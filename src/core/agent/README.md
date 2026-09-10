@@ -1,0 +1,47 @@
+# Agent 运行时（M3 实现）
+
+> 本目录承载产品的"灵魂"：Agent 循环、工具注册表、答案泄漏护栏。
+> M0 只留空目录与设计约定，实现放在 M3。
+
+## 循环（唯一入口 `runAgentTurn`）
+
+```
+1. 组装上下文（提示词 L0~L5，见 docs/ARCHITECTURE.md §7）
+2. 调 LLMClient.chat(messages, { tools })
+3. 若返回 toolCalls → 逐个执行 → 结果以 role:'tool' 回填 → 回到第 2 步
+4. 得到最终回答 → 护栏检查（是否泄漏答案）→ 命中则加严重生成一次
+5. 落库（Turn + 必要时的 MasteryRecord）→ 返回给主进程流式推送给界面
+```
+
+**硬性约束**：
+- 最多循环 N 次（默认 5），防止工具调用死循环；
+- 任何 LLM 失败必须降级为可读中文提示（"我现在连不上外脑啦"），不得抛到界面；
+- 一轮对话只允许写一次 `MasteryRecord`，避免刷状态。
+
+## 工具清单（每个工具一个文件，含 Zod Schema + handler）
+
+| 工具 | 作用 | 归属里程碑 |
+|---|---|---|
+| `get_section_text` | 按需取教材小节原文（省 token 的补充手段） | M3 |
+| `record_mastery` | 更新知识点掌握度 | M4 |
+| `get_student_profile` | 取该生掌握度与历史误区，做个性化 | M4 |
+| `generate_quiz` | 生成变式题（结构化返回，不落题库文件） | M4 |
+| `generate_interactive_html` | 生成单文件互动实验并落盘，交界面 iframe 展示 | M4（可选） |
+| `flag_for_teacher` | 标记超纲 / 疑似抄作业 / 情绪风险，供教师端聚合 | M3 |
+
+工具接口（实现时遵守）：
+
+```ts
+interface AgentTool<In, Out> {
+  name: string
+  description: string          // 给模型看的说明，直接决定调用准确率
+  schema: z.ZodType<In>        // 参数校验；解析失败要返回可读错误给模型，让它自我修正
+  handler: (input: In, ctx: ToolContext) => Promise<Out>
+}
+```
+
+## 答案泄漏护栏（差异化关键）
+
+回答生成后追加一次判定："这段回复是否包含最终答案？"命中则用更严格的指令重生成一次，
+并在 Turn 上打 `answer-leak-guard-triggered` 标记。**命中率是研习报告的核心指标之一**，
+因此该标记必须落库、可聚合。

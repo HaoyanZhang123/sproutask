@@ -1,0 +1,25 @@
+# 依赖与构建产物
+node_modules/
+out/
+dist/
+release/
+
+# 环境与密钥
+.env
+.env.local
+.env.*.local
+
+# 不进版本库的本地资料（见 docs/ARCHITECTURE.md §1）
+notes/
+content/textbook/
+
+# 运行时数据（本地 SQLite / 日志，若放在仓库目录内）
+data/
+*.log
+
+# 编辑器与系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,9 @@
+# pnpm 11 起，构建脚本白名单配置从 package.json 迁移到本文件。
+# 默认拦截所有依赖的构建脚本（供应链安全策略），这里显式放行必要的几个：
+#   electron  —— 需要下载 Electron 运行时二进制
+#   esbuild   —— 需要下载平台专用二进制
+#   vue-demi  —— pinia 的 Vue 版本适配层，需要执行构建脚本
+allowBuilds:
+  electron: true
+  esbuild: true
+  vue-demi: true

@@ -1,0 +1,21 @@
+appId: com.biobuddy.app
+productName: BioBuddy
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+# 教学内容随包分发（教材原文不入库，打包时若缺失则 Agent 会提示未配置）
+extraResources:
+  - from: content
+    to: content
+win:
+  target:
+    - portable
+  artifactName: ${productName}-${version}-win-${arch}.${ext}
+mac:
+  target:
+    - dmg
+  category: public.app-category.education
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
