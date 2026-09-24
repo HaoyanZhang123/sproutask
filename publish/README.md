@@ -7,7 +7,7 @@
 
 ```powershell
 pwsh publish/publish_github.ps1 `
-  -TargetDir D:\dsh\sproutask `
+  -TargetDir E:\my-project\sproutask `
   -GitHubEmail "195906259+HaoyanZhang123@users.noreply.github.com" `
   -GitHubName "HaoyanZhang123" `
   -CopyrightHolder "HaoyanZhang123" `
