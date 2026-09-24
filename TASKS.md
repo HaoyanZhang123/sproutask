@@ -45,7 +45,7 @@
 | F-014 | 前后测问卷、评分说明与知情同意材料 | M5 | ✅ 材料齐备 + **Word 版已生成**（4 份 .docx） | `specs/F-014-questionnaire-and-consent.md` + `docs/研习材料/`（4 md + 4 docx） |
 | F-015 | 打包（exe 便携版 / dmg）与首次运行配置向导 | M6 | ⏳ 未开始 | 待建 spec |
 | F-016 | 研习数据整理（问卷统计、对话编码、图表） | M6 | ⏳ 未开始 | 待建 spec |
-| F-017 | 开源发布（导出干净仓库并推送到 GitHub） | M3 完成后 | 🟢 **产物已就绪并过两轮 6 人次独立审核**：`E:\my-project\sproutask`（77 文件，单次提交，origin 已配）；项目名 **芽问 / SproutAsk**；**待你在 GitHub 建仓库后 push**（仓库尚未创建 → push 报 `Repository not found`） | `publish/README.md` + `docs/adr/ADR-0005-公开范围与许可.md` |
+| F-017 | 开源发布（导出干净仓库并推送到 GitHub） | M3 完成后 | ✅ **已发布**：<https://github.com/HaoyanZhang123/sproutask>（public，77 文件，单次提交）；**GitHub Actions CI run #1 结论 success**（26 秒） | `publish/README.md` + `docs/adr/ADR-0005-公开范围与许可.md` |
 
 ## 需人工决定（agent 不自行处置）
 
