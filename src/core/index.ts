@@ -5,5 +5,8 @@
 
 export * as domain from './domain'
 export * from './llm'
+export { DeepSeekClient } from './llm/deepseek'
+export * as prompts from './prompts'
+export * as evalRunner from './eval/runner'
 export type { StudentStore } from './storage'
 export type { TextbookLibrary, StudyScope, CurriculumRequirement } from './content'

@@ -22,6 +22,9 @@
 pnpm install
 pnpm dev          # 启动 Electron 应用（会打开一个窗口）
 
+pnpm chat         # 🆕 终端里和小芽对话（需先在 .env 配好 DeepSeek Key）
+pnpm eval         # 🆕 教学行为评测跑批（真实调用模型，注意费用）
+
 pnpm typecheck    # 类型检查（node + web 两端）
 pnpm test         # 单元测试（含"core 层不得依赖 electron/vue"的自动把关）
 ```
@@ -63,9 +66,12 @@ pnpm test         # 单元测试（含"core 层不得依赖 electron/vue"的自�
 ## 当前进度与待决策
 
 - ✅ M0 骨架（可运行、可测试、规范就位）
-- ✅ 关键决策：交互形态 = 方案 D（对话 + 可折叠教材阅读视图）；不做教师端；教材全册入库
-- ⏳ M1 提示词与 LLM 客户端（下一步）
-- 待决策：Q3 内容格式、Q4 存储实现、Q6 教材装载方式、Q7 学习位置如何确定 —— 见 `docs/adr/`
+- ✅ M1 提示词与 LLM 客户端（`pnpm chat` 终端对话、`pnpm eval` 评测；离线部分已实测，
+  **真实 API 联调待你配好 `.env` 后跑一次**）
+- ✅ 关键决策：交互形态 = 方案 D（对话 + 可折叠教材阅读视图）；不做教师端；
+  教材全册结构化入库、按位置装载（ADR-0002/0004）
+- ⏳ 下一步 M2 内容工程（等教材版本确认）与 M3 Agent 循环
+- 待决策：Q3 内容格式、Q4 存储实现、Q8 各模式内部交互流程 —— 见 `docs/adr/` 与 `docs/ROADMAP.md`
 
 ## 学习资料
 

@@ -1,0 +1,61 @@
+import type { MasteryRecord } from '../../domain'
+import type { StudyScope } from '../../content'
+import type { ChatMessage } from '../../llm'
+
+import { L0_PERSONA } from './l0-persona'
+import { L1_DISCIPLINE } from './l1-discipline'
+import { buildTextbookLayer } from './l2-textbook'
+import { buildProfileLayer } from './l3-profile'
+import { buildSessionLayer } from './l4-session'
+
+/**
+ * 提示词 v1 装配入口。
+ *
+ * 分层顺序即最终 system 消息的顺序（L0 → L4）；L5 是对话历史，不进 system。
+ * 改动教学规则请**新建 v2 目录**而非原地修改，便于 A/B 对比（见 docs/CONVENTIONS.md）。
+ */
+
+export const PROMPT_VERSION = 'v1'
+
+/** 对话历史最多携带的轮数（超出部分 M4 再做摘要压缩） */
+export const MAX_HISTORY_TURNS = 12
+
+export interface PromptContext {
+  /** 教材原文 + 知识点 + 课标要求（来自 TextbookLibrary.buildStudyScope） */
+  scope: StudyScope
+  /** 该生的掌握度记录（仅本地，可为空） */
+  mastery?: MasteryRecord[]
+  /** 本轮已给出的提示次数（控制支架强度） */
+  hintLevel?: number
+}
+
+export function buildSystemPrompt(ctx: PromptContext): string {
+  const layers = [
+    L0_PERSONA,
+    L1_DISCIPLINE,
+    buildTextbookLayer(ctx.scope),
+    buildProfileLayer(ctx.mastery ?? [], ctx.scope.knowledgePoints),
+    buildSessionLayer({
+      mode: ctx.scope.mode,
+      position: ctx.scope.position,
+      ...(ctx.hintLevel !== undefined ? { hintLevel: ctx.hintLevel } : {})
+    })
+  ]
+  return layers.filter((layer) => layer.trim().length > 0).join('\n\n---\n\n')
+}
+
+/** 组装完整消息序列：system + 历史 + 本轮学生输入 */
+export function buildMessages(
+  ctx: PromptContext,
+  history: ChatMessage[],
+  userMessage: string
+): ChatMessage[] {
+  const trimmedHistory = history.slice(-MAX_HISTORY_TURNS * 2)
+  return [
+    { role: 'system', content: buildSystemPrompt(ctx) },
+    ...trimmedHistory,
+    { role: 'user', content: userMessage }
+  ]
+}
+
+export { L0_PERSONA, L1_DISCIPLINE, buildTextbookLayer, buildProfileLayer, buildSessionLayer }
