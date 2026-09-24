@@ -72,6 +72,10 @@ main  ✓ 可用 node:*，但业务逻辑必须放 core
 - 通道命名 `<域>:<动作>`（如 `agent:chat`），入参/返回值均 Zod 校验；preload 只做转发
 - 生成的教学 HTML 在受限 iframe 中展示，禁止外链与 Node 能力
 - 外链一律交系统浏览器打开
+- ⛔ **禁止在应用内嵌第三方网页版 AI**（如 WebView 裹 `chat.deepseek.com`）：该站点 CSP
+  `frame-ancestors 'none'` 会直接拒绝内嵌；桌面端嵌真网页需"原生子窗口叠加"，会吃掉指针事件、
+  遮挡浮层，且常驻约 380MB 内存。AI 能力一律走 API（理由与实测见
+  `notes/reference/markdown-reader-flutter-借鉴.md` §2.2）
 
 ## 6. 领域契约（`src/core/domain/index.ts`）
 
