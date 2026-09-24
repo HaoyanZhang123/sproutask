@@ -1,0 +1,9 @@
+# 统一换行符，避免 Windows 开发时 Git 反复提示 CRLF 转换
+* text=auto eol=lf
+
+# 二进制文件不参与换行符转换
+*.png binary
+*.jpg binary
+*.ico binary
+*.exe binary
+*.dmg binary

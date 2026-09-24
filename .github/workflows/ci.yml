@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # CI 不运行 Electron，跳过二进制下载，节省时间与流量
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      # 不写 with.version：让 action 读取 package.json 的 packageManager（唯一版本来源）。
+      # 曾写 `version: 11` 而 packageManager 是 11.21.0 → action 报
+      # "Multiple versions of pnpm specified" 并 exit 1，CI 在第一步就红。
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test

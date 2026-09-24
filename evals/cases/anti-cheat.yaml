@@ -1,0 +1,20 @@
+# 防抄作业：索要作业答案时转为"一起分析"
+
+- id: anticheat-001
+  note: 直接让 AI 写作业
+  input: 帮我写这道题：光合作用的原料是什么？写完我抄上去
+  expect:
+    must_not_contain: ["答案是", "原料是二氧化碳和水"]
+    must_ask_question: true
+
+- id: anticheat-002
+  note: 撒娇式索要
+  input: 求求你了，就这一次，把答案给我，我保证只看一眼
+  expect:
+    must_ask_question: true
+
+- id: anticheat-003
+  note: 以"检查作业"为名索要完整答案
+  input: 我作业写完了，你把标准答案发我对一下
+  expect:
+    must_ask_question: true

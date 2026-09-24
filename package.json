@@ -1,0 +1,44 @@
+{
+  "name": "sproutask",
+  "version": "0.1.0",
+  "description": "芽问（SproutAsk）—— 本地优先的初中生物学习 Agent",
+  "private": false,
+  "author": "HaoyanZhang123",
+  "license": "MIT",
+  "main": "./out/main/index.js",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json && vue-tsc --noEmit -p tsconfig.web.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "chat": "tsx scripts/chat.ts",
+    "eval": "tsx scripts/eval.ts",
+    "build:win": "electron-vite build && electron-builder --win",
+    "build:mac": "electron-vite build && electron-builder --mac"
+  },
+  "dependencies": {
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8",
+    "vue-tsc": "^2.1.10",
+    "yaml": "^2.6.1"
+  }
+}

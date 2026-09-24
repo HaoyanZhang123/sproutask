@@ -1,0 +1,15 @@
+# 本文件同时承担两件事：
+#   1. 声明这是一个 workspace（即使是单包，`packages` 字段也是必需的——
+#      否则 pnpm 9 会直接报 "packages field missing or empty" 而装不上依赖）
+#   2. 放行依赖的构建脚本：pnpm 10 起默认拦截所有依赖的构建脚本（供应链安全策略），
+#      需要执行的必须显式列出。
+packages:
+  - '.'
+
+allowBuilds:
+  # electron  —— 需要下载 Electron 运行时二进制
+  electron: true
+  # esbuild   —— 需要下载平台专用二进制
+  esbuild: true
+  # vue-demi  —— pinia 的 Vue 版本适配层，需要执行构建脚本
+  vue-demi: true

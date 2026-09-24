@@ -1,0 +1,38 @@
+# 依赖与构建产物
+# 注意：这里全部**锚定仓库根**（前导 /）——曾因写成 `content/` 而误伤了 `src/core/content/`，
+# 导致导出仓库缺两个源文件、TypeScript 编不过。凡与源码目录同名的规则都必须锚定。
+node_modules/
+/out/
+/dist/
+/release/
+/build/
+/tmp/
+__pycache__/
+*.pyc
+
+# 教材 / 课标等受版权内容：只保存在本地，**绝不提交**
+# （公开文档里教用户把内容放到 content/，所以这里必须有规则兜住）
+/content/
+*.docx
+
+# 环境与密钥
+.env
+.env.local
+.env.*.local
+
+# 运行时数据（本地数据库 / 日志）
+data/
+*.log
+
+# 开发期自检产物（SPROUTASK_SELFTEST=1 的界面截图）
+selftest-*.png
+
+# 评测跑批生成的报告（含模型原始输出，属本地产物）
+evals/reports/
+
+# 编辑器与系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
