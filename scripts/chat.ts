@@ -1,8 +1,10 @@
 import { createInterface } from 'node:readline/promises'
 import { DeepSeekClient } from '../src/core/llm/deepseek'
-import { LLMError, type ChatMessage } from '../src/core/llm'
-import { PROMPT_VERSION, buildMessages } from '../src/core/prompts'
+import type { ChatMessage } from '../src/core/llm'
+import { PROMPT_VERSION } from '../src/core/prompts'
 import { IntentFlow, type PositionOption } from '../src/core/agent/intent'
+import { runAgentTurn } from '../src/core/agent/loop'
+import { ToolRegistry, createDefaultTools } from '../src/core/agent/tools'
 import { STUDY_MODE_LABELS } from '../src/core/domain'
 import { createDemoScope } from './demo-scope'
 import { loadDotEnv, readDeepSeekEnv } from './_env'
@@ -58,38 +60,54 @@ async function main(): Promise<void> {
   )
   console.log('   现在可以开始提问了；输入 exit 退出。\n')
 
+  // F-009：走完整 Agent 循环（工具调用 + 答案泄漏护栏 + 降级）
+  const registry = new ToolRegistry(createDefaultTools())
+
   for (;;) {
     const raw = await rl.question('你 > ')
     const input = raw.trim()
     if (!input) continue
     if (['exit', 'quit', '退出'].includes(input.toLowerCase())) break
 
-    const messages = buildMessages({ scope, mastery: [] }, history, input)
-
-    process.stdout.write('小芽 > ')
-    let answer = ''
-    try {
-      const reply = await client.chat(messages, {
-        onDelta: (text) => {
-          answer += text
-          process.stdout.write(text)
-        }
-      })
-      answer = reply.content
-      process.stdout.write('\n\n')
-    } catch (error) {
-      if (error instanceof LLMError) {
-        console.log(`\n[${error.kind}] ${error.toStudentMessage()}\n`)
-        // 开发期仍需看到技术细节以便排错（不含密钥）
-        console.log(`  技术信息：${error.message}\n`)
-        continue
+    // 说明：这里**不做逐字流式**。护栏可能要求重生成，若先流式显示了被判定泄漏的内容就无法撤回；
+    // 「流式 与 护栏」的交互方案（缓冲后整段显示 / 先显示"想一想"状态）由 F-010 界面需求决定。
+    process.stdout.write('小芽 > [思考中…]\r')
+    const result = await runAgentTurn({
+      client,
+      registry,
+      prompt: { scope, mastery: [] },
+      history,
+      userMessage: input,
+      toolContext: {
+        studentId: 'S00',
+        getSectionText: async (sectionId) =>
+          scope.sectionTexts.find((section) => section.sectionId === sectionId)?.text ?? null
       }
-      console.log(`\n出错了：${String(error)}\n`)
-      continue
+    })
+
+    // 覆盖掉"[思考中…]"那一行
+    process.stdout.write('小芽 > ' + result.reply + '\n')
+
+    if (result.toolCalls.length > 0) {
+      console.log(
+        `\n  ⚙️ 工具：${result.toolCalls.map((c) => `${c.name}${c.ok ? '' : '(失败)'}`).join('、')}`
+      )
     }
+    if (result.flags.length > 0) {
+      console.log(`  🚩 标记：${result.flags.join('、')}`)
+    }
+    if (result.guard.triggered) {
+      console.log(
+        `  🛡️ 护栏命中${result.guard.regenerated ? '（已重写）' : ''}：${result.guard.reasons.join('；')}`
+      )
+    }
+    if (result.degraded) {
+      console.log(`  ⚠️ 降级（${result.degraded.kind}）：已用可读话术替代`)
+    }
+    console.log(`  ⏱ 迭代 ${result.iterations} 轮\n`)
 
     history.push({ role: 'user', content: input })
-    history.push({ role: 'assistant', content: answer })
+    history.push({ role: 'assistant', content: result.reply })
   }
 
   rl.close()

@@ -13,6 +13,11 @@ export interface ChatMessage {
   toolCallId?: string
   /** role = 'tool' 时必填，工具名 */
   name?: string
+  /**
+   * role = 'assistant' 且该轮返回了工具调用时必填。
+   * 协议要求：assistant 消息携带 tool_calls，随后的 tool 消息才能与之对应。
+   */
+  toolCalls?: ToolCall[]
 }
 
 export interface ToolCall {
@@ -94,6 +99,11 @@ export class MockLLMClient implements LLMClient {
 
   constructor(script: LLMReply[] = []) {
     this.script = script
+  }
+
+  /** 已消耗的脚本条数（测试用） */
+  get consumed(): number {
+    return this.cursor
   }
 
   async chat(_messages: ChatMessage[], options?: ChatOptions): Promise<LLMReply> {

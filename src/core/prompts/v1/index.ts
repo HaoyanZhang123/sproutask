@@ -58,4 +58,22 @@ export function buildMessages(
   ]
 }
 
+/**
+ * 护栏命中后的加严指令（L1 的追加层）。
+ *
+ * 只在"答案泄漏护栏"判定命中时使用：把上一条不合格的回复连同这条指令一起发回，
+ * 要求模型改写为纯引导式回复。措辞要具体，避免模型只是道歉却仍然给答案。
+ */
+export function buildStrictRetryHint(reasons: string[]): string {
+  const detail = reasons.length > 0 ? `（命中原因：${reasons.join('；')}）` : ''
+  return `你刚才的回复不符合教学纪律${detail}。
+
+请**重写**这条回复，并且：
+1. 不要出现任何结论性表述（那是学生要自己说出来的）；
+2. 不要说"答案是……"这类句式；
+3. 只保留一个**提问**，或一句提示 + 一个提问；
+4. 长度不超过 150 字，语气仍然亲切。
+直接输出重写后的回复，不要解释你在做什么。`
+}
+
 export { L0_PERSONA, L1_DISCIPLINE, buildTextbookLayer, buildProfileLayer, buildSessionLayer }

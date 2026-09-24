@@ -24,6 +24,8 @@ interface ApiMessage {
   content: string
   tool_call_id?: string
   name?: string
+  /** assistant 消息携带的工具调用（协议必需，否则后续 tool 消息无法对应） */
+  tool_calls?: Array<{ id: string; type: 'function'; function: { name: string; arguments: string } }>
 }
 
 export class DeepSeekClient implements LLMClient {
@@ -122,10 +124,22 @@ export class DeepSeekClient implements LLMClient {
   }
 }
 
-function toApiMessage(message: ChatMessage): ApiMessage {
+/**
+ * 把内部消息转换为接口格式。
+ * **导出以便离线单测**：工具调用的序列化是"循环能否跑通"的关键协议细节，
+ * 不能只靠联调验证（见 tests/deepseek-message.test.ts）。
+ */
+export function toApiMessage(message: ChatMessage): ApiMessage {
   const out: ApiMessage = { role: message.role, content: message.content }
   if (message.toolCallId) out.tool_call_id = message.toolCallId
   if (message.name) out.name = message.name
+  if (message.toolCalls && message.toolCalls.length > 0) {
+    out.tool_calls = message.toolCalls.map((call) => ({
+      id: call.id,
+      type: 'function' as const,
+      function: { name: call.name, arguments: call.arguments }
+    }))
+  }
   return out
 }
 
