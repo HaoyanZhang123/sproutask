@@ -6,4 +6,4 @@
 export * as domain from './domain'
 export * from './llm'
 export type { StudentStore } from './storage'
-export type { ContentRepository } from './content'
+export type { TextbookLibrary, StudyScope, CurriculumRequirement } from './content'

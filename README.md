@@ -5,13 +5,14 @@
 >
 > DeepSeek API 只作推理外脑；教材原文注入上下文；学情与对话日志存本地。
 
-## 先读这三份
+## 先读这几份
 
 | 文档 | 内容 |
 |---|---|
 | `docs/ARCHITECTURE.md` | 架构、目录边界、分层铁律、领域契约、可插拔接口 |
-| `docs/CONVENTIONS.md` | 编码规范、命名、测试、Git 流程、**独立对话开工模板** |
+| `docs/CONVENTIONS.md` | 编码规范、命名、测试、Git 流程、合规红线、**独立对话开工模板** |
 | `docs/ROADMAP.md` | 里程碑、需求清单（F-0XX）、**待决策清单** |
+| `docs/研习设计.md` | **研习课题**：题目、研究问题、理论框架、方法、伦理、报告结构 |
 
 写新需求前先看 `docs/specs/`（每条需求一份 spec）；架构决策记录在 `docs/adr/`。
 
@@ -51,19 +52,20 @@ pnpm test         # 单元测试（含"core 层不得依赖 electron/vue"的自�
 │  ├─ preload/    # contextBridge 桥接（只转发，无业务逻辑）
 │  ├─ renderer/   # Vue3 界面（无 Node 权限）
 │  └─ core/       # ⭐ 纯领域逻辑：契约、Agent、提示词、LLM、存储与内容接口
-├─ content/       # 教学内容（units/ 进 git；textbook/ 不进）
+├─ content/       # units/（结构，进 git）；textbook/ 与 curriculum/（原文，不进）
 ├─ tools/         # Python 开发期工具（不进 exe）
 ├─ evals/cases/   # 教学行为评测用例
 ├─ tests/         # 单元测试
-├─ docs/          # 架构 / 规范 / 路线 / specs / adr / tutorials
+├─ docs/          # 架构 / 规范 / 路线 / 研习设计 / specs / adr / tutorials
 └─ notes/         # 调研与个人记录（不进 git）
 ```
 
-## 当前进度
+## 当前进度与待决策
 
 - ✅ M0 骨架（可运行、可测试、规范就位）
+- ✅ 关键决策：交互形态 = 方案 D（对话 + 可折叠教材阅读视图）；不做教师端；教材全册入库
 - ⏳ M1 提示词与 LLM 客户端（下一步）
-- 待决策：Q3 内容格式、Q4 存储实现、Q5 是否采用"关卡"形态 —— 见 `docs/adr/`
+- 待决策：Q3 内容格式、Q4 存储实现、Q6 教材装载方式、Q7 学习位置如何确定 —— 见 `docs/adr/`
 
 ## 学习资料
 

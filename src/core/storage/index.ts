@@ -35,8 +35,5 @@ export interface StudentStore {
     updatedAt: string
   ): Promise<void>
 
-  /** 全班聚合：供"学情雷达"使用（M6，可选） */
-  aggregateKpInquiries(unitId: string): Promise<Array<{ kpId: string; count: number }>>
-
   close(): Promise<void>
 }

@@ -73,17 +73,41 @@ export const StudentSchema = z.object({
 })
 export type Student = z.infer<typeof StudentSchema>
 
-/* ── 会话与对话 ───────────────────────────────────────────── */
+/* ── 学习模式：由学生自选，Agent 不猜"这周教到哪" ──────────────
+ * 依据 2026-09 决策：不依赖教师排课、不依赖教学进度表。
+ * 学生打开后由 Agent 主动询问意图，学生四选一，再进入对应流程。
+ * （各模式的具体交互设计待后续细化，此处只固定枚举值。）                */
 
-export const SessionModeSchema = z.enum(['free-ask', 'guided'])
-export type SessionMode = z.infer<typeof SessionModeSchema>
+export const StudyModeSchema = z.enum(['preview', 'review', 'practice', 'extension'])
+export type StudyMode = z.infer<typeof StudyModeSchema>
+
+export const STUDY_MODE_LABELS: Record<StudyMode, string> = {
+  preview: '预习',
+  review: '复习',
+  practice: '做题',
+  extension: '拓展'
+}
+
+/* ── 学习位置：决定装载哪一部分教材 ──────────────────────────
+ * 全册教材都入库，运行时按学生的当前位置取对应内容（不做全文注入）。    */
+
+export const StudyPositionSchema = z.object({
+  /** 册次，如 '7s'（七年级上）、'8x'（八年级下） */
+  volumeId: z.string().min(1),
+  /** 章/单元 id */
+  unitId: z.string().min(1),
+  /** 小节 id，可选（整章学习时留空） */
+  sectionId: z.string().min(1).optional()
+})
+export type StudyPosition = z.infer<typeof StudyPositionSchema>
+
+/* ── 会话与对话 ───────────────────────────────────────────── */
 
 export const SessionSchema = z.object({
   id: z.string().min(1),
   studentId: z.string().regex(/^S\d{2,3}$/),
-  mode: SessionModeSchema,
-  /** 引导式会话所关联的目标知识点（具体编排方式待定，见 ADR-0002） */
-  targetKpIds: z.array(z.string()).default([]),
+  studyMode: StudyModeSchema,
+  position: StudyPositionSchema,
   startedAt: z.string(),
   endedAt: z.string().optional()
 })
@@ -93,7 +117,8 @@ export const TurnFlagSchema = z.enum([
   'answer-leak-guard-triggered',
   'likely-homework-cheating',
   'off-topic',
-  'flagged-for-teacher'
+  /** 建议学生去问真人老师（仅提示学生，不作为教师端功能——本项目不做教师端） */
+  'suggested-ask-teacher'
 ])
 export type TurnFlag = z.infer<typeof TurnFlagSchema>
 
@@ -108,15 +133,3 @@ export const TurnSchema = z.object({
   createdAt: z.string()
 })
 export type Turn = z.infer<typeof TurnSchema>
-
-/* ── 教学进度（让 Agent "知道这周教到哪"） ────────────────── */
-
-export const TeachingPlanSchema = z.object({
-  unitId: z.string().min(1),
-  weekStart: z.string(),
-  weekEnd: z.string(),
-  /** 本周涉及的章节 id */
-  sectionScope: z.array(z.string()).min(1),
-  teacherNotes: z.string().default('')
-})
-export type TeachingPlan = z.infer<typeof TeachingPlanSchema>

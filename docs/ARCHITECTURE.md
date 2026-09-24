@@ -1,9 +1,11 @@
 # 架构（ARCHITECTURE）
 
 > BioBuddy：**本地优先的桌面 Agent**。Agent 的目标 / 状态 / 工具 / 策略全在本地，
-> DeepSeek API 只作推理外脑；教材原文注入上下文（不做检索）；学情与日志存本地。
+> DeepSeek API 只作推理外脑；**全册教材与课程标准结构化入库、按学生当前位置装载**；
+> 学情与日志仅存本地，**不做教师端**。
 >
-> 拍板状态：Q1 文档分层 ✅ ｜ Q2 单包分层 ✅ ｜ **Q3 内容格式 ⏳ 待定** ｜ **Q4 存储实现 ⏳ 待定**（见 `adr/`）
+> 拍板状态：Q1 文档分层 ✅ ｜ Q2 单包分层 ✅ ｜ Q5 交互形态 ✅（方案 D，见 ADR-0002）
+> ｜ **Q3 内容格式 ⏳ 待定** ｜ **Q4 存储实现 ⏳ 待定** ｜ **Q6 教材装载方式 ⏳ 待确认**（ADR-0004）
 
 ---
 
@@ -11,13 +13,14 @@
 
 | 目录 | 内容 | 进 git |
 |---|---|---|
-| `src/` `content/` `tools/` `evals/` `tests/` | 代码与教学内容 | ✅ |
-| `docs/` | 架构、规范、路线、specs、adr、教程 | ✅ |
-| `notes/` | 调研报告、学校信息、个人决策记录 | ❌ gitignore |
-| `content/textbook/` | 教材原文提取结果 | ❌ gitignore（版权 + 体积） |
+| `src/` `content/units/` `tools/` `evals/` `tests/` | 代码与教学内容结构 | ✅ |
+| `docs/` | 架构、规范、路线、specs、adr、tutorials、研习设计 | ✅ |
+| `notes/` | 调研报告、学校信息、个人决策记录、参考项目分析 | ❌ gitignore |
+| `content/textbook/` | 教材原文（全册提取结果） | ❌ gitignore（版权 + 体积） |
+| `content/curriculum/` | 课程标准等教学文件原文 | ❌ gitignore（版权） |
 | `.env` | API Key | ❌ gitignore |
 
-**规则**：教材全文永不入库；仓库只放"结构"（知识点、章节引用），原文留本地并在运行时注入。
+**规则**：教材与课标**原文永不入库**；仓库只放"结构与引用"（章节索引、知识点、课标条目编号与短引用）。
 
 ## 2. 技术栈
 
@@ -27,11 +30,12 @@
 | 界面 | Vue3 + TypeScript + Pinia（组件库按需引入） |
 | Agent 运行时 | TypeScript，跑在**主进程**；DeepSeek 原生 function calling，不引入 LangGraph |
 | 大模型 | DeepSeek `deepseek-chat`（唯一云端依赖，流式 SSE） |
+| 教材装载 | **结构化按需装载**（册 → 章 → 节）；向量检索为可选增强，见 ADR-0004 |
 | 校验 | Zod（IPC 入参、内容文件、工具参数） |
 | 本地存储 | ⏳ 待定：SQLite 或 JSONL（接口已定，见 §6） |
 | 测试 | Vitest |
 | 打包 | electron-builder（win: portable exe；mac: dmg，GitHub Actions 构建） |
-| 开发期工具 | Python 3.11+（`tools/`，仅教材文本提取，不进 exe） |
+| 开发期工具 | Python 3.11+（`tools/`，教材与课标文本提取，不进 exe） |
 
 ## 3. 目录结构
 
@@ -45,12 +49,15 @@
 │     ├─ prompts/  # 分层提示词 v1（M1）
 │     ├─ domain/   # 领域契约（Zod）——已落地
 │     ├─ storage/  # StudentStore 接口（实现待定）
-│     ├─ content/  # ContentRepository 接口（实现待定）
+│     ├─ content/  # TextbookLibrary 接口（全册教材 + 课标）
 │     └─ llm/      # LLMClient 接口 + Mock 实现
-├─ content/        # 教学内容（units/ 进 git；textbook/ 不进）
-├─ tools/          # Python 开发期工具
-├─ evals/cases/    # 提示词行为评测用例
-├─ docs/           # 文档
+├─ content/
+│  ├─ units/       # 单元结构：章节索引、知识点、常见误区（进 git）
+│  ├─ curriculum/  # 课标原文（不进 git）+ 课标↔知识点映射（进 git）
+│  └─ textbook/    # 全册教材原文（不进 git）
+├─ tools/          # Python 开发期工具（PDF → 结构化文本）
+├─ evals/cases/    # 教学行为评测用例
+├─ docs/           # 文档（含 研习设计.md）
 └─ notes/          # 不进 git
 ```
 
@@ -73,60 +80,105 @@ main  ✓ 可用 node:*，但业务逻辑必须放 core
 - 生成的教学 HTML 在受限 iframe 中展示，禁止外链与 Node 能力
 - 外链一律交系统浏览器打开
 - ⛔ **禁止在应用内嵌第三方网页版 AI**（如 WebView 裹 `chat.deepseek.com`）：该站点 CSP
-  `frame-ancestors 'none'` 会直接拒绝内嵌；桌面端嵌真网页需"原生子窗口叠加"，会吃掉指针事件、
-  遮挡浮层，且常驻约 380MB 内存。AI 能力一律走 API（理由与实测见
+  `frame-ancestors 'none'` 会拒绝内嵌；桌面端嵌真网页需"原生子窗口叠加"，会吃掉指针事件、
+  遮挡浮层，且常驻约 380MB 内存。AI 能力一律走 API（实测见
   `notes/reference/markdown-reader-flutter-借鉴.md` §2.2）
 
 ## 6. 领域契约（`src/core/domain/index.ts`）
 
-稳定字段：教材单元 / 小节 / 知识点（含前置知识与常见误区）/ 学情（掌握度三态）/ 学生会话与轮次 / 教学进度。
-`Turn.flags` 用于承载护栏命中、疑似抄作业、教师关注等标记——**这些标记会进入研习统计**。
+稳定字段：教材单元 / 小节 / 知识点（含前置知识与常见误区）/ 学情（掌握度三态）/
+学生会话与轮次 / **学习模式（预习·复习·做题·拓展）** / **学习位置（册·章·节）**。
 
-**尚未定案、因此不进契约的**：交互编排形态（关卡 / 纯对话 / 混合 / 对话+教材阅读视图，
-四选一见 ADR-0002）。四种形态共用"知识点 + 掌握度"这层地基，因此不影响本契约。
+| 契约 | 说明 |
+|---|---|
+| `StudyMode` | 学生自选的四种意图；Agent **不猜**"这周教到哪"，而是主动询问后让学生选 |
+| `StudyPosition` | 决定装载哪部分教材；全册入库、按位置取用 |
+| `Turn.flags` | 护栏命中（answer-leak-guard）、疑似抄作业、超纲建议问老师等标记，**用于研习统计** |
 
-### 可插拔的两个接口（吸收 Q3/Q4 的未定）
+> 已移除：`TeachingPlan`（教学进度表）——不依赖教师排课；
+> `aggregateKpInquiries`（全班聚合）——**不做教师端，避免学生隐私风险**。
+
+### 可插拔的接口（吸收未定项）
 
 ```ts
-interface ContentRepository {          // 内容从哪来：YAML / JSON / Markdown 待定
-  getActiveUnit(); getUnit(id); listKnowledgePoints(unitId);
-  getKnowledgePoint(id); getSectionText(sectionId);
+interface TextbookLibrary {            // 全册教材 + 课标；格式待定（Q3）
+  listVolumes(); listUnits(volumeId); getUnit(id);
+  listKnowledgePoints(unitId); getKnowledgePoint(id);
+  getSectionText(sectionId);           // 教材原文（不入 git）
+  getCurriculumRequirements(unitId);   // 课标要求（约束层）
+  buildStudyScope(position, mode);     // 运行期核心：装配要注入的上下文
 }
-interface StudentStore {               // 数据存哪：SQLite / JSONL 待定
+interface StudentStore {               // 数据存哪：SQLite / JSONL 待定（Q4）
   upsertStudent(); createSession(); appendTurn(); listTurns();
-  upsertMastery(); getMastery(); setMasteryState(); aggregateKpInquiries();
+  upsertMastery(); getMastery(); setMasteryState();
 }
 ```
 
-**上层的代码只依赖这两个接口**。将来无论选哪种实现，只新增一个实现文件 + 在主进程注入，
-其余代码零改动。这是让"还没想好"不阻塞开发的关键设计。
+**上层代码只依赖这两个接口**。将来无论选哪种实现，只新增一个实现文件 + 在主进程注入，
+其余代码零改动——这是让"还没想好"不阻塞开发的关键设计。
 
 ### 合规内建
 
-`studentId` 只接受 `S01` 形式编号（Zod 强制）；姓名映射表不落库；导出研习数据前必须匿名化。
+- `studentId` 只接受 `S01` 形式编号（Zod 强制），姓名映射表不落库
+- **不做教师端**：不提供班级聚合、不提供教师查看学生对话的界面
+- 研习数据以**问卷**为主渠道获取（见 §9）
 
 ## 7. Agent 运行时设计
 
-**循环**：组装上下文 → 调 LLM（带 tools）→ 有 toolCalls 则执行并回填 → 直到产出最终回答 → 护栏检查 → 落库 → 推送界面。（上限 5 轮，防死循环）
+**一轮的完整流程**：
 
-**提示词分层**（`src/core/prompts/v1/`）：L0 人格 / L1 教学纪律 / L2 教材上下文 / L3 学情摘要 / L4 会话上下文 / L5 对话历史。
+```
+① 开场：Agent 主动询问意图 ——「今天想做什么？预习 / 复习 / 做题 / 拓展」
+② 学生四选一（并确定学习位置：册·章·节）
+③ buildStudyScope(position, mode) 装配上下文：
+     教材原文（按节）+ 知识点 + 常见误区 + 课标要求（约束层）
+④ Agent 循环：调 LLM（带 tools）→ 有 toolCalls 则执行并回填 → 直到产出最终回答
+⑤ 答案泄漏护栏：判定"是否把答案说出来了" → 命中则加严指令重生成一次并打标
+⑥ 落库（轮次 + 掌握度）→ 流式推送界面
+```
+
+- 循环上限 5 次；LLM 失败必须降级为可读中文提示，不得崩溃
+- 各模式的具体交互流程（问什么、怎么推进、如何收尾）**待后续细化**
+
+**提示词分层**（`src/core/prompts/v1/`）：
+L0 人格 / L1 教学纪律 / **L2 教材与课标约束** / L3 学情摘要（仅本地使用） / L4 学习模式与位置 / L5 对话历史。
 改动教学规则 = 新建 `v2/` 而非原地改，便于 A/B 对比研习效果。
 
-**答案泄漏护栏**：回答产出后追加一次判定"是否包含最终答案"，命中则用更严格指令重生成一次，并在 `Turn.flags` 打标。命中率是核心研习指标。
+**答案泄漏护栏**：命中率是核心研习指标，必须落库可统计。
 
-**离线 / Mock 模式**：`MockLLMClient` 提供脚本化响应，用于测试与断网公开课演示。
+**离线 / Mock 模式**：`MockLLMClient` 提供脚本化响应，用于测试、断网演示与无网机房。
 
-## 8. 内容工程流水线
+## 8. 内容工程流水线（全册）
 
 ```
-教材 PDF → tools/extract_textbook.py → content/textbook/<unit>.md（不进 git）
-        → 拆分知识点与引导线索 → content/units/<unit>/*.（格式待定，进 git）
+① 教材 PDF（全册）→ tools/extract_textbook.py
+     → content/textbook/<volume>/<unit>/<section>.md（不进 git）
+② 课标 PDF → tools/extract_curriculum.py
+     → content/curriculum/<source>.md（不进 git）
+③ 结构化：章节索引 + 知识点 + 常见误区 + 课标↔知识点映射
+     → content/units/<unit>/*（进 git，格式待 Q3 定）
+④ 校验：引用完整性、前置知识无环、课标映射可追溯（M2 实现）
 ```
 
-无论最终格式：教师必须可读可改；必须有引用完整性与前置知识无环校验（M2 实现）。
+**为什么全册入库而不是只做一册**：学生可能预习、复习、做题跨章节取用；
+但**运行时只装载"当前位置"对应的内容**，不把全书塞进上下文。
 
-## 9. 打包与分发
+## 9. 问卷与研习数据（本项目的数据来源）
+
+因为当前对中小学生使用生成式 AI 监管较严，本项目采用**以问卷为接触与数据渠道**的方式：
+
+| 环节 | 做法 |
+|---|---|
+| 接触方式 | 学生在**问卷/受控活动流程**中接触产品，而非自由下载使用 |
+| 前测 | 问卷收集已有概念水平、AI 使用经验 |
+| 体验 | 在受控环境（机房/课后服务时段，教师在场）限时体验 |
+| 后测 | 问卷收集概念理解变化、使用体验与态度 |
+| 对话数据 | 仅存学生本机；研习分析以问卷与课堂观察为主，必要时经同意后匿名化引用片段 |
+| 教师端 | **不做**（隐私优先） |
+
+## 10. 打包与分发
 
 - Windows：`portable` 便携版（免安装，规避机房权限）；macOS：`dmg`（GitHub Actions 构建）
-- 教学内容经 `extraResources` 随包分发；教材原文不入包（运行时读取本地文件）
+- 教学内容（`content/units` 结构 + 教材原文）经 `extraResources` 随包分发
 - 未签名应用会被 SmartScreen 拦截 → 分发时附"仍要运行"说明
+- 仅向本班小范围提供，不公开传播（合规锚点）
