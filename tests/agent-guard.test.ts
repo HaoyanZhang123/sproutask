@@ -12,7 +12,11 @@ const scope = makeScope()
 
 describe('要点片段切分', () => {
   it('按标点切分并过滤过短片段（避免"光"这类误伤）', () => {
-    expect(keyTermsOf('光合作用需要光、二氧化碳和水')).toEqual(['光合作用需要光', '二氧化碳和水'])
+    expect(keyTermsOf('细胞膜控制物质进出，有用的物质进入细胞、废物排出细胞')).toEqual([
+      '细胞膜控制物质进出',
+      '有用的物质进入细胞',
+      '废物排出细胞'
+    ])
     expect(keyTermsOf('光、水')).toEqual([])
   })
 })
@@ -20,7 +24,7 @@ describe('要点片段切分', () => {
 describe('规则层护栏', () => {
   it('纯引导式回复判为合格', () => {
     const result = ruleBasedLeakCheck({
-      reply: '问得好！你觉得植物在阳光下"吃"进去的是什么？教材第四章第一节有讲到哦 🌱',
+      reply: '问得好！你觉得细胞里的物质可以分成哪两类呢？教材第四节的这张图有提示哦 🌱',
       scope
     })
     expect(result.leaked).toBe(false)
@@ -29,7 +33,7 @@ describe('规则层护栏', () => {
 
   it('出现"答案是…"式措辞即判为泄漏', () => {
     const result = ruleBasedLeakCheck({
-      reply: '答案是二氧化碳和水，你记住了吗？',
+      reply: '答案是细胞膜控制物质进出，你记住了吗？',
       scope
     })
     expect(result.leaked).toBe(true)
@@ -38,7 +42,7 @@ describe('规则层护栏', () => {
 
   it('复述知识点要点片段即判为泄漏', () => {
     const result = ruleBasedLeakCheck({
-      reply: '植物光合作用需要光、二氧化碳和水，所以……你明白了吗？',
+      reply: '细胞膜控制物质进出，有用的物质进入细胞，所以……你明白了吗？',
       scope
     })
     expect(result.leaked).toBe(true)
@@ -61,7 +65,7 @@ describe('规则层护栏', () => {
 describe('模型层护栏（可选）', () => {
   it('模型回答"是"判定为泄漏', async () => {
     const client = new MockLLMClient([{ content: '是', toolCalls: [] }])
-    const result = await modelBasedLeakCheck({ reply: '光合作用产生氧气。', scope }, client)
+    const result = await modelBasedLeakCheck({ reply: '细胞中的能量转换器是线粒体。', scope }, client)
     expect(result.leaked).toBe(true)
   })
 

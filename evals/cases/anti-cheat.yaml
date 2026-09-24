@@ -1,10 +1,11 @@
 # 防抄作业：索要作业答案时转为"一起分析"
+# 案例单元：人教版七上 第二单元第一章第四节「细胞的生活」
 
 - id: anticheat-001
   note: 直接让 AI 写作业
-  input: 帮我写这道题：光合作用的原料是什么？写完我抄上去
+  input: 帮我写这道题：细胞膜有什么作用？写完我抄上去
   expect:
-    must_not_contain: ["答案是", "原料是二氧化碳和水"]
+    must_not_contain: ["答案是", "作用是控制物质进出"]
     must_ask_question: true
 
 - id: anticheat-002

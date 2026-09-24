@@ -46,22 +46,22 @@ describe('模式识别', () => {
 
 describe('开场问句', () => {
   it('列出四个模式与编号，并提示上次位置', () => {
-    const question = buildOpeningQuestion({ lastPositionLabel: '第四章第一节 光合作用' })
+    const question = buildOpeningQuestion({ lastPositionLabel: '第二单元第一章第四节 细胞的生活' })
     expect(question).toContain('1 预习')
     expect(question).toContain('4 拓展')
-    expect(question).toContain('上次你在：第四章第一节 光合作用')
+    expect(question).toContain('上次你在：第二单元第一章第四节 细胞的生活')
   })
 })
 
 describe('位置选择', () => {
   const options: PositionOption[] = [
-    { position: { volumeId: '7s', unitId: 'u4', sectionId: 's1' }, label: '第四章第一节 光合作用' },
+    { position: { volumeId: '7s', unitId: 'u4', sectionId: 's1' }, label: '第二单元第一章第四节 细胞的生活' },
     { position: { volumeId: '7s', unitId: 'u4', sectionId: 's2' }, label: '第四章第二节 呼吸作用' }
   ]
 
   it('按编号或名称匹配', () => {
     expect(labelOf(parsePositionChoice('2', options))).toBe('第四章第二节 呼吸作用')
-    expect(labelOf(parsePositionChoice('光合作用', options))).toBe('第四章第一节 光合作用')
+    expect(labelOf(parsePositionChoice('细胞的生活', options))).toBe('第二单元第一章第四节 细胞的生活')
   })
 
   it('空输入表示"继续上次"', () => {
@@ -75,8 +75,8 @@ describe('位置选择', () => {
   })
 
   it('位置问句包含可选项与"回车继续上次"提示', () => {
-    const question = buildPositionQuestion({ options, lastPositionLabel: '第四章第一节 光合作用' })
-    expect(question).toContain('1 第四章第一节 光合作用')
+    const question = buildPositionQuestion({ options, lastPositionLabel: '第二单元第一章第四节 细胞的生活' })
+    expect(question).toContain('1 第二单元第一章第四节 细胞的生活')
     expect(question).toContain('直接回车＝继续上次')
   })
 })
@@ -99,7 +99,7 @@ function makeFlow(answers: string[], deps: Partial<ConstructorParameters<typeof 
 
 describe('IntentFlow 状态机', () => {
   const position: StudyPosition = { volumeId: '7s', unitId: 'u4', sectionId: 's1' }
-  const single: PositionOption[] = [{ position, label: '第四章第一节 光合作用' }]
+  const single: PositionOption[] = [{ position, label: '第二单元第一章第四节 细胞的生活' }]
 
   it('只有一个位置时自动选定，只问模式', async () => {
     const { flow, asked } = makeFlow(['2'], { positions: single })
@@ -126,12 +126,12 @@ describe('IntentFlow 状态机', () => {
 
   it('多个位置时：空输入＝继续上次位置', async () => {
     const options: PositionOption[] = [
-      { position, label: '第四章第一节 光合作用' },
+      { position, label: '第二单元第一章第四节 细胞的生活' },
       { position: { volumeId: '7s', unitId: 'u4', sectionId: 's2' }, label: '第四章第二节 呼吸作用' }
     ]
     const { flow, asked } = makeFlow(['复习', ''], {
       positions: options,
-      lastPosition: { position, label: '第四章第一节 光合作用' }
+      lastPosition: { position, label: '第二单元第一章第四节 细胞的生活' }
     })
     const result = await flow.run()
     expect(result.mode).toBe('review')
@@ -141,12 +141,12 @@ describe('IntentFlow 状态机', () => {
 
   it('位置无法识别时回到上次位置，不卡死', async () => {
     const options: PositionOption[] = [
-      { position, label: '第四章第一节 光合作用' },
+      { position, label: '第二单元第一章第四节 细胞的生活' },
       { position: { volumeId: '7s', unitId: 'u4', sectionId: 's2' }, label: '第四章第二节 呼吸作用' }
     ]
     const { flow } = makeFlow(['预习', '第九章', '第九章', '第九章'], {
       positions: options,
-      lastPosition: { position, label: '第四章第一节 光合作用' },
+      lastPosition: { position, label: '第二单元第一章第四节 细胞的生活' },
       maxRetries: 3
     })
     const result = await flow.run()

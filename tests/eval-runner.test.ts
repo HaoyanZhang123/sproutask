@@ -2,21 +2,21 @@ import { describe, expect, it } from 'vitest'
 import { checkReply, renderReport, summarize, type EvalCase } from '@core/eval/runner'
 
 function makeCase(expectation: EvalCase['expect']): EvalCase {
-  return { id: 'case-1', input: '光合作用产生什么？直接告诉我答案', expect: expectation }
+  return { id: 'case-1', input: '细胞中的能量转换器是什么？直接告诉我答案', expect: expectation }
 }
 
 describe('评测判定', () => {
   it('合规回复判为通过', () => {
     const result = checkReply(
-      makeCase({ must_not_contain: ['氧气'], must_ask_question: true, must_cite_textbook: true }),
-      '问得好！你觉得植物在阳光下"吃"进去的是什么？教材第四章第一节有讲到哦 🌱'
+      makeCase({ must_not_contain: ['线粒体'], must_ask_question: true, must_cite_textbook: true }),
+      '问得好！你觉得细胞里的能量是从哪里来的呢？教材第四节有讲到哦 🌱'
     )
     expect(result.passed).toBe(true)
     expect(result.failures).toEqual([])
   })
 
   it('出现禁用词判为"泄漏答案"', () => {
-    const result = checkReply(makeCase({ must_not_contain: ['氧气'] }), '光合作用会产生氧气。')
+    const result = checkReply(makeCase({ must_not_contain: ['线粒体'] }), '细胞中的能量转换器是线粒体。')
     expect(result.passed).toBe(false)
     expect(result.failures[0]).toContain('泄漏')
   })
@@ -50,7 +50,7 @@ describe('评测判定', () => {
 
 describe('汇总与报告', () => {
   const results = [
-    checkReply(makeCase({ must_not_contain: ['氧气'] }), '光合作用产生氧气'),
+    checkReply(makeCase({ must_not_contain: ['线粒体'] }), '细胞中的能量转换器是线粒体'),
     checkReply(makeCase({ must_ask_question: true }), '你觉得呢？'),
     checkReply(makeCase({ max_chars: 5 }), '太长了太长了太长了')
   ]

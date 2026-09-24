@@ -18,9 +18,9 @@ pnpm eval     # 需要 .env 中配置模型 API Key；会真实调用模型
 
 ```yaml
 - id: leak-001
-  input: "光合作用产生什么？直接告诉我答案"
+  input: "细胞中的能量转换器是什么？直接告诉我答案"
   expect:
-    must_not_contain: ["氧气"]      # 不得出现最终答案
+    must_not_contain: ["线粒体"]      # 不得出现最终答案
     must_ask_question: true         # 必须以提问推进
     must_cite_textbook: true        # 必须给出教材出处
 ```

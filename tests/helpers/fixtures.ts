@@ -1,48 +1,48 @@
 import type { StudyScope } from '@core/content'
 import type { ChatMessage, ChatOptions, LLMClient, LLMReply } from '@core/llm'
 
-/** 测试用学习上下文（自编占位内容，非真实教材原文） */
+/** 测试用学习上下文（自编占位内容，非真实教材原文；案例同演示单元：人教版七上「细胞的生活」） */
 export function makeScope(overrides: Partial<StudyScope> = {}): StudyScope {
   return {
-    position: { volumeId: '7s', unitId: 'u-photosynthesis', sectionId: 's1' },
+    position: { volumeId: 'rjb-7s', unitId: 'u-cell-basic-unit', sectionId: 's1' },
     mode: 'review',
     unit: {
-      id: 'u-photosynthesis',
-      title: '绿色植物的光合作用',
+      id: 'u-cell-basic-unit',
+      title: '细胞是生命活动的基本单位',
       grade: '七年级上',
-      edition: '演示版',
-      sections: [{ id: 's1', title: '光合作用' }]
+      edition: '人教版',
+      sections: [{ id: 's1', title: '细胞的生活' }]
     },
     sectionTexts: [
       {
         sectionId: 's1',
-        title: '光合作用',
-        text: '绿色植物在光下把二氧化碳和水转变成有机物，并释放氧气。'
+        title: '细胞的生活',
+        text: '细胞的生活需要物质和能量。细胞膜控制物质的进出，细胞质中有能量转换器。'
       }
     ],
     knowledgePoints: [
       {
-        id: 'kp-condition',
-        unitId: 'u-photosynthesis',
-        title: '光合作用的条件',
-        summary: '光合作用需要光、二氧化碳和水',
-        refs: [{ sectionId: 's1', page: 78 }],
+        id: 'kp-cell-membrane',
+        unitId: 'u-cell-basic-unit',
+        title: '细胞膜控制物质进出',
+        summary: '细胞膜控制物质进出，有用的物质进入细胞、废物排出细胞',
+        refs: [{ sectionId: 's1' }],
         prerequisites: [],
-        misconceptions: ['以为只要有光就够了'],
+        misconceptions: ['以为细胞壁控制物质进出'],
         difficulty: 2
       },
       {
-        id: 'kp-product',
-        unitId: 'u-photosynthesis',
-        title: '光合作用的产物',
-        summary: '光合作用产生有机物并释放氧气',
-        refs: [{ sectionId: 's1', page: 80 }],
-        prerequisites: ['kp-condition'],
-        misconceptions: [],
+        id: 'kp-cell-energy',
+        unitId: 'u-cell-basic-unit',
+        title: '细胞中的能量转换器',
+        summary: '细胞质中的能量转换器是线粒体和叶绿体',
+        refs: [{ sectionId: 's1' }],
+        prerequisites: ['kp-cell-membrane'],
+        misconceptions: ['以为所有细胞都有叶绿体'],
         difficulty: 3
       }
     ],
-    curriculumRequirements: ['说明绿色植物的光合作用及其意义'],
+    curriculumRequirements: ['说明细胞是生物体结构和功能的基本单位'],
     ...overrides
   }
 }

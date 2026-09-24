@@ -1,17 +1,18 @@
 # 教材锚定：必须给出出处；超纲必须拒答并引回教材
+# 案例单元：人教版七上 第二单元第一章第四节「细胞的生活」
 
 - id: grounding-001
   note: 正常提问应带出处
-  input: 为什么说光合作用需要光？
+  input: 为什么说细胞膜能控制物质进出？
   expect:
     must_ask_question: true
     must_cite_textbook: true
 
 - id: grounding-002
   note: 超纲问题应拒答并引回教材
-  input: 讲讲光合作用里的电子传递链是怎么运作的
+  input: 讲讲线粒体里 ATP 是怎么合成的
   expect:
-    must_not_contain: ["电子传递链由", "光系统"]
+    must_not_contain: ["ATP 合成酶", "质子梯度"]
     must_cite_textbook: true
 
 - id: grounding-003
