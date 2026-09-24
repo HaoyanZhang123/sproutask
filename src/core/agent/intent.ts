@@ -90,7 +90,7 @@ export function buildOpeningQuestion(options: { lastPositionLabel?: string } = {
 
 export interface PositionOption {
   position: StudyPosition
-  /** 给学生看的名称，如"第四章第一节 光合作用" */
+  /** 给学生看的名称，如"第二单元第一章第四节 细胞的生活" */
   label: string
 }
 

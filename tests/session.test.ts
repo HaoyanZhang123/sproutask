@@ -45,7 +45,7 @@ describe('会话：开场与模式选择', () => {
       ok: true,
       mode: 'review',
       modeLabel: '复习',
-      positionLabel: '第四章第一节 光合作用'
+      positionLabel: '第二单元第一章第四节 细胞的生活'
     })
     expect(session.getState().mode).toBe('review')
   })
@@ -64,7 +64,7 @@ describe('会话：开场与模式选择', () => {
   })
 
   it('有上次位置时优先沿用（自动恢复）', () => {
-    const last: StudyPosition = { volumeId: '7s', unitId: 'demo-photosynthesis', sectionId: 's1' }
+    const last: StudyPosition = { volumeId: 'rjb-7s', unitId: 'u-cell-basic-unit', sectionId: 's1' }
     const session = makeSession(new RecordingClient([]), {
       lastPosition: { position: last, label: '上次学到的地方' }
     })
@@ -78,7 +78,7 @@ describe('会话：一轮对话', () => {
   it('未选模式时先要模式，不进循环', async () => {
     const client = new RecordingClient([])
     const session = makeSession(client)
-    const outcome = await session.chat('光合作用是什么？')
+    const outcome = await session.chat('细胞的生活是什么？')
     expect(outcome.needsMode).toBe(true)
     expect(client.callCount).toBe(0)
   })
@@ -90,7 +90,7 @@ describe('会话：一轮对话', () => {
     const session = makeSession(client)
     session.chooseMode('2')
 
-    const outcome = await session.chat('光合作用需要什么？')
+    const outcome = await session.chat('细胞的生活需要什么？')
     expect(outcome.needsMode).toBe(false)
     if (!outcome.needsMode) {
       expect(outcome.reply).toContain('你觉得')
@@ -138,7 +138,7 @@ describe('会话：一轮对话', () => {
     }
     const session = makeSession(failing as never)
     session.chooseMode('review')
-    const outcome = await session.chat('光合作用需要什么？')
+    const outcome = await session.chat('细胞的生活需要什么？')
     expect(outcome.needsMode).toBe(false)
     if (!outcome.needsMode) {
       expect(outcome.degraded?.kind).toBe('network')

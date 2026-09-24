@@ -9,7 +9,7 @@ import { makeScope, RecordingClient } from './helpers/fixtures'
 const scope = makeScope()
 const registry = new ToolRegistry([getSectionTextTool as never, flagForTeacherTool as never])
 
-function makeInput(client: RecordingClient, userMessage = '光合作用需要什么？') {
+function makeInput(client: RecordingClient, userMessage = '细胞的生活需要什么？') {
   return {
     client,
     registry,
@@ -18,7 +18,7 @@ function makeInput(client: RecordingClient, userMessage = '光合作用需要什
     toolContext: {
       studentId: 'S07',
       getSectionText: async (sectionId: string) =>
-        sectionId === 's1' ? '教材原文：绿色植物在光下把二氧化碳和水转变成有机物。' : null
+        sectionId === 's1' ? '教材原文：细胞的生活需要物质和能量。' : null
     }
   }
 }
@@ -92,7 +92,7 @@ describe('Agent 循环：基本路径', () => {
 describe('Agent 循环：答案泄漏护栏', () => {
   it('命中泄漏 → 用更严格的指令重新生成一次，并打标记', async () => {
     const client = new RecordingClient([
-      { content: '答案是二氧化碳和水。', toolCalls: [] }, // 泄漏
+      { content: '答案是细胞膜控制物质进出。', toolCalls: [] }, // 泄漏
       { content: '那你觉得，植物在阳光下会"吃"进什么？🌱', toolCalls: [] } // 重写后合格
     ])
     const result = await runAgentTurn(makeInput(client))
@@ -112,8 +112,8 @@ describe('Agent 循环：答案泄漏护栏', () => {
 
   it('重生成后仍泄漏：保留标记但不再无限重试', async () => {
     const client = new RecordingClient([
-      { content: '答案是二氧化碳和水。', toolCalls: [] },
-      { content: '答案就是二氧化碳和水，记住了吗？', toolCalls: [] }
+      { content: '答案是细胞膜控制物质进出。', toolCalls: [] },
+      { content: '答案就是细胞膜控制物质进出，记住了吗？', toolCalls: [] }
     ])
     const result = await runAgentTurn(makeInput(client))
     expect(client.callCount).toBe(2)

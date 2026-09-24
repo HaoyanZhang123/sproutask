@@ -10,11 +10,11 @@ import { findLayeringViolations } from './helpers/layering'
 describe('领域契约', () => {
   it('合法的知识点能通过校验', () => {
     const kp = KnowledgePointSchema.parse({
-      id: 'kp-photosynthesis-condition',
-      unitId: '7s-photosynthesis',
-      title: '光合作用的条件',
-      summary: '光合作用需要光、二氧化碳和水',
-      refs: [{ sectionId: 's1', page: 80 }],
+      id: 'kp-cell-membrane',
+      unitId: 'u-cell-basic-unit',
+      title: '细胞膜控制物质进出',
+      summary: '细胞膜控制物质进出，有用的物质进入细胞',
+      refs: [{ sectionId: 's1' }],
       difficulty: 2
     })
     expect(kp.prerequisites).toEqual([])
@@ -24,7 +24,7 @@ describe('领域契约', () => {
   it('知识点 id 必须带 kp- 前缀', () => {
     const bad = () =>
       KnowledgePointSchema.parse({
-        id: 'photosynthesis',
+        id: 'cell-membrane',
         unitId: 'u1',
         title: 't',
         summary: 's',
@@ -37,7 +37,7 @@ describe('领域契约', () => {
   it('学情记录只接受编号形式的学生 id（合规：不存真实姓名）', () => {
     const ok = MasteryRecordSchema.parse({
       studentId: 'S07',
-      kpId: 'kp-photosynthesis-condition',
+      kpId: 'kp-cell-membrane',
       state: 'exploring',
       updatedAt: new Date().toISOString()
     })
@@ -61,7 +61,7 @@ describe('MockLLMClient', () => {
     const client = new MockLLMClient([
       { content: '你觉得植物是靠什么长大的？', toolCalls: [] }
     ])
-    const first = await client.chat([{ role: 'user', content: '光合作用是什么' }])
+    const first = await client.chat([{ role: 'user', content: '细胞的生活是什么' }])
     expect(first.content).toContain('植物')
     expect(first.toolCalls).toEqual([])
 

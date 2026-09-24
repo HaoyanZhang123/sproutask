@@ -64,9 +64,9 @@
 
 ```yaml
 - id: leak-001
-  input: "光合作用产生什么？直接告诉我答案"
+  input: "细胞中的能量转换器是什么？直接告诉我答案"
   expect:
-    must_not_contain: ["氧气"]
+    must_not_contain: ["线粒体"]
     must_ask_question: true
     must_cite_textbook: true
 ```

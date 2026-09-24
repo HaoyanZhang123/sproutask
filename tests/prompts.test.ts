@@ -3,29 +3,31 @@ import { MAX_HISTORY_TURNS, PROMPT_VERSION, buildMessages, buildSystemPrompt } f
 import type { StudyScope } from '@core/content'
 
 const scope: StudyScope = {
-  position: { volumeId: '7s', unitId: 'u-photosynthesis', sectionId: 's1' },
+  position: { volumeId: 'rjb-7s', unitId: 'u-cell-basic-unit', sectionId: 's1' },
   mode: 'review',
   unit: {
-    id: 'u-photosynthesis',
-    title: '绿色植物的光合作用',
+    id: 'u-cell-basic-unit',
+    title: '细胞是生命活动的基本单位',
     grade: '七年级上',
-    edition: '某版本',
-    sections: [{ id: 's1', title: '光合作用', page: 78 }]
+    edition: '人教版',
+    sections: [{ id: 's1', title: '第四节 细胞的生活' }]
   },
-  sectionTexts: [{ sectionId: 's1', title: '光合作用', text: '绿色植物在光下把二氧化碳和水转变成有机物。' }],
+  sectionTexts: [
+    { sectionId: 's1', title: '第四节 细胞的生活', text: '细胞的生活需要物质和能量。' }
+  ],
   knowledgePoints: [
     {
-      id: 'kp-condition',
-      unitId: 'u-photosynthesis',
-      title: '光合作用的条件',
-      summary: '需要光、二氧化碳和水',
-      refs: [{ sectionId: 's1', page: 78 }],
+      id: 'kp-cell-membrane',
+      unitId: 'u-cell-basic-unit',
+      title: '细胞膜控制物质进出',
+      summary: '有用的物质进入细胞，废物排出细胞',
+      refs: [{ sectionId: 's1' }],
       prerequisites: [],
-      misconceptions: ['以为只要有光就够了'],
+      misconceptions: ['以为细胞壁控制物质进出'],
       difficulty: 2
     }
   ],
-  curriculumRequirements: ['说明光合作用及其意义']
+  curriculumRequirements: ['说明细胞是生物体结构和功能的基本单位']
 }
 
 describe('提示词分层装配', () => {
@@ -39,8 +41,8 @@ describe('提示词分层装配', () => {
     expect(prompt).toContain('教学纪律') // L1 纪律
     expect(prompt).toContain('课程标准要求') // L2 课标约束
     expect(prompt).toContain('教材原文') // L2 教材
-    expect(prompt).toContain('光合作用的条件') // 知识点
-    expect(prompt).toContain('以为只要有光就够了') // 常见误区（用于设计诊断性提问）
+    expect(prompt).toContain('细胞膜控制物质进出') // 知识点
+    expect(prompt).toContain('以为细胞壁控制物质进出') // 常见误区（用于设计诊断性提问）
     expect(prompt).toContain('复习') // L4 模式
   })
 
@@ -55,7 +57,7 @@ describe('提示词分层装配', () => {
       mastery: [
         {
           studentId: 'S07',
-          kpId: 'kp-condition',
+          kpId: 'kp-cell-membrane',
           state: 'exploring',
           evidence: [],
           updatedAt: '2026-09-01T00:00:00.000Z'

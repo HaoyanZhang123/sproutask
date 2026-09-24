@@ -93,7 +93,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   check('提供四个模式选项', start.options.length === 4, start.options.map((o) => o.label).join('/'))
   check('选择"2"解析为复习', chosen.ok && chosen.mode === 'review')
 
-  const chat = await session.chat('光合作用需要什么？')
+  const chat = await session.chat('细胞的生活需要什么？')
   const reply = 'reply' in chat ? chat.reply : ''
   const degraded = 'degraded' in chat ? chat.degraded : undefined
 
@@ -153,7 +153,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     win,
     `(() => {
       const box = document.querySelector('.composer textarea')
-      box.value = '光合作用需要什么？'
+      box.value = '细胞的生活需要什么？'
       box.dispatchEvent(new Event('input', { bubbles: true }))
       return true
     })()`

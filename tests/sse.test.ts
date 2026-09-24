@@ -39,9 +39,9 @@ describe('SSE 行解析', () => {
 describe('增量累积', () => {
   it('正文跨多个分片正确拼接', () => {
     const acc = createAccumulator()
-    applyDelta(acc, { content: '光合作用' })
-    applyDelta(acc, { content: '需要光' })
-    expect(finalize(acc).content).toBe('光合作用需要光')
+    applyDelta(acc, { content: '细胞的生活' })
+    applyDelta(acc, { content: '需要物质' })
+    expect(finalize(acc).content).toBe('细胞的生活需要物质')
   })
 
   it('工具调用参数分片按 index 拼接（流式最容易出错的地方）', () => {
