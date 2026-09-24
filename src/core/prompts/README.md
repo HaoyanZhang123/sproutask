@@ -1,6 +1,6 @@
 # 提示词层（M1 实现）
 
-M0 空置。M1 将按 docs/ARCHITECTURE.md §7 落地分层：
+M0 空置。M1 将按 docs/ARCHITECTURE.md「Agent 运行时设计」落地分层：
 
 ```
 src/core/prompts/

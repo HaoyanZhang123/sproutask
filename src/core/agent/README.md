@@ -6,7 +6,7 @@
 ## 循环（唯一入口 `runAgentTurn`）
 
 ```
-1. 组装上下文（提示词 L0~L5，见 docs/ARCHITECTURE.md §7）
+1. 组装上下文（提示词 L0~L5，见 docs/ARCHITECTURE.md「Agent 运行时设计」）
 2. 调 LLMClient.chat(messages, { tools })
 3. 若返回 toolCalls → 逐个执行 → 结果以 role:'tool' 回填 → 回到第 2 步
 4. 得到最终回答 → 护栏检查（是否泄漏答案）→ 命中则加严重生成一次

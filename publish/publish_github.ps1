@@ -27,7 +27,8 @@ param(
     [Parameter(Mandatory = $true)][string]$CopyrightHolder,
     [string]$GitHubName = 'biobuddy-dev',
     [switch]$Force,
-    [switch]$SkipGit
+    [switch]$SkipGit,
+    [switch]$AllowStale
 )
 
 $ErrorActionPreference = 'Stop'
@@ -67,8 +68,23 @@ $files = @(
     'tsconfig.json', 'tsconfig.web.json', 'vitest.config.ts',
     '.npmrc', '.gitattributes', '.env.example'
 )
-# 评测用例（只取 cases，不要带研习语境的 README）
+# 评测用例（只取 cases；README 由公开版生成）
 $evalCases = Join-Path $repoRoot 'evals/cases'
+
+# ADR 的公开版：从内部 ADR 派生，按下表做**显式替换**（规则可审计；新增规则请同步 publish/README.md）
+$adrRewrites = [ordered]@{
+    '研习数据以问卷为主渠道（M6）'                              = '学习数据的本地留存与匿名化导出（M6）'
+    '研习对比实验'                                              = '教学对比实验'
+    '研习数据'                                                  = '学习数据'
+    '研习'                                                      = '教学研究'
+    '`notes/reference/markdown-reader-flutter-借鉴.md`「教材就是 Markdown」一节 —— 该项目的折叠块' = '参考项目分析（不随本仓库分发）：该项目的折叠块'
+}
+$adrSourceDir = Join-Path $repoRoot 'docs/adr'
+# 注意：PowerShell 的 -Filter 不支持 [1-4] 这类字符范围，必须用 Where-Object 过滤
+$adrFiles = @(
+    Get-ChildItem -LiteralPath $adrSourceDir -Filter 'ADR-*.md' -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match '^ADR-000[1-4]-' }
+)
 
 foreach ($dir in $dirs) {
     $source = Join-Path $repoRoot $dir
@@ -88,6 +104,32 @@ if (Test-Path $evalCases) {
     Copy-Item -Path (Join-Path $evalCases '*') -Destination $destCases -Recurse -Force
     Write-Host "  + evals/cases/"
 }
+
+# ── 1b. 文档：架构与规范（公开版）+ ADR（派生并清洗） ───────
+$docsTarget = Join-Path $target 'docs'
+$adrTarget = Join-Path $docsTarget 'adr'
+New-Item -ItemType Directory -Path $adrTarget -Force | Out-Null
+
+# 手工裁剪的公开版：描述的是"公开仓库"的布局，与研究组织相关的段落已移除
+foreach ($doc in @('ARCHITECTURE.md', 'CONVENTIONS.md')) {
+    Copy-Item -LiteralPath (Join-Path $publicDir "docs/$doc") -Destination (Join-Path $docsTarget $doc) -Force
+    Write-Host "  + docs/$doc（公开版）"
+}
+Copy-Item -LiteralPath (Join-Path $publicDir 'docs/adr/README.md') -Destination (Join-Path $adrTarget 'README.md') -Force
+Write-Host "  + docs/adr/README.md（公开版）"
+
+$rewriteTotal = 0
+foreach ($adr in $adrFiles) {
+    $text = Get-Content -LiteralPath $adr.FullName -Raw
+    $before = $text
+    foreach ($pattern in $adrRewrites.Keys) {
+        $text = $text.Replace($pattern, $adrRewrites[$pattern])
+    }
+    if ($text -ne $before) { $rewriteTotal += 1 }
+    Set-Content -LiteralPath (Join-Path $adrTarget $adr.Name) -Value $text -NoNewline -Encoding UTF8
+    Write-Host "  + docs/adr/$($adr.Name)"
+}
+Write-Host "  ~ ADR 清洗：$($adrFiles.Count) 份中 $rewriteTotal 份做了替换（规则见脚本 $adrRewrites）`n"
 
 # ── 2. 生成公开版 README / LICENSE / .gitignore / 评测说明 ──
 $year = (Get-Date).Year
@@ -114,8 +156,8 @@ $forbidden = [ordered]@{
     '个人邮箱'    = '1814914856@qq\.com'
     '他人姓名'    = '唐懿含'
     '密钥'        = 'sk-[A-Za-z0-9]{16,}'
-    '研究语境'    = '研习|教育研习|实习学校|问卷设计'
-    '内部路径'    = 'notes/|CODEBASE_NOTES|docs/研习|E:\\DSH'
+    '研究语境'    = '研习|教育研习|实习学校|问卷|知情同意'
+    '内部路径'    = 'notes/|CODEBASE_NOTES|TASKS\.md|AGENTS\.md|docs/ROADMAP|docs/specs|docs/tutorials|docs/研习|E:\\DSH'
 }
 $scannable = Get-ChildItem -LiteralPath $target -Recurse -File |
     Where-Object { $_.Extension -in @('.ts', '.js', '.mjs', '.json', '.yaml', '.yml', '.md', '.html', '.css', '.py', '.txt') -and $_.FullName -notmatch 'node_modules|pnpm-lock' }
@@ -137,7 +179,31 @@ if ($problems.Count -gt 0) {
     $problems | ForEach-Object { Write-Host "   - $_" }
     throw "公开扫描发现 $($problems.Count) 类问题"
 }
-Write-Host "  ✅ 安全扫描通过（校名/邮箱/密钥/研究语境/内部路径 均未发现）`n" -ForegroundColor Green
+Write-Host "  ✅ 安全扫描通过（校名/邮箱/密钥/研究语境/内部路径 均未发现）" -ForegroundColor Green
+
+# ── 4b. 防漂移：公开版文档是否落后于内部文档 ────────────────
+$driftPairs = @(
+    @{ Internal = 'docs/ARCHITECTURE.md'; Public = 'docs/ARCHITECTURE.md'; Note = '架构' },
+    @{ Internal = 'docs/CONVENTIONS.md'; Public = 'docs/CONVENTIONS.md'; Note = '规范' }
+)
+$stale = @()
+foreach ($pair in $driftPairs) {
+    $internal = Get-Item -LiteralPath (Join-Path $repoRoot $pair.Internal) -ErrorAction SilentlyContinue
+    $public = Get-Item -LiteralPath (Join-Path $publicDir $pair.Public) -ErrorAction SilentlyContinue
+    if ($internal -and $public -and $internal.LastWriteTime -gt $public.LastWriteTime) {
+        $stale += "$($pair.Note)：内部 $($pair.Internal) 比公开版新"
+    }
+}
+if ($stale.Count -gt 0) {
+    Write-Host "  ⚠️  公开版文档可能已过期：" -ForegroundColor Yellow
+    $stale | ForEach-Object { Write-Host "     - $_" -ForegroundColor Yellow }
+    if (-not $AllowStale) {
+        throw "公开版文档落后于内部文档；请先更新 publish/public/docs/ 下的公开版，或用 -AllowStale 强制继续"
+    }
+} else {
+    Write-Host "  ✅ 公开版文档与内部同步（无漂移）" -ForegroundColor Green
+}
+Write-Host ""
 
 # ── 5. git 初始化与单次提交 ────────────────────────────────
 if (-not $SkipGit) {

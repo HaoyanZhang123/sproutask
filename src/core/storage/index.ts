@@ -8,7 +8,7 @@ import type { MasteryRecord, MasteryState, Session, Student, Turn } from '../dom
  *    决策落地后：新增 `sqlite-store.ts` 或 `jsonl-store.ts` 实现本接口，
  *    并在 src/main 里按配置注入。禁止在上层直接依赖具体实现。
  *
- * 所有实现必须遵守的合规约束（docs/ARCHITECTURE.md §6）：
+ * 所有实现必须遵守的合规约束（docs/ARCHITECTURE.md「领域契约」）：
  *   - 只存学生编号，不存真实姓名；
  *   - 日志中不得出现教材与对话之外的个人信息；
  *   - 导出学习数据时必须经过匿名化处理。

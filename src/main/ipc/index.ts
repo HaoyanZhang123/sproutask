@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 /**
  * IPC 处理器注册表。
- * 规矩（docs/CONVENTIONS.md §4）：
+ * 规矩（docs/CONVENTIONS.md「IPC 与安全」）：
  *   - 通道名 `<域>:<动作>`，如 `agent:chat`
  *   - 入参一律用 Zod 校验，禁止直接把 unknown 传进业务层
  *   - 这里只做"校验 + 转发"，业务逻辑放 src/core
