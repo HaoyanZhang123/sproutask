@@ -82,7 +82,7 @@ main  ✓ 可用 node:*，但业务逻辑必须放 core
 - ⛔ **禁止在应用内嵌第三方网页版 AI**（如 WebView 裹 `chat.deepseek.com`）：该站点 CSP
   `frame-ancestors 'none'` 会拒绝内嵌；桌面端嵌真网页需"原生子窗口叠加"，会吃掉指针事件、
   遮挡浮层，且常驻约 380MB 内存。AI 能力一律走 API（实测见
-  `notes/reference/markdown-reader-flutter-借鉴.md` §2.2）
+  `notes/reference/markdown-reader-flutter-借鉴.md`「内嵌 DeepSeek 网页版」一节）
 
 ## 6. 领域契约（`src/core/domain/index.ts`）
 
