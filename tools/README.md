@@ -1,7 +1,25 @@
 # 开发期工具（tools/）
 
 这里的脚本**只在开发你的电脑上运行，不会被打进 exe**。
-用途是把纸质/PDF 教材整理成应用能读的文本。
+用途：把教材整理成应用能读的文本；把研习材料转成可打印的 Word。
+
+## 已有工具
+
+| 脚本 | 作用 |
+|---|---|
+| `md_to_docx.py` | 把 `docs/研习材料/*.md` 转成可打印的 `.docx`（支持标题/加粗/表格/引用/列表；可 `--stop-at` 截断出"学生用"版本、`--append` 合并教师用附录） |
+
+重新生成 F-014 四份 Word（依赖 `python -m pip install python-docx`）：
+
+```powershell
+$out = "docs\研习材料\word"
+python tools/md_to_docx.py "docs\研习材料\F-014-前测问卷.md" -o "$out\F-014-前测问卷（学生用）.docx" --stop-at "## ⚙️ 教师用页"
+python tools/md_to_docx.py "docs\研习材料\F-014-后测问卷.md" -o "$out\F-014-后测问卷（学生用）.docx" --stop-at "## ⚙️ 教师用页"
+python tools/md_to_docx.py "docs\研习材料\F-014-家长知情同意书与使用公约.md" -o "$out\F-014-家长知情同意书与使用公约.docx" --stop-at "## ⚙️ 教师用提示"
+python tools/md_to_docx.py "docs\研习材料\F-014-教师用（维度对应表·评分·参考文献）.md" "docs\研习材料\F-014-前测问卷.md" "docs\研习材料\F-014-后测问卷.md" --append -o "$out\F-014-教师用说明.docx"
+```
+
+> **单一落点**：材料内容以 `docs/研习材料/*.md` 为准；`.docx` 是派生产物，改内容后请重新生成，不要直接改 Word。
 
 ## 计划中的工具
 

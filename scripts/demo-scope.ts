@@ -1,5 +1,5 @@
 import type { StudyScope } from '../src/core/content'
-import type { KnowledgePoint } from '../src/core/domain'
+import type { KnowledgePoint, StudyMode } from '../src/core/domain'
 
 /**
  * 演示用 StudyScope —— ⚠️ 文本为**自己编写的占位示例**，不是真实教材原文。
@@ -30,10 +30,10 @@ const KNOWLEDGE_POINTS: KnowledgePoint[] = [
   }
 ]
 
-export function createDemoScope(): StudyScope {
+export function createDemoScope(mode: StudyMode = 'review'): StudyScope {
   return {
     position: { volumeId: '7s', unitId: 'demo-photosynthesis', sectionId: 's1' },
-    mode: 'review',
+    mode,
     unit: {
       id: 'demo-photosynthesis',
       title: '绿色植物的光合作用（演示单元）',
