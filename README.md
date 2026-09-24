@@ -29,7 +29,10 @@ pnpm typecheck    # 类型检查（node + web 两端）
 pnpm test         # 单元测试（含"core 层不得依赖 electron/vue"的自动把关）
 ```
 
-`.env`：复制 `.env.example` 为 `.env`，填入 DeepSeek API Key（M1 起才会真正用到）。
+`.env`：复制 `.env.example` 为 `.env`，填入 DeepSeek API Key（主进程会自动读取项目根目录的 `.env`）。
+
+`$env:BIOBUDDY_SELFTEST = "1"; pnpm dev` —— 界面自检：在真实应用里操作 DOM 并断言（渲染/交互/样式/降级），
+无需人工点击；通过时退出码 0，并输出截图 `selftest-ui.png`。
 
 ### 环境相关的两个坑（已解决，重装时可参考）
 

@@ -1,20 +1,26 @@
 import { app, BrowserWindow, shell } from 'electron'
+import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { registerIpcHandlers } from './ipc'
+import { registerIpcHandlers, createSelfTestSession } from './ipc'
+import { loadConfig } from './config'
 
 /**
  * 主进程入口。
- * 职责边界：窗口生命周期、IPC 注册、配置加载。
- * 业务逻辑（Agent 循环、提示词、存储）一律放 src/core，不得写在这里。
+ * 职责边界：窗口生命周期、IPC 注册、配置加载、开发期自检。
+ * 业务逻辑（会话状态机、Agent 循环、提示词）一律放 src/core，不得写在这里。
  */
 
-function createWindow(): void {
+/** 开发期自检：无头验证"主进程侧装配 + 界面能否渲染"，不需要人工点击 */
+const SELF_TEST = process.env['BIOBUDDY_SELFTEST'] === '1'
+
+function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1100,
     height: 760,
     show: false,
     title: 'BioBuddy',
     autoHideMenuBar: true,
+    backgroundColor: '#f7f8fa',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -38,11 +44,147 @@ function createWindow(): void {
   } else {
     void win.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return win
+}
+
+/** 在渲染进程里执行一段 JS 并取回结果（自检用） */
+async function evalInRenderer<T>(win: BrowserWindow, code: string): Promise<T> {
+  return (await win.webContents.executeJavaScript(code, true)) as T
+}
+
+const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * 自检：不靠人工点击，直接在运行中的应用里操作 DOM 并断言。
+ *
+ * 覆盖：主进程装配（会话/选项/降级）→ 界面渲染（开场问句、四个模式按钮）
+ * → 交互（点击模式 → 进入对话 → 发送消息 → 出现回复气泡）→ 样式是否生效。
+ * 任何一项失败则以退出码 1 结束，便于 CI 或无头环境自动判定。
+ */
+async function runSelfTest(win: BrowserWindow): Promise<void> {
+  const config = loadConfig()
+  const session = createSelfTestSession()
+  const failures: string[] = []
+
+  const check = (label: string, ok: boolean, detail = ''): void => {
+    console.log(`[selftest] ${ok ? '✅' : '❌'} ${label}${detail ? ` —— ${detail}` : ''}`)
+    if (!ok) failures.push(label)
+  }
+
+  // ── 主进程侧装配 ───────────────────────────────────────────
+  const start = session.start()
+  const chosen = session.chooseMode('2')
+  check('运行模式为 dev', config.mode === 'dev', config.mode)
+  check('未配置 Key 时能被识别（走降级路径）', config.deepseek.apiKey.length === 0)
+  check('开场问句包含主动询问', start.question.includes('今天想做什么'))
+  check('提供四个模式选项', start.options.length === 4, start.options.map((o) => o.label).join('/'))
+  check('选择"2"解析为复习', chosen.ok && chosen.mode === 'review')
+
+  const chat = await session.chat('光合作用需要什么？')
+  const degraded = 'degraded' in chat ? chat.degraded : undefined
+  check('无 Key 时降级而非崩溃', Boolean(degraded) && 'reply' in chat)
+  if ('reply' in chat) {
+    check('降级话术不含技术细节', !chat.reply.includes('Key') || chat.reply.includes('钥匙'))
+  }
+
+  // ── 界面渲染 ───────────────────────────────────────────────
+  await wait(1200)
+  const firstScreen = await evalInRenderer<{
+    text: string
+    cards: number
+    visibleCards: number
+  }>(
+    win,
+    `(() => {
+      const cards = [...document.querySelectorAll('.mode-card')]
+      return {
+        text: document.body.innerText,
+        cards: cards.length,
+        visibleCards: cards.filter((el) => el.offsetParent !== null).length
+      }
+    })()`
+  )
+  check('界面渲染出开场问句', firstScreen.text.includes('今天想做什么'), firstScreen.text.split('\n')[0])
+  check('界面渲染出四个模式按钮且可见', firstScreen.cards === 4 && firstScreen.visibleCards === 4)
+
+  // ── 交互：点击"复习" ───────────────────────────────────────
+  await evalInRenderer(
+    win,
+    `[...document.querySelectorAll('.mode-card')][1].click(); true`
+  )
+  await wait(600)
+  const afterChoose = await evalInRenderer<{ text: string; hasComposer: boolean }>(
+    win,
+    `({ text: document.body.innerText, hasComposer: Boolean(document.querySelector('.composer')) })`
+  )
+  check('点击模式后进入对话状态', afterChoose.hasComposer, afterChoose.text.split('\n').slice(-3).join(' / '))
+  check('顶部显示当前模式', afterChoose.text.includes('复习'))
+
+  // ── 交互：发送一句话 ───────────────────────────────────────
+  await evalInRenderer(
+    win,
+    `(() => {
+      const box = document.querySelector('.composer textarea')
+      box.value = '光合作用需要什么？'
+      box.dispatchEvent(new Event('input', { bubbles: true }))
+      return true
+    })()`
+  )
+  await wait(300)
+  await evalInRenderer(win, `document.querySelector('.composer button').click(); true`)
+  await wait(2500)
+
+  const afterSend = await evalInRenderer<{
+    userBubbles: number
+    assistantBubbles: number
+    text: string
+    userBg: string
+  }>(
+    win,
+    `(() => {
+      const user = document.querySelector('.bubble.user')
+      return {
+        userBubbles: document.querySelectorAll('.bubble.user').length,
+        assistantBubbles: document.querySelectorAll('.bubble.assistant').length,
+        text: document.body.innerText,
+        userBg: user ? getComputedStyle(user).backgroundColor : ''
+      }
+    })()`
+  )
+  check('学生的消息上屏（用户气泡）', afterSend.userBubbles >= 1)
+  check('小芽的回复上屏（助手气泡）', afterSend.assistantBubbles >= 1)
+  check('回复内容为可读中文（降级话术）', afterSend.text.includes('外脑') || afterSend.text.includes('钥匙'))
+  check('样式已生效（用户气泡为品牌绿）', afterSend.userBg === 'rgb(22, 163, 74)', afterSend.userBg)
+
+  // ── 留档：截图供人工复核 ───────────────────────────────────
+  const image = await win.webContents.capturePage()
+  const outFile = join(process.cwd(), 'selftest-ui.png')
+  writeFileSync(outFile, image.toPNG())
+  console.log('[selftest] 界面截图：', outFile)
+
+  if (failures.length > 0) {
+    console.error(`[selftest] 结果：失败 ${failures.length} 项 —— ${failures.join('；')}`)
+    app.exit(1)
+    return
+  }
+  console.log('[selftest] 结果：通过')
+  app.exit(0)
 }
 
 void app.whenReady().then(() => {
+  const config = loadConfig()
   registerIpcHandlers()
-  createWindow()
+  const win = createWindow()
+
+  // 自检模式：等界面首帧后再截图（判定标准是"渲染出了内容"，不是"窗口存在"）
+  if (SELF_TEST) {
+    win.webContents.once('did-finish-load', () => {
+      void runSelfTest(win)
+    })
+  } else if (!config.deepseek.apiKey) {
+    console.warn('[main] 未检测到 DEEPSEEK_API_KEY：对话会走降级路径（界面仍可用）')
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

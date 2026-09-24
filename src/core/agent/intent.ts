@@ -15,7 +15,8 @@ import { STUDY_MODE_LABELS, type StudyMode, type StudyPosition } from '../domain
 /** 选项展示顺序（编号 1–4 即按此顺序） */
 export const MODE_ORDER: StudyMode[] = ['preview', 'review', 'practice', 'extension']
 
-const MODE_HINTS: Record<StudyMode, string> = {
+/** 各模式的一句话说明（界面按钮与开场问句共用） */
+export const MODE_HINTS: Record<StudyMode, string> = {
   preview: '还没学过，先看看',
   review: '学过了，巩固一下',
   practice: '练一练，做点题',

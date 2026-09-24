@@ -8,9 +8,11 @@
 
 **无进行中任务。** 下一候选（待开发者选择）：
 
-- **F-010 最小对话界面（M3 收尾）**——做完即达到开源发布标准（F-017 的触发条件）
+- **F-017 开源发布（M3 已齐备）**——先填 GitHub 用户名/noreply 邮箱跑发布脚本（见 `publish/README.md`）
 - F-004 教材文本提取工具（M2）——需先到校确认教材版本
 - F-005 课标与教学材料提取（M2）——可与 F-004 并行
+
+> 刚完成：**F-010**（最小对话界面，M3 收尾）——界面自检 15/15 通过，M3 目标达成
 
 > 刚完成：**F-009**（Agent 循环 + 工具 + 答案泄漏护栏；`pnpm chat` 已走完整循环）
 
@@ -27,7 +29,7 @@
 | F-007 | 意图询问与模式选择流程（预习/复习/做题/拓展 + 位置） | M3 | ✅ 完成 | `specs/F-007-intent-and-mode-selection.md`；`src/core/agent/intent.ts`；`pnpm chat` 实测 |
 | F-008 | `buildStudyScope`：按位置与模式装配上下文 | M3 | ⏳ 未开始（依赖 F-006 内容库） | 待建 spec |
 | F-009 | Agent 循环（工具调用、答案泄漏护栏、降级处理） | M3 | ✅ 完成（含 mutation-check 与端到端降级实测） | `specs/F-009-agent-loop.md`；`src/core/agent/{loop,guard,tools}`；测试 79/79 |
-| F-010 | 最小对话界面（流式渲染、模式选择入口） | M3 | ⏳ 未开始 | 待建 spec |
+| F-010 | 最小对话界面（模式入口 + 对话 + 诊断信息） | M3 | ✅ 完成（界面自检 15/15；**未做逐字流式**，理由见 spec） | `specs/F-010-minimal-chat-ui.md`；`src/core/agent/session.ts` + `src/main/ipc` + `App.vue`；测试 90/90 |
 | F-011 | 方案 D 界面：教材阅读视图（折叠答案、搜索高亮、出处定位） | M4 | ⏳ 未开始 | 待建 spec |
 | F-012 | 按模式自动折叠/展开阅读区 | M4 | ⏳ 未开始 | 待建 spec |
 | F-013 | 存储实现（SQLite / JSONL）+ 掌握度状态机 | M4 | ⏳ 未开始（等 Q4） | 待建 spec |
