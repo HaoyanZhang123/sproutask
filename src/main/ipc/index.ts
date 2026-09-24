@@ -24,7 +24,7 @@ const ChooseModeInput = z.object({ input: z.string().max(200) })
 const ChatInput = z.object({ message: z.string().min(1).max(2000) })
 const PingInput = z.object({ message: z.string().max(200) })
 
-/** 会话单例（M3 只有一次会话；多会话/持久化属 F-013） */
+/** 会话单例（当前只有一次会话；多会话与持久化待后续迭代） */
 let session: ChatSession | null = null
 
 function createSession(): ChatSession {
@@ -35,7 +35,7 @@ function createSession(): ChatSession {
     model: config.deepseek.model
   })
 
-  // 内容库（TextbookLibrary）尚未实现（F-006），先用演示内容占位
+  // 内容库（TextbookLibrary）尚未实现，先用演示内容占位
   const demo = createDemoScope()
   const getSectionText = async (sectionId: string): Promise<string | null> =>
     demo.sectionTexts.find((section) => section.sectionId === sectionId)?.text ?? null
@@ -45,7 +45,7 @@ function createSession(): ChatSession {
     registry: new ToolRegistry(createDefaultTools()),
     scopeFactory: (mode) => createDemoScope(mode) as StudyScope,
     getSectionText,
-    studentId: 'S00', // 编号由教师分配；真实编号在 F-013 接入后从本地记录读取
+    studentId: 'S00', // 编号由教师分配；接入本地记录后改为读取已分配的编号
     positions: demo.unit.sections.map((section) => ({
       position: { volumeId: '7s', unitId: demo.unit.id, sectionId: section.id },
       label: section.title

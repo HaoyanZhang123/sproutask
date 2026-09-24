@@ -4,7 +4,7 @@ import type { KnowledgePoint, MasteryRecord } from '../../domain'
  * L3 学情摘要层：让 Agent"记得这个学生"。
  *
  * 只使用**本地**掌握度数据，不涉及任何教师端或班级聚合（隐私优先，2026-09 决策）。
- * 注：M1 阶段由调用方传入；M4 接上存储后从 StudentStore 读取。
+ * 注：当前由调用方传入；接入本地存储后改为从 StudentStore 读取。
  */
 export function buildProfileLayer(mastery: MasteryRecord[], knowledgePoints: KnowledgePoint[]): string {
   if (knowledgePoints.length === 0) return ''

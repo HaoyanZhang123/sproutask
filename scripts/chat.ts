@@ -29,7 +29,7 @@ async function main(): Promise<void> {
 
   const rl = createInterface({ input: process.stdin, output: process.stdout })
 
-  // ── F-007 意图询问：Agent 主动发问，学生四选一 ─────────────────
+  // ── 意图询问：Agent 主动发问，学生四选一 ──────────────────────
   const demoScope = createDemoScope()
   const positions: PositionOption[] = demoScope.unit.sections.map((section) => ({
     position: { volumeId: '7s', unitId: demoScope.unit.id, sectionId: section.id },
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
       return await rl.question('你 > ')
     },
     positions,
-    lastPosition: null // 真实持久化属 F-013（存储实现）
+    lastPosition: null // 真实持久化由调用方接入（见 src/core/storage）
   })
 
   const intent = await flow.run()
@@ -60,7 +60,7 @@ async function main(): Promise<void> {
   )
   console.log('   现在可以开始提问了；输入 exit 退出。\n')
 
-  // F-009：走完整 Agent 循环（工具调用 + 答案泄漏护栏 + 降级）
+  // 走完整 Agent 循环（工具调用 + 答案泄漏护栏 + 降级）
   const registry = new ToolRegistry(createDefaultTools())
 
   for (;;) {
@@ -70,7 +70,7 @@ async function main(): Promise<void> {
     if (['exit', 'quit', '退出'].includes(input.toLowerCase())) break
 
     // 说明：这里**不做逐字流式**。护栏可能要求重生成，若先流式显示了被判定泄漏的内容就无法撤回；
-    // 「流式 与 护栏」的交互方案（缓冲后整段显示 / 先显示"想一想"状态）由 F-010 界面需求决定。
+    // 「流式 与 护栏」的交互方案（缓冲后整段显示 / 先显示"想一想"状态）待界面迭代决定。
     process.stdout.write('小芽 > [思考中…]\r')
     const result = await runAgentTurn({
       client,

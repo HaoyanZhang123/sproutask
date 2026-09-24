@@ -7,7 +7,7 @@ import { z } from 'zod'
  * 运行配置。
  * API Key 只允许出现在主进程（见 docs/ARCHITECTURE.md「安全与 IPC」）：
  *   dev       → 读进程环境变量（.env 由 electron-vite 注入）
- *   packaged  → 读用户目录配置文件 userData/config.json（首次运行向导写入，M5 实现）
+ *   packaged  → 读用户目录配置文件 userData/config.json（首次运行向导写入）
  *   mock      → 不联网，使用脚本化响应（开发与断网演示）
  */
 

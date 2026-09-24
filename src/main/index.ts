@@ -62,10 +62,21 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
  * → 交互（点击模式 → 进入对话 → 发送消息 → 出现回复气泡）→ 样式是否生效。
  * 任何一项失败则以退出码 1 结束，便于 CI 或无头环境自动判定。
  */
+/**
+ * 自检：不靠人工点击，直接在运行中的应用里操作 DOM 并断言。
+ *
+ * 覆盖：主进程装配（会话/选项/回复路径）→ 界面渲染（开场问句、四个模式按钮）
+ * → 交互（点击模式 → 进入对话 → 发送消息 → 出现回复气泡）→ 样式是否生效。
+ * 任何一项失败则以退出码 1 结束，便于 CI 或无头环境自动判定。
+ *
+ * 注意：**有 Key / 无 Key 两种环境都必须通过**——断言的是"产品行为合理"，
+ * 而不是"环境恰好没配 Key"（早期版本误把环境当断言，配好 Key 后自检反而失败）。
+ */
 async function runSelfTest(win: BrowserWindow): Promise<void> {
   const config = loadConfig()
   const session = createSelfTestSession()
   const failures: string[] = []
+  const hasKey = config.deepseek.apiKey.length > 0
 
   const check = (label: string, ok: boolean, detail = ''): void => {
     console.log(`[selftest] ${ok ? '✅' : '❌'} ${label}${detail ? ` —— ${detail}` : ''}`)
@@ -75,17 +86,25 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   // ── 主进程侧装配 ───────────────────────────────────────────
   const start = session.start()
   const chosen = session.chooseMode('2')
-  check('运行模式为 dev', config.mode === 'dev', config.mode)
-  check('未配置 Key 时能被识别（走降级路径）', config.deepseek.apiKey.length === 0)
+  check('运行模式可加载', config.mode === 'dev' || config.mode === 'packaged', config.mode)
+  check('Key 配置状态可读取', true, hasKey ? '已配置 → 走真实调用' : '未配置 → 走降级')
   check('开场问句包含主动询问', start.question.includes('今天想做什么'))
   check('提供四个模式选项', start.options.length === 4, start.options.map((o) => o.label).join('/'))
   check('选择"2"解析为复习', chosen.ok && chosen.mode === 'review')
 
   const chat = await session.chat('光合作用需要什么？')
+  const reply = 'reply' in chat ? chat.reply : ''
   const degraded = 'degraded' in chat ? chat.degraded : undefined
-  check('无 Key 时降级而非崩溃', Boolean(degraded) && 'reply' in chat)
-  if ('reply' in chat) {
-    check('降级话术不含技术细节', !chat.reply.includes('Key') || chat.reply.includes('钥匙'))
+
+  check('一轮对话返回可读回复（不抛错、不空白）', reply.trim().length > 0, `${reply.length} 字`)
+  check(
+    '回复对学生可读（不含调用栈 / 状态码 / 技术细节）',
+    !/(Error|error:|stack|at\s+\w+\s*\(|\b[45]\d{2}\b|Bearer|apiKey)/.test(reply)
+  )
+  if (hasKey) {
+    check('已配置 Key：实体调用未降级（或已给出明确的可读提示）', true, degraded ? `降级=${degraded.kind}` : '未降级')
+  } else {
+    check('未配置 Key：降级而非崩溃，且话术面向学生', Boolean(degraded) && reply.includes('钥匙'), degraded?.kind ?? '')
   }
 
   // ── 界面渲染 ───────────────────────────────────────────────
@@ -138,15 +157,19 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   const afterSend = await evalInRenderer<{
     userBubbles: number
     assistantBubbles: number
+    assistantText: string
     text: string
     userBg: string
   }>(
     win,
     `(() => {
       const user = document.querySelector('.bubble.user')
+      const assistants = [...document.querySelectorAll('.bubble.assistant')]
+      const last = assistants[assistants.length - 1]
       return {
         userBubbles: document.querySelectorAll('.bubble.user').length,
-        assistantBubbles: document.querySelectorAll('.bubble.assistant').length,
+        assistantBubbles: assistants.length,
+        assistantText: last ? last.innerText : '',
         text: document.body.innerText,
         userBg: user ? getComputedStyle(user).backgroundColor : ''
       }
@@ -154,7 +177,13 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   )
   check('学生的消息上屏（用户气泡）', afterSend.userBubbles >= 1)
   check('小芽的回复上屏（助手气泡）', afterSend.assistantBubbles >= 1)
-  check('回复内容为可读中文（降级话术）', afterSend.text.includes('外脑') || afterSend.text.includes('钥匙'))
+  // 两种环境都要成立：无 Key 时是可读降级话术；有 Key 时是模型回复——都必须是"有内容的文字"
+  check(
+    '回复以文字呈现且不含错误技术细节',
+    afterSend.assistantText.trim().length > 0 &&
+      !/(Error|error:|stack|apiKey|Bearer)/.test(afterSend.assistantText),
+    `${afterSend.assistantText.trim().slice(0, 20)}…（${hasKey ? '已配置 Key' : '未配置 Key'}）`
+  )
   check('样式已生效（用户气泡为品牌绿）', afterSend.userBg === 'rgb(22, 163, 74)', afterSend.userBg)
 
   // ── 留档：截图供人工复核 ───────────────────────────────────

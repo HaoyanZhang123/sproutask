@@ -63,7 +63,7 @@ describe('会话：开场与模式选择', () => {
     expect(session.getState().mode).toBeNull()
   })
 
-  it('有上次位置时优先沿用（Q7：自动恢复）', () => {
+  it('有上次位置时优先沿用（自动恢复）', () => {
     const last: StudyPosition = { volumeId: '7s', unitId: 'demo-photosynthesis', sectionId: 's1' }
     const session = makeSession(new RecordingClient([]), {
       lastPosition: { position: last, label: '上次学到的地方' }

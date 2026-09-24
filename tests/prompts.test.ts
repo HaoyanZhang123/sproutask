@@ -9,7 +9,7 @@ const scope: StudyScope = {
     id: 'u-photosynthesis',
     title: '绿色植物的光合作用',
     grade: '七年级上',
-    edition: '北师大版',
+    edition: '某版本',
     sections: [{ id: 's1', title: '光合作用', page: 78 }]
   },
   sectionTexts: [{ sectionId: 's1', title: '光合作用', text: '绿色植物在光下把二氧化碳和水转变成有机物。' }],

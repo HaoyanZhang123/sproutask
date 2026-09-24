@@ -1,14 +1,14 @@
 import { STUDY_MODE_LABELS, type StudyMode, type StudyPosition } from '../domain'
 
 /**
- * 意图询问与模式选择流程（F-007）。
+ * 意图询问与模式选择流程。
  *
  * 2026-09 决策：Agent **不猜**"这周教到哪"，而是主动询问，学生四选一
  * （预习 / 复习 / 做题 / 拓展），再确定学习位置。
  *
  * 设计要点：
  *   - 全部逻辑为纯函数 + 一个可注入 `ask` 的状态机，便于单测、也便于将来换成图形界面
- *   - 位置策略（Q7）：有上次位置则"回车即继续"，也可手动改
+ *   - 位置策略：有上次位置则"回车即继续"，也可手动改
  *   - 学生用非常规说法识别失败时重问，超过上限才回退（回退会如实标记，不静默）
  */
 
@@ -166,7 +166,7 @@ export interface IntentFlowDeps {
   ask: (question: string) => Promise<string>
   /** 可选的学习位置；为空则不询问位置（由调用方给出默认位置） */
   positions?: PositionOption[]
-  /** 上次的学习位置（Q7：回车即继续） */
+  /** 上次的学习位置（回车即继续） */
   lastPosition?: { position: StudyPosition; label: string } | null
   /** 最多重问次数，超过则回退到"复习" */
   maxRetries?: number

@@ -2,14 +2,13 @@
 import { computed, onMounted, nextTick, ref } from 'vue'
 
 /**
- * BioBuddy 最小对话界面（F-010）。
+ * BioBuddy 最小对话界面。
  *
  * 职责边界：**只做显示与转发**——模式判断、Agent 循环、护栏全在主进程/core，
  * 这里不写教学逻辑，也不接触 API Key。
  *
  * 关于"流式"：本版**不做逐字流式**。护栏可能在回答产出后要求重写，
- * 若已逐字显示则无法撤回（见 docs/specs/F-009 的已知缺口）。因此这里显示"正在想…"，
- * 护栏通过后整段呈现。
+ * 若已逐字显示则无法撤回，因此这里显示"正在想…"，护栏通过后整段呈现。
  */
 
 interface ModeOption {

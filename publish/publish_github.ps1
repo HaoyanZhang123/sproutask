@@ -61,10 +61,10 @@ New-Item -ItemType Directory -Path $target -Force | Out-Null
 # ── 1. 白名单：只上软件本身 ────────────────────────────────
 # 目录（递归复制）
 $dirs = @('src', 'tests', 'scripts', '.github')
-# 单文件
+# 单文件（electron-builder.yml 用公开版，见下方 docs 处理段）
 $files = @(
     'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml',
-    'electron.vite.config.ts', 'electron-builder.yml',
+    'electron.vite.config.ts',
     'tsconfig.json', 'tsconfig.web.json', 'vitest.config.ts',
     '.npmrc', '.gitattributes', '.env.example'
 )
@@ -72,12 +72,12 @@ $files = @(
 $evalCases = Join-Path $repoRoot 'evals/cases'
 
 # ADR 的公开版：从内部 ADR 派生，按下表做**显式替换**（规则可审计；新增规则请同步 publish/README.md）
+# 顺序敏感：长句/具体表述在前，泛化规则在后。
 $adrRewrites = [ordered]@{
-    '研习数据以问卷为主渠道（M6）'                              = '学习数据的本地留存与匿名化导出（M6）'
     '研习对比实验'                                              = '教学对比实验'
     '研习数据'                                                  = '学习数据'
     '研习'                                                      = '教学研究'
-    '`notes/reference/markdown-reader-flutter-借鉴.md`「教材就是 Markdown」一节 —— 该项目的折叠块' = '参考项目分析（不随本仓库分发）：该项目的折叠块'
+    '`notes/reference/markdown-reader-flutter-借鉴.md`「教材就是 Markdown」一节 —— 该项目的折叠块' = '同类开源阅读器项目的实践：该项目的折叠块'
 }
 $adrSourceDir = Join-Path $repoRoot 'docs/adr'
 # 注意：PowerShell 的 -Filter 不支持 [1-4] 这类字符范围，必须用 Where-Object 过滤
@@ -139,7 +139,10 @@ Copy-Item -LiteralPath (Join-Path $publicDir 'README.md') -Destination (Join-Pat
     Set-Content -LiteralPath (Join-Path $target 'LICENSE') -NoNewline -Encoding UTF8
 Copy-Item -LiteralPath (Join-Path $publicDir 'gitignore') -Destination (Join-Path $target '.gitignore') -Force
 Copy-Item -LiteralPath (Join-Path $publicDir 'evals-README.md') -Destination (Join-Path $target 'evals/README.md') -Force
-Write-Host "  + README.md / LICENSE / .gitignore / evals/README.md（公开版生成）"
+# electron-builder 配置用公开版：内部版含 build/ 资源目录与 content/（教材随包分发）指向，
+# 这两者都不随仓库分发，直接复制会让打包报错或产物残缺。
+Copy-Item -LiteralPath (Join-Path $publicDir 'electron-builder.yml') -Destination (Join-Path $target 'electron-builder.yml') -Force
+Write-Host "  + README.md / LICENSE / .gitignore / evals/README.md / electron-builder.yml（公开版生成）"
 
 # ── 3. 修正 package.json（许可与作者） ─────────────────────
 $pkgPath = Join-Path $target 'package.json'
@@ -158,9 +161,22 @@ $forbidden = [ordered]@{
     '密钥'        = 'sk-[A-Za-z0-9]{16,}'
     '研究语境'    = '研习|教育研习|实习学校|问卷|知情同意'
     '内部路径'    = 'notes/|CODEBASE_NOTES|TASKS\.md|AGENTS\.md|docs/ROADMAP|docs/specs|docs/tutorials|docs/研习|E:\\DSH'
+    '内部编号'    = '\bF-\d{3}\b|\bM[0-6]\b|\bQ[1-9]\b'
 }
-$scannable = Get-ChildItem -LiteralPath $target -Recurse -File |
-    Where-Object { $_.Extension -in @('.ts', '.js', '.mjs', '.json', '.yaml', '.yml', '.md', '.html', '.css', '.py', '.txt') -and $_.FullName -notmatch 'node_modules|pnpm-lock' }
+
+# ⚠️ 这里用**黑名单**（只排除二进制与巨型 lockfile），不用白名单。
+# 曾经的教训：白名单只列了 .ts/.md/... 而**漏掉 .vue**，导致 App.vue 里的
+# `docs/specs/F-009` 引用从未被扫描就发布了。漏一个扩展名 = 闸门有洞，
+# 所以改为"默认全扫，逐个排除已知不可读的文件"。
+$binaryExtensions = @('.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.zip', '.gz',
+                     '.exe', '.dll', '.node', '.woff', '.woff2', '.ttf', '.docx', '.xlsx', '.pptx')
+$scannable = Get-ChildItem -LiteralPath $target -Recurse -File -Force |
+    Where-Object {
+        $_.FullName -notmatch '\\node_modules\\|\\\.git\\' -and
+        $_.Name -ne 'pnpm-lock.yaml' -and
+        $binaryExtensions -notcontains $_.Extension.ToLower()
+    }
+Write-Host "  🔍 扫描范围：$($scannable.Count) 个文件（含无扩展名文件与 .vue）"
 
 $problems = @()
 foreach ($entry in $forbidden.GetEnumerator()) {
@@ -179,7 +195,7 @@ if ($problems.Count -gt 0) {
     $problems | ForEach-Object { Write-Host "   - $_" }
     throw "公开扫描发现 $($problems.Count) 类问题"
 }
-Write-Host "  ✅ 安全扫描通过（校名/邮箱/密钥/研究语境/内部路径 均未发现）" -ForegroundColor Green
+Write-Host "  ✅ 安全扫描通过（校名/邮箱/密钥/研究语境/内部路径/内部编号 均未发现）" -ForegroundColor Green
 
 # ── 4b. 防漂移：公开版文档是否落后于内部文档 ────────────────
 $driftPairs = @(

@@ -3,7 +3,7 @@ import type { MasteryRecord, MasteryState, Session, Student, Turn } from '../dom
 /**
  * 学情与日志的存储接口。
  *
- * ⚠️ 实现方式【待定】（Q4 搁置）：SQLite（better-sqlite3）或 JSONL 文件。
+ * ⚠️ 实现方式【待定】：SQLite（better-sqlite3）或 JSONL 文件。
  *    今天只定接口，不写实现——两个选择都不会影响上层代码。
  *    决策落地后：新增 `sqlite-store.ts` 或 `jsonl-store.ts` 实现本接口，
  *    并在 src/main 里按配置注入。禁止在上层直接依赖具体实现。

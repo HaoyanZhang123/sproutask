@@ -17,7 +17,7 @@ import { buildSessionLayer } from './l4-session'
 
 export const PROMPT_VERSION = 'v1'
 
-/** 对话历史最多携带的轮数（超出部分 M4 再做摘要压缩） */
+/** 对话历史最多携带的轮数（超出部分后续再做摘要压缩） */
 export const MAX_HISTORY_TURNS = 12
 
 export interface PromptContext {

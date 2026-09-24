@@ -9,7 +9,7 @@ import type { KnowledgePoint, StudyMode, StudyPosition, TextbookUnit } from '../
  *   3. 装载方式以"结构化按需装载"为主（册 → 章 → 节），**不是**把全书塞进上下文；
  *      向量检索（RAG）仅在需要跨章节检索时作为可选增强，见 docs/adr/ADR-0004。
  *
- * ⚠️ 实现方式【待定】（Q3）：YAML+Zod / JSON / Markdown+frontmatter。
+ * ⚠️ 实现方式【待定】：YAML+Zod / JSON / Markdown+frontmatter。
  *    今天只定接口不写实现；决策落地后新增实现文件并在 src/main 注入。
  *
  * 无论选哪种格式，都必须满足：

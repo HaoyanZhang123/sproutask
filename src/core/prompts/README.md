@@ -1,6 +1,8 @@
-# 提示词层（M1 实现）
+# 提示词层
 
-M0 空置。M1 将按 docs/ARCHITECTURE.md「Agent 运行时设计」落地分层：
+> 当前使用 `v1/`；版本化的意义见下。
+
+按 docs/ARCHITECTURE.md「Agent 运行时设计」落地分层：
 
 ```
 src/core/prompts/

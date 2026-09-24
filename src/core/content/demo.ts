@@ -4,8 +4,8 @@ import type { StudyScope } from './index'
 /**
  * 演示用 StudyScope —— ⚠️ 文本为**自己编写的占位示例**，不是真实教材原文。
  *
- * 为什么放在 core 而不是 scripts：桌面应用在没有教材内容（M2 内容工程）之前也要能启动、
- * 能演示完整流程。内容库接口（TextbookLibrary）落地后，这里会被真实实现替换。
+ * 为什么放在 core 而不是 scripts：桌面应用在接入真实教材内容之前也要能启动、能演示完整流程。
+ * 内容库接口（TextbookLibrary）落地后，这里会被真实实现替换。
  */
 
 const KNOWLEDGE_POINTS = [

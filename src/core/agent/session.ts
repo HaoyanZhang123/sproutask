@@ -7,13 +7,13 @@ import type { LeakGuardOptions } from './guard'
 import type { ToolRegistry } from './tools'
 
 /**
- * 一次学习会话的状态机（F-010）。
+ * 一次学习会话的状态机。
  *
  * 为什么放在 core：桌面界面（渲染进程）不该持有教学状态，主进程也不该写业务逻辑。
  * 会话只关心"现在什么模式、位置在哪、聊过什么"，并把这轮交给 Agent 循环。
  * 这样界面层只剩"显示与转发"，也让整套流程可以在没有 Electron 的情况下被单测。
  *
- * 注意：**不写数据库**（持久化属 F-013）；历史只保存在内存里，关掉应用即消失。
+ * 注意：**不写数据库**（持久化由调用方负责）；历史只保存在内存里，关掉应用即消失。
  */
 
 const MAX_HISTORY_MESSAGES = 24
@@ -46,7 +46,7 @@ export interface ChatSessionDeps {
   scopeFactory: (mode: StudyMode) => StudyScope
   getSectionText: (sectionId: string) => Promise<string | null>
   studentId: string
-  /** 可选位置列表；只有一个时自动选定（Q7：自动恢复 + 可手动改） */
+  /** 可选位置列表；只有一个时自动选定（自动恢复上次位置 + 可手动改） */
   positions?: Array<{ position: StudyPosition; label: string }>
   lastPosition?: { position: StudyPosition; label: string } | null
   leakGuard?: LeakGuardOptions

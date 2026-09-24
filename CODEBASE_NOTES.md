@@ -45,6 +45,7 @@
 | 3 | `.npmrc` 里 `electron_mirror=…` 报 `Unknown project config` | pnpm/npm 不再把任意配置键传给生命周期脚本 | 改用环境变量（见上）；`.npmrc` 保留仅作参考 | 若 pnpm 恢复支持该键 → 可简化 |
 | 4 | `pnpm chat`/`pnpm eval` 报 `Top-level await is currently not supported with the "cjs" output format` | 仓库无 `"type": "module"`（Electron 主进程需 CJS 输出），tsx 按 CJS 转译脚本 | 脚本逻辑包进 `async function main()` 后 `void main()` | 若将来改为 ESM（`"type": "module"` + 调整 Electron 输出）→ 可恢复顶层 await |
 | 5 | `vitest` 输出根路径为 `E:/DSH/workspaces/ai4edu` 而非 `D:\dsh\ai4edu` | 仓库根实际在 E:（见第 1 节） | 正常现象，不必修 | 同第 1 节 |
+| 6 | **`pnpm install` 在 pnpm 9 下报 `ERROR packages field missing or empty`** | `pnpm-workspace.yaml` 只写了 `allowBuilds` 而**没有 `packages:` 字段**：pnpm 10/11 容忍，pnpm 9 认为 workspace 声明不完整而直接报错 —— CI 当时钉的正是 pnpm 9，于是流水线在第一步就红（2026-09 由独立审核者实测发现） | 在 `pnpm-workspace.yaml` 里补 `packages: ['.']`（即使是单包也必须写）；CI 升到 pnpm 11；`package.json` 补 `packageManager` 字段固定版本 | 若两处 `packages:`/`packageManager` 被删或 CI 版本再变 → 复测 pnpm 9 与 11 |
 
 ## 5. 提交身份（**存在漂移，待人工决定**）
 
@@ -61,8 +62,9 @@
 
 ## 6. 未验证事项（诚实声明）
 
-- DeepSeek 真实 API 调用**从未成功联调过**（本机无 `.env`）。`pnpm chat` 的联网路径、
-  流式分片在真实报文下的形态、工具调用增量累积的正确性均**只有离线单测支撑**。
-- 打包（`electron-builder`）从未实际执行过。
-- 教材与课标内容工程（M2）尚未开始，当前 `scripts/demo-scope.ts` 用的是**自编占位文本**，
+- DeepSeek 真实 API **已确认可达、鉴权头正确**（2026-09：用无效 Key 实测返回 401，
+  被映射为 `auth` 降级路径），但**从未用有效 Key 完成一次成功对话**（本机无有效 `.env`）。
+  因此流式分片在真实报文下的形态、工具调用增量累积的正确性，仍**只有离线单测支撑**。
+- 打包（`electron-builder`）从未实际执行过；公开版 `electron-builder.yml` 只做静态检查。
+- 教材与课标内容工程（M2）尚未开始，当前用的是**自编占位文本**（`src/core/content/demo.ts`），
   不是真实教材原文。

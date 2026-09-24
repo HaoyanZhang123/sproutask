@@ -6,7 +6,7 @@ import type { ToolRegistry } from './tools'
 import type { ToolContext } from './tools/types'
 
 /**
- * Agent 循环（F-009）。
+ * Agent 循环。
  *
  * 一轮的完整流程：
  *   组装上下文 → 调模型（带工具）→ 有工具调用则执行并回填 → 直到产出最终回答
@@ -16,7 +16,7 @@ import type { ToolContext } from './tools/types'
  *   - 循环上限（默认 5），防空转；超限也要给出可读回复，不能挂住
  *   - 模型调用失败 → 降级为面向学生的中文提示，**不抛给界面**
  *   - 工具失败 → 文本回填给模型自我修正，不打断整轮
- *   - 本函数**不写数据库**：持久化属 F-013（存储实现），此处只返回结果
+ *   - 本函数**不写数据库**：持久化由调用方负责，此处只返回结果
  */
 
 export const DEFAULT_MAX_ITERATIONS = 5

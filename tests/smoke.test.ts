@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { KnowledgePointSchema, MasteryRecordSchema } from '@core/domain'
 import { MockLLMClient } from '@core/llm'
+import { findLayeringViolations } from './helpers/layering'
 
 /* ── 领域契约 ─────────────────────────────────────────────── */
 
@@ -69,7 +70,7 @@ describe('MockLLMClient', () => {
   })
 })
 
-/* ── 分层依赖铁律（docs/CONVENTIONS.md §2） ───────────────── */
+/* ── 分层依赖铁律（见 docs/CONVENTIONS.md「依赖与分层」） ─── */
 
 function walk(dir: string): string[] {
   const out: string[] = []
@@ -84,13 +85,41 @@ function walk(dir: string): string[] {
 describe('分层依赖铁律', () => {
   it('core 层不得依赖 electron / vue', () => {
     const offenders: string[] = []
-    const pattern = /from\s+['"](electron|vue|pinia|@vue\/[^'"]+)['"]/
 
     for (const file of walk('src/core')) {
-      const source = readFileSync(file, 'utf-8')
-      if (pattern.test(source)) offenders.push(file)
+      const findings = findLayeringViolations(readFileSync(file, 'utf-8'))
+      if (findings.length > 0) offenders.push(`${file}（${findings.join('；')}）`)
     }
 
     expect(offenders, `以下文件违反了 core 层不得依赖宿主能力的约定：\n${offenders.join('\n')}`).toEqual([])
+  })
+})
+
+describe('把关逻辑自身（防止"测试没测到点上"）', () => {
+  const bypasses: Array<[string, string]> = [
+    ['静态 from', `import { app } from 'electron'`],
+    ['export from', `export * from 'vue'`],
+    ['副作用 import', `import 'vue'`],
+    ['动态 import()', `await import('electron')`],
+    ['require()', `const vue = require('vue')`],
+    ['子路径', `import { app } from 'electron/main'`],
+    ['作用域包', `import { ref } from '@vue/reactivity'`],
+    ['pinia', `import { createPinia } from 'pinia'`]
+  ]
+
+  it.each(bypasses)('能抓出绕过写法：%s', (_label, source) => {
+    expect(findLayeringViolations(source).length).toBeGreaterThan(0)
+  })
+
+  it('不误伤合法写法（相对路径 / 别名 / 无关注释）', () => {
+    const legal = [
+      `import { z } from 'zod'`,
+      `import type { StudyScope } from '../content'`,
+      `import { buildMessages } from '@core/prompts'`,
+      `// 规矩：core 不得 import electron / vue（注释里提到不算违规）`
+    ]
+    for (const source of legal) {
+      expect(findLayeringViolations(source)).toEqual([])
+    }
   })
 })

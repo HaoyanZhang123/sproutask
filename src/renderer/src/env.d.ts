@@ -8,7 +8,7 @@ declare module '*.vue' {
 
 /**
  * preload 通过 contextBridge 暴露的能力。
- * ⚠️ 与 `src/preload/index.ts` 必须保持一致（M5 可考虑自动生成类型以消除手工同步）。
+ * ⚠️ 与 `src/preload/index.ts` 必须保持一致（后续可考虑自动生成类型以消除手工同步）。
  */
 declare global {
   interface Window {
