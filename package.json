@@ -1,7 +1,7 @@
 {
   "name": "biobuddy",
   "version": "0.1.0",
-  "description": "BioBuddy —— 本地优先的初中生物学习 Agent（教育研习项目）",
+  "description": "BioBuddy —— 本地优先的初中生物学习 Agent",
   "private": true,
   "author": "",
   "license": "UNLICENSED",

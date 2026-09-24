@@ -32,6 +32,7 @@ pnpm test         # 单元测试（含"core 层不得依赖 electron/vue"自动�
 | 领需求/看待决策 | `docs/ROADMAP.md` + `docs/specs/` |
 | 写测试 | `tests/` 现有用例 + `vitest.config.ts` |
 | 查环境基线/已知坑/命令坐标 | `CODEBASE_NOTES.md`（数字都带基线与过期判据） |
+| **要开源/打包公开仓库** | `publish/README.md`（白名单 + 强制安全扫描；**研究材料绝不上传**） |
 | **写研习报告/找理论依据/文献** | `docs/研习设计.md`（研究问题、理论框架、方法、报告结构） |
 
 **整体开发规范**（全局规则与教材）在 `E:\DSH\整体开发规范\`，按需读其 `INDEX.md`。

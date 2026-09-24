@@ -11,7 +11,7 @@ import type { MasteryRecord, MasteryState, Session, Student, Turn } from '../dom
  * 所有实现必须遵守的合规约束（docs/ARCHITECTURE.md §6）：
  *   - 只存学生编号，不存真实姓名；
  *   - 日志中不得出现教材与对话之外的个人信息；
- *   - 导出研习数据时必须经过匿名化处理。
+ *   - 导出学习数据时必须经过匿名化处理。
  */
 export interface StudentStore {
   /** 首次使用时登记学生（编号由教师分配） */

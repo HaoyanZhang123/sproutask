@@ -23,5 +23,5 @@ export function registerIpcHandlers(): void {
   //   agent:abort     —— 中止当前轮
   //   content:unit    —— 读取单元内容
   //   student:profile —— 读取学情
-  //   research:export —— 导出脱敏研习数据
+  //   research:export —— 导出脱敏学习数据
 }

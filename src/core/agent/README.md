@@ -43,5 +43,5 @@ interface AgentTool<In, Out> {
 ## 答案泄漏护栏（差异化关键）
 
 回答生成后追加一次判定："这段回复是否包含最终答案？"命中则用更严格的指令重生成一次，
-并在 Turn 上打 `answer-leak-guard-triggered` 标记。**命中率是研习报告的核心指标之一**，
+并在 Turn 上打 `answer-leak-guard-triggered` 标记。**命中率是评测报告的核心指标之一**，
 因此该标记必须落库、可聚合。

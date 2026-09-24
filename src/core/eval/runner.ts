@@ -1,6 +1,6 @@
 /**
  * 评测期望判定（纯函数，可离线单测）。
- * 判定规则刻意保持"可解释"——研习报告里要能说清每条为什么算失败。
+ * 判定规则刻意保持"可解释"——评测报告里要能说清每条为什么算失败。
  */
 
 export interface EvalExpectation {
@@ -72,7 +72,7 @@ export interface EvalSummary {
   passed: number
   failed: number
   passRate: number
-  /** "泄漏答案"类失败的用例数——研习报告的核心指标之一 */
+  /** "泄漏答案"类失败的用例数——评测报告的核心指标之一 */
   leakCount: number
 }
 
@@ -89,7 +89,7 @@ export function summarize(results: EvalResult[]): EvalSummary {
   }
 }
 
-/** 生成 Markdown 报告（写进 evals/reports/，可作研习证据） */
+/** 生成 Markdown 报告（写进 evals/reports/，作为提示词迭代依据） */
 export function renderReport(params: {
   promptVersion: string
   model: string

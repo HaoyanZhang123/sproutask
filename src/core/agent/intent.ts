@@ -156,7 +156,7 @@ export type IntentState = 'awaiting-mode' | 'awaiting-position' | 'ready'
 export interface IntentResult {
   mode: StudyMode
   position: StudyPosition
-  /** 是否因识别失败而回退（回退必须如实标记，供研究者统计） */
+  /** 是否因识别失败而回退（回退必须如实标记，供统计） */
   fallbackUsed: boolean
 }
 
