@@ -52,8 +52,8 @@
 ## 7. 已知缺口与遗留问题
 
 - **无 lint / 格式化脚本**：当前只有 `typecheck` 与 `test`；规范靠自觉 + CI 把关，未引入 ESLint/Prettier
-- **`backend/`（Python 提示词沙盒）与未来 TS core 会有提示词重复**：M1 落地分层提示词时需决定
-  "以哪边为准"，避免两处提示词漂移
+- ~~**`backend/`（Python 提示词沙盒）与 TS core 会有提示词重复**~~ → **已解决（2026-09）**：
+  分层提示词落地在 `src/core/prompts/v1/` 后，`backend/` 已整个删除（含教程归档，见 `docs/tutorials/`）
 - **打包未实测**：`electron-builder.yml` 已写但 M5 前未验证（便携 exe / dmg 均未构建过）
 - **渲染页类型是手写的**：`src/renderer/src/env.d.ts` 里的 `window.sproutask` 类型与
   `src/preload/index.ts` 需要人工保持一致；将来可用 `preload` 类型导入或代码生成消除

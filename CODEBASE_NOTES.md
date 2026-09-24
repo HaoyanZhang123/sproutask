@@ -51,18 +51,27 @@
 | 9 | 用 `git ls-files` 与磁盘遍历对比文件集合时"多出/缺失一批文件" | `git ls-files` 对中文名做 octal 引号、且用正斜杠；直接与 `Get-ChildItem` 的反斜杠路径比较会全错 | 比较前统一：`Trim('"').Replace('\','/')`；中文名可用 `-z` 或按 sha 比对 | 脚本已按此归一化 → 无 |
 | 10 | 管道喂多行 stdin 给 `pnpm chat` 只消费第一行 | Node `readline` 在"没有 pending question"时到达的行会被丢弃 | 交互式流程别用管道测；要自动化改用**逐步写入 stdin**（`ProcessStartInfo.RedirectStandardInput` + 延时） | 若将来 chat 改用一次性读取全部输入 → 可简化 |
 
-## 5. 提交身份（**存在漂移，待人工决定**）
+## 5. 提交身份（✅ 已规范化，2026-09-24）
 
-| 身份 | 出现位置 |
+**现状**：全部 19 个提交的作者与提交者均为 `张灏焱 <1814914856@qq.com>`（仓库配置身份），
+分支唯一（`main`），`git log --pretty='%an <%ae>' | Sort-Object -Unique` 只返回一种。
+
+**历史漂移（已修复，仅作记录）**：
+
+| 原身份 | 出现位置 |
 |---|---|
-| `张灏焱 <1814914856@qq.com>` | 仓库 `git config user.name/user.email`（当前配置） |
-| `HaoyanZhang123 <1814914856@qq.com>` | 提交 `baca2cc`（docs: add AGENTS.md） |
-| `芽问 Dev <dev@local>` | 提交 `fa77da4`、`082498e`、`3c91af6`、`042bd14`、`67a6b6a`、`d46934c`（M0/M1 期间由 agent 用 `git -c` 覆盖写入） |
+| `张灏焱 <1814914856@qq.com>` | 12 次提交（仓库配置身份，原本就正确） |
+| `HaoyanZhang123 <1814914856@qq.com>` | 提交 `baca2cc` |
+| `BioBuddy Dev <dev@local>` | 6 次提交（M0/M1 期间由 agent 用 `git -c` 覆盖写入） |
 
-**规范要求**：提交身份必须固定、不许漂移。**现状不符**。
-规范化历史（重写 author）属破坏性操作，需人工授权；未授权前，新提交一律使用仓库配置身份。
+**修复方式**：`git filter-branch --env-filter`——命中漂移身份即 `unset`，让 git 回落到仓库配置
+（筛子脚本刻意只用 ASCII 判断，避免中文写进 sh 脚本的编码风险）。
+**验证**：重写前后 `HEAD^{tree}` 哈希一致（`700f5021…`）→ 只改身份、内容一字未动；
+提交数仍 19；工作区干净；`pnpm test` 105/105；`git fsck` 无异常。
+旧对象已 `reflog expire` + `gc --prune=now` 清除，备份 bundle 留在 `E:\_backups\`。
+同时把分支名由 `master` 改为 `main`，与 `docs/CONVENTIONS.md` 的约定一致。
 
-**过期判据**：`git log --pretty=%an` 只出现单一名字 → 本节过期。
+**过期判据**：`git log --pretty='%an <%ae>' | Sort-Object -Unique` 出现第二种身份 → 本节过期。
 
 ## 6. 未验证事项（诚实声明）
 

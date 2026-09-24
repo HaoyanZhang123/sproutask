@@ -47,7 +47,7 @@ pwsh publish/publish_github.ps1 `
 | `docs/adr/ADR-0005`（公开范围与许可） | 描述内部分仓策略 |
 | `notes/` | 调研报告、学校信息、个人记录 |
 | `TASKS.md`、`CODEBASE_NOTES.md`、`AGENTS.md` | 内部协作文件（含邮箱、内部路径） |
-| `publish/`、`backend/`、`tools/`、`content/` | 内部工具与早期沙盒、教材工程 |
+| `publish/`、`tools/`、`content/` | 内部发布工具、教材内容工程、教材原文 |
 | `.env` | 密钥 |
 
 ## 文档怎么处理（两层机制）
