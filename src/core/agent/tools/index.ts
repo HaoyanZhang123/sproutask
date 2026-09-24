@@ -155,7 +155,7 @@ function convertZod(schema: z.ZodTypeAny): { json: Record<string, unknown>; opti
   }
 
   // 不支持的类型必须**立刻报错**（fail loud），不要生成一个模型看不懂的 schema
-  throw new Error(`暂不支持把 ${schema.constructor.name} 转成 JSON Schema，请扩展 tools/index.ts`)
+  throw new Error(`暂不支持把 ${schema.constructor.name} 转成 JSON Schema，请扩展 src/core/agent/tools/index.ts`)
 }
 
 function withDescription(

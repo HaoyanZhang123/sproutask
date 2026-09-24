@@ -7,7 +7,7 @@ import type { KnowledgePoint, StudyMode, StudyPosition, TextbookUnit } from '../
  *   1. **全册教材都入库**（不只一个单元），运行时按"学生学到哪里"装载对应内容；
  *   2. **课程标准等教学文件一并入库**，作为约束层随上下文注入，防止模型自行发挥；
  *   3. 装载方式以"结构化按需装载"为主（册 → 章 → 节），**不是**把全书塞进上下文；
- *      向量检索（RAG）仅在需要跨章节检索时作为可选增强，见 docs/adr/ADR-0004。
+ *      向量检索（RAG）仅在需要跨章节检索时作为可选增强，见 docs/adr/ADR-0004-教材装载方式.md。
  *
  * ⚠️ 实现方式【待定】：YAML+Zod / JSON / Markdown+frontmatter。
  *    今天只定接口不写实现；决策落地后新增实现文件并在 src/main 注入。

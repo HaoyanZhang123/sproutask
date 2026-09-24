@@ -2,7 +2,7 @@
 import { computed, onMounted, nextTick, ref } from 'vue'
 
 /**
- * BioBuddy 最小对话界面。
+ * SproutAsk 最小对话界面。
  *
  * 职责边界：**只做显示与转发**——模式判断、Agent 循环、护栏全在主进程/core，
  * 这里不写教学逻辑，也不接触 API Key。
@@ -46,10 +46,10 @@ async function scrollToBottom(): Promise<void> {
 }
 
 onMounted(async () => {
-  const status = await window.biobuddy.configStatus()
+  const status = await window.sproutask.configStatus()
   hasApiKey.value = status.hasApiKey
 
-  const info = await window.biobuddy.sessionStart()
+  const info = await window.sproutask.sessionStart()
   openingQuestion.value = info.question
   options.value = info.options
   stage.value = 'choosing'
@@ -57,7 +57,7 @@ onMounted(async () => {
 
 async function choose(answer: string): Promise<void> {
   chooseError.value = ''
-  const result = await window.biobuddy.sessionChooseMode(answer)
+  const result = await window.sproutask.sessionChooseMode(answer)
   if (!result.ok) {
     chooseError.value = result.message
     return
@@ -82,7 +82,7 @@ async function send(): Promise<void> {
   await scrollToBottom()
 
   try {
-    const result = await window.biobuddy.chat(text)
+    const result = await window.sproutask.chat(text)
 
     if (result.needsMode) {
       bubbles.value.push({ role: 'system', text: result.message ?? '请先选择学习模式' })
@@ -115,7 +115,7 @@ async function send(): Promise<void> {
 }
 
 async function restart(): Promise<void> {
-  const info = await window.biobuddy.sessionStart()
+  const info = await window.sproutask.sessionStart()
   openingQuestion.value = info.question
   options.value = info.options
   bubbles.value = []
@@ -132,7 +132,7 @@ async function restart(): Promise<void> {
       <div class="brand">
         <span class="logo">🌱</span>
         <div>
-          <h1>BioBuddy</h1>
+          <h1>芽问 <span class="en">SproutAsk</span></h1>
           <p class="sub">初中生物学习伙伴 · 只给线索，不给答案</p>
         </div>
       </div>
@@ -230,6 +230,12 @@ h1 {
   margin: 2px 0 0;
   font-size: 12px;
   color: #6b7280;
+}
+.en {
+  font-size: 13px;
+  font-weight: 400;
+  color: #6b7280;
+  letter-spacing: 0.02em;
 }
 .status {
   display: flex;

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  从本仓库导出一个**只含 BioBuddy 软件本身**的干净目录，并做成单次提交的 git 仓库。
+  从本仓库导出一个**只含 SproutAsk 软件本身**的干净目录，并做成单次提交的 git 仓库。
 
 .DESCRIPTION
   公开范围（2026-09 决策）：只上软件本身；研究类材料一律排除；新建干净历史（不用现有历史，
@@ -18,14 +18,14 @@
   LICENSE 里的版权持有人（真名或 GitHub 用户名，由你决定）
 
 .EXAMPLE
-  pwsh publish/publish_github.ps1 -TargetDir D:\dsh\biobuddy -GitHubEmail "12345+you@users.noreply.github.com" -CopyrightHolder "your-handle" -Force
+  pwsh publish/publish_github.ps1 -TargetDir D:\dsh\sproutask -GitHubEmail "12345+you@users.noreply.github.com" -CopyrightHolder "your-handle" -Force
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$TargetDir,
     [Parameter(Mandatory = $true)][string]$GitHubEmail,
     [Parameter(Mandatory = $true)][string]$CopyrightHolder,
-    [string]$GitHubName = 'biobuddy-dev',
+    [string]$GitHubName = 'sproutask-dev',
     [switch]$Force,
     [switch]$SkipGit,
     [switch]$AllowStale
@@ -37,13 +37,23 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $publicDir = Join-Path $PSScriptRoot 'public'
 $target = [System.IO.Path]::GetFullPath($TargetDir)
 
-Write-Host "📦 BioBuddy 公开发布打包" -ForegroundColor Cyan
+Write-Host "📦 SproutAsk 公开发布打包" -ForegroundColor Cyan
 Write-Host "   源仓库：$repoRoot"
 Write-Host "   目标：  $target`n"
 
 # ── 0. 前置校验 ────────────────────────────────────────────
 if ($target.StartsWith([System.IO.Path]::GetFullPath($repoRoot), [System.StringComparison]::OrdinalIgnoreCase)) {
     throw "目标目录不能位于源仓库内部（否则会被递归打包）"
+}
+# 销毁性护栏：下面会 Remove-Item -Recurse -Force，必须挡住"手滑指到盘根/用户目录"
+if ($target -match '^[A-Za-z]:\\?$') {
+    throw "目标目录不能是盘根（会递归删除整个磁盘）：$target"
+}
+if ($target.TrimEnd('\') -eq $env:USERPROFILE.TrimEnd('\')) {
+    throw "目标目录不能是用户主目录：$target"
+}
+if (($target.TrimEnd('\') -split '\\').Count -lt 3) {
+    throw "目标目录层级过浅（形如 D:\x），为避免误删请至少放到两层目录下，例如 E:\DSH\sproutask：$target"
 }
 if ($CopyrightHolder -match '^<.*>$' -or [string]::IsNullOrWhiteSpace($CopyrightHolder)) {
     throw "请填写真实的版权持有人（LICENSE 会公开显示）"
@@ -77,7 +87,7 @@ $adrRewrites = [ordered]@{
     '研习对比实验'                                              = '教学对比实验'
     '研习数据'                                                  = '学习数据'
     '研习'                                                      = '教学研究'
-    '`notes/reference/markdown-reader-flutter-借鉴.md`「教材就是 Markdown」一节 —— 该项目的折叠块' = '同类开源阅读器项目的实践：该项目的折叠块'
+    '（本地调研笔记：`notes/reference/markdown-reader-flutter-借鉴.md`）' = ''
 }
 $adrSourceDir = Join-Path $repoRoot 'docs/adr'
 # 注意：PowerShell 的 -Filter 不支持 [1-4] 这类字符范围，必须用 Where-Object 过滤
@@ -154,33 +164,82 @@ $pkg | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $pkgPath -Encoding UT
 Write-Host "  ~ package.json：license=MIT, author=$GitHubName, private=false"
 
 # ── 4. 安全扫描：发现任何一项就中止 ────────────────────────
-$forbidden = [ordered]@{
-    '校名/学区'   = '三帆|新风街|德胜学区'
-    '个人邮箱'    = '1814914856@qq\.com'
-    '他人姓名'    = '唐懿含'
-    '密钥'        = 'sk-[A-Za-z0-9]{16,}'
-    '研究语境'    = '研习|教育研习|实习学校|问卷|知情同意'
-    '内部路径'    = 'notes/|CODEBASE_NOTES|TASKS\.md|AGENTS\.md|docs/ROADMAP|docs/specs|docs/tutorials|docs/研习|E:\\DSH'
-    '内部编号'    = '\bF-\d{3}\b|\bM[0-6]\b|\bQ[1-9]\b'
-}
+#
+# 设计要点（每一轮独立审核都补上了洞，别删这些注释）：
+#   1. 范围用**黑名单**：默认扫全部文件（含隐藏文件、无扩展名文件、.vue）。
+#      曾用扩展名白名单而漏掉 .vue，导致内部引用漏网。
+#   2. **文件名/路径也参与匹配**：只看内容的话，`三帆中学-研习记录.md` 这类
+#      把 PII 写进文件名的情况会被静默放行。
+#   3. **二进制文件直接判失败**：白名单从不复制二进制，出现即说明出了问题；
+#      与其"跳过扫描"（截图/PDF 的 EXIF 扫不到），不如直接拒绝。
+#   4. **PII 规则做泛化**：不只列第一轮命中过的那几个词，同时覆盖机构、
+#      手机号、身份证、通用邮箱、各盘符本机路径，避免"只防旧泄漏"。
+#   5. `pnpm-lock.yaml` **在发布范围内**，所以必须纳入检查：
+#      对它跑 all 级规则，并额外校验依赖来源（见下方专用检查）。
+#
+# Scope 说明：'all' = 文本文件 + lockfile；'text' = 仅文本文件。
+# 后者用于那些在 lockfile 的 base64 完整性串里会产生假阳性的规则
+# （宽泛邮箱、手机号、内部编号），lockfile 由专用检查兜底。
+$forbidden = @(
+    @{ Key = '校名/机构/地点'; Scope = 'all'
+       Pattern = '三帆|新风街|德胜|西城|北京四中|附属中学|中学|学院|大学|师范|教育实习|实习学校' }
+    @{ Key = '个人邮箱';       Scope = 'all'
+       Pattern = '1814914856@qq\.com' }
+    @{ Key = '通用邮箱';       Scope = 'text'
+       Pattern = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' }
+    @{ Key = '手机号';         Scope = 'text'
+       Pattern = '(?<!\d)1[3-9]\d{9}(?!\d)' }
+    @{ Key = '身份证号';       Scope = 'text'
+       Pattern = '(?<!\d)\d{17}[\dXx](?!\d)' }
+    @{ Key = '他人姓名';       Scope = 'all'
+       Pattern = '唐懿含|张灏焱' }
+    @{ Key = '密钥';           Scope = 'text'
+       Pattern = 'sk-[A-Za-z0-9]{16,}' }
+    @{ Key = '研究语境';       Scope = 'all'
+       Pattern = '研习|教育研习|实习学校|问卷|知情同意' }
+    @{ Key = '内部路径';       Scope = 'all'
+       Pattern = 'notes/|CODEBASE_NOTES|TASKS\.md|AGENTS\.md|docs/ROADMAP|docs/specs|docs/tutorials|docs/研习|E:\\DSH|C:\\Users|D:\\dsh|/Users/|/home/' }
+    @{ Key = '内部黑话';       Scope = 'text'
+       Pattern = '参考项目|P0 原则|不随仓库分发|不随本仓库分发' }
+    @{ Key = '内部编号';       Scope = 'text'
+       Pattern = '\bF-\d{3}\b|\bM[0-6]\b|\bQ[1-9]\b' }
+)
 
-# ⚠️ 这里用**黑名单**（只排除二进制与巨型 lockfile），不用白名单。
-# 曾经的教训：白名单只列了 .ts/.md/... 而**漏掉 .vue**，导致 App.vue 里的
-# `docs/specs/F-009` 引用从未被扫描就发布了。漏一个扩展名 = 闸门有洞，
-# 所以改为"默认全扫，逐个排除已知不可读的文件"。
 $binaryExtensions = @('.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.zip', '.gz',
                      '.exe', '.dll', '.node', '.woff', '.woff2', '.ttf', '.docx', '.xlsx', '.pptx')
-$scannable = Get-ChildItem -LiteralPath $target -Recurse -File -Force |
-    Where-Object {
-        $_.FullName -notmatch '\\node_modules\\|\\\.git\\' -and
-        $_.Name -ne 'pnpm-lock.yaml' -and
-        $binaryExtensions -notcontains $_.Extension.ToLower()
-    }
-Write-Host "  🔍 扫描范围：$($scannable.Count) 个文件（含无扩展名文件与 .vue）"
+
+$allFiles = Get-ChildItem -LiteralPath $target -Recurse -File -Force |
+    Where-Object { $_.FullName -notmatch '\\node_modules\\|\\\.git\\' }
+$scannable = $allFiles | Where-Object { $binaryExtensions -notcontains $_.Extension.ToLower() }
+$binaries = $allFiles | Where-Object { $binaryExtensions -contains $_.Extension.ToLower() }
+
+Write-Host "  🔍 扫描范围：$($scannable.Count) 个文件（含无扩展名文件、.vue 与 pnpm-lock.yaml）"
 
 $problems = @()
-foreach ($entry in $forbidden.GetEnumerator()) {
-    $hits = $scannable | Select-String -Pattern $entry.Value -ErrorAction SilentlyContinue
+
+# 4a. 二进制文件一律拒绝（无法扫描内容，就不该出现在导出里）
+if ($binaries) {
+    $problems += "[二进制文件] $($binaries.Count) 个"
+    $binaries | Select-Object -First 5 | ForEach-Object {
+        Write-Host "  ❌ 不应存在的二进制：$($_.FullName.Replace($target, '').TrimStart('\'))" -ForegroundColor Red
+    }
+}
+
+# 4b. 文件名/路径检查：所有规则都参与（路径不会出现 base64 假阳性）
+foreach ($file in $allFiles) {
+    $rel = $file.FullName.Substring($target.Length).TrimStart('\')
+    foreach ($entry in $forbidden) {
+        if ($rel -match $entry.Pattern) {
+            $problems += "[文件名·$($entry.Key)] $rel"
+            Write-Host "  ❌ 文件名命中 $($entry.Key)：$rel" -ForegroundColor Red
+        }
+    }
+}
+
+# 4c. 内容检查（按 Scope 决定是否包含 lockfile）
+foreach ($entry in $forbidden) {
+    $pool = if ($entry.Scope -eq 'all') { $scannable } else { $scannable | Where-Object { $_.Name -ne 'pnpm-lock.yaml' } }
+    $hits = $pool | Select-String -Pattern $entry.Pattern -ErrorAction SilentlyContinue
     if ($hits) {
         $problems += "[$($entry.Key)] $($hits.Count) 处"
         $hits | Select-Object -First 5 | ForEach-Object {
@@ -190,12 +249,35 @@ foreach ($entry in $forbidden.GetEnumerator()) {
     }
 }
 
+# 4d. lockfile 专用检查：依赖来源必须是公共 npm registry，且不得有本地路径/内网地址
+$lockPath = Join-Path $target 'pnpm-lock.yaml'
+if (Test-Path $lockPath) {
+    $lock = Get-Content -LiteralPath $lockPath -Raw
+    $allowedHosts = @('registry.npmjs.org', 'www.npmjs.com', 'npmjs.org')
+    $hosts = [regex]::Matches($lock, 'https?://([^/"\s]+)') |
+        ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+    $badHosts = @($hosts | Where-Object { $allowedHosts -notcontains $_ })
+    if ($badHosts.Count -gt 0) {
+        $problems += "[lockfile·非公共 registry] $($badHosts -join ', ')"
+        Write-Host "  ❌ lockfile 出现非公共 registry：$($badHosts -join ', ')" -ForegroundColor Red
+    }
+    # 注意：包名里可能含 "file:"（如 isbinaryfile），所以只查真正表示本地依赖的写法
+    if ($lock -match 'file:(\.|/)|link:|git\+ssh|localhost|127\.0\.0\.1') {
+        $problems += '[lockfile·本地/内网依赖]'
+        Write-Host "  ❌ lockfile 含本地路径或内网依赖（file:./ 、link: 、git+ssh、localhost）" -ForegroundColor Red
+    }
+    if ($lock -match 'E:\\\\DSH|D:\\\\dsh|C:\\\\Users') {
+        $problems += '[lockfile·本机绝对路径]'
+        Write-Host "  ❌ lockfile 含本机绝对路径" -ForegroundColor Red
+    }
+}
+
 if ($problems.Count -gt 0) {
     Write-Host "`n🚫 扫描未通过，已中止（目标目录保留供你检查）：" -ForegroundColor Red
     $problems | ForEach-Object { Write-Host "   - $_" }
     throw "公开扫描发现 $($problems.Count) 类问题"
 }
-Write-Host "  ✅ 安全扫描通过（校名/邮箱/密钥/研究语境/内部路径/内部编号 均未发现）" -ForegroundColor Green
+Write-Host "  ✅ 安全扫描通过（文件内容 + 文件名 + 二进制 + lockfile 来源 均已检查）" -ForegroundColor Green
 
 # ── 4b. 防漂移：公开版文档是否落后于内部文档 ────────────────
 $driftPairs = @(
@@ -229,7 +311,7 @@ if (-not $SkipGit) {
         git config user.name $GitHubName
         git config user.email $GitHubEmail
         git add -A
-        git commit -q -m "feat: BioBuddy 初始版本
+        git commit -q -m "feat: SproutAsk 初始版本
 
 本地优先的初中生物学习 Agent：
 - Electron + Vue3 + TypeScript 分层结构（界面 / 主进程 / 纯领域核心）
@@ -253,7 +335,7 @@ Write-Host @"
 下一步（需你人工执行，脚本不代做）：
   1. 在 GitHub 新建空仓库（不要勾选 README / .gitignore / License）
   2. cd "$target"
-     git remote add origin git@github.com:<你的用户名>/biobuddy.git
+     git remote add origin git@github.com:<你的用户名>/sproutask.git
      git branch -M main
      git push -u origin main
   3. 公开前再确认一次：GitHub 上的仓库可见性与 LICENSE 持有人是否符合预期

@@ -77,15 +77,15 @@
 
 | 变量 | 作用 | 状态 |
 |---|---|---|
-| `BIOBUDDY_SELFTEST=1` | 启动后在**真实应用里操作 DOM 并断言**（渲染/交互/样式/降级），失败以退出码 1 结束，并输出界面截图 `selftest-ui.png` | ✅ 已实现（M3，15 项断言） |
-| `BIOBUDDY_MODE=mock` | 不联网，用 `MockLLMClient` 的脚本化响应跑通全流程 | ⏳ 未实现 |
-| `BIOBUDDY_PERF=1` | 打印一轮对话的耗时与 token 用量后退出 | ⏳ 未实现 |
-| `BIOBUDDY_OPEN=<文件>` | 启动即打开指定会话/内容，便于复现 | ⏳ 未实现 |
+| `SPROUTASK_SELFTEST=1` | 启动后在**真实应用里操作 DOM 并断言**（渲染/交互/样式/降级），失败以退出码 1 结束，并输出界面截图 `selftest-ui.png` | ✅ 已实现（M3，15 项断言） |
+| `SPROUTASK_MODE=mock` | 不联网，用 `MockLLMClient` 的脚本化响应跑通全流程 | ⏳ 未实现 |
+| `SPROUTASK_PERF=1` | 打印一轮对话的耗时与 token 用量后退出 | ⏳ 未实现 |
+| `SPROUTASK_OPEN=<文件>` | 启动即打开指定会话/内容，便于复现 | ⏳ 未实现 |
 
 用法：
 
 ```powershell
-$env:BIOBUDDY_SELFTEST = "1"; pnpm dev    # 通过=退出码 0；日志以 [selftest] 开头
+$env:SPROUTASK_SELFTEST = "1"; pnpm dev    # 通过=退出码 0；日志以 [selftest] 开头
 ```
 
 约定：这些开关只影响开发与自动化验证，**不得改变生产行为**；新增开关需在本表登记。
@@ -110,5 +110,5 @@ $env:BIOBUDDY_SELFTEST = "1"; pnpm dev    # 通过=退出码 0；日志以 [self
 
 **在新对话里开工时，把这段贴给 AI**：
 
-> 项目：BioBuddy（本地优先桌面 Agent）。先读 `docs/ARCHITECTURE.md`、`docs/CONVENTIONS.md`、`docs/ROADMAP.md`，
+> 项目：芽问（本地优先桌面 Agent）。先读 `docs/ARCHITECTURE.md`、`docs/CONVENTIONS.md`、`docs/ROADMAP.md`，
 > 再读 `docs/specs/F-00X-xxx.md`，**只实现这一条需求**，不要改动领域契约与其他模块。

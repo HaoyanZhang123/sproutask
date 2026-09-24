@@ -1,15 +1,19 @@
-# 依赖与构建产物
+# 依赖与构建产物（与源码目录同名的规则一律锚定仓库根，避免误伤 src/**/build 之类）
 node_modules/
-out/
-dist/
-release/
+/out/
+/dist/
+/release/
+/build/
+/tmp/
+__pycache__/
+*.pyc
 
 # 环境与密钥
 .env
 .env.local
 .env.*.local
 
-# 不进版本库的本地资料（见 docs/ARCHITECTURE.md §1）
+# 不进版本库的本地资料（见 docs/ARCHITECTURE.md 的目录结构一节）
 notes/
 content/textbook/
 
@@ -17,7 +21,7 @@ content/textbook/
 data/
 *.log
 
-# 开发期自检产物（BIOBUDDY_SELFTEST=1 的界面截图）
+# 开发期自检产物（SPROUTASK_SELFTEST=1 的界面截图）
 selftest-*.png
 
 # 编辑器与系统

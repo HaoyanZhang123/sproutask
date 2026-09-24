@@ -55,7 +55,7 @@
 - **`backend/`（Python 提示词沙盒）与未来 TS core 会有提示词重复**：M1 落地分层提示词时需决定
   "以哪边为准"，避免两处提示词漂移
 - **打包未实测**：`electron-builder.yml` 已写但 M5 前未验证（便携 exe / dmg 均未构建过）
-- **渲染页类型是手写的**：`src/renderer/src/env.d.ts` 里的 `window.biobuddy` 类型与
+- **渲染页类型是手写的**：`src/renderer/src/env.d.ts` 里的 `window.sproutask` 类型与
   `src/preload/index.ts` 需要人工保持一致；将来可用 `preload` 类型导入或代码生成消除
 
 ## 8. 变更记录

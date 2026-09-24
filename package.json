@@ -1,7 +1,7 @@
 {
-  "name": "biobuddy",
+  "name": "sproutask",
   "version": "0.1.0",
-  "description": "BioBuddy —— 本地优先的初中生物学习 Agent",
+  "description": "芽问（SproutAsk）—— 本地优先的初中生物学习 Agent",
   "private": true,
   "author": "",
   "license": "UNLICENSED",

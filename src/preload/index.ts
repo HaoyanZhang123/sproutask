@@ -46,6 +46,6 @@ const api = {
     ipcRenderer.invoke('config:status') as never
 }
 
-contextBridge.exposeInMainWorld('biobuddy', api)
+contextBridge.exposeInMainWorld('sproutask', api)
 
-export type BioBuddyApi = typeof api
+export type SproutAskApi = typeof api

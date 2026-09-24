@@ -65,7 +65,7 @@ function loadDotEnvIfPresent(): void {
 export function loadConfig(): AppConfig {
   loadDotEnvIfPresent()
 
-  const envMode = process.env['BIOBUDDY_MODE']
+  const envMode = process.env['SPROUTASK_MODE']
   const machine = RunModeSchema.safeParse(envMode)
   const mode: RunMode = machine.success ? machine.data : 'dev'
 

@@ -45,7 +45,11 @@
 | 3 | `.npmrc` 里 `electron_mirror=…` 报 `Unknown project config` | pnpm/npm 不再把任意配置键传给生命周期脚本 | 改用环境变量（见上）；`.npmrc` 保留仅作参考 | 若 pnpm 恢复支持该键 → 可简化 |
 | 4 | `pnpm chat`/`pnpm eval` 报 `Top-level await is currently not supported with the "cjs" output format` | 仓库无 `"type": "module"`（Electron 主进程需 CJS 输出），tsx 按 CJS 转译脚本 | 脚本逻辑包进 `async function main()` 后 `void main()` | 若将来改为 ESM（`"type": "module"` + 调整 Electron 输出）→ 可恢复顶层 await |
 | 5 | `vitest` 输出根路径为 `E:/DSH/workspaces/ai4edu` 而非 `D:\dsh\ai4edu` | 仓库根实际在 E:（见第 1 节） | 正常现象，不必修 | 同第 1 节 |
-| 6 | **`pnpm install` 在 pnpm 9 下报 `ERROR packages field missing or empty`** | `pnpm-workspace.yaml` 只写了 `allowBuilds` 而**没有 `packages:` 字段**：pnpm 10/11 容忍，pnpm 9 认为 workspace 声明不完整而直接报错 —— CI 当时钉的正是 pnpm 9，于是流水线在第一步就红（2026-09 由独立审核者实测发现） | 在 `pnpm-workspace.yaml` 里补 `packages: ['.']`（即使是单包也必须写）；CI 升到 pnpm 11；`package.json` 补 `packageManager` 字段固定版本 | 若两处 `packages:`/`packageManager` 被删或 CI 版本再变 → 复测 pnpm 9 与 11 |
+| 6 | **`pnpm install` 在 pnpm 9 下报 `ERROR packages field missing or empty`** | `pnpm-workspace.yaml` 只写了 `allowBuilds` 而**没有 `packages:` 字段**：pnpm 10/11 容忍，pnpm 9 认为 workspace 声明不完整而直接报错 —— CI 当时钉的正是 pnpm 9，于是流水线在第一步就红（2026-09 由独立审核者实测发现） | 在 `pnpm-workspace.yaml` 里补 `packages: ['.']`（即使是单包也必须写）；CI 版本改为**由 `package.json` 的 `packageManager` 单点决定**（`pnpm/action-setup` 不要再写 `with: version`，否则报 `Multiple versions of pnpm specified` 并 exit 1 —— 这是补 `packageManager` 时引入的**新**故障，同样由审核者实测发现） | 若 `packages:`/`packageManager` 被删、或 CI 里又出现 `with: version` → 复测 pnpm 9 与 11 |
+| 7 | 导出仓库里 `src/core/content/*.ts` 消失、TypeScript 编不过 | `.gitignore` 里写 `content/`（**未锚定根目录**）会匹配任意层级的 `content` 目录，连源码目录一起忽略 | 与源码目录同名的忽略规则一律锚定仓库根：`/content/`、`/build/`、`/tmp/` | 若 `.gitignore` 出现无前导 `/` 的目录名规则 → 复查是否误伤 `src/**` |
+| 8 | `pnpm 9` 下 `node_modules/electron/dist` 为空、`pnpm dev` 报 `Error: Electron uninstall` | 本机 pnpm 用的是另一处 store，其中已缓存 electron 构建脚本的**空 side-effects**，`side-effects-cache` 命中即跳过 postinstall | 用 `--config.side-effects-cache=false` 重装；干净机器不会出现（**不要**误判为仓库缺陷） | 若同版本 store 内 electron 的 `dist/` 已存在 → 无需处理 |
+| 9 | 用 `git ls-files` 与磁盘遍历对比文件集合时"多出/缺失一批文件" | `git ls-files` 对中文名做 octal 引号、且用正斜杠；直接与 `Get-ChildItem` 的反斜杠路径比较会全错 | 比较前统一：`Trim('"').Replace('\','/')`；中文名可用 `-z` 或按 sha 比对 | 脚本已按此归一化 → 无 |
+| 10 | 管道喂多行 stdin 给 `pnpm chat` 只消费第一行 | Node `readline` 在"没有 pending question"时到达的行会被丢弃 | 交互式流程别用管道测；要自动化改用**逐步写入 stdin**（`ProcessStartInfo.RedirectStandardInput` + 延时） | 若将来 chat 改用一次性读取全部输入 → 可简化 |
 
 ## 5. 提交身份（**存在漂移，待人工决定**）
 
@@ -53,7 +57,7 @@
 |---|---|
 | `张灏焱 <1814914856@qq.com>` | 仓库 `git config user.name/user.email`（当前配置） |
 | `HaoyanZhang123 <1814914856@qq.com>` | 提交 `baca2cc`（docs: add AGENTS.md） |
-| `BioBuddy Dev <dev@local>` | 提交 `fa77da4`、`082498e`、`3c91af6`、`042bd14`、`67a6b6a`、`d46934c`（M0/M1 期间由 agent 用 `git -c` 覆盖写入） |
+| `芽问 Dev <dev@local>` | 提交 `fa77da4`、`082498e`、`3c91af6`、`042bd14`、`67a6b6a`、`d46934c`（M0/M1 期间由 agent 用 `git -c` 覆盖写入） |
 
 **规范要求**：提交身份必须固定、不许漂移。**现状不符**。
 规范化历史（重写 author）属破坏性操作，需人工授权；未授权前，新提交一律使用仓库配置身份。

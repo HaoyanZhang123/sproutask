@@ -127,7 +127,7 @@ export class DeepSeekClient implements LLMClient {
 /**
  * 把内部消息转换为接口格式。
  * **导出以便离线单测**：工具调用的序列化是"循环能否跑通"的关键协议细节，
- * 不能只靠联调验证（见 tests/deepseek-message.test.ts）。
+ * 不能只靠联调验证（见 tests/agent-loop.test.ts 与 tests/sse.test.ts）。
  */
 export function toApiMessage(message: ChatMessage): ApiMessage {
   const out: ApiMessage = { role: message.role, content: message.content }

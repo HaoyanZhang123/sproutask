@@ -1,13 +1,13 @@
 # 公开发布（publish/）
 
-> **内部工具，不上传**。用于把本仓库中"**属于 BioBuddy 软件本身**"的部分导出成一个干净仓库。
+> **内部工具，不上传**。用于把本仓库中"**属于 芽问 软件本身**"的部分导出成一个干净仓库。
 > 决策依据见 `docs/adr/ADR-0005-公开范围与许可.md`。
 
 ## 一条命令（可直接复制）
 
 ```powershell
 pwsh publish/publish_github.ps1 `
-  -TargetDir D:\dsh\biobuddy `
+  -TargetDir D:\dsh\sproutask `
   -GitHubEmail "195906259+HaoyanZhang123@users.noreply.github.com" `
   -GitHubName "HaoyanZhang123" `
   -CopyrightHolder "HaoyanZhang123" `
@@ -70,18 +70,21 @@ pwsh publish/publish_github.ps1 `
 
 **新增替换规则时，请同步更新本表**（规则与文档同一落点）。
 
-## 安全扫描（2026-09 加固）
+## 安全扫描（多轮独立审核后逐层加固）
 
-**扫描范围用黑名单，不用白名单**：默认扫描目标目录下**所有**文件（含隐藏文件与无扩展名文件），
-只排除 `node_modules/`、`.git/`、`pnpm-lock.yaml` 与已知二进制扩展名。
+扫描**不是**只匹配第一轮命中过的那几个词，而是五个维度都过一遍（命中即中止）：
 
-> 教训：旧版用扩展名**白名单**（`.ts/.md/.json/...`）却**漏了 `.vue`**，
-> 于是 `App.vue` 里的内部引用（`docs/specs/F-009`）从未被扫描就发布出去了。
-> 漏一个扩展名 = 闸门有洞，所以改成"默认全扫"。
+| 维度 | 做法 | 为什么需要 |
+|---|---|---|
+| ① 范围 | **黑名单**：默认扫全部文件（含隐藏文件、无扩展名文件、`.vue`），只排除 `node_modules/`、`.git/` | 旧版用扩展名**白名单**却**漏了 `.vue`**，`App.vue` 里的内部引用从未被扫到 |
+| ② 文件名 | 相对路径也参与所有规则匹配 | 只看内容的话，`三帆中学-研习记录.md` 这类**把 PII 写进文件名**的情况会被静默放行 |
+| ③ 二进制 | 一旦出现二进制文件**直接判失败**（不去扫内容） | 白名单从不复制二进制，出现即说明出了问题；而截图/PDF 的 EXIF 本来也扫不到 |
+| ④ 内容 | 规则做了**泛化**：机构词（中学/学院/大学/师范…）、手机号、身份证号、通用邮箱、各盘符本机路径（`C:\Users`、`E:\DSH`、`D:\dsh`、`/Users/`）、内部编号 | 只列"第一轮命中过的串"能防旧泄漏复发，**防不住新泄漏引入** |
+| ⑤ lockfile | `pnpm-lock.yaml` **在发布范围内**，因此纳入检查：跑 always 级规则 + 校验依赖来源只允许公共 npm registry、禁止 `file:./`/`link:`/`git+ssh`/`localhost` 与本机路径 | lockfile 恰是私有 registry、本地路径最易夹带之处，而它又是要发布的文件 |
 
-禁止出现的模式（命中即中止）：校名/学区、个人邮箱、他人姓名、密钥、
-研究语境（研习/问卷/知情同意…）、内部路径（`docs/specs`、`TASKS.md`、`notes/`、本机盘符…）、
-**内部编号（`F-\d{3}`、`M0-M6`、`Q1-Q9`）**。
+> 少数规则标注 `Scope = text`（宽泛邮箱、手机号、内部编号）：它们在 lockfile 的 base64
+> 完整性串里会产生假阳性，故只作用于文本文件，lockfile 由 ⑤ 兜底。
+> **这几条边界是独立审核员用对抗探针测出来的**，不是作者想当然。
 
 ## 防漂移检查
 
@@ -92,29 +95,30 @@ pwsh publish/publish_github.ps1 `
 
 - [ ] 主仓库质量门：`pnpm typecheck && pnpm test`
 - [ ] 导出目录质量门：`pnpm install --frozen-lockfile && pnpm typecheck && pnpm test`
-- [ ] **用 CI 同款 pnpm 版本再装一次**（pnpm 9 与 11 行为不同，见下）
-- [ ] 导出目录内跑一次界面自检：`$env:BIOBUDDY_SELFTEST="1"; pnpm dev`（**有 Key / 无 Key 两种环境都要通过**）
-- [ ] 安全扫描通过（含 `.vue` 与无扩展名文件在扫描范围内）
+- [ ] **用 CI 当前版本再装一次**（`.github/workflows/ci.yml` 与 `package.json` 的 `packageManager` 已对齐 pnpm 11；
+      另用 **pnpm 9** 做一次回归——旧 CI 用 9，曾因 `pnpm-workspace.yaml` 缺 `packages:` 而必然失败）
+- [ ] 导出目录内跑一次界面自检：`$env:SPROUTASK_SELFTEST="1"; pnpm dev`（**有 Key / 无 Key 两种环境都要通过**）
+- [ ] 安全扫描通过（五个维度见上）
 - [ ] 防漂移检查通过
-- [ ] 独立审核（建议派不知情的审核者按"隐私 / 内部信息 / 可运行性"三个视角各审一遍）
+- [ ] 独立审核（派**不知情**的审核者按"隐私 / 内部信息 / 可运行性"三个视角各审一遍）
 - [ ] 人工确认 LICENSE 持有人写法与仓库可见性
 
 ## 已验证（2026-09 实测）
 
-**产物规模**：导出 **77 个文件**；顶层只有软件文件、配置与 `docs/`（无二进制、无 `.env`）。
+**产物规模**：导出 **77 个文件**；`git ls-files` 与磁盘文件集合**完全一致**（曾因 `.gitignore` 未锚定而丢过 2 个源文件，见下）。
 
 **质量门（均在导出目录的临时副本中实测）**
 
 | 验证 | 结果 |
 |---|---|
-| `pnpm install --frozen-lockfile`（pnpm 11.21.0） | 退出码 0 |
-| `pnpm install --frozen-lockfile`（**pnpm 9.15.9，CI 同款**） | 退出码 0（修复前为 `ERROR packages field missing or empty`） |
+| `pnpm install --frozen-lockfile`（pnpm 11.21.0，与 `packageManager` 一致） | 0 |
+| `pnpm install --frozen-lockfile`（**pnpm 9.15.9**，CI 曾用版本，回归） | 0（修复前为 `ERROR packages field missing or empty`） |
 | `pnpm typecheck` | 0 错 |
-| `pnpm test` | **99/99 通过**（9 个文件） |
-| `pnpm build` | 三入口产物齐（`out/main`、`out/preload`、`out/renderer`） |
-| 界面自检（无 Key 环境） | **17/17 通过**，输出截图 |
-| 界面自检（有 Key 环境） | **17/17 通过**（修复前此环境必然失败） |
-| 安全扫描 | 通过（扫描 76 个文件，含 `.vue` 与无扩展名文件） |
+| `pnpm test` | **105/105 通过**（9 个文件） |
+| 界面自检（无 Key） | **17/17 通过** |
+| 界面自检（有 Key，无效 Key 走 401） | **17/17 通过**（修复前此环境必然失败） |
+| 安全扫描（正常产物） | 通过 |
+| **安全扫描（对抗探针）** | 在"假内部仓库"里注入 4 类违规 → **全部拦下**：文件名 PII（`src\三帆中学-研习记录.md`）、二进制（`src\screenshot.png`）、泛化 PII（校名/手机号/身份证/`C:\Users`/通用邮箱）、lockfile 内网 registry（`npm.internal.corp`） |
 | 防漂移检查 | 通过 |
 | git | 单次提交，作者为指定 noreply 邮箱，**不含现有历史** |
 
@@ -122,10 +126,25 @@ pwsh publish/publish_github.ps1 `
 
 | 轮次 | 视角 | 判决 | 关键发现 |
 |---|---|---|---|
-| 第一轮 | 隐私与身份 | 可安全公开 | 无 PII；但指出扫描器盲区（`.vue` 未扫描） |
+| 第一轮 | 隐私与身份 | 可安全公开 | 无 PII；指出扫描器盲区（`.vue` 未扫描） |
 | 第一轮 | 凭据与内部信息 | 有风险 → 已清理 | 凭据全净；36 处内部编号残留、README 过度宣称 |
 | 第一轮 | 可运行性 | **有阻塞问题** | ① CI 因 pnpm 9 + 缺 `packages:` 必然失败 ② 自检在配好 Key 的环境必然失败 |
-| 第二轮 | 隐私 / 文档 / 可运行性 | 见 `TASKS.md` 的 F-017 记录 | 复核上述修复 |
+| 第二轮 | 隐私与扫描器 | 内容可公开；**闸门仍有 4 处洞** | 只看内容不看文件名、lockfile 被排除却发布、二进制被跳过、PII 规则未泛化；`.gitignore` 丢了内容规则 |
+| 第二轮 | 文档自洽性 | **需修订** | 多处"未实现写成已实现"、首屏语病「加严重生成」、ADR 指代失去先行词、概念性内部残留（需求号/spec） |
+| 第二轮 | 可运行性 | **仍有阻塞** | ① CI 改在更早的 action-setup 步骤就红（`version: 11` 与 `packageManager` 冲突）② 分层把关漏模板字符串写法 |
 
-> 第一轮的三位审核者都**没有**被告知"已经自检过"，各自独立取证；
-> 他们找到的两个阻断项是作者自检没覆盖到的——这正是"独立审核"的价值。
+> 三轮审核者都**没有**被告知"已经自检过"，各自独立取证。他们找到的问题（CI 两次必挂、
+> 自检与 README 互斥、扫描器四处盲区、`.gitignore` 误伤源码）**全部是作者自检没覆盖到的**——
+> 这就是"独立审核"的价值，也是为什么每次修完都要再让人审一遍。
+
+## 踩过的坑（留给以后）
+
+| 坑 | 症状 | 修法 |
+|---|---|---|
+| 扫描白名单漏扩展名 | `.vue` 里的内部引用漏网 | 改成黑名单：默认全扫 |
+| 只看内容不看文件名 | `三帆中学-…md` 这类文件名静默通过 | 相对路径也参与匹配 |
+| 二进制被"跳过扫描" | 截图/PDF 的 EXIF 扫不到，且它本就在发布范围 | 出现二进制即判失败 |
+| lockfile 被排除却要发布 | 私有 registry / 本地路径夹带的通道 | 纳入扫描 + 校验依赖来源 |
+| PII 规则只列"上轮命中串" | 能防复发，防不住新泄漏 | 规则泛化（机构/手机/身份证/邮箱/各盘符） |
+| `.gitignore` 写 `content/` 未锚定 | 连 `src/core/content/` 一起忽略 → 导出缺源码、编不过 | 与源码目录同名的规则一律写 `/content/` |
+| `pnpm/action-setup` 写 `with: version` 且 `packageManager` 为完整版本 | CI 在 action 步骤报 `Multiple versions of pnpm specified` | 删掉 `with: version`，让 action 读 `packageManager` |

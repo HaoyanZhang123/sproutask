@@ -31,7 +31,7 @@
 - 主进程自己加载 `.env`：electron-vite 只注入带前缀的变量，不读的话 `pnpm dev` 会一直走降级路径
 - **不做逐字流式**（决策与理由）：护栏可能在回答产出后要求重写，逐字显示无法撤回；
   本版显示"正在想…"，护栏通过后整段呈现。流式与护栏的正式取舍留给后续界面迭代
-- **界面自检**：`BIOBUDDY_SELFTEST=1 pnpm dev` 会在真实应用里操作 DOM 并断言，失败以退出码 1 结束
+- **界面自检**：`SPROUTASK_SELFTEST=1 pnpm dev` 会在真实应用里操作 DOM 并断言，失败以退出码 1 结束
 
 ## 5. 验收标准
 
@@ -45,7 +45,7 @@
 **实测结论（2026-09-22）**：
 - `pnpm test` **90/90 通过**（9 个文件；本次新增 `tests/session.test.ts` 11 例）
 - `pnpm typecheck` 0 错
-- `BIOBUDDY_SELFTEST=1 pnpm dev` → **15/15 通过**：主进程装配 7 项 + 界面渲染 2 项 +
+- `SPROUTASK_SELFTEST=1 pnpm dev` → **15/15 通过**：主进程装配 7 项 + 界面渲染 2 项 +
   交互 4 项 + 样式 1 项 + 降级话术 1 项；并输出截图 `selftest-ui.png`
   （其中"样式已生效"用 `getComputedStyle` 断言用户气泡为品牌绿 `rgb(22, 163, 74)`，
   可确认 scoped CSS 真的加载了，而不只是 DOM 存在）

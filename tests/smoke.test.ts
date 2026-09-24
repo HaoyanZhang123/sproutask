@@ -104,7 +104,14 @@ describe('把关逻辑自身（防止"测试没测到点上"）', () => {
     ['require()', `const vue = require('vue')`],
     ['子路径', `import { app } from 'electron/main'`],
     ['作用域包', `import { ref } from '@vue/reactivity'`],
-    ['pinia', `import { createPinia } from 'pinia'`]
+    ['pinia', `import { createPinia } from 'pinia'`],
+    // 以下由独立审核员实测为"旧版可绕过"，必须持续覆盖
+    ['模板字符串 import()', 'await import(`electron`)'],
+    ['模板字符串 require()', 'const v = require(`vue`)'],
+    ['import() 带注释', `await import(/* @vite-ignore */ 'electron')`],
+    ['require() 带注释', `const v = require(/* c */ 'vue')`],
+    ['require.resolve()', `const p = require.resolve('electron')`],
+    ['换行书写', `import {\n  app\n} from 'electron'`]
   ]
 
   it.each(bypasses)('能抓出绕过写法：%s', (_label, source) => {

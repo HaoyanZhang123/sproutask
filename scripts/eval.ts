@@ -101,6 +101,13 @@ async function main(): Promise<void> {
     `\n汇总：通过 ${summary.passed}/${summary.total}（${(summary.passRate * 100).toFixed(1)}%）｜答案泄漏用例 ${summary.leakCount} 条`
   )
   console.log(`报告已保存：${outFile}`)
+
+  // 退出码即门禁：有用例失败就返回非零，否则"13/13 全失败仍 exit 0"会让它形同虚设
+  // （独立审核员实测指出过这一点；规范里把它列为验收步骤，就必须真的能失败）
+  if (summary.failed > 0) {
+    console.error(`\n❌ 评测未通过：${summary.failed} 条用例失败。请对照上面的失败原因调整提示词后重跑。`)
+    process.exit(1)
+  }
 }
 
 void main()

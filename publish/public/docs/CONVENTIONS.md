@@ -1,6 +1,6 @@
 # 编码与协作规范（CONVENTIONS）
 
-> 本文件是**公开版**，保留工程规范；与研究组织相关的约定不在此文件。
+> 本文件是协作规范；与研究 / 组织相关的约定不在开源范围内。
 
 ## 1. 语言与命名
 
@@ -10,12 +10,16 @@
 
 | 概念 | 代码用词 |
 |---|---|
-| 教材单元 | `unit` |
+| 教材单元（= 章） | `unit` |
 | 小节 | `section` |
 | 知识点 | `knowledgePoint`（id 前缀 `kp-`） |
-| 掌握度 | `mastery`（`unlearned` / `exploring` / `mastered`） |
+| 掌握度 | `mastery`（`unlearned` / `exploring` / `mastered`）/ 记录为 `MasteryRecord` |
+| 学情摘要（提示词层） | `l3-profile` / `buildProfileLayer` |
+| 学习位置 | `StudyPosition`（册 · 章/单元 · 节） |
+| 学生编号 | `studentId`（`^S\d{2,3}$`，**只存编号不存姓名**） |
+| 课程标准要求 | `curriculumRequirements` |
+| 前置知识 | `prerequisites` |
 | 会话 / 轮次 | `session` / `turn` |
-| 学情 | `profile` |
 | 学习模式 | `studyMode`（`preview` / `review` / `practice` / `extension`） |
 
 ## 2. 依赖与分层
@@ -29,7 +33,7 @@
 - `strict: true`；**禁止 `any`**（用 `unknown` + Zod 解析）
 - 外部输入（IPC、文件、模型返回值）一律先 Zod 校验再使用
 - 不用 `enum`，用 `z.enum` + `z.infer`
-- 单文件 ≤ 300 行（软约束，超了先想拆分）
+- 单文件 ≤ 300 行（软约束，超了先想拆分；`.vue` 的 `<style>` 块不计入）
 
 ## 4. IPC 与安全
 
@@ -50,7 +54,7 @@
 | 单元测试 | `pnpm test` | 领域逻辑、状态机、流式解析、评测判定 |
 | 类型检查 | `pnpm typecheck` | 两端（主进程 / 渲染进程） |
 | 教学行为评测 | `pnpm eval` | 苏格拉底纪律、答案泄漏、出处引用、适龄语气 |
-| **界面自检** | `$env:BIOBUDDY_SELFTEST = "1"; pnpm dev` | 在真实应用里操作 DOM 并断言（渲染/交互/样式/降级）；失败退出码 1，并输出截图 |
+| **界面自检** | `$env:SPROUTASK_SELFTEST = "1"; pnpm dev` | 在真实应用里操作 DOM 并断言（渲染/交互/样式/降级）；失败退出码 1，并输出截图 |
 
 > 单元测试与类型检查**必须都跑**：`vitest` 只转译不做类型检查，类型错误不会让它变红。
 
@@ -69,7 +73,7 @@
 
 ## 7. Git 工作流
 
-- 分支：`main` 常绿；功能分支 `feat/<需求号>-<简述>`
+- 分支：`main` 常绿；功能分支 `feat/<简述>`（如 `feat/section-text-tool`）
 - 提交信息：Conventional Commits（`feat:` `fix:` `docs:` `refactor:` `test:` `chore:`）
 - 合并前必须通过 `pnpm typecheck && pnpm test`（CI 已配置）
 - 一次提交只做一件事
@@ -77,14 +81,15 @@
 
 ## 8. 需求驱动流程
 
-每条需求三步走：
+每个改动三步走：
 
-1. **写 spec**：目标 / 用户故事 / 输入输出 / 涉及契约 / **验收标准** / **明确不做什么**
+1. **先写清目标与验收标准**：目标 / 用户故事 / 输入输出 / 涉及契约 / **验收标准** / **明确不做什么**
+   （维护者内部用需求文档承载；本仓库不含这些文档）
 2. **实现**：落在对应分层目录；新增领域概念先补 Zod schema；同步补测试
 3. **验收**：`pnpm typecheck && pnpm test`（提示词相关再加 `pnpm eval`）；
    若改动了契约或分层规则，补一份决策记录
 
 **在新对话里开工时，把这段贴给 AI**：
 
-> 项目：BioBuddy（本地优先桌面 Agent）。先读 `ARCHITECTURE.md` 与 `CONVENTIONS.md`，
-> 再读本次需求的 spec，**只实现这一条需求**，不要改动领域契约与其他模块。
+> 项目：芽问 SproutAsk（本地优先桌面 Agent）。先读 `ARCHITECTURE.md` 与 `CONVENTIONS.md`，
+> 再读本次要做的这件事的验收标准，**只做这一件事**，不要改动领域契约与其他模块。

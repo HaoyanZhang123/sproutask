@@ -11,7 +11,8 @@ import { buildSessionLayer } from './l4-session'
 /**
  * 提示词 v1 装配入口。
  *
- * 分层顺序即最终 system 消息的顺序（L0 → L4）；L5 是对话历史，不进 system。
+ * 分层顺序即最终 system 消息的顺序（L0 → L4）。
+ * 对话历史不进 system，而是以 user / assistant 消息附在 system 之后（见 buildMessages）。
  * 改动教学规则请**新建 v2 目录**而非原地修改，便于 A/B 对比（见 docs/CONVENTIONS.md）。
  */
 

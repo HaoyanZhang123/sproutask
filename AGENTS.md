@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> BioBuddy —— 本地优先的初中生物学习 Agent（Electron + Vue3 + pnpm，教育研习项目）。
+> 芽问 —— 本地优先的初中生物学习 Agent（Electron + Vue3 + pnpm，教育研习项目）。
 > 详细规矩在 `docs/`，本文件只做命令+红线+路由，不复制内容。
 
 ## 命令

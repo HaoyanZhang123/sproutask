@@ -13,7 +13,7 @@ client = OpenAI(
     base_url="https://api.deepseek.com"
 )
 
-app = FastAPI(title="BioBuddy 生物学习伙伴")
+app = FastAPI(title="SproutAsk 生物学习伙伴")
 
 
 # 请求体：学生发来什么
@@ -44,4 +44,4 @@ def chat(req: ChatRequest):
 
 @app.get("/")
 def root():
-    return {"status": "BioBuddy is running 🌱"}
+    return {"status": "SproutAsk is running 🌱"}

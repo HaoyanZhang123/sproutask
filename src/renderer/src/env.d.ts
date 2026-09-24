@@ -12,7 +12,7 @@ declare module '*.vue' {
  */
 declare global {
   interface Window {
-    biobuddy: {
+    sproutask: {
       ping(message: string): Promise<{ reply: string; at: string }>
       sessionStart(): Promise<{
         question: string

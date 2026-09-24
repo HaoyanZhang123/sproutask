@@ -90,7 +90,7 @@ describe('Agent 循环：基本路径', () => {
 })
 
 describe('Agent 循环：答案泄漏护栏', () => {
-  it('命中泄漏 → 加严重生成一次，并打标记', async () => {
+  it('命中泄漏 → 用更严格的指令重新生成一次，并打标记', async () => {
     const client = new RecordingClient([
       { content: '答案是二氧化碳和水。', toolCalls: [] }, // 泄漏
       { content: '那你觉得，植物在阳光下会"吃"进什么？🌱', toolCalls: [] } // 重写后合格

@@ -5,7 +5,7 @@ import { z } from 'zod'
  *
  * 规则（docs/ARCHITECTURE.md「领域契约」）：
  *   1. 所有跨层传递的结构都必须先在这里定义 Schema，类型由 z.infer 推导；
- *   2. 修改本文件的字段 = 破坏性变更，必须写决策记录（docs/adr/）并在需求说明里记录影响；
+ *   2. 修改本文件的字段 = 破坏性变更，必须写决策记录（docs/adr/）并说明影响范围；
  *   3. 尚未定案的形态（如"关卡/闯关"）不写入本文件，放在可选编排层。
  */
 
@@ -15,7 +15,7 @@ export const SectionSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   page: z.number().int().positive().optional(),
-  /** 指向本地教材原文文件的定位符（原文不入库，见 .gitignore） */
+  /** 指向本地教材原文文件的定位符（原文不入库，见 .gitignore 的 `/content/` 规则） */
   textRef: z.string().optional()
 })
 export type Section = z.infer<typeof SectionSchema>

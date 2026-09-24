@@ -11,14 +11,14 @@ import { loadConfig } from './config'
  */
 
 /** 开发期自检：无头验证"主进程侧装配 + 界面能否渲染"，不需要人工点击 */
-const SELF_TEST = process.env['BIOBUDDY_SELFTEST'] === '1'
+const SELF_TEST = process.env['SPROUTASK_SELFTEST'] === '1'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1100,
     height: 760,
     show: false,
-    title: 'BioBuddy',
+    title: '芽问 SproutAsk',
     autoHideMenuBar: true,
     backgroundColor: '#f7f8fa',
     webPreferences: {
@@ -58,19 +58,14 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
 /**
  * 自检：不靠人工点击，直接在运行中的应用里操作 DOM 并断言。
  *
- * 覆盖：主进程装配（会话/选项/降级）→ 界面渲染（开场问句、四个模式按钮）
- * → 交互（点击模式 → 进入对话 → 发送消息 → 出现回复气泡）→ 样式是否生效。
- * 任何一项失败则以退出码 1 结束，便于 CI 或无头环境自动判定。
- */
-/**
- * 自检：不靠人工点击，直接在运行中的应用里操作 DOM 并断言。
- *
  * 覆盖：主进程装配（会话/选项/回复路径）→ 界面渲染（开场问句、四个模式按钮）
  * → 交互（点击模式 → 进入对话 → 发送消息 → 出现回复气泡）→ 样式是否生效。
  * 任何一项失败则以退出码 1 结束，便于 CI 或无头环境自动判定。
  *
  * 注意：**有 Key / 无 Key 两种环境都必须通过**——断言的是"产品行为合理"，
  * 而不是"环境恰好没配 Key"（早期版本误把环境当断言，配好 Key 后自检反而失败）。
+ * 另外：**信息性输出用 note() 打印，不要写成恒真的 check()**——
+ * `check(x, true)` 这类断言看着绿，其实什么都没验证（独立审核员指出过）。
  */
 async function runSelfTest(win: BrowserWindow): Promise<void> {
   const config = loadConfig()
@@ -83,11 +78,17 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     if (!ok) failures.push(label)
   }
 
+  /** 信息性输出：只打印事实，不计入通过/失败（避免写成恒真断言） */
+  const note = (label: string, detail: string): void => {
+    console.log(`[selftest] ℹ️  ${label} —— ${detail}`)
+  }
+
   // ── 主进程侧装配 ───────────────────────────────────────────
   const start = session.start()
   const chosen = session.chooseMode('2')
   check('运行模式可加载', config.mode === 'dev' || config.mode === 'packaged', config.mode)
-  check('Key 配置状态可读取', true, hasKey ? '已配置 → 走真实调用' : '未配置 → 走降级')
+  check('Key 配置状态可读取', typeof config.deepseek.apiKey === 'string' && config.deepseek.model.length > 0)
+  note('Key 状态', hasKey ? '已配置 → 走真实调用' : '未配置 → 走降级')
   check('开场问句包含主动询问', start.question.includes('今天想做什么'))
   check('提供四个模式选项', start.options.length === 4, start.options.map((o) => o.label).join('/'))
   check('选择"2"解析为复习', chosen.ok && chosen.mode === 'review')
@@ -102,7 +103,14 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     !/(Error|error:|stack|at\s+\w+\s*\(|\b[45]\d{2}\b|Bearer|apiKey)/.test(reply)
   )
   if (hasKey) {
-    check('已配置 Key：实体调用未降级（或已给出明确的可读提示）', true, degraded ? `降级=${degraded.kind}` : '未降级')
+    // 有 Key 时不断言"一定成功"（可能余额不足/网络不通），但降级原因必须是已知分类，
+    // 否则说明错误映射漏了一种情况——这是能真正失败的断言。
+    const knownKinds = ['missing-key', 'auth', 'balance', 'rate-limit', 'server', 'network', 'bad-response']
+    check(
+      '已配置 Key：未降级，或降级原因属于已知分类',
+      !degraded || knownKinds.includes(degraded.kind),
+      degraded ? `降级=${degraded.kind}` : '未降级'
+    )
   } else {
     check('未配置 Key：降级而非崩溃，且话术面向学生', Boolean(degraded) && reply.includes('钥匙'), degraded?.kind ?? '')
   }
