@@ -108,14 +108,10 @@ export class ChatSession {
 
   /** 学生发一句话：交给 Agent 循环（含工具调用与答案泄漏护栏） */
   async chat(userMessage: string): Promise<ChatOutcome> {
-    if (!this.mode || !this.position) {
+    const scoped = this.currentScope()
+    if (!scoped) {
       return { needsMode: true, message: '先告诉我今天想做什么吧：预习、复习、做题，还是拓展？' }
     }
-
-    const mode = this.mode
-    const scope = this.deps.scopeFactory(mode)
-    // 把会话选定的位置写回上下文，保证"按位置装载"这条链路一致
-    const scoped: StudyScope = { ...scope, position: this.position }
 
     const result = await runAgentTurn({
       client: this.deps.client,
@@ -137,6 +133,18 @@ export class ChatSession {
     }
 
     return { needsMode: false, ...result }
+  }
+
+  /**
+   * 当前学习上下文（教材阅读视图要用）。
+   * 未选模式时返回 null——此时界面还在问"今天想做什么"。
+   * 与 chat() 共用同一份装配逻辑，避免两处各建一份导致上下文不一致。
+   */
+  currentScope(): StudyScope | null {
+    if (!this.mode || !this.position) return null
+    const scope = this.deps.scopeFactory(this.mode)
+    // 把会话选定的位置写回上下文，保证"按位置装载"这条链路一致
+    return { ...scope, position: this.position }
   }
 
   getState(): {

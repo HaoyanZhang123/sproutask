@@ -17,13 +17,15 @@
     "baseUrl": ".",
     "paths": {
       "@core/*": ["src/core/*"],
-      "@main/*": ["src/main/*"]
+      "@main/*": ["src/main/*"],
+      "@shared/*": ["src/shared/*"]
     }
   },
   "include": [
     "src/main/**/*.ts",
     "src/preload/**/*.ts",
     "src/core/**/*.ts",
+    "src/shared/**/*.ts",
     "scripts/**/*.ts",
     "tests/**/*.ts",
     "*.ts"

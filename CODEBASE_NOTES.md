@@ -9,8 +9,9 @@
 |---|---|
 | Git 仓库根 | `E:/DSH/workspaces/ai4edu` |
 | 会话可见工作路径 | `D:\dsh\ai4edu`（同一仓库的另一路径视图；`Get-Item` 可能报"找不到项"） |
-| 远端 | 无（自有本地仓） |
-| 跟踪文件数 | 51（M0 结束时，`git ls-files` 计数） |
+| 远端 | 无（自有本地仓）；分支 `main`；提交身份唯一 `张灏焱 <1814914856@qq.com>` |
+| 跟踪文件数 | 113（2026-09 完成 F-011 时计数；`git ls-files`） |
+| 公开产物 | `E:\my-project\sproutask` → <https://github.com/HaoyanZhang123/sproutask>（独立单/多提交仓） |
 
 **过期判据**：`git rev-parse --show-toplevel` 的输出与上表不符 → 本节过期。
 
@@ -50,6 +51,7 @@
 | 8 | `pnpm 9` 下 `node_modules/electron/dist` 为空、`pnpm dev` 报 `Error: Electron uninstall` | 本机 pnpm 用的是另一处 store，其中已缓存 electron 构建脚本的**空 side-effects**，`side-effects-cache` 命中即跳过 postinstall | 用 `--config.side-effects-cache=false` 重装；干净机器不会出现（**不要**误判为仓库缺陷） | 若同版本 store 内 electron 的 `dist/` 已存在 → 无需处理 |
 | 9 | 用 `git ls-files` 与磁盘遍历对比文件集合时"多出/缺失一批文件" | `git ls-files` 对中文名做 octal 引号、且用正斜杠；直接与 `Get-ChildItem` 的反斜杠路径比较会全错 | 比较前统一：`Trim('"').Replace('\','/')`；中文名可用 `-z` 或按 sha 比对 | 脚本已按此归一化 → 无 |
 | 10 | 管道喂多行 stdin 给 `pnpm chat` 只消费第一行 | Node `readline` 在"没有 pending question"时到达的行会被丢弃 | 交互式流程别用管道测；要自动化改用**逐步写入 stdin**（`ProcessStartInfo.RedirectStandardInput` + 延时） | 若将来 chat 改用一次性读取全部输入 → 可简化 |
+| 11 | `pnpm dev` 报 `TypeError: Cannot read properties of undefined (reading 'whenReady')`，而代码本身没问题 | 环境里存在 `ELECTRON_RUN_AS_NODE=1`（模拟 CI 时常被设置后忘记清理）→ Electron 以**纯 Node** 启动，`require('electron')` 返回 npm 包而不是 Electron API，`electron.app` 因此为 undefined | `Remove-Item Env:ELECTRON_RUN_AS_NODE` 后重跑；`src/main/index.ts` 已加"启动前自检"，命中即打印可读诊断并退出（不再抛晦涩的 TypeError） | 若 `src/main/index.ts` 里那段自检被删 → 恢复它 |
 
 ## 5. 提交身份（✅ 已规范化，2026-09-24）
 

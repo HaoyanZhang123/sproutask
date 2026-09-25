@@ -7,7 +7,10 @@ import vue from '@vitejs/plugin-vue'
  *   main      → Electron 主进程（Agent 运行时的宿主，可用 node:*）
  *   preload   → 仅做 contextBridge 暴露，不含业务逻辑
  *   renderer  → Vue3 界面（无 Node 权限）
- * 分层依赖铁律见 docs/ARCHITECTURE.md §4：renderer → main → core（core 不得依赖 electron/vue）
+ *
+ * 分层依赖铁律见 docs/ARCHITECTURE.md「分层依赖铁律」：
+ *   renderer → main → core，且 core / main 不得依赖 electron 之外的宿主能力；
+ *   `src/shared/` 放**无任何依赖的纯代码**，三层都可以引用（由 tests/smoke.test.ts 把关）。
  */
 export default defineConfig({
   main: {
@@ -15,7 +18,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@core': resolve('src/core'),
-        '@main': resolve('src/main')
+        '@main': resolve('src/main'),
+        '@shared': resolve('src/shared')
       }
     },
     build: {
@@ -36,7 +40,8 @@ export default defineConfig({
     root: resolve('src/renderer'),
     resolve: {
       alias: {
-        '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve('src/renderer/src'),
+        '@shared': resolve('src/shared')
       }
     },
     plugins: [vue()],

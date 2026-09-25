@@ -41,6 +41,29 @@ const api = {
     historyLength: number
   }> => ipcRenderer.invoke('session:state') as never,
 
+  /** 教材阅读视图的数据源（未选模式时为 null） */
+  sectionContent: (): Promise<{
+    unitTitle: string
+    edition: string
+    grade: string
+    sectionTitle: string
+    mode: string
+    blocks: Array<{
+      type: 'text' | 'think' | 'answer'
+      title?: string
+      body: string
+      index: number
+    }>
+    knowledgePoints: Array<{
+      id: string
+      title: string
+      summary: string
+      refs: string[]
+      misconceptions: string[]
+    }>
+    curriculumRequirements: string[]
+  } | null> => ipcRenderer.invoke('content:section') as never,
+
   /** 是否已配置 Key —— 只回布尔，Key 本身永不进入渲染进程 */
   configStatus: (): Promise<{ mode: string; hasApiKey: boolean }> =>
     ipcRenderer.invoke('config:status') as never

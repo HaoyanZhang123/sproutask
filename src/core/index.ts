@@ -17,5 +17,16 @@ export { ChatSession } from './agent/session'
 export type { ChatOutcome, ChooseModeResult, SessionStartInfo } from './agent/session'
 export * as evalRunner from './eval/runner'
 export { createDemoScope } from './content/demo'
+export {
+  ANSWER_TITLE,
+  THINK_TITLE,
+  countMatches,
+  extractCitation,
+  matchesOnlyInCollapsed,
+  parseSectionBlocks,
+  splitHighlights
+} from '../shared/section-blocks'
+export { plainTextOf } from './prompts/v1/l2-textbook'
+export type { HighlightSegment, SectionBlock, SectionBlockType } from '../shared/section-blocks'
 export type { StudentStore } from './storage'
 export type { TextbookLibrary, StudyScope, CurriculumRequirement } from './content'

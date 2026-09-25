@@ -44,6 +44,7 @@
 │  ├─ main/        # Electron 主进程：窗口、IPC、配置、注入实现
 │  ├─ preload/     # contextBridge 暴露的类型化 API（无业务逻辑）
 │  ├─ renderer/    # Vue3 界面（无 Node 权限）
+│  ├─ shared/      # ⭐ 零依赖纯代码，三层都可引用（如正文区块解析、搜索高亮切分）
 │  └─ core/        # ⭐ 纯领域逻辑，可单测，不依赖宿主
 │     ├─ agent/    # Agent 循环、工具注册表、答案泄漏护栏（M3）
 │     ├─ prompts/  # 分层提示词 v1（M1）
@@ -65,12 +66,16 @@
 
 ```
 renderer ──(仅经 preload 暴露的 API)──▶ main ──▶ core
+renderer ──(可直接引用)──▶ shared          # 零依赖纯代码，如正文区块解析、搜索高亮
 core  ✗ 不得 import electron / vue / pinia
 main  ✓ 可用 node:*，但业务逻辑必须放 core
 ```
 
 - renderer 需要 core 的**类型**时，只允许 `import type`
-- 违反此规则的需求一律打回；`tests/smoke.test.ts` 已自动把关
+- `src/shared/` 是**唯一的跨层共享区**：里面必须是零依赖纯函数（连 `import` 都不许有），
+  这样"给渲染进程用"不会把主进程的依赖带进界面包
+- 违反此规则的需求一律打回；`tests/smoke.test.ts` 已自动把关三条：
+  core 不得依赖宿主、`src/shared` 必须零依赖、renderer 不得直接引 core/main
 
 ## 5. 安全与 IPC
 
@@ -134,7 +139,7 @@ interface StudentStore {               // 数据存哪：SQLite / JSONL 待定�
      教材原文（按节）+ 知识点 + 常见误区 + 课标要求（约束层）
 ④ Agent 循环：调 LLM（带 tools）→ 有 toolCalls 则执行并回填 → 直到产出最终回答
 ⑤ 答案泄漏护栏：判定"是否把答案说出来了" → 命中则加严指令重生成一次并打标
-⑥ 落库（轮次 + 掌握度）→ 流式推送界面
+⑥ 结果推送到界面整段呈现（**落库待 F-013**；逐字流式待界面迭代，护栏重写与流式的冲突见 F-010 的决策）
 ```
 
 - 循环上限 5 次；LLM 失败必须降级为可读中文提示，不得崩溃
@@ -156,8 +161,11 @@ L0 人格 / L1 教学纪律 / **L2 教材与课标约束** / L3 学情摘要（�
 ② 课标 PDF → tools/extract_curriculum.py
      → content/curriculum/<source>.md（不进 git）
 ③ 结构化：章节索引 + 知识点 + 常见误区 + 课标↔知识点映射
-     → content/units/<unit>/*（进 git，格式待 Q3 定）
-④ 校验：引用完整性、前置知识无环、课标映射可追溯（M2 实现）
+     → content/units/<unit>/*（进 git，格式待定，见 ADR-0003）
+④ 正文里的"想一想 / 答案"按折叠标记包裹后交给界面（约定见 ADR-0003「决策三」）：
+     `:::think 想一想` … `:::`  与  `:::answer` … `:::`
+     解析器 `src/shared/section-blocks.ts`；渲染层不用 v-html，未闭合的块退化为普通文本
+⑤ 校验：引用完整性、前置知识无环、课标映射可追溯（M2 实现）
 ```
 
 **为什么全册入库而不是只做一册**：学生可能预习、复习、做题跨章节取用；
