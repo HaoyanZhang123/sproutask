@@ -210,7 +210,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   )
   check('样式已生效（用户气泡为品牌绿）', afterSend.userBg === 'rgb(22, 163, 74)', afterSend.userBg)
 
-  // ── 教材阅读视图（F-011：可折叠答案、搜索高亮、按模式折叠） ──
+  // ── 教材阅读视图（可折叠答案、搜索高亮、按模式折叠） ────────
   const reading = await evalInRenderer<{
     hasPane: boolean
     sectionTitle: string

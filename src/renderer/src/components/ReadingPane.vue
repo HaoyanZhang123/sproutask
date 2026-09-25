@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-// 允许渲染进程直接引用的**唯一例外**：core 里的无依赖纯函数模块（见 tests/smoke.test.ts 的把关）
+// 允许渲染进程直接引用的**唯一例外**：src/shared 里的零依赖纯函数（见 tests/smoke.test.ts 的把关）
 import {
   countMatches,
   matchesOnlyInCollapsed,
@@ -8,7 +8,7 @@ import {
 } from '@shared/section-blocks'
 
 /**
- * 教材阅读视图（F-011）。
+ * 教材阅读视图。
  *
  * 设计要点：
  *   - **不用 v-html**：区块由主进程解析好传过来，这里只用模板渲染 → 无 XSS 面
