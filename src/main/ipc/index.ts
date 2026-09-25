@@ -7,6 +7,7 @@ import {
   createDefaultTools,
   createDemoScope
 } from '../../core'
+import { parseSectionBlocks } from '../../shared/section-blocks'
 import type { StudyScope } from '../../core'
 import { loadConfig } from '../config'
 
@@ -82,6 +83,37 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('session:state', () => getSession().getState())
+
+  /**
+   * 教材阅读视图的数据源：当前小节的原文（解析后的区块）、知识点与课标要求。
+   *
+   * 解析放在主进程（core 的纯函数）：渲染进程不接触原始标记文本，只渲染结构化区块，
+   * 因此**不需要 v-html**，也就没有 XSS 面（教材内容可能是他人编写的文件）。
+   */
+  ipcMain.handle('content:section', () => {
+    const scope = getSession().currentScope()
+    if (!scope) return null
+
+    const section = scope.sectionTexts[0]
+    if (!section) return null
+
+    return {
+      unitTitle: scope.unit.title,
+      edition: scope.unit.edition,
+      grade: scope.unit.grade,
+      sectionTitle: section.title,
+      mode: scope.mode,
+      blocks: parseSectionBlocks(section.text),
+      knowledgePoints: scope.knowledgePoints.map((kp) => ({
+        id: kp.id,
+        title: kp.title,
+        summary: kp.summary,
+        refs: kp.refs.map((r) => (r.page ? `${section.title}（第 ${r.page} 页）` : section.title)),
+        misconceptions: kp.misconceptions
+      })),
+      curriculumRequirements: scope.curriculumRequirements
+    }
+  })
 
   /** 是否已配置 Key（**只回布尔，不回 Key 本身**） */
   ipcMain.handle('config:status', () => {

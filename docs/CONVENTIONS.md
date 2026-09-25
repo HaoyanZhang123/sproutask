@@ -25,8 +25,10 @@
 ## 2. 依赖与分层
 
 - 铁律见 `ARCHITECTURE.md`「分层依赖铁律」：`renderer → main → core`；core 不得依赖 electron/vue
+- **跨层共享的纯逻辑放 `src/shared/`**（零依赖，连 `import` 都不许写）；渲染进程不得直接引 core/main
 - 跨层只用类型时写 `import type`
 - 不许绕过接口直接 `new` 具体实现——存储与内容实现由主进程注入
+- 上述三条都有自动把关（`pnpm test` 的分层用例）
 
 ## 3. TypeScript
 

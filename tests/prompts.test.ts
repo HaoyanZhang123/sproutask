@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MAX_HISTORY_TURNS, PROMPT_VERSION, buildMessages, buildSystemPrompt } from '@core/prompts'
 import type { StudyScope } from '@core/content'
+import { makeScope } from './helpers/fixtures'
 
 const scope: StudyScope = {
   position: { volumeId: 'rjb-7s', unitId: 'u-cell-basic-unit', sectionId: 's1' },
@@ -49,6 +50,23 @@ describe('提示词分层装配', () => {
   it('未提供学情时不注入该层', () => {
     const prompt = buildSystemPrompt({ scope, mastery: [] })
     expect(prompt).not.toContain('这个学生的学习记录')
+  })
+
+  it('可折叠块的标记不进提示词，但块内文字（含答案）保留', () => {
+    const withBlocks = makeScope({
+      sectionTexts: [
+        {
+          sectionId: 's1',
+          title: '细胞的生活',
+          text: ['正文一句。', '', ':::think 想一想', '油属于哪类物质？', ':::', '', ':::answer', '属于有机物。', ':::'].join('\n')
+        }
+      ]
+    })
+    const prompt = buildSystemPrompt({ scope: withBlocks })
+    expect(prompt).not.toContain(':::') // 标记必须被剥掉，避免污染上下文
+    expect(prompt).toContain('正文一句。')
+    expect(prompt).toContain('（想一想）油属于哪类物质？') // 折叠块标注来源，便于模型区分课文与思考题
+    expect(prompt).toContain('（参考答案）属于有机物。') // 答案留在上下文里：引导需要知道正确结论
   })
 
   it('提供学情时按掌握度分组，并提示误区', () => {

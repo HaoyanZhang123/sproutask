@@ -53,6 +53,22 @@ async function evalInRenderer<T>(win: BrowserWindow, code: string): Promise<T> {
   return (await win.webContents.executeJavaScript(code, true)) as T
 }
 
+/**
+ * 启动前的环境自检：如果主进程是被"纯 Node"方式启动的（典型原因：环境里设了
+ * `ELECTRON_RUN_AS_NODE=1`，多半是模拟 CI 时留下的），`require('electron')`
+ * 会返回 npm 包而不是 Electron API，报错会是难以定位的
+ * `Cannot read properties of undefined (reading 'whenReady')`。
+ * 这里提前给出可读的诊断，省得下次再查半小时。
+ */
+if (!process.versions.electron) {
+  console.error(
+    '[main] 当前进程不是 Electron 运行时，而以纯 Node 启动了。\n' +
+      '       常见原因：环境变量 ELECTRON_RUN_AS_NODE=1（模拟 CI 时常被设置后忘记清理）。\n' +
+      '       处理：在新终端里执行 `Remove-Item Env:ELECTRON_RUN_AS_NODE`（或 set ELECTRON_RUN_AS_NODE=）后重跑 pnpm dev。'
+  )
+  process.exit(1)
+}
+
 const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
@@ -193,6 +209,110 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     `${afterSend.assistantText.trim().slice(0, 20)}…（${hasKey ? '已配置 Key' : '未配置 Key'}）`
   )
   check('样式已生效（用户气泡为品牌绿）', afterSend.userBg === 'rgb(22, 163, 74)', afterSend.userBg)
+
+  // ── 教材阅读视图（可折叠答案、搜索高亮、按模式折叠） ────────
+  const reading = await evalInRenderer<{
+    hasPane: boolean
+    sectionTitle: string
+    collapsed: boolean
+    stacked: boolean
+    answerToggles: number
+    visibleAnswerBodies: number
+  }>(
+    win,
+    `(() => {
+      const pane = document.querySelector('.pane')
+      return {
+        hasPane: Boolean(pane),
+        sectionTitle: pane ? (pane.querySelector('.section-title')?.textContent ?? '') : '',
+        collapsed: pane ? pane.classList.contains('collapsed') : false,
+        stacked: Boolean(document.querySelector('.workspace.stacked')),
+        answerToggles: document.querySelectorAll('.answer-toggle').length,
+        visibleAnswerBodies: document.querySelectorAll('.answer-body').length
+      }
+    })()`
+  )
+  check('教材阅读区已渲染出来', reading.hasPane)
+  check('阅读区显示当前小节标题', reading.sectionTitle.includes('细胞的生活'), reading.sectionTitle)
+  check(
+    '复习模式默认收起阅读区（把屏幕让给对话）',
+    reading.collapsed && reading.stacked,
+    `collapsed=${reading.collapsed} stacked=${reading.stacked}`
+  )
+  check(
+    '收起状态下不渲染正文（省空间，也避免答案被瞥见）',
+    reading.answerToggles === 0,
+    `收起时答案块数=${reading.answerToggles}`
+  )
+
+  // 展开阅读区
+  await evalInRenderer(win, `(() => { document.querySelector('.pane .ghost').click(); return true })()`)
+  await wait(400)
+  const afterExpandPane = await evalInRenderer<{
+    collapsed: boolean
+    hasSearch: boolean
+    answerToggles: number
+    visibleAnswerBodies: number
+  }>(
+    win,
+    `(() => {
+      const pane = document.querySelector('.pane')
+      return {
+        collapsed: pane ? pane.classList.contains('collapsed') : true,
+        hasSearch: Boolean(document.querySelector('.pane .search')),
+        answerToggles: document.querySelectorAll('.answer-toggle').length,
+        visibleAnswerBodies: document.querySelectorAll('.answer-body').length
+      }
+    })()`
+  )
+  check('点"展开教材"后阅读区展开并出现搜索框', !afterExpandPane.collapsed && afterExpandPane.hasSearch)
+  check(
+    '答案块存在且默认收起（先自己答、再展开对照）',
+    afterExpandPane.answerToggles >= 3 && afterExpandPane.visibleAnswerBodies === 0,
+    `${afterExpandPane.answerToggles} 个答案块，默认可见正文 ${afterExpandPane.visibleAnswerBodies} 个`
+  )
+
+  // 点开一个答案块
+  await evalInRenderer(win, `(() => { document.querySelector('.answer-toggle').click(); return true })()`)
+  await wait(300)
+  const openedAnswer = await evalInRenderer<number>(
+    win,
+    `document.querySelectorAll('.answer-body').length`
+  )
+  check('点开答案块后能看到答案正文', openedAnswer >= 1)
+
+  // 搜索只出现在折叠答案里的词（"DNA" 只在答案块内）→ 给提示而不自动展开
+  await evalInRenderer(
+    win,
+    `(() => {
+      const box = document.querySelector('.pane .search')
+      box.value = 'DNA'
+      box.dispatchEvent(new Event('input', { bubbles: true }))
+      return true
+    })()`
+  )
+  await wait(400)
+  const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
+    win,
+    `(() => ({
+      hint: Boolean(document.querySelector('.collapsed-hint')),
+      hits: document.querySelectorAll('.pane .hit').length,
+      info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
+    }))()`
+  )
+  check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
+
+  // 学生主动点"展开看看"后才展开并高亮
+  await evalInRenderer(
+    win,
+    `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
+  )
+  await wait(400)
+  const afterSearchExpand = await evalInRenderer<number>(
+    win,
+    `document.querySelectorAll('.pane .hit').length`
+  )
+  check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
 
   // ── 留档：截图供人工复核 ───────────────────────────────────
   const image = await win.webContents.capturePage()

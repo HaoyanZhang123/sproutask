@@ -38,6 +38,27 @@ declare global {
         positionLabel: string
         historyLength: number
       }>
+      sectionContent(): Promise<{
+        unitTitle: string
+        edition: string
+        grade: string
+        sectionTitle: string
+        mode: string
+        blocks: Array<{
+          type: 'text' | 'think' | 'answer'
+          title?: string
+          body: string
+          index: number
+        }>
+        knowledgePoints: Array<{
+          id: string
+          title: string
+          summary: string
+          refs: string[]
+          misconceptions: string[]
+        }>
+        curriculumRequirements: string[]
+      } | null>
       configStatus(): Promise<{ mode: string; hasApiKey: boolean }>
     }
   }

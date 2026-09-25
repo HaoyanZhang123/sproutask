@@ -93,7 +93,50 @@ describe('分层依赖铁律', () => {
 
     expect(offenders, `以下文件违反了 core 层不得依赖宿主能力的约定：\n${offenders.join('\n')}`).toEqual([])
   })
+
+  it('shared 层必须是零依赖纯代码（三层都可引用，所以绝不能引入任何 import）', () => {
+    const offenders: string[] = []
+    for (const file of walk('src/shared')) {
+      const source = readFileSync(file, 'utf-8')
+      if (/^\s*import\s/m.test(source) || /\brequire\s*\(/.test(source)) {
+        offenders.push(file)
+      }
+    }
+    expect(
+      offenders,
+      `src/shared 只放不带依赖的纯函数；以下文件引入了依赖：\n${offenders.join('\n')}`
+    ).toEqual([])
+  })
+
+  it('渲染进程不得直接引 core / main（唯一允许的共享代码是 src/shared）', () => {
+    // .vue 也要查：只遍历 .ts 会漏掉界面里的越层引用
+    const rendererFiles = [
+      ...walk('src/renderer/src'),
+      ...listFilesRecursive('src/renderer/src', '.vue')
+    ]
+    const offenders: string[] = []
+    for (const file of rendererFiles) {
+      const source = readFileSync(file, 'utf-8')
+      const banned = /from\s+['"](?:@core|@main|\.\.\/core|\.\.\/main|\.\.\/\.\.\/core|\.\.\/\.\.\/main)[^'"]*['"]/
+      if (banned.test(source)) offenders.push(file)
+    }
+    expect(
+      offenders,
+      `渲染进程只能通过 preload 暴露的 API 拿数据；共享纯逻辑请放 src/shared：\n${offenders.join('\n')}`
+    ).toEqual([])
+  })
 })
+
+/** 递归列出指定扩展名的文件（含 .vue 等非 .ts 文件） */
+function listFilesRecursive(dir: string, extension: string): string[] {
+  const out: string[] = []
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) out.push(...listFilesRecursive(full, extension))
+    else if (entry.name.endsWith(extension)) out.push(full)
+  }
+  return out
+}
 
 describe('把关逻辑自身（防止"测试没测到点上"）', () => {
   const bypasses: Array<[string, string]> = [

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, nextTick, ref } from 'vue'
+import ReadingPane from './components/ReadingPane.vue'
+// 纯函数模块的白名单例外（见 tests/smoke.test.ts）：渲染进程可直接引用 core 里无依赖的纯逻辑
+import { extractCitation } from '@shared/section-blocks'
 
 /**
- * SproutAsk 最小对话界面。
+ * 芽问 SproutAsk 主界面（方案 D：对话 + 可折叠教材阅读视图）。
  *
  * 职责边界：**只做显示与转发**——模式判断、Agent 循环、护栏全在主进程/core，
  * 这里不写教学逻辑，也不接触 API Key。
@@ -24,6 +27,26 @@ interface Bubble {
   diagnostics?: string[]
 }
 
+interface SectionContent {
+  unitTitle: string
+  edition: string
+  grade: string
+  sectionTitle: string
+  mode: string
+  blocks: Array<{ type: 'text' | 'think' | 'answer'; title?: string; body: string; index: number }>
+  knowledgePoints: Array<{
+    id: string
+    title: string
+    summary: string
+    refs: string[]
+    misconceptions: string[]
+  }>
+  curriculumRequirements: string[]
+}
+
+/** 复习 / 做题时收起教材区，把屏幕让给对话；预习 / 拓展时展开（2026-09 决策） */
+const MODES_WITH_COLLAPSED_READING = ['review', 'practice']
+
 const stage = ref<'loading' | 'choosing' | 'chatting'>('loading')
 const openingQuestion = ref('')
 const options = ref<ModeOption[]>([])
@@ -31,10 +54,18 @@ const bubbles = ref<Bubble[]>([])
 const input = ref('')
 const thinking = ref(false)
 const modeLabel = ref<string | null>(null)
+const mode = ref<string | null>(null)
 const positionLabel = ref('')
 const hasApiKey = ref(true)
 const chooseError = ref('')
 const scrollAnchor = ref<HTMLElement | null>(null)
+
+// 教材阅读区
+const section = ref<SectionContent | null>(null)
+const paneCollapsed = ref(false)
+const query = ref('')
+const focusToken = ref(0)
+const locatedNote = ref('')
 
 const canSend = computed(
   () => stage.value === 'chatting' && !thinking.value && input.value.trim().length > 0
@@ -63,13 +94,39 @@ async function choose(answer: string): Promise<void> {
     return
   }
   modeLabel.value = result.modeLabel
+  mode.value = result.mode
   positionLabel.value = result.positionLabel
   stage.value = 'chatting'
   bubbles.value.push({
     role: 'system',
     text: `${result.modeLabel} · ${result.positionLabel} —— 现在开始吧，我会提问，不会直接告诉你答案 🌱`
   })
+  await loadSection()
   await scrollToBottom()
+}
+
+async function loadSection(): Promise<void> {
+  section.value = await window.sproutask.sectionContent()
+  paneCollapsed.value = MODES_WITH_COLLAPSED_READING.includes(mode.value ?? '')
+  query.value = ''
+  focusToken.value = 0
+  locatedNote.value = ''
+}
+
+/** 回复里出现出处时，教材区自动定位并高亮（"答案必须有出处"的落地环节） */
+function locateCitation(reply: string): void {
+  if (!section.value) return
+  const candidates = [
+    section.value.sectionTitle,
+    section.value.unitTitle,
+    ...section.value.sectionTitle.split(/\s+/).filter((part) => part.length > 1)
+  ]
+  const cited = extractCitation(reply, candidates)
+  if (!cited) return
+  query.value = cited
+  paneCollapsed.value = false
+  focusToken.value += 1
+  locatedNote.value = `已在教材中定位「${cited}」（高亮显示）`
 }
 
 async function send(): Promise<void> {
@@ -106,6 +163,7 @@ async function send(): Promise<void> {
     if (typeof result.iterations === 'number') diagnostics.push(`迭代 ${result.iterations} 轮`)
 
     bubbles.value.push({ role: 'assistant', text: result.reply ?? '', diagnostics })
+    if (result.reply) locateCitation(result.reply)
   } catch (error) {
     bubbles.value.push({ role: 'system', text: `出错了：${String(error)}` })
   } finally {
@@ -120,8 +178,12 @@ async function restart(): Promise<void> {
   options.value = info.options
   bubbles.value = []
   modeLabel.value = null
+  mode.value = null
   positionLabel.value = ''
   chooseError.value = ''
+  section.value = null
+  query.value = ''
+  locatedNote.value = ''
   stage.value = 'choosing'
 }
 </script>
@@ -139,7 +201,7 @@ async function restart(): Promise<void> {
       <div class="status">
         <span v-if="modeLabel" class="badge">{{ modeLabel }}</span>
         <span v-if="positionLabel" class="position">{{ positionLabel }}</span>
-        <button class="ghost" @click="restart">换一个模式</button>
+        <button class="ghost-btn" @click="restart">换一个模式</button>
       </div>
     </header>
 
@@ -148,9 +210,9 @@ async function restart(): Promise<void> {
       仍可体验流程，但每次提问都会走"连不上外脑"的降级提示。
     </p>
 
-    <section class="chat">
-      <!-- 开场：Agent 主动询问，学生四选一 -->
-      <div v-if="stage === 'choosing'" class="opening">
+    <!-- 开场：Agent 主动询问，学生四选一 -->
+    <section v-if="stage === 'choosing'" class="chat solo">
+      <div class="opening">
         <pre class="question">{{ openingQuestion }}</pre>
         <div class="mode-grid">
           <button
@@ -171,29 +233,50 @@ async function restart(): Promise<void> {
         </div>
         <p v-if="chooseError" class="error">{{ chooseError }}</p>
       </div>
-
-      <!-- 对话区 -->
-      <div v-else class="bubbles">
-        <div v-for="(bubble, index) in bubbles" :key="index" :class="['bubble', bubble.role]">
-          <div class="text">{{ bubble.text }}</div>
-          <ul v-if="bubble.diagnostics?.length" class="diagnostics">
-            <li v-for="(line, i) in bubble.diagnostics" :key="i">{{ line }}</li>
-          </ul>
-        </div>
-        <div v-if="thinking" class="bubble assistant thinking">小芽正在想…</div>
-        <div ref="scrollAnchor"></div>
-      </div>
     </section>
 
-    <footer v-if="stage === 'chatting'" class="composer">
-      <textarea
-        v-model="input"
-        rows="2"
-        placeholder="把你的问题或想法打在这里，回车发送（Shift+回车换行）"
-        @keydown.enter.exact.prevent="send"
-      ></textarea>
-      <button :disabled="!canSend" @click="send">{{ thinking ? '思考中…' : '发送' }}</button>
-    </footer>
+    <!-- 方案 D：左教材、右对话（复习 / 做题时教材区默认收起） -->
+    <div v-else class="workspace" :class="{ stacked: paneCollapsed }">
+      <ReadingPane
+        v-if="section"
+        :section-title="section.sectionTitle"
+        :unit-title="section.unitTitle"
+        :edition="section.edition"
+        :grade="section.grade"
+        :blocks="section.blocks"
+        :knowledge-points="section.knowledgePoints"
+        :curriculum-requirements="section.curriculumRequirements"
+        :query="query"
+        :collapsed="paneCollapsed"
+        :focus-token="focusToken"
+        @update:query="(value: string) => (query = value)"
+        @toggle-collapse="paneCollapsed = !paneCollapsed"
+      />
+
+      <section class="chat">
+        <p v-if="locatedNote" class="located">{{ locatedNote }}</p>
+        <div class="bubbles">
+          <div v-for="(bubble, index) in bubbles" :key="index" :class="['bubble', bubble.role]">
+            <div class="text">{{ bubble.text }}</div>
+            <ul v-if="bubble.diagnostics?.length" class="diagnostics">
+              <li v-for="(line, i) in bubble.diagnostics" :key="i">{{ line }}</li>
+            </ul>
+          </div>
+          <div v-if="thinking" class="bubble assistant thinking">小芽正在想…</div>
+          <div ref="scrollAnchor"></div>
+        </div>
+
+        <footer class="composer">
+          <textarea
+            v-model="input"
+            rows="2"
+            placeholder="把你的问题或想法打在这里，回车发送（Shift+回车换行）"
+            @keydown.enter.exact.prevent="send"
+          ></textarea>
+          <button :disabled="!canSend" @click="send">{{ thinking ? '思考中…' : '发送' }}</button>
+        </footer>
+      </section>
+    </div>
   </main>
 </template>
 
@@ -202,15 +285,13 @@ async function restart(): Promise<void> {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: 860px;
-  margin: 0 auto;
   font-family: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
 }
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid #e5e7eb;
   background: #fff;
 }
@@ -253,7 +334,7 @@ h1 {
 .position {
   color: #6b7280;
 }
-.ghost,
+.ghost-btn,
 .mode-card,
 .composer button,
 .choose-input button {
@@ -264,7 +345,7 @@ h1 {
   padding: 7px 12px;
   font-size: 13px;
 }
-.ghost:hover {
+.ghost-btn:hover {
   background: #f3f4f6;
 }
 .warn {
@@ -274,15 +355,37 @@ h1 {
   color: #854d0e;
   font-size: 13px;
 }
-.chat {
+/* 双区：左教材、右对话；收起教材时改为上下堆叠（教材只剩一条细栏） */
+.workspace {
   flex: 1;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 46%) minmax(0, 54%);
+  min-height: 0;
+}
+.workspace.stacked {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: #f7f8fa;
+}
+.chat.solo {
+  flex: 1;
+}
+.chat.solo .opening {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
   padding: 20px;
 }
 .opening .question {
   white-space: pre-wrap;
   font-family: inherit;
-  background: #f9fafb;
+  background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 16px;
@@ -302,6 +405,7 @@ h1 {
   padding: 14px;
   text-align: left;
   font-size: 14px;
+  background: #fff;
 }
 .mode-card:hover {
   border-color: #16a34a;
@@ -348,13 +452,23 @@ h1 {
   font-size: 13px;
   margin-top: 8px;
 }
+.located {
+  margin: 0;
+  padding: 6px 16px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 12px;
+}
 .bubbles {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 .bubble {
-  max-width: 86%;
+  max-width: 88%;
   padding: 11px 14px;
   border-radius: 12px;
   font-size: 14px;
@@ -368,7 +482,8 @@ h1 {
 }
 .bubble.assistant {
   align-self: flex-start;
-  background: #f3f4f6;
+  background: #fff;
+  border: 1px solid #e5e7eb;
 }
 .bubble.system {
   align-self: center;
@@ -390,7 +505,7 @@ h1 {
 .composer {
   display: flex;
   gap: 10px;
-  padding: 14px 20px 18px;
+  padding: 12px 16px 16px;
   border-top: 1px solid #e5e7eb;
   background: #fff;
 }
