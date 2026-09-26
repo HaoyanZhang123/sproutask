@@ -57,6 +57,8 @@ const modeLabel = ref<string | null>(null)
 const mode = ref<string | null>(null)
 const positionLabel = ref('')
 const hasApiKey = ref(true)
+/** 是否显示开发用信息（工具调用/护栏/迭代/降级）；默认关闭，`SPROUTASK_DEVUI=1` 打开 */
+const devUi = ref(false)
 const chooseError = ref('')
 const scrollAnchor = ref<HTMLElement | null>(null)
 
@@ -79,6 +81,7 @@ async function scrollToBottom(): Promise<void> {
 onMounted(async () => {
   const status = await window.sproutask.configStatus()
   hasApiKey.value = status.hasApiKey
+  devUi.value = status.devUi
 
   const info = await window.sproutask.sessionStart()
   openingQuestion.value = info.question
@@ -126,7 +129,7 @@ function locateCitation(reply: string): void {
   query.value = cited
   paneCollapsed.value = false
   focusToken.value += 1
-  locatedNote.value = `已在教材中定位「${cited}」（高亮显示）`
+  locatedNote.value = `课本里也提到了，我把「${cited}」标出来了`
 }
 
 async function send(): Promise<void> {
@@ -147,25 +150,32 @@ async function send(): Promise<void> {
       return
     }
 
+    // 调试信息只在开发模式下构造（学生看到"工具：get_section_text"这种字样会很出戏）
     const diagnostics: string[] = []
-    if (result.toolCalls?.length) {
-      diagnostics.push(
-        `工具：${result.toolCalls.map((c) => `${c.name}${c.ok ? '' : '(失败)'}`).join('、')}`
-      )
+    if (devUi.value) {
+      if (result.toolCalls?.length) {
+        diagnostics.push(
+          `工具：${result.toolCalls.map((c) => `${c.name}${c.ok ? '' : '(失败)'}`).join('、')}`
+        )
+      }
+      if (result.flags?.length) diagnostics.push(`标记：${result.flags.join('、')}`)
+      if (result.guard?.triggered) {
+        diagnostics.push(
+          `护栏命中${result.guard.regenerated ? '（已重写）' : ''}：${result.guard.reasons.join('；')}`
+        )
+      }
+      if (result.degraded) diagnostics.push(`降级：${result.degraded.kind}`)
+      if (typeof result.iterations === 'number') diagnostics.push(`迭代 ${result.iterations} 轮`)
     }
-    if (result.flags?.length) diagnostics.push(`标记：${result.flags.join('、')}`)
-    if (result.guard?.triggered) {
-      diagnostics.push(
-        `护栏命中${result.guard.regenerated ? '（已重写）' : ''}：${result.guard.reasons.join('；')}`
-      )
-    }
-    if (result.degraded) diagnostics.push(`降级：${result.degraded.kind}`)
-    if (typeof result.iterations === 'number') diagnostics.push(`迭代 ${result.iterations} 轮`)
 
     bubbles.value.push({ role: 'assistant', text: result.reply ?? '', diagnostics })
     if (result.reply) locateCitation(result.reply)
   } catch (error) {
-    bubbles.value.push({ role: 'system', text: `出错了：${String(error)}` })
+    // 面向学生只说人话；技术细节留给开发模式
+    bubbles.value.push({
+      role: 'system',
+      text: devUi.value ? `出错了：${String(error)}` : '刚才出了点小状况，再试一次好吗？'
+    })
   } finally {
     thinking.value = false
     await scrollToBottom()
@@ -270,7 +280,7 @@ async function restart(): Promise<void> {
           <textarea
             v-model="input"
             rows="2"
-            placeholder="把你的问题或想法打在这里，回车发送（Shift+回车换行）"
+            placeholder="想问什么？打完按回车就行"
             @keydown.enter.exact.prevent="send"
           ></textarea>
           <button :disabled="!canSend" @click="send">{{ thinking ? '思考中…' : '发送' }}</button>
