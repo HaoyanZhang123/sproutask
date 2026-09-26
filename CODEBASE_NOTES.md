@@ -52,6 +52,7 @@
 | 9 | 用 `git ls-files` 与磁盘遍历对比文件集合时"多出/缺失一批文件" | `git ls-files` 对中文名做 octal 引号、且用正斜杠；直接与 `Get-ChildItem` 的反斜杠路径比较会全错 | 比较前统一：`Trim('"').Replace('\','/')`；中文名可用 `-z` 或按 sha 比对 | 脚本已按此归一化 → 无 |
 | 10 | 管道喂多行 stdin 给 `pnpm chat` 只消费第一行 | Node `readline` 在"没有 pending question"时到达的行会被丢弃 | 交互式流程别用管道测；要自动化改用**逐步写入 stdin**（`ProcessStartInfo.RedirectStandardInput` + 延时） | 若将来 chat 改用一次性读取全部输入 → 可简化 |
 | 11 | `pnpm dev` 报 `TypeError: Cannot read properties of undefined (reading 'whenReady')`，而代码本身没问题 | 环境里存在 `ELECTRON_RUN_AS_NODE=1`（模拟 CI 时常被设置后忘记清理）→ Electron 以**纯 Node** 启动，`require('electron')` 返回 npm 包而不是 Electron API，`electron.app` 因此为 undefined | `Remove-Item Env:ELECTRON_RUN_AS_NODE` 后重跑；`src/main/index.ts` 已加"启动前自检"，命中即打印可读诊断并退出（不再抛晦涩的 TypeError） | 若 `src/main/index.ts` 里那段自检被删 → 恢复它 |
+| 12 | **发布扫描失败后仍然镜像并提交了公开仓库**（绕过了自己的闸门） | 我把 `publish_github.ps1` 的输出用 `Select-String` 过滤后就直接 `robocopy` + `git commit`，**没检查脚本退出码**；扫描报 ❌ 的那次照样提交成功 | 流程改为：**以退出码为闸门**——`if ($LASTEXITCODE -ne 0) { 不镜像、不提交 }`；这次已 `git reset --soft` 撤掉未推送的坏提交并重做 | 当镜像/提交命令与发布脚本写在同一条命令里时 → 必须显式检查退出码 |
 
 ## 5. 提交身份（✅ 已规范化，2026-09-24）
 

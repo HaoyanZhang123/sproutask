@@ -12,7 +12,7 @@ import { loadDotEnv, readDeepSeekEnv } from './_env'
  *
  * 为什么需要它：语气是**主观**的，单测和规则评测都判不了"像不像 AI"。
  * 这个脚本把同一批学生提问分别喂给 v1 与 v2，并排打印结果，供人工判读；
- * 同时落一份 Markdown 到 evals/reports/，可作为研习报告里 A/B 对比的原始材料。
+ * 同时落一份 Markdown 到 evals/reports/，作为两版提示词的对比留档。
  *
  * 用法：pnpm prompts:compare   （真实调用模型，会产生少量费用）
  */
