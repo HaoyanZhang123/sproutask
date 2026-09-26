@@ -130,8 +130,10 @@ pnpm dev                  # 打开桌面窗口
   **打包版不再读 `.env`**（来路不明的 .env 能顶替用户配置）、诊断文件改写到持久目录
   （便携版 cwd 是退出即删的自解压临时目录）
 
-**下一件事（建议，等你拍板）**：发一个 GitHub Release `v0.1.0-alpha`（把 exe 作为附件上传，
-说明用已留档的 E 版文案）——这样"sproutask 有得下载"才成立。
+**✅ GitHub Release 已发布**：<https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.1.0-alpha>
+- tag 指向提交 `29ced1f`（即远端 main）；附件 `SproutAsk-0.1.0-win-x64.exe`（72.35 MB）
+- 核实方式：Release 非草稿、tag 指向正确；**把附件下载回来比对 SHA256，与本地验证过的文件逐字节一致**
+- 说明文案见 `docs/releases/v0.1.0-alpha.md`（开头用 E 版产品句，并写明"需自配 Key + SmartScreen 提示"）
 
 **再往后待排期**：F-013 存储（JSONL/SQLite + 掌握度）、F-004 教材内容工程（需要教材文本）、
 自定义图标与代码签名（正式分发前置）。
