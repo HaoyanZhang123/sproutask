@@ -14,6 +14,12 @@ win:
   target:
     - portable
   artifactName: ${productName}-${version}-win-${arch}.${ext}
+  # 【为什么必须关掉】electron-builder 打包 Windows 时会下载 winCodeSign 工具，
+  # 该压缩包含 macOS 的 .dylib 软链接；在没有管理员权限、也没开"开发者模式"的 Windows 上，
+  # 7-Zip 解压会因"客户端没有所需的特权"而失败，整个打包中断（实测踩到）。
+  # 关掉它只影响"改写 exe 图标/版本信息 + 数字签名"——本项目当前既没有自定义图标也未签名，
+  # 因此不影响可用性；等要做正式签名分发时，需要以管理员身份运行或开启开发者模式再打开此项。
+  signAndEditExecutable: false
 mac:
   target:
     - dmg

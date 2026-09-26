@@ -66,7 +66,37 @@ const api = {
 
   /** 是否已配置 Key（只回布尔）+ 是否显示开发用信息（`SPROUTASK_DEVUI=1`） */
   configStatus: (): Promise<{ mode: string; hasApiKey: boolean; devUi: boolean }> =>
-    ipcRenderer.invoke('config:status') as never
+    ipcRenderer.invoke('config:status') as never,
+
+  /**
+   * 配置概览（首次运行配置界面用）。
+   * ⚠️ 不含 Key 的任何片段——连"sk-…abcd"这种掩码都不给。
+   */
+  configDescribe: (): Promise<{
+    mode: string
+    keySource: 'userconfig' | 'env' | 'none'
+    hasApiKey: boolean
+    hasUserConfig: boolean
+    userConfigPath: string
+    userConfigError?: string
+    baseUrl: string
+    model: string
+    devUi: boolean
+  }> => ipcRenderer.invoke('config:describe') as never,
+
+  /** 保存配置到本机用户目录（不依赖 .env，打包版靠它） */
+  configSave: (input: { apiKey: string; baseUrl?: string; model?: string }): Promise<{
+    ok: boolean
+    message: string
+    path: string
+  }> => ipcRenderer.invoke('config:save', input) as never,
+
+  /** 连通性测试：真实发一次最小请求，成功/失败都给面向大人的中文说明 */
+  configTest: (input: { apiKey?: string; baseUrl?: string; model?: string }): Promise<{
+    ok: boolean
+    kind: string
+    message: string
+  }> => ipcRenderer.invoke('config:test', input) as never
 }
 
 contextBridge.exposeInMainWorld('sproutask', api)

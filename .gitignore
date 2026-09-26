@@ -21,8 +21,9 @@ content/textbook/
 data/
 *.log
 
-# 开发期自检产物（SPROUTASK_SELFTEST=1 的界面截图）
+# 开发期自检产物（SPROUTASK_SELFTEST=1 的界面截图与结果文件）
 selftest-*.png
+selftest-result.json
 
 # 编辑器与系统
 .vscode/*
