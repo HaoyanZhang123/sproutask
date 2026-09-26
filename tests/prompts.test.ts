@@ -40,11 +40,22 @@ describe('提示词分层装配', () => {
     const prompt = buildSystemPrompt({ scope })
     expect(prompt).toContain('AI 腔')
     // 关键几条必须真的写进提示词里，否则"去 AI 味"只是文档里的话
-    expect(prompt).toContain('不要客套')
+    expect(prompt).toContain('不要空洞客套')
     expect(prompt).toContain('不要书面连接词')
-    expect(prompt).toContain('不要列条目')
     // 类比必须以教材为准（用户要求：别为了亲切而编造）
     expect(prompt).toContain('不能替代结论')
+  })
+
+  it('v2 的 system 提示词含"温度"约束（防止退回冷淡/怼人的写法）', () => {
+    const prompt = buildSystemPrompt({ scope })
+    // 背景：v2 初稿为了"像人"写得太短太硬，用户判定"冷淡、不耐烦、有攻击性，还不如 v1"。
+    // 这几条断言就是为了防止以后再退回那种语气。
+    expect(prompt).toContain('说话的温度')
+    expect(prompt).toContain('绝对不要这些冷硬')
+    expect(prompt).toContain('用邀请代替命令')
+    expect(prompt).toContain('100–180 字')
+    // 不许把答案的要点/结构先递给学生
+    expect(prompt).toContain('不要把答案的要点、条数或结构先说出来')
   })
 
   it('v2 不再包含 v1 的写死台词（模型会背书同一句话）', () => {
