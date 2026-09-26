@@ -165,6 +165,37 @@ B4 导出时发布扫描拦下了 `scripts/prompt-compare.ts`（注释里有"研
 
 **候选（暂缓）**：F-013 存储实现、F-004 教材内容工程、F-012 收尾。
 
+### 发布与分发（已定文案，待执行）
+
+**① GitHub 仓库 About（描述 + 标签）—— 文案已由用户拍板**
+
+- 描述（D 版）：
+  `芽问：教材锚定的初中生物学习助手。解释只来自课本与课标，只提问不给答案，帮学生从"记住"走到"想通"。`
+- 标签（11 个）：
+  `education` `ai4edu` `ai-for-education` `agent` `biology` `learning-assistant`
+  `socratic-method` `textbook` `ai-tutor` `local-first` `typescript`
+- 执行方式：本机 `gh` 的登录令牌**已失效**（不影响 `git push`，那条走 SSH），
+  所以要么 `gh auth login -h github.com` 后跑下面的命令，要么在网页上 ⚙️ About 里粘贴：
+
+  ```powershell
+  gh repo edit HaoyanZhang123/sproutask `
+    --description '芽问：教材锚定的初中生物学习助手。解释只来自课本与课标，只提问不给答案，帮学生从"记住"走到"想通"。' `
+    --add-topic education,ai4edu,ai-for-education,agent,biology,learning-assistant,socratic-method,textbook,ai-tutor,local-first,typescript
+  ```
+
+**② GitHub Release —— 时机：第一版 exe 打出来、你本机验证过之后**
+
+- 版本号：`v0.1.0-alpha`（研习试用版）
+- Release 说明开头用（E 版）：
+  `芽问 SproutAsk：面向初中生物的"教材锚定对话学习"工具——用苏格拉底式提问带学生读课本、自己想，而不是直接给答案。`
+- 附件：便携版 exe；说明里必须写清"需自配 DeepSeek API Key"
+
+**③ 一键安装 exe —— 前置条件（打包本身没做过，且缺一个必需件）**
+
+- 缺的必需件：**首次运行配置**（学生机器上不会有 `.env`；现在读配置的向导没做，
+  装完打开会连不上模型）→ 必须先做配置向导或支持"老师预置配置文件"
+- 其余前置：图标、版本号、许可与作者信息；`electron-builder` 从未执行过，属未验证路径
+
 ---
 
 ## 6. 已知的坑（踩过并已解决）
