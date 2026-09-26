@@ -210,6 +210,18 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   )
   check('样式已生效（用户气泡为品牌绿）', afterSend.userBg === 'rgb(22, 163, 74)', afterSend.userBg)
 
+  // ── 布局（1/2）：无论并排还是堆叠，输入框都必须在视口内 ──
+  const composerAlwaysVisible = await evalInRenderer<boolean>(
+    win,
+    `(() => {
+      const box = document.querySelector('.composer textarea')
+      if (!box) return false
+      const r = box.getBoundingClientRect()
+      return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight + 1
+    })()`
+  )
+  check('输入框常驻可见（不因布局变化被顶出屏幕）', composerAlwaysVisible)
+
   // ── 教材阅读视图（可折叠答案、搜索高亮、按模式折叠） ────────
   const reading = await evalInRenderer<{
     hasPane: boolean
@@ -270,6 +282,47 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     '答案块存在且默认收起（先自己答、再展开对照）',
     afterExpandPane.answerToggles >= 3 && afterExpandPane.visibleAnswerBodies === 0,
     `${afterExpandPane.answerToggles} 个答案块，默认可见正文 ${afterExpandPane.visibleAnswerBodies} 个`
+  )
+
+  // ── 布局（2/2）：左右并排时（用户报 bug 的场景）各栏各滚各的、输入框在右半区 ──
+  const sideBySide = await evalInRenderer<{
+    pageScrolls: boolean
+    composerVisible: boolean
+    composerInRightHalf: boolean
+    paneScrollable: boolean
+    bubblesScrollable: boolean
+  }>(
+    win,
+    `(() => {
+      const box = document.querySelector('.composer textarea')
+      const pane = document.querySelector('.pane')
+      const paneBody = document.querySelector('.pane-body')
+      const bubbles = document.querySelector('.bubbles')
+      const boxRect = box ? box.getBoundingClientRect() : null
+      const paneRect = pane ? pane.getBoundingClientRect() : null
+      return {
+        // 页面本身不该出现滚动条：滚动只发生在栏内
+        pageScrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
+        composerVisible: boxRect
+          ? boxRect.height > 0 && boxRect.top >= 0 && boxRect.bottom <= window.innerHeight + 1
+          : false,
+        // 输入框应在右半区（证明确实是左右并排，而不是被挤到下面）
+        composerInRightHalf: boxRect && paneRect ? boxRect.left > paneRect.right - 2 : false,
+        paneScrollable: Boolean(paneBody) && getComputedStyle(paneBody).overflowY === 'auto',
+        bubblesScrollable: Boolean(bubbles) && getComputedStyle(bubbles).overflowY === 'auto'
+      }
+    })()`
+  )
+  check('左右并排时页面不出现滚动条', !sideBySide.pageScrolls)
+  check(
+    '左右并排时输入框就在右半区、无需滚动',
+    sideBySide.composerVisible && sideBySide.composerInRightHalf,
+    `可见=${sideBySide.composerVisible} 在右半区=${sideBySide.composerInRightHalf}`
+  )
+  check(
+    '左教材与右对话各自独立滚动',
+    sideBySide.paneScrollable && sideBySide.bubblesScrollable,
+    `阅读区=${sideBySide.paneScrollable} 对话区=${sideBySide.bubblesScrollable}`
   )
 
   // 点开一个答案块
