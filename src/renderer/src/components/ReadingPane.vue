@@ -212,7 +212,12 @@ watch(
 .pane {
   display: flex;
   flex-direction: column;
+  /* ⚠️ 必须写 min-height: 0：作为 grid/flex 子项，默认最小高度是 auto，
+     不放行的话阅读区会被内容撑高、内部滚动条失效，进而把整页顶出滚动条
+     （2026-09 用户实测发现的 bug） */
+  min-height: 0;
   min-width: 0;
+  overflow: hidden;
   background: #fff;
   border-right: 1px solid #e5e7eb;
 }
@@ -288,6 +293,7 @@ watch(
 }
 .pane-body {
   flex: 1;
+  min-height: 0; /* 阅读区自己的滚动容器：只滚这一块，不影响对话栏 */
   overflow-y: auto;
   padding: 10px 14px 14px;
 }

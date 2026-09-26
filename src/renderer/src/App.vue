@@ -285,6 +285,9 @@ async function restart(): Promise<void> {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  /* 兜底：页面本身永不出现滚动条；滚动只发生在各栏内部
+     （否则内容会把 grid 行撑高，输入框被顶到屏幕外——用户实测报过这个 bug） */
+  overflow: hidden;
   font-family: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
 }
 .topbar {
@@ -360,6 +363,9 @@ h1 {
   flex: 1;
   display: grid;
   grid-template-columns: minmax(0, 46%) minmax(0, 54%);
+  /* ⚠️ 必须约束行高：默认 auto 会被内容撑开，导致"整页滚动、输入框被顶出屏幕"
+     （2026-09 用户实测发现的 bug；只有 stacked 那种情况原本写了行高约束） */
+  grid-template-rows: minmax(0, 1fr);
   min-height: 0;
 }
 .workspace.stacked {
@@ -371,6 +377,7 @@ h1 {
   flex-direction: column;
   min-height: 0;
   min-width: 0;
+  overflow: hidden; /* 让 .bubbles 成为唯一滚动容器，输入框固定在底部 */
   background: #f7f8fa;
 }
 .chat.solo {
