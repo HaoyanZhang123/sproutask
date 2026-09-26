@@ -325,6 +325,38 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     `阅读区=${sideBySide.paneScrollable} 对话区=${sideBySide.bubblesScrollable}`
   )
 
+  // ── 学生视野的"干净度"：不得出现开发/控制台字样（用户反馈"AI 味太浓"的一部分） ──
+  const visible = await evalInRenderer<{ text: string; diagnosticBlocks: number }>(
+    win,
+    `(() => ({
+      text: document.body.innerText,
+      diagnosticBlocks: document.querySelectorAll('.diagnostics').length
+    }))()`
+  )
+  const DEV_JARGON = /工具：|护栏|迭代 \d+ 轮|降级：|SPROUTASK|get_section_text|flag_for_teacher|missing-key/
+  const devUiEnabled = process.env['SPROUTASK_DEVUI'] === '1'
+  const jargonHit = visible.text.match(DEV_JARGON)?.[0]
+  if (devUiEnabled) {
+    // 开发模式：调试信息**应当**可见（我自己排错要用）
+    check(
+      '开发模式：调试信息可见（工具 / 护栏 / 降级等字样）',
+      visible.diagnosticBlocks >= 1 && Boolean(jargonHit),
+      `调试块=${visible.diagnosticBlocks}｜命中样例=${jargonHit ?? '无'}`
+    )
+  } else {
+    // 默认模式：学生视野里**不得**出现任何开发/控制台字样
+    check(
+      '学生可见文案里没有开发/控制台字样',
+      !jargonHit,
+      jargonHit ? `命中：${jargonHit}` : '干净'
+    )
+    check(
+      '默认不显示调试信息（学生看不到）',
+      visible.diagnosticBlocks === 0,
+      `调试块=${visible.diagnosticBlocks}`
+    )
+  }
+
   // 点开一个答案块
   await evalInRenderer(win, `(() => { document.querySelector('.answer-toggle').click(); return true })()`)
   await wait(300)

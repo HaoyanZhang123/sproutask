@@ -59,7 +59,7 @@ declare global {
         }>
         curriculumRequirements: string[]
       } | null>
-      configStatus(): Promise<{ mode: string; hasApiKey: boolean }>
+      configStatus(): Promise<{ mode: string; hasApiKey: boolean; devUi: boolean }>
     }
   }
 }

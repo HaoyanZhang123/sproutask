@@ -115,7 +115,7 @@ watch(
         <span class="meta">{{ edition }} · {{ grade }}</span>
       </div>
       <button class="ghost" @click="emit('toggle-collapse')">
-        {{ collapsed ? '展开教材' : '收起教材' }}
+        {{ collapsed ? '看看课本' : '收起课本' }}
       </button>
     </header>
 
@@ -125,17 +125,17 @@ watch(
           :value="query"
           class="search"
           type="search"
-          placeholder="在教材里找一找（关键词）"
+          placeholder="在课本里找找看"
           @input="emit('update:query', ($event.target as HTMLInputElement).value)"
         />
         <span v-if="query.trim()" class="match-info">
-          命中 {{ totalMatches }} 处
+          在课本里找到 {{ totalMatches }} 处
         </span>
       </div>
 
       <p v-if="query.trim() && collapsedOnly" class="hint collapsed-hint">
-        命中都在折叠的答案里：
-        <button class="link" @click="expandMatchedAnswers">展开看看</button>
+        要找的内容在收起的答案里：
+        <button class="link" @click="expandMatchedAnswers">点开看看</button>
       </p>
 
       <div ref="container" class="pane-body">
@@ -167,7 +167,7 @@ watch(
           <div v-else class="answer" :data-answer-index="block.index">
             <button class="answer-toggle" @click="toggleAnswer(block.index)">
               {{ isExpanded(block.index) ? '▾' : '▸' }}
-              {{ isExpanded(block.index) ? '收起答案' : '先自己想一想，再展开对照' }}
+              {{ isExpanded(block.index) ? '收起来' : '先自己想想，想好了再点开对答案' }}
             </button>
             <p v-if="isExpanded(block.index)" class="para answer-body">
               <span
@@ -183,12 +183,12 @@ watch(
 
       <div class="pane-foot">
         <div class="answer-tools">
-          <button class="link" @click="expandAllAnswers">展开全部答案</button>
+          <button class="link" @click="expandAllAnswers">全部点开</button>
           <span class="dot">·</span>
-          <button class="link" @click="collapseAllAnswers">全部收起</button>
+          <button class="link" @click="collapseAllAnswers">全部收起来</button>
           <span class="dot">·</span>
           <button class="link" @click="showPoints = !showPoints">
-            {{ showPoints ? '隐藏本节知识点' : '看本节知识点' }}
+            {{ showPoints ? '收起掌握要点' : '这一节要掌握什么' }}
           </button>
         </div>
 

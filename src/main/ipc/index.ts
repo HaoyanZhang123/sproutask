@@ -115,10 +115,10 @@ export function registerIpcHandlers(): void {
     }
   })
 
-  /** 是否已配置 Key（**只回布尔，不回 Key 本身**） */
+  /** 是否已配置 Key（**只回布尔，不回 Key 本身**）+ 是否显示开发用信息 */
   ipcMain.handle('config:status', () => {
     const config = loadConfig()
-    return { mode: config.mode, hasApiKey: config.deepseek.apiKey.length > 0 }
+    return { mode: config.mode, hasApiKey: config.deepseek.apiKey.length > 0, devUi: config.devUi }
   })
 }
 

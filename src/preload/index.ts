@@ -64,8 +64,8 @@ const api = {
     curriculumRequirements: string[]
   } | null> => ipcRenderer.invoke('content:section') as never,
 
-  /** 是否已配置 Key —— 只回布尔，Key 本身永不进入渲染进程 */
-  configStatus: (): Promise<{ mode: string; hasApiKey: boolean }> =>
+  /** 是否已配置 Key（只回布尔）+ 是否显示开发用信息（`SPROUTASK_DEVUI=1`） */
+  configStatus: (): Promise<{ mode: string; hasApiKey: boolean; devUi: boolean }> =>
     ipcRenderer.invoke('config:status') as never
 }
 

@@ -16,6 +16,12 @@ export type RunMode = z.infer<typeof RunModeSchema>
 
 export interface AppConfig {
   mode: RunMode
+  /**
+   * 是否显示"开发用信息"（工具调用、护栏命中、迭代轮次、降级原因）。
+   * 默认关闭——学生不该看到 `工具：get_section_text` 这种控制台味儿的东西；
+   * 调试时用 `SPROUTASK_DEVUI=1` 打开。
+   */
+  devUi: boolean
   deepseek: {
     apiKey: string
     baseUrl: string
@@ -73,6 +79,7 @@ export function loadConfig(): AppConfig {
 
   return {
     mode,
+    devUi: process.env['SPROUTASK_DEVUI'] === '1',
     deepseek: {
       apiKey: user.deepseekApiKey ?? process.env['DEEPSEEK_API_KEY'] ?? '',
       baseUrl:
