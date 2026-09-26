@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, nextTick, ref } from 'vue'
 import ReadingPane from './components/ReadingPane.vue'
+import ConfigPanel from './components/ConfigPanel.vue'
 // 纯函数模块的白名单例外（见 tests/smoke.test.ts）：渲染进程可直接引用 core 里无依赖的纯逻辑
 import { extractCitation } from '@shared/section-blocks'
 
@@ -73,6 +74,9 @@ const canSend = computed(
   () => stage.value === 'chatting' && !thinking.value && input.value.trim().length > 0
 )
 
+/** 首次运行配置 / 设置界面：没配 Key 时自动打开 */
+const showConfig = ref(false)
+
 async function scrollToBottom(): Promise<void> {
   await nextTick()
   scrollAnchor.value?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -82,12 +86,21 @@ onMounted(async () => {
   const status = await window.sproutask.configStatus()
   hasApiKey.value = status.hasApiKey
   devUi.value = status.devUi
+  // 没配 Key 就先把"接上外脑"这一步摆在前面（学生打开盒子第一眼要能自己搞定）
+  showConfig.value = !status.hasApiKey
 
   const info = await window.sproutask.sessionStart()
   openingQuestion.value = info.question
   options.value = info.options
   stage.value = 'choosing'
 })
+
+/** 配置保存成功：关掉面板并刷新状态（顶部提示条随之消失） */
+async function onConfigured(): Promise<void> {
+  const status = await window.sproutask.configStatus()
+  hasApiKey.value = status.hasApiKey
+  showConfig.value = false
+}
 
 async function choose(answer: string): Promise<void> {
   chooseError.value = ''
@@ -211,19 +224,24 @@ async function restart(): Promise<void> {
       <div class="status">
         <span v-if="modeLabel" class="badge">{{ modeLabel }}</span>
         <span v-if="positionLabel" class="position">{{ positionLabel }}</span>
+        <button class="ghost-btn" @click="showConfig = true">设置</button>
         <button class="ghost-btn" @click="restart">换一个模式</button>
       </div>
     </header>
 
-    <p v-if="!hasApiKey" class="warn">
-      ⚠️ 未检测到模型 API Key（开发期请在项目根目录的 <code>.env</code> 中配置）。
-      仍可体验流程，但每次提问都会走"连不上外脑"的降级提示。
-    </p>
+    <!-- 首次运行配置 / 设置：没配 Key 时自动打开，也可随时从顶栏进来 -->
+    <ConfigPanel v-if="showConfig" @configured="onConfigured" @skip="showConfig = false" />
 
-    <!-- 开场：Agent 主动询问，学生四选一 -->
-    <section v-if="stage === 'choosing'" class="chat solo">
-      <div class="opening">
-        <pre class="question">{{ openingQuestion }}</pre>
+    <template v-else>
+      <p v-if="!hasApiKey" class="warn">
+        ⚠️ 未检测到模型 API Key（开发期请在项目根目录的 <code>.env</code> 中配置）。
+        仍可体验流程，但每次提问都会走"连不上外脑"的降级提示。
+      </p>
+
+      <!-- 开场：Agent 主动询问，学生四选一 -->
+      <section v-if="stage === 'choosing'" class="chat solo">
+        <div class="opening">
+          <pre class="question">{{ openingQuestion }}</pre>
         <div class="mode-grid">
           <button
             v-for="(option, index) in options"
@@ -287,6 +305,7 @@ async function restart(): Promise<void> {
         </footer>
       </section>
     </div>
+    </template>
   </main>
 </template>
 

@@ -60,6 +60,27 @@ declare global {
         curriculumRequirements: string[]
       } | null>
       configStatus(): Promise<{ mode: string; hasApiKey: boolean; devUi: boolean }>
+      configDescribe(): Promise<{
+        mode: string
+        keySource: 'userconfig' | 'env' | 'none'
+        hasApiKey: boolean
+        hasUserConfig: boolean
+        userConfigPath: string
+        userConfigError?: string
+        baseUrl: string
+        model: string
+        devUi: boolean
+      }>
+      configSave(input: { apiKey: string; baseUrl?: string; model?: string }): Promise<{
+        ok: boolean
+        message: string
+        path: string
+      }>
+      configTest(input: { apiKey?: string; baseUrl?: string; model?: string }): Promise<{
+        ok: boolean
+        kind: string
+        message: string
+      }>
     }
   }
 }

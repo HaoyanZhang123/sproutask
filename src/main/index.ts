@@ -13,6 +13,30 @@ import { loadConfig } from './config'
 /** 开发期自检：无头验证"主进程侧装配 + 界面能否渲染"，不需要人工点击 */
 const SELF_TEST = process.env['SPROUTASK_SELFTEST'] === '1'
 
+/**
+ * 打包版没有控制台，出问题时只能靠文件。
+ * 启动过程与自检的关键节点都追加写到这里。
+ *
+ * 目录顺序有讲究：**打包版优先写用户目录**——便携版是自解压运行，
+ * cwd 在临时目录里、退出时会被整目录删掉（实测：结果文件因此消失），
+ * 只有用户目录是持久的；开发期则写当前目录（我总在项目根启动，方便直接看）。
+ */
+function bootLog(line: string): void {
+  const text = `[${new Date().toISOString()}] ${line}\n`
+  const candidates = app.isPackaged
+    ? [join(app.getPath('userData'), 'boot.log'), join(process.cwd(), 'boot.log')]
+    : [join(process.cwd(), 'boot.log'), join(app.getPath('userData'), 'boot.log')]
+
+  for (const file of candidates) {
+    try {
+      writeFileSync(file, text, { flag: 'a' })
+      return
+    } catch {
+      /* 换下一个候选目录 */
+    }
+  }
+}
+
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1100,
@@ -54,6 +78,29 @@ async function evalInRenderer<T>(win: BrowserWindow, code: string): Promise<T> {
 }
 
 /**
+ * 轮询等待渲染进程满足条件。
+ * 为什么需要：界面状态是异步装配的（例如选完模式后要等一次 IPC 把教材读来），
+ * 固定 sleep 在开发机上够用、到了打包版就可能赶不上——那会让自检变成"看运气"。
+ */
+async function waitForRenderer(
+  win: BrowserWindow,
+  code: string,
+  timeoutMs = 4000,
+  stepMs = 200
+): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    try {
+      if (await evalInRenderer<boolean>(win, code)) return true
+    } catch {
+      // 渲染进程还在切换状态时脚本可能抛错，忽略并重试
+    }
+    await wait(stepMs)
+  }
+  return false
+}
+
+/**
  * 启动前的环境自检：如果主进程是被"纯 Node"方式启动的（典型原因：环境里设了
  * `ELECTRON_RUN_AS_NODE=1`，多半是模拟 CI 时留下的），`require('electron')`
  * 会返回 npm 包而不是 Electron API，报错会是难以定位的
@@ -87,16 +134,53 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   const config = loadConfig()
   const session = createSelfTestSession()
   const failures: string[] = []
+  const records: Array<{ label: string; ok: boolean; detail: string }> = []
+  const notes: string[] = []
   const hasKey = config.deepseek.apiKey.length > 0
 
   const check = (label: string, ok: boolean, detail = ''): void => {
     console.log(`[selftest] ${ok ? '✅' : '❌'} ${label}${detail ? ` —— ${detail}` : ''}`)
+    records.push({ label, ok, detail })
     if (!ok) failures.push(label)
   }
 
   /** 信息性输出：只打印事实，不计入通过/失败（避免写成恒真断言） */
   const note = (label: string, detail: string): void => {
     console.log(`[selftest] ℹ️  ${label} —— ${detail}`)
+    notes.push(`${label}：${detail}`)
+  }
+
+  /**
+   * 写结果文件。
+   * 为什么需要：**打包后的 Windows 应用没有控制台**，stdout 看不到；
+   * 有了这个文件，就能用"退出码 + 结果文件"验证打包产物真的能跑。
+   */
+  const writeResultFile = (): void => {
+    const payload = {
+      at: new Date().toISOString(),
+      mode: config.mode,
+      packaged: app.isPackaged,
+      hasKey,
+      total: records.length,
+      failed: failures.length,
+      failures,
+      checks: records,
+      notes
+    }
+    // 打包版优先写用户目录：便携版的自解压目录退出即被删除（实测结果文件因此丢失）
+    const targets = app.isPackaged
+      ? [app.getPath('userData'), process.cwd()]
+      : [process.cwd(), app.getPath('userData')]
+    for (const target of targets) {
+      try {
+        writeFileSync(join(target, 'selftest-result.json'), `${JSON.stringify(payload, null, 2)}\n`, 'utf-8')
+        console.log('[selftest] 结果文件：', join(target, 'selftest-result.json'))
+        return
+      } catch {
+        // 换下一个可写目录（打包版可能从只读位置启动）
+      }
+    }
+    console.warn('[selftest] 结果文件写入失败（两个候选目录都不可写）')
   }
 
   // ── 主进程侧装配 ───────────────────────────────────────────
@@ -131,8 +215,109 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     check('未配置 Key：降级而非崩溃，且话术面向学生', Boolean(degraded) && reply.includes('钥匙'), degraded?.kind ?? '')
   }
 
+  // ── 首次运行配置（学生装完得能自己接上"外脑"） ──────────────
+  await wait(1400)
+  const configUi = await evalInRenderer<{
+    shown: boolean
+    leaksKey: boolean
+    saveDisabled: boolean
+    hasTestButton: boolean
+    text: string
+  }>(
+    win,
+    `(() => {
+      const panel = document.querySelector('.config')
+      const save = document.querySelector('.config .save-btn')
+      const keyInput = document.querySelector('.config .key-input')
+      return {
+        shown: Boolean(panel),
+        // 界面上不得出现任何 Key 片段（连 sk- 掩码都不许）
+        leaksKey: /sk-[A-Za-z0-9]/.test(document.body.innerText),
+        saveDisabled: save ? save.disabled : true,
+        hasTestButton: Boolean(document.querySelector('.config .test-btn')),
+        text: document.body.innerText,
+        emptyKeyInput: keyInput ? keyInput.value === '' : false
+      }
+    })()`
+  )
+
+  if (!hasKey) {
+    check('未配置 Key：先弹出"首次运行配置"界面', configUi.shown)
+    check('配置界面不显示 Key 内容（连掩码都不给）', !configUi.leaksKey)
+    check('Key 还没填时"保存并开始"不可点（防手滑）', configUi.saveDisabled)
+    check('提供"先试连一下"与"稍后再说"两个出口', configUi.hasTestButton)
+
+    // 填一个假 Key → 试连应当失败，但必须给出面向大人的中文说明，且不崩、不泄露
+    await evalInRenderer(
+      win,
+      `(() => {
+        const input = document.querySelector('.config .key-input')
+        input.value = ['sk', 'fake', 'key', 'for', 'selftest'].join('-')
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        return true
+      })()`
+    )
+    await wait(300)
+    const saveEnabledAfterTyping = await evalInRenderer<boolean>(
+      win,
+      `!document.querySelector('.config .save-btn').disabled`
+    )
+    check('填了足够长的 Key 后"保存并开始"可点', saveEnabledAfterTyping)
+
+    await evalInRenderer(win, `(() => { const b = document.querySelector('.config .test-btn'); if (b) b.click(); return true })()`)
+    await wait(4500)
+    const testResult = await evalInRenderer<{ text: string; busy: boolean; leaksKey: boolean }>(
+      win,
+      `(() => {
+        const msg = document.querySelector('.config .message')
+        const btn = document.querySelector('.config .test-btn')
+        return {
+          text: msg ? msg.innerText : '',
+          busy: btn ? btn.disabled : true,
+          leaksKey: /sk-[A-Za-z0-9]/.test(document.body.innerText)
+        }
+      })()`
+    )
+    check(
+      '试连失败时给出面向大人的中文说明（不抛错、不卡住）',
+      testResult.text.length > 0 && !testResult.busy && !/Error|error:|stack/.test(testResult.text),
+      testResult.text.slice(0, 30)
+    )
+    check('试连过程与结果都不泄露 Key', !testResult.leaksKey)
+
+    // "稍后再说" → 回到正常流程
+    await evalInRenderer(win, `(() => { const b = document.querySelector('.config .skip-btn'); if (b) b.click(); return true })()`)
+    await wait(600)
+    const afterSkip = await evalInRenderer<{ panel: boolean; cards: number; warnText: string }>(
+      win,
+      `(() => ({
+        panel: Boolean(document.querySelector('.config')),
+        cards: document.querySelectorAll('.mode-card').length,
+        warnText: document.querySelector('.warn') ? document.querySelector('.warn').innerText : ''
+      }))()`
+    )
+    check('点"稍后再说"回到正常流程，且不再显示配置界面', !afterSkip.panel && afterSkip.cards === 4)
+    check(
+      '未配置时仍保留原来的顶部提示（文案未改）',
+      afterSkip.warnText.includes('未检测到模型 API Key'),
+      afterSkip.warnText.slice(0, 24)
+    )
+  } else {
+    check('已配置 Key：启动时不弹首次运行配置界面', !configUi.shown)
+  }
+
+  // 顶栏"设置"随时能进来（两种环境都该有）
+  await evalInRenderer(
+    win,
+    `[...document.querySelectorAll('.ghost-btn')].find((b) => b.innerText.includes('设置')).click(); true`
+  )
+  await wait(500)
+  const settingsOpened = await evalInRenderer<boolean>(win, `Boolean(document.querySelector('.config'))`)
+  check('顶栏"设置"能随时打开配置界面', settingsOpened)
+  await evalInRenderer(win, `(() => { const b = document.querySelector('.config .skip-btn'); if (b) b.click(); return true })()`)
+  await wait(400)
+
   // ── 界面渲染 ───────────────────────────────────────────────
-  await wait(1200)
   const firstScreen = await evalInRenderer<{
     text: string
     cards: number
@@ -164,6 +349,43 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   check('点击模式后进入对话状态', afterChoose.hasComposer, afterChoose.text.split('\n').slice(-3).join(' / '))
   check('顶部显示当前模式', afterChoose.text.includes('复习'))
 
+  // ── 教材区"默认收起"必须在发消息之前断言 ────────────────────
+  // 为什么：小芽的回复一旦提到课本位置，就会触发"出处自动定位"并把教材区展开（这是设计行为，
+  // 见教材阅读视图的 spec）。若在发消息之后才断言"默认收起"，有 Key 的真实环境下必然失败。
+  // 另外这里**轮询等待**而不是固定 sleep：选完模式后教材要经一次 IPC 才装配好，
+  // 固定等待在打包版上赶不上（实测踩到）。
+  const paneCollapsedInTime = await waitForRenderer(
+    win,
+    `(() => { const p = document.querySelector('.pane'); return Boolean(p) && p.classList.contains('collapsed') })()`
+  )
+  const paneDefault = await evalInRenderer<{
+    collapsed: boolean
+    stacked: boolean
+    answerToggles: number
+    located: boolean
+  }>(
+    win,
+    `(() => {
+      const pane = document.querySelector('.pane')
+      return {
+        collapsed: pane ? pane.classList.contains('collapsed') : false,
+        stacked: Boolean(document.querySelector('.workspace.stacked')),
+        answerToggles: document.querySelectorAll('.answer-toggle').length,
+        located: Boolean(document.querySelector('.located'))
+      }
+    })()`
+  )
+  check(
+    '复习模式默认收起阅读区（把屏幕让给对话）',
+    paneCollapsedInTime && paneDefault.collapsed && paneDefault.stacked,
+    `collapsed=${paneDefault.collapsed} stacked=${paneDefault.stacked} 及时=${paneCollapsedInTime}`
+  )
+  check(
+    '收起状态下不渲染正文（省空间，也避免答案被瞥见）',
+    paneDefault.answerToggles === 0,
+    `收起时答案块数=${paneDefault.answerToggles}`
+  )
+
   // ── 交互：发送一句话 ───────────────────────────────────────
   await evalInRenderer(
     win,
@@ -175,7 +397,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     })()`
   )
   await wait(300)
-  await evalInRenderer(win, `document.querySelector('.composer button').click(); true`)
+  await evalInRenderer(win, `(() => { const b = document.querySelector('.composer button'); if (b) b.click(); return true })()`)
   await wait(2500)
 
   const afterSend = await evalInRenderer<{
@@ -246,19 +468,38 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   )
   check('教材阅读区已渲染出来', reading.hasPane)
   check('阅读区显示当前小节标题', reading.sectionTitle.includes('细胞的生活'), reading.sectionTitle)
-  check(
-    '复习模式默认收起阅读区（把屏幕让给对话）',
-    reading.collapsed && reading.stacked,
-    `collapsed=${reading.collapsed} stacked=${reading.stacked}`
+
+  // 出处自动定位：回复里提到课本位置时，教材区应自动展开并给出"已定位"提示；
+  // 没提到时应保持收起。两种结果都算通过——断言的是"行为与回复一致"。
+  const locatedNote = await evalInRenderer<{ hasNote: boolean; collapsed: boolean; hits: number }>(
+    win,
+    `(() => {
+      const pane = document.querySelector('.pane')
+      return {
+        hasNote: Boolean(document.querySelector('.located')),
+        collapsed: pane ? pane.classList.contains('collapsed') : false,
+        hits: document.querySelectorAll('.pane .hit').length
+      }
+    })()`
   )
   check(
-    '收起状态下不渲染正文（省空间，也避免答案被瞥见）',
-    reading.answerToggles === 0,
-    `收起时答案块数=${reading.answerToggles}`
+    '提到出处就自动展开定位，没提到就保持收起（两者一致）',
+    locatedNote.hasNote ? !locatedNote.collapsed : locatedNote.collapsed,
+    `已定位提示=${locatedNote.hasNote} 收起=${locatedNote.collapsed} 高亮=${locatedNote.hits}`
   )
 
-  // 展开阅读区
-  await evalInRenderer(win, `(() => { document.querySelector('.pane .ghost').click(); return true })()`)
+  // 展开阅读区（先确保它确实是收起的，避免"点展开"实际点成了收起）
+  await evalInRenderer(
+    win,
+    `(() => {
+      const pane = document.querySelector('.pane')
+      if (pane && pane.classList.contains('collapsed')) {
+        const b = document.querySelector('.pane .ghost')
+        if (b) b.click()
+      }
+      return true
+    })()`
+  )
   await wait(400)
   const afterExpandPane = await evalInRenderer<{
     collapsed: boolean
@@ -358,7 +599,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   }
 
   // 点开一个答案块
-  await evalInRenderer(win, `(() => { document.querySelector('.answer-toggle').click(); return true })()`)
+  await evalInRenderer(win, `(() => { const b = document.querySelector('.answer-toggle'); if (b) b.click(); return true })()`)
   await wait(300)
   const openedAnswer = await evalInRenderer<number>(
     win,
@@ -399,30 +640,52 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   )
   check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
 
-  // ── 留档：截图供人工复核 ───────────────────────────────────
-  const image = await win.webContents.capturePage()
-  const outFile = join(process.cwd(), 'selftest-ui.png')
-  writeFileSync(outFile, image.toPNG())
-  console.log('[selftest] 界面截图：', outFile)
+  // ── 留档：截图与结果文件（打包版没有控制台，靠结果文件验证） ──────
+  try {
+    const image = await win.webContents.capturePage()
+    const outFile = join(process.cwd(), 'selftest-ui.png')
+    writeFileSync(outFile, image.toPNG())
+    console.log('[selftest] 界面截图：', outFile)
+  } catch (error) {
+    console.warn('[selftest] 截图写入失败（不影响结论）：', error)
+  }
+  writeResultFile()
 
   if (failures.length > 0) {
     console.error(`[selftest] 结果：失败 ${failures.length} 项 —— ${failures.join('；')}`)
+    console.log(`[selftest] 合计 ${records.length} 项断言`)
     app.exit(1)
     return
   }
-  console.log('[selftest] 结果：通过')
+  console.log(`[selftest] 结果：通过（共 ${records.length} 项断言）`)
   app.exit(0)
 }
 
 void app.whenReady().then(() => {
   const config = loadConfig()
+  // 无条件记录启动事实：打包版没有控制台，这是排查的唯一线索
+  bootLog(
+    `boot: packaged=${app.isPackaged} mode=${config.mode} hasKey=${config.deepseek.apiKey.length > 0}` +
+      ` selftestEnv=${String(process.env['SPROUTASK_SELFTEST'])} selfTestConst=${SELF_TEST}` +
+      ` userData=${app.getPath('userData')} cwd=${process.cwd()}`
+  )
   registerIpcHandlers()
   const win = createWindow()
 
   // 自检模式：等界面首帧后再截图（判定标准是"渲染出了内容"，不是"窗口存在"）
   if (SELF_TEST) {
+    bootLog(`selftest: 启动，packaged=${app.isPackaged} mode=${config.mode} hasKey=${config.deepseek.apiKey.length > 0}`)
     win.webContents.once('did-finish-load', () => {
+      bootLog('selftest: 界面首帧已加载，开始断言')
       void runSelfTest(win)
+        .then(() => bootLog('selftest: 断言流程结束'))
+        .catch((error: unknown) => {
+          bootLog(`selftest: 断言流程抛错 —— ${error instanceof Error ? error.stack : String(error)}`)
+          app.exit(2)
+        })
+    })
+    win.webContents.on('did-fail-load', (_e, code, desc, url) => {
+      bootLog(`selftest: 界面加载失败 code=${code} desc=${desc} url=${url}`)
     })
   } else if (!config.deepseek.apiKey) {
     console.warn('[main] 未检测到 DEEPSEEK_API_KEY：对话会走降级路径（界面仍可用）')

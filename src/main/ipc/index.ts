@@ -3,13 +3,14 @@ import { z } from 'zod'
 import {
   ChatSession,
   DeepSeekClient,
+  LLMError,
   ToolRegistry,
   createDefaultTools,
   createDemoScope
 } from '../../core'
 import { parseSectionBlocks } from '../../shared/section-blocks'
 import type { StudyScope } from '../../core'
-import { loadConfig } from '../config'
+import { describeConfig, loadConfig, readUserConfig, saveUserConfig } from '../config'
 
 /**
  * IPC 处理器注册表。
@@ -24,6 +25,19 @@ import { loadConfig } from '../config'
 const ChooseModeInput = z.object({ input: z.string().max(200) })
 const ChatInput = z.object({ message: z.string().min(1).max(2000) })
 const PingInput = z.object({ message: z.string().max(200) })
+
+/** 首次运行配置：入参一律校验（Key 长度、URL 形态），不合法就当场拒绝 */
+const ConfigSaveInput = z.object({
+  apiKey: z.string().trim().min(10, 'Key 太短，像是没复制完整').max(200),
+  baseUrl: z.string().url('接口地址不是合法网址').max(200).optional(),
+  model: z.string().trim().max(100).optional()
+})
+
+const ConfigTestInput = z.object({
+  apiKey: z.string().trim().max(200).optional(),
+  baseUrl: z.string().url().max(200).optional(),
+  model: z.string().trim().max(100).optional()
+})
 
 /** 会话单例（当前只有一次会话；多会话与持久化待后续迭代） */
 let session: ChatSession | null = null
@@ -120,6 +134,78 @@ export function registerIpcHandlers(): void {
     const config = loadConfig()
     return { mode: config.mode, hasApiKey: config.deepseek.apiKey.length > 0, devUi: config.devUi }
   })
+
+  /**
+   * 配置概览（给"首次运行配置"界面用）。
+   * ⚠️ 不返回 Key 的任何片段——包括掩码预览（掩码也是密钥信息）。
+   */
+  ipcMain.handle('config:describe', () => describeConfig())
+
+  /** 保存配置到本机用户目录（首次运行配置 / 设置里改 Key 都走这里） */
+  ipcMain.handle('config:save', (_event, raw) => {
+    const input = ConfigSaveInput.parse(raw)
+    return saveUserConfig({
+      deepseekApiKey: input.apiKey,
+      deepseekBaseUrl: input.baseUrl,
+      deepseekModel: input.model
+    })
+  })
+
+  /**
+   * 连通性测试：用"输入框里的 Key"（没填则用已保存的/环境变量）真实发一次最小请求。
+   * 目的：让学生在拿到软件之前，老师就能确认"这台电脑能不能连上模型"。
+   * Key 只在这一方向经过 IPC（渲染 → 主进程），永远不会回传。
+   */
+  ipcMain.handle('config:test', async (_event, raw) => {
+    const input = ConfigTestInput.parse(raw ?? {})
+    const saved = describeConfig()
+    const apiKey =
+      input.apiKey?.trim() || process.env['DEEPSEEK_API_KEY'] || readUserConfig().deepseekApiKey || ''
+
+    if (!apiKey) {
+      return { ok: false, kind: 'missing-key', message: '还没有填写 API Key' }
+    }
+
+    const client = new DeepSeekClient({
+      apiKey,
+      baseUrl: input.baseUrl?.trim() || saved.baseUrl,
+      model: input.model?.trim() || saved.model
+    })
+
+    const startedAt = Date.now()
+    try {
+      await client.chat([{ role: 'user', content: '你好' }], { temperature: 0 })
+      return { ok: true, kind: 'ok', message: `连接成功（用了 ${Date.now() - startedAt} 毫秒）` }
+    } catch (error) {
+      if (error instanceof LLMError) {
+        return { ok: false, kind: error.kind, message: describeConnectivityError(error) }
+      }
+      return { ok: false, kind: 'unknown', message: '连接失败：请检查网络后重试' }
+    }
+  })
+}
+
+/**
+ * 连通性失败的"大人版"提示：这里的使用者是老师/家长，说清技术原因是帮忙，不是添乱
+ * （面向学生的降级话术在 core 的 LLMError.toStudentMessage 里，两者受众不同）。
+ */
+function describeConnectivityError(error: LLMError): string {
+  switch (error.kind) {
+    case 'missing-key':
+      return '还没填 API Key'
+    case 'auth':
+      return 'Key 无效（认证失败）：请确认复制完整、没有多余空格'
+    case 'balance':
+      return '账户余额不足：请先充值'
+    case 'rate-limit':
+      return '请求太频繁：稍等一会儿再试'
+    case 'network':
+      return '连不上服务器：请检查网络（或公司/学校网络限制）'
+    case 'server':
+      return '对方服务器暂时不可用：稍后重试'
+    default:
+      return '对方返回了预期外的内容：请重试，或换一个模型名'
+  }
 }
 
 /** 开发期自检用：把会话能力暴露给主进程自检脚本（不经过 IPC） */
