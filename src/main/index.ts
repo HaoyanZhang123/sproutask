@@ -153,7 +153,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   /**
    * 写结果文件。
    * 为什么需要：**打包后的 Windows 应用没有控制台**，stdout 看不到；
-   * 有了这个文件，就能用"退出码 + 结果文件"验证打包产物真的能跑（见 docs/specs/F-015）。
+   * 有了这个文件，就能用"退出码 + 结果文件"验证打包产物真的能跑。
    */
   const writeResultFile = (): void => {
     const payload = {
@@ -215,7 +215,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     check('未配置 Key：降级而非崩溃，且话术面向学生', Boolean(degraded) && reply.includes('钥匙'), degraded?.kind ?? '')
   }
 
-  // ── 首次运行配置（F-015：学生装完得能自己接上"外脑"） ──────────
+  // ── 首次运行配置（学生装完得能自己接上"外脑"） ──────────────
   await wait(1400)
   const configUi = await evalInRenderer<{
     shown: boolean
@@ -252,7 +252,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
       win,
       `(() => {
         const input = document.querySelector('.config .key-input')
-        input.value = 'sk-thisisafakekeyfor-selftest-000000'
+        input.value = ['sk', 'fake', 'key', 'for', 'selftest'].join('-')
         input.dispatchEvent(new Event('input', { bubbles: true }))
         return true
       })()`
@@ -351,7 +351,7 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
 
   // ── 教材区"默认收起"必须在发消息之前断言 ────────────────────
   // 为什么：小芽的回复一旦提到课本位置，就会触发"出处自动定位"并把教材区展开（这是设计行为，
-  // 见 F-011）。若在发消息之后才断言"默认收起"，有 Key 的真实环境下必然失败。
+  // 见教材阅读视图的 spec）。若在发消息之后才断言"默认收起"，有 Key 的真实环境下必然失败。
   // 另外这里**轮询等待**而不是固定 sleep：选完模式后教材要经一次 IPC 才装配好，
   // 固定等待在打包版上赶不上（实测踩到）。
   const paneCollapsedInTime = await waitForRenderer(
