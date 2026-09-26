@@ -26,7 +26,7 @@ export {
   parseSectionBlocks,
   splitHighlights
 } from '../shared/section-blocks'
-export { plainTextOf } from './prompts/v1/l2-textbook'
+export { plainTextOf } from './prompts/v2/l2-textbook'
 export type { HighlightSegment, SectionBlock, SectionBlockType } from '../shared/section-blocks'
 export type { StudentStore } from './storage'
 export type { TextbookLibrary, StudyScope, CurriculumRequirement } from './content'

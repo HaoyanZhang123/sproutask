@@ -32,8 +32,25 @@ const scope: StudyScope = {
 }
 
 describe('提示词分层装配', () => {
-  it('版本号可追踪', () => {
-    expect(PROMPT_VERSION).toBe('v1')
+  it('版本号可追踪（当前 v2：去 AI 腔版本）', () => {
+    expect(PROMPT_VERSION).toBe('v2')
+  })
+
+  it('v2 的 system 提示词含反 AI 腔约束（防回归）', () => {
+    const prompt = buildSystemPrompt({ scope })
+    expect(prompt).toContain('AI 腔')
+    // 关键几条必须真的写进提示词里，否则"去 AI 味"只是文档里的话
+    expect(prompt).toContain('不要客套')
+    expect(prompt).toContain('不要书面连接词')
+    expect(prompt).toContain('不要列条目')
+    // 类比必须以教材为准（用户要求：别为了亲切而编造）
+    expect(prompt).toContain('不能替代结论')
+  })
+
+  it('v2 不再包含 v1 的写死台词（模型会背书同一句话）', () => {
+    const prompt = buildSystemPrompt({ scope })
+    expect(prompt).not.toContain('这道题我们一起来分析！')
+    expect(prompt).not.toContain('教材第四章第一节') // 过期案例也一并清掉
   })
 
   it('system 提示词包含全部层次的关键内容', () => {
