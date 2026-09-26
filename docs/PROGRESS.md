@@ -47,8 +47,8 @@ pnpm dev                  # 打开桌面窗口
 |---|---|---|
 | 工程骨架（分层、领域契约、CI） | ✅ | 五层目录齐（`main/preload/renderer/core/shared`）；`domain/index.ts` Zod 契约；CI 在 GitHub 上**跑绿过** |
 | 分层提示词 v1（L0–L4） | ✅ | `core/prompts/v1/`；7 个单测 |
-| DeepSeek 客户端 + SSE 流式解析 | 🟡 | 代码与 10 个单测齐；**真实报文下的流式从未验证**（无有效 Key，只到 401） |
-| 教学行为评测（harness + 13 条用例） | 🟡 | `core/eval/runner.ts` + `evals/cases/`（4 文件 13 例）+ `scripts/eval.ts`；8 个单测。**从未真实调用模型、从未生成过报告**（`evals/reports/` 不存在） |
+| DeepSeek 客户端 + SSE 解析 | ✅ | 代码与 10 个单测；**用户已实测完成一次真实对话**；逐字流式渲染未做（产品决策，见 F-010） |
+| 教学行为评测（15 条用例） | ✅ | `pnpm eval` **已真实跑通：15/15（100%）**，答案泄漏用例 0 条；报告在 `evals/reports/` |
 | 意图询问（预习/复习/做题/拓展 + 位置） | ✅ | `core/agent/intent.ts`、`session.ts`；14+11 个单测；`pnpm chat` 实测 |
 | Agent 循环（工具调用 + 上限 + 降级） | ✅ | `core/agent/loop.ts`；10 个单测 + mutation-check；端到端跑到"401 → 可读降级" |
 | 工具调用（2 个工具 + JSON Schema 生成） | ✅ | `get_section_text`、`flag_for_teacher`；14 个单测 |
@@ -113,7 +113,34 @@ pnpm dev                  # 打开桌面窗口
 
 ---
 
-## 5. 下一步（当前：等你就两个问题拍板）
+## 5. 下一步（当前：等你点头，开工"打包"）
+
+**B. 去 AI 味：✅ 全部完成，且已通过你的验收**（v2 成为当前生效版本）
+
+### 下一件（建议）：F-015 打包 —— 先解决"学生装完能连上模型"这个硬门槛
+
+**为什么必须先做这一步**：现在读 API Key 只有两条路——开发期的 `.env`，或打包后的
+`userData/config.json`（**能写入它的向导还没做**）。直接把 exe 发给学生，他打开就连不上模型。
+
+**草拟的验收标准（你确认后我才动手）**：
+
+1. 应用内有"首次运行配置"界面：能填 API Key 并保存到本机用户目录（不依赖 `.env`），
+   保存后当场做一次连通性验证，成功/失败都给面向人的中文提示
+2. Key 仍然**只在主进程**，渲染进程与日志里看不到明文（沿用现有安全约定）
+3. `pnpm build:win` 能在本机产出可运行的便携版 exe；双击后能开窗口 → 完成配置 → 正常对话
+4. 打包产物里**不含** `.env`、不含教材原文、不含研究材料（沿用发布扫描那套红线）
+5. `typecheck && test` 全绿；界面自检新增覆盖"配置界面"的断言
+6. 若 electron-builder 首次执行遇到下载/签名问题，**如实报告，不假装成功**
+
+> 打包是**从未执行过**的路径，所以这里我不承诺一次成功——先把环境跑通，再报结果给你。
+
+### 再往后（待你排期）
+
+| 候选 | 前置条件 |
+|---|---|
+| F-013 存储实现（JSONL 或 SQLite）+ 掌握度状态机 | 你拍板用哪种；做完"小芽记得你"才成立 |
+| F-004/F-005 教材内容工程 | 需要你提供人教版七上教材电子文本 |
+| GitHub Release `v0.1.0-alpha` | 打包产出可运行的 exe 之后（说明开头用留档的 E 版文案） |
 
 ### 用户试跑结果（2026-09）：**软件能正常用，但发现两个问题**
 
@@ -149,7 +176,8 @@ pnpm dev                  # 打开桌面窗口
   不许直接确认或纠正学生、**类比不得偏离教材**；**验收期内又按你的反馈做了两次修订**：
   ① v2 初稿太冷淡（"直接说就没意思了"）→ 新增"说话的温度"一节：接住学生、用邀请代替命令、
   禁用冷硬推拒说法、长度放宽到 100–180 字；② 别再预告答案结构（"管了两件事"）→ 禁止说出要点/条数
-- **v2 是否通过验收：等你判读**（对照报告见 `evals/reports/2026-09-26-prompt-compare.md`）
+- **v2 验收结论：✅ 用户已判读通过**（2026-09："我对你的修改很满意"）→ v2 定为当前生效版本；
+  今后再改教学规则/语气需新开 v3，v2 冻结为对比基线
 - **用户明确不改的两处**：出处标注 `（出处：…）`、顶部无 Key 提示条
 - 新增工具 `pnpm prompts:compare`：同一批问题分别用 v1/v2 生成并排打印，落报告到 `evals/reports/`
 - **验证**：`pnpm eval` **首次真实跑通：15/15（100%）**、0 条答案泄漏；`typecheck` 0 错、`test` 127/127；
@@ -170,21 +198,12 @@ B4 导出时发布扫描拦下了 `scripts/prompt-compare.ts`（注释里有"研
 
 ### 发布与分发（已定文案，待执行）
 
-**① GitHub 仓库 About（描述 + 标签）—— 文案已由用户拍板**
+**① GitHub 仓库 About（描述 + 标签）—— ✅ 已完成（2026-09）**
 
-- 描述（D 版）：
-  `芽问：教材锚定的初中生物学习助手。解释只来自课本与课标，只提问不给答案，帮学生从"记住"走到"想通"。`
-- 标签（11 个）：
-  `education` `ai4edu` `ai-for-education` `agent` `biology` `learning-assistant`
+- 描述（D 版）：`芽问：教材锚定的初中生物学习助手。解释只来自课本与课标，只提问不给答案，帮学生从"记住"走到"想通"。`
+- 标签（11 个）：`education` `ai4edu` `ai-for-education` `agent` `biology` `learning-assistant`
   `socratic-method` `textbook` `ai-tutor` `local-first` `typescript`
-- 执行方式：本机 `gh` 的登录令牌**已失效**（不影响 `git push`，那条走 SSH），
-  所以要么 `gh auth login -h github.com` 后跑下面的命令，要么在网页上 ⚙️ About 里粘贴：
-
-  ```powershell
-  gh repo edit HaoyanZhang123/sproutask `
-    --description '芽问：教材锚定的初中生物学习助手。解释只来自课本与课标，只提问不给答案，帮学生从"记住"走到"想通"。' `
-    --add-topic education,ai4edu,ai-for-education,agent,biology,learning-assistant,socratic-method,textbook,ai-tutor,local-first,typescript
-  ```
+- 执行方式：用户完成 `gh auth login` 后由我用 `gh repo edit` 写入，并已用 GitHub API 复核（描述与标签全部生效）
 
 **② GitHub Release —— 时机：第一版 exe 打出来、你本机验证过之后**
 
@@ -252,4 +271,4 @@ B4 导出时发布扫描拦下了 `scripts/prompt-compare.ts`（注释里有"研
 
 ---
 
-*最后更新：本次会话（盘点与治理；下一步＝等你试跑反馈）*
+*最后更新：本次会话（去 AI 味 B1–B4 完成并通过验收；About 已写入；下一步＝打包 F-015）*
