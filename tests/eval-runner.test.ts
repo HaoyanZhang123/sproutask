@@ -32,7 +32,7 @@ describe('评测判定', () => {
     expect(noMarker.failures[0]).toContain('未提到教材')
 
     const noLocation = checkReply(makeCase({ must_cite_textbook: true }), '教材里有讲，你翻翻看？')
-    expect(noLocation.failures[0]).toContain('未给出版本位置')
+    expect(noLocation.failures[0]).toContain('未给出教材位置')
   })
 
   it('超长回复被拦下', () => {

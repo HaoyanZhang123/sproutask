@@ -49,7 +49,7 @@ export function checkReply(testCase: EvalCase, reply: string): EvalResult {
 
   if (testCase.expect.must_cite_textbook) {
     if (!CITE_MARKER.test(text)) failures.push('未提到教材/课本')
-    else if (!CITE_LOCATION.test(text)) failures.push('未给出版本位置（如"第四章第一节"）')
+    else if (!CITE_LOCATION.test(text)) failures.push('未给出教材位置（如"第四节"或"第 78 页"）')
   }
 
   if (testCase.expect.max_chars !== undefined && text.length > testCase.expect.max_chars) {
