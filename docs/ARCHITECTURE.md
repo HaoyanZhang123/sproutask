@@ -190,7 +190,9 @@ L0 人格 / L1 教学纪律 / **L2 教材与课标约束** / L3 学情摘要（�
 
 ## 10. 打包与分发
 
-- Windows：`portable` 便携版（免安装，规避机房权限）；macOS：`dmg`（GitHub Actions 构建）
+- Windows：**两种形态并存**（见 `docs/adr/ADR-0006`）——
+  `portable` 便携版（免安装，规避机房权限）与 `nsis` 安装版（per-user、不需要管理员、可卸载）；
+  macOS：`dmg`（GitHub Actions 构建，**尚未构建过**）
 - 教学内容（`content/units` 结构 + 教材原文）经 `extraResources` 随包分发
   （⚠️ **现状**：`content/` 下只有说明文件，教材尚未入库，因此随包发放的是自编占位文本）
 - 未签名应用会被 SmartScreen 拦截 → 分发时附"仍要运行"说明

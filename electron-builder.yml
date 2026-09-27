@@ -13,6 +13,7 @@ extraResources:
 win:
   target:
     - portable
+    - nsis
   artifactName: ${productName}-${version}-win-${arch}.${ext}
   # 【为什么必须关掉】electron-builder 打包 Windows 时会下载 winCodeSign 工具，
   # 该压缩包含 macOS 的 .dylib 软链接；在没有管理员权限、也没开"开发者模式"的 Windows 上，
@@ -20,6 +21,26 @@ win:
   # 关掉它只影响"改写 exe 图标/版本信息 + 数字签名"——本项目当前既没有自定义图标也未签名，
   # 因此不影响可用性；等要做正式签名分发时，需要以管理员身份运行或开启开发者模式再打开此项。
   signAndEditExecutable: false
+
+# 安装版（NSIS）：给学生"双击安装"的那条路。
+# 与便携版的关键差别（也是它存在的理由）：
+#   - 装到**当前用户目录**（%LOCALAPPDATA%\Programs\...），不需要管理员权限 —— 机房场景的关键
+#   - 有开始菜单/桌面快捷方式、能正常卸载；便携版则是一次性解压运行
+#   两者并存：机房/无权限环境用便携版，自己的电脑用安装版更方便（见 docs/adr/ADR-0006）
+nsis:
+  # 安装包必须单独命名，否则与便携版同名冲突（都是 .exe）
+  artifactName: ${productName}-Setup-${version}-${arch}.${ext}
+  oneClick: true
+  perMachine: false
+  # 安装过程不申请提权：per-user + oneClick 本来就不需要；万一被要求提权，宁可失败也不要弹 UAC
+  allowElevation: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 芽问 SproutAsk
+  uninstallDisplayName: 芽问 SproutAsk ${version}
+  # 卸载时**保留** %APPDATA%\sproutask\config.json —— 那里面有用户的 API Key，
+  # 删掉会连带毁掉便携版的配置（两者共用同一个 userData 目录）
+  deleteAppDataOnUninstall: false
 mac:
   target:
     - dmg

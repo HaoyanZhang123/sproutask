@@ -36,7 +36,7 @@ $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 | `$env:SPROUTASK_SELFTEST="1"; pnpm dev` | 界面自检（无头 DOM 断言 + 截图） | 不需要 |
 | `pnpm eval` | 教学行为评测跑批（**会真实调用模型，产生费用**） | 需要 |
 | `pnpm build` | 只做构建（产出 `out/`），不打包安装包 | 不需要 |
-| `pnpm build:win` / `build:mac` | 打包成便携版 / dmg（`build:win` 已实测跑通；`build:mac` **从未实测**） | 不需要 |
+| `pnpm build:win` / `build:mac` | 打包：Windows 产出**便携版 + 安装版**两个 exe；macOS dmg **从未实测** | 不需要 |
 
 ## 目录结构
 

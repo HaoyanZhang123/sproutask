@@ -117,7 +117,7 @@ $env:SPROUTASK_SELFTEST = "1"; pnpm dev        # 通过=退出码 0，并输出�
 | 按学习位置**装载**（`buildStudyScope`） | ⏳ | **只有接口声明**，无实现 |
 | 掌握度状态机 | ⏳ | 只有三态 schema 与接口方法，无实现 |
 | 本地存储（SQLite / JSONL） | ⏳ | 只有 `StudentStore` 接口，无实现；**关掉应用学情即丢失** |
-| 打包（便携版 / dmg） | ✅ | **Windows 便携版已发布**：[v0.1.0-alpha](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.1.0-alpha)（含首次运行配置界面）；macOS 未构建、未做代码签名 |
+| 打包（便携版 / 安装版 / dmg） | ✅ | **Windows 便携版已发布**：[v0.1.0-alpha](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.1.0-alpha)（含首次运行配置界面）；**安装版（NSIS）也已跑通**（本机静默安装 + 卸载验证）；macOS 未构建、未做代码签名 |
 
 **一句话**："对话 + 教材视图"这条主链路已跑通并被自动验证；**"教材内容"与"记住学生"两块还是空的**。
 

@@ -15,7 +15,19 @@ files:
 win:
   target:
     - portable
+    - nsis
   artifactName: ${productName}-${version}-win-${arch}.${ext}
+# 安装版（NSIS）：双击即装，装到当前用户目录（不需要管理员权限），可正常卸载。
+# 与便携版并存：受限环境用便携版，自己的电脑用安装版。安装包必须单独命名，否则与便携版同名冲突。
+# 注：卸载时保留用户目录下的 config.json（里面是用户自己填的 API Key）。
+nsis:
+  artifactName: ${productName}-Setup-${version}-${arch}.${ext}
+  oneClick: true
+  perMachine: false
+  allowElevation: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
 mac:
   target:
     - dmg
