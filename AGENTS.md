@@ -27,7 +27,7 @@ pnpm typecheck && pnpm test        # 必须全绿，不许带红测试进下一�
 ```
 
 - 改了提示词 / 教学规则 → 追加 `pnpm eval`
-- 改了界面 → 追加 `$env:SPROUTASK_SELFTEST="1"; pnpm dev`（断言数量**随环境与内容变动**：当前 44 项（无 Key）/ 36 项（有 Key）；以 `selftest-result.json` 为准，必须全过）
+- 改了界面 → 追加 `$env:SPROUTASK_SELFTEST="1"; pnpm dev`（断言数量**随环境与内容变动**，以 `selftest-result.json` 为准，必须全过；无 Key 与有 Key 两种环境都跑）
 - 报告结论时**区分"实测"与"推断"**；没验证的必须明说
 
 ## 命令
