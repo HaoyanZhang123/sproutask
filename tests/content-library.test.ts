@@ -8,6 +8,7 @@ import {
   positionsOf,
   sourceForPosition
 } from '../src/main/content/file-library'
+import { createContentRuntime } from '../src/main/content/runtime'
 
 /**
  * 从本机文件装载教学内容（`content/units/*` + 原文）。
@@ -106,6 +107,31 @@ describe('装载教学内容（本机文件）', () => {
     const root = mkdtempSync(join(tmpdir(), 'sproutask-empty-'))
     expect(loadContentLibrary(root)).toBeNull()
     expect(describeLoaded(null)).toContain('演示占位')
+  })
+})
+
+describe('运行时内容源（打包后学生机的关键情形）', () => {
+  it('有结构但没有教材正文时：仍用真实内容，不回落演示占位', () => {
+    const root = makeFixture({ withText: false })
+    const runtime = createContentRuntime(root)
+    expect(runtime.source).toBe('content')
+    expect(runtime.positions).toHaveLength(1)
+    // 正文为空是"事实"，不编造
+    expect(runtime.scopeFor(runtime.positions[0]!.position, 'review').sectionTexts[0]?.text).toBe('')
+  })
+
+  it('完全没有内容目录时才回落演示占位（开发机/公开仓库）', () => {
+    const root = mkdtempSync(join(tmpdir(), 'sproutask-none-'))
+    const runtime = createContentRuntime(root)
+    expect(runtime.source).toBe('demo')
+    expect(runtime.positions.length).toBeGreaterThan(0)
+  })
+
+  it('多个候选目录：第一个能装载的胜出（打包后内容在 resources 下）', () => {
+    const empty = mkdtempSync(join(tmpdir(), 'sproutask-empty2-'))
+    const withContent = makeFixture({ withText: false })
+    const runtime = createContentRuntime([empty, withContent])
+    expect(runtime.source).toBe('content')
   })
 })
 

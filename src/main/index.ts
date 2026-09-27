@@ -222,6 +222,8 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
   // 只在"本节确有 :::answer 块"时才有意义；没有就明确标"未测"，不假装通过。
   const scopeText = session.currentScope()?.sectionTexts.map((s) => s.text).join('\n') ?? ''
   const hasAnswerBlocks = /(^|\n):::answer/.test(scopeText)
+  // 本机有没有教材正文：决定界面该显示正文还是"请对照课本"提示（打包后学生机=没有）
+  const scopeHasText = scopeText.trim().length > 0
 
   // 搜索探针：从"折叠答案"里取一小段**只在答案块里出现**的文字，
   // 用来验"搜到折叠内容时只提示、不自动展开"。写死一个词（如 DNA）在真实教材上会失效——
@@ -537,6 +539,9 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
     stacked: boolean
     answerToggles: number
     visibleAnswerBodies: number
+    noTextNotice: boolean
+    demoNotice: boolean
+    paneParas: number
   }>(
     win,
     `(() => {
@@ -547,12 +552,41 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
         collapsed: pane ? pane.classList.contains('collapsed') : false,
         stacked: Boolean(document.querySelector('.workspace.stacked')),
         answerToggles: document.querySelectorAll('.answer-toggle').length,
-        visibleAnswerBodies: document.querySelectorAll('.answer-body').length
+        visibleAnswerBodies: document.querySelectorAll('.answer-body').length,
+        // 学生机（随包只有结构、没有教材正文）必须看到"请对照课本"的提示，
+        // 而不是被塞一段占位文本；有正文时则不该出现这条提示。
+        noTextNotice: Boolean(document.querySelector('.no-text-notice')),
+        demoNotice: Boolean(document.querySelector('.demo-notice')),
+        paneParas: pane ? pane.querySelectorAll('.pane-body .para').length : 0
       }
     })()`
   )
   check('教材阅读区已渲染出来', reading.hasPane)
   check('阅读区显示当前小节标题', reading.sectionTitle.includes('细胞的生活'), reading.sectionTitle)
+
+  // 正文有无决定界面该怎么说话——三种情形都必须正确。
+  // ⚠️ 判断依据用**后端事实**（内容源 + scope 里有没有正文），不能用"页面上有几段"：
+  //    段落数还受阅读区是否展开影响（复习模式默认收起；有回应引用出处时才会自动展开），
+  //    拿它当判据会在"无 Key 降级话术"那轮误判（2026-09-27 实测踩到）。
+  if (runtime.source === 'demo') {
+    check(
+      '演示占位内容已显式标注（不让学生误以为是课本原文）',
+      reading.demoNotice,
+      reading.demoNotice ? '已标注"演示内容"' : '演示内容没有标注 → 学生会误当成课本'
+    )
+  } else if (scopeHasText) {
+    check(
+      '有教材正文：不显示"本机没有正文"的提示',
+      !reading.noTextNotice && !reading.demoNotice,
+      `正文段落 ${reading.paneParas} 段（收起状态下为 0，属正常）`
+    )
+  } else {
+    check(
+      '本机没有教材正文：显示"请对照课本"提示，而不是占位文本',
+      reading.noTextNotice && !reading.demoNotice,
+      reading.noTextNotice ? '已提示对照自己手里的课本（学生机情形）' : '既没有正文也没有提示（学生会被误导）'
+    )
+  }
 
   // 出处自动定位：回复里提到课本位置时，教材区应自动展开并给出"已定位"提示；
   // 没提到时应保持收起。两种结果都算通过——断言的是"行为与回复一致"。
@@ -603,7 +637,14 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
       }
     })()`
   )
-  check('点"展开教材"后阅读区展开并出现搜索框', !afterExpandPane.collapsed && afterExpandPane.hasSearch)
+  check(
+    scopeHasText
+      ? '点"展开教材"后阅读区展开并出现搜索框'
+      : '点"展开教材"后阅读区展开（本节无正文 → 不出现搜索框，属预期）',
+    scopeHasText
+      ? !afterExpandPane.collapsed && afterExpandPane.hasSearch
+      : !afterExpandPane.collapsed && !afterExpandPane.hasSearch
+  )
   check(
     hasAnswerBlocks
       ? '答案块存在且默认收起（先自己答、再展开对照）'
@@ -652,8 +693,8 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
     `可见=${sideBySide.composerVisible} 在右半区=${sideBySide.composerInRightHalf}`
   )
   check(
-    '左教材与右对话各自独立滚动',
-    sideBySide.paneScrollable && sideBySide.bubblesScrollable,
+    scopeHasText ? '左教材与右对话各自独立滚动' : '左对话独立滚动（本节无正文 → 没有正文区，属预期）',
+    scopeHasText ? sideBySide.paneScrollable && sideBySide.bubblesScrollable : sideBySide.bubblesScrollable,
     `阅读区=${sideBySide.paneScrollable} 对话区=${sideBySide.bubblesScrollable}`
   )
 
@@ -788,7 +829,13 @@ void app.whenReady().then(() => {
   )
   // 内容源：真实内容（本机有 content/units + 原文）优先，否则回落到演示占位。
   // 打包发给学生的机器上没有教材原文（ADR-0007），所以这一步必须能优雅回落。
-  const contentRuntime = createContentRuntime(process.cwd(), bootLog)
+  // 内容源：真实内容优先（打包后在 resources/ 下；开发时在仓库根），否则回落演示占位。
+  // 随包的是**我们自己的结构**（知识点/课标/页码），教材正文只留在开发机（ADR-0007）——
+  // 所以学生机上"有结构、没正文"，这种情况必须优雅降级：引导学生对照自己手里的课本。
+  const contentRuntime = createContentRuntime(
+    [process.resourcesPath, app.getAppPath(), process.cwd()],
+    bootLog
+  )
   // 本机数据（JSONL）：对话与掌握度变更都落在这里；退出后仍可读，供学习统计与匿名化导出
   const { store, dataDir } = createJsonlStudentStore(join(app.getPath('userData'), 'data'))
   bootLog(`数据目录：${dataDir}`)

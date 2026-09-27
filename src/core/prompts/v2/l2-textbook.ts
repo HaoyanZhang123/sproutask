@@ -12,7 +12,21 @@ import { parseSectionBlocks } from '../../../shared/section-blocks'
  *     写进提示词只会变成噪声；块内的文字（含答案）仍要保留，模型需要知道正确结论
  *     才能引导学生走过去——"不给答案"是靠教学纪律与泄漏护栏约束的，不靠藏内容。
  */
+/**
+ * 本机没有教材正文时给模型的交代（**打包分发后学生机就是这种情况**：
+ * 正文是版权物、只留在开发机；随包的是我们自己的知识点/课标/页码，见 ADR-0007）。
+ *
+ * 关键：**不许引用或编造课本原句**，把"读课本"这件事交回学生手里——
+ * 这既符合"学生用自己手里那本课本"的设计，也避免模型凭空造教材。
+ * 带着页码与知识点，引导依然可执行。
+ */
+const MISSING_TEXT_NOTICE = `（**本机没有存放教材正文**：不要引用、不要编造课本原句，也不要假装你看到了课本。）
+按下面的做法进行：让学生翻到课本对应页码，念出或转述他看到的段落，你再根据他的转述提问、纠偏与追问；
+涉及具体结论时，只使用"本部分应掌握的知识点"里给出的表述，并请学生用课本核对。`
+
 export function buildTextbookLayer(scope: StudyScope): string {
+  const hasLocalText = scope.sectionTexts.some((section) => section.text.trim().length > 0)
+
   const sections = scope.sectionTexts
     .map((section) => `【${section.title}】\n${plainTextOf(section.text)}`)
     .join('\n\n')
@@ -39,7 +53,7 @@ ${curriculum}
 【教材原文（唯一事实来源）】
 当前单元：${scope.unit.title}（${scope.unit.edition}，${scope.unit.grade}）
 
-${sections}
+${hasLocalText ? sections : MISSING_TEXT_NOTICE}
 
 【本部分应掌握的知识点】
 ${knowledgePoints}`

@@ -38,6 +38,12 @@ const props = defineProps<{
   edition: string
   grade: string
   blocks: Block[]
+  /** 本机有没有教材正文（没有时显示"请对照课本第 X 页"的提示，而不是占位文本） */
+  hasLocalText: boolean
+  /** 印刷页起始页提示，如"第 28 页" */
+  pageHint: string | null
+  /** 内容来源：content＝内容工程产物；demo＝开发期演示占位（必须显式标注） */
+  source: 'content' | 'demo'
   knowledgePoints: KnowledgePoint[]
   curriculumRequirements: string[]
   query: string
@@ -119,8 +125,20 @@ watch(
       </button>
     </header>
 
+    <!-- 这两条提示放在折叠开关之外：**收起时也要看得见**——
+         学生机上没有教材正文，这是他一进来就该知道的事 -->
+    <p v-if="source === 'demo'" class="notice demo-notice">
+      这是**演示内容**：开发用的占位文字，不是你课本上的原文。
+    </p>
+    <p v-else-if="!hasLocalText" class="notice no-text-notice">
+      本机没有存放教材正文。请翻到课本<span v-if="pageHint"> {{ pageHint }}</span
+      >所在的这一节，念出或转述你看到的段落，小芽会照着你说的内容提问与纠偏。
+      本节要掌握的知识点与课程标准要求，在下面的"这一节要掌握什么"里，可以直接对照。
+    </p>
+
     <template v-if="!collapsed">
-      <div class="search-row">
+      <template v-if="hasLocalText">
+        <div class="search-row">
         <input
           :value="query"
           class="search"
@@ -180,6 +198,7 @@ watch(
           </div>
         </template>
       </div>
+      </template>
 
       <div class="pane-foot">
         <div class="answer-tools">
@@ -391,5 +410,24 @@ watch(
 .curriculum {
   margin: 6px 0 0;
   color: #6b7280;
+}
+
+/* 两条提示（"本机没有正文" / "演示内容"）：要看得见、但不喧宾夺主 */
+.notice {
+  margin: 10px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.no-text-notice {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0c4a6e;
+}
+.demo-notice {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #7c2d12;
 }
 </style>

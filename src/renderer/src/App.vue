@@ -34,6 +34,12 @@ interface SectionContent {
   grade: string
   sectionTitle: string
   mode: string
+  /** 本机有没有教材正文（没有时提示学生对照手里的课本，而不是显示占位文本） */
+  hasLocalText: boolean
+  /** 印刷页起始页（如"第 28 页"）：正文不在本机时，这是"翻到哪一页"的依据 */
+  pageHint: string | null
+  /** 内容来源：content＝我们的内容工程产物；demo＝开发期演示占位（必须显式标注） */
+  source: 'content' | 'demo'
   blocks: Array<{ type: 'text' | 'think' | 'answer'; title?: string; body: string; index: number }>
   knowledgePoints: Array<{
     id: string
@@ -272,6 +278,9 @@ async function restart(): Promise<void> {
         :edition="section.edition"
         :grade="section.grade"
         :blocks="section.blocks"
+        :has-local-text="section.hasLocalText"
+        :page-hint="section.pageHint"
+        :source="section.source"
         :knowledge-points="section.knowledgePoints"
         :curriculum-requirements="section.curriculumRequirements"
         :query="query"
