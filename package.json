@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "chat": "tsx scripts/chat.ts",
     "eval": "tsx scripts/eval.ts",
+    "content:validate": "tsx scripts/content-validate.ts",
     "prompts:compare": "tsx scripts/prompt-compare.ts",
     "build:win": "electron-vite build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac"
