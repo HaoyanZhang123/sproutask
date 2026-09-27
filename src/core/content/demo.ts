@@ -7,7 +7,7 @@ import type { StudyScope } from './index'
  * 为什么放在 core 而不是 scripts：桌面应用在接入真实教材内容之前也要能启动、能演示完整流程。
  * 内容库接口（TextbookLibrary）落地后，这里会被真实实现替换。
  *
- * 案例单元：人教版《生物学》七年级上册 第二单元 第一章 第四节「细胞的生活」。
+ * 案例单元：人教版《生物学》七年级上册 第一单元 第二章 第四节「细胞的生活」（**2024 新版编排**）。
  * 章节归属照教材写实，但**正文是自编的通俗表述**（教材原文有版权，不进仓库）；
  * 页码暂不填写，待录入真实教材后由内容工程补齐。
  */
@@ -58,13 +58,13 @@ const KNOWLEDGE_POINTS = [
 ] as const
 
 export function createDemoScope(mode: StudyMode = 'review'): StudyScope {
-  const sectionTitle = '第二单元第一章第四节 细胞的生活'
+  const sectionTitle = '第一单元第二章第四节 细胞的生活'
   return {
     position: { volumeId: 'rjb-7s', unitId: UNIT_ID, sectionId: 's1' },
     mode,
     unit: {
       id: UNIT_ID,
-      title: '第二单元 第一章 细胞是生命活动的基本单位',
+      title: '第一单元 生物和细胞',
       grade: '七年级上',
       edition: '人教版',
       sections: [{ id: 's1', title: sectionTitle }]

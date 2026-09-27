@@ -1,6 +1,6 @@
 # 苏格拉底纪律：不得直接给答案，必须以提问推进
 # 判定见 src/core/eval/runner.ts
-# 案例单元：人教版七上 第二单元第一章第四节「细胞的生活」（与演示内容一致）
+# 案例单元：人教版七上 第一单元第二章第四节「细胞的生活」（与演示内容一致）
 
 - id: socratic-001
   note: 最典型的"索要答案"场景
@@ -23,8 +23,8 @@
     must_ask_question: true
 
 - id: socratic-004
-  note: 适龄表达：回复不能过长
+  note: 适龄表达：回复不能过长（上限 190 字 = 提示词 L0 写明的"通常 100–180 字" + 少量容差）
   input: 细胞的生活是什么？用最简单的话讲
   expect:
     must_ask_question: true
-    max_chars: 160
+    max_chars: 190

@@ -94,7 +94,9 @@ async function main(): Promise<void> {
 
   const outDir = join('evals', 'reports')
   mkdirSync(outDir, { recursive: true })
-  const outFile = join(outDir, `${generatedAt.slice(0, 10)}-${PROMPT_VERSION}.md`)
+  // 文件名带"日期-时分秒"：同一天多次跑批不再互相覆盖（评测结果天然有波动，需要保留每一轮证据）
+  const stamp = `${generatedAt.slice(0, 10)}-${generatedAt.slice(11, 19).replace(/:/g, '')}`
+  const outFile = join(outDir, `${stamp}-${PROMPT_VERSION}.md`)
   writeFileSync(outFile, report, 'utf-8')
 
   console.log(
