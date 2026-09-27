@@ -1,0 +1,81 @@
+# 知识点（进 git：我们自己的教学设计，不是教材原文）
+#
+# 写法约定（很重要，有自动校验）：
+#   1. summary 里**要有标点**（、，；），因为答案泄漏护栏是按"要点里 ≥6 字的片段"判定的——
+#      一句话没有标点会变成一整段长片段，护栏就形同虚设（2026-09-27 审计实测发现）
+#   2. refs 的 page 用**印刷页码**（不是 PDF 页码），出处要对得上学生手里的课本
+#   3. 每条都要能回答："学生答错时，我让他翻到哪儿看？"
+#
+# 依据：人教版 2024 新版 七上 第一单元第二章第四节（印刷页 28–32）
+# ⚠️ 正文来自扫描版 OCR，已做形近字修正；**逐字核对前不要当作最终出处**
+
+knowledgePoints:
+  - id: kp-cell-matter
+    unitId: u-cell-basic-unit
+    title: 细胞中的物质
+    summary: 细胞中的物质分无机物和有机物两类，水、无机盐属于无机物，糖类、脂质、蛋白质和核酸属于有机物
+    refs:
+      - sectionId: s1
+        page: 28
+    prerequisites: []
+    misconceptions:
+      - 以为细胞里的物质都属于有机物，忽略了水和无机盐
+      - 以为无机物也含有碳元素
+    difficulty: 2
+
+  - id: kp-cell-membrane
+    unitId: u-cell-basic-unit
+    title: 细胞膜控制物质进出
+    summary: 细胞膜把细胞内部与外界环境分开，并能控制物质的进出，让需要的物质进入、把有害物质挡在外面、把废物和分泌物排出
+    refs:
+      - sectionId: s1
+        page: 29
+    prerequisites: []
+    misconceptions:
+      - 以为细胞壁控制物质进出（细胞壁主要起保护和支持作用）
+      - 以为细胞膜把细胞完全封闭起来了
+    difficulty: 2
+
+  - id: kp-cell-energy
+    unitId: u-cell-basic-unit
+    title: 细胞中的能量转换器
+    summary: 细胞质中的叶绿体和线粒体是能量转换器，叶绿体把光能转化成化学能储存在有机物中，线粒体把有机物中的化学能释放出来供细胞利用
+    refs:
+      - sectionId: s1
+        page: 30
+    prerequisites:
+      - kp-cell-matter
+    misconceptions:
+      - 以为所有细胞都有叶绿体（动物细胞没有叶绿体）
+      - 把叶绿体和线粒体的能量转换方向记反
+    difficulty: 3
+
+  - id: kp-cell-nucleus
+    unitId: u-cell-basic-unit
+    title: 细胞核是细胞的控制中心
+    summary: 细胞核中含有遗传物质DNA，是细胞的控制中心，控制着生物的生长发育和遗传
+    refs:
+      - sectionId: s1
+        page: 31
+    prerequisites:
+      - kp-cell-membrane
+    misconceptions:
+      - 以为遗传物质存在于细胞质中
+      - 把细胞核的作用只记成"里面有DNA"，说不清它控制什么
+    difficulty: 3
+
+  - id: kp-cell-basic-unit
+    unitId: u-cell-basic-unit
+    title: 细胞是生物体结构和功能的基本单位
+    summary: 细胞的生活是物质、能量和信息的统一，因此细胞是生物体结构和功能的基本单位
+    refs:
+      - sectionId: s1
+        page: 32
+    prerequisites:
+      - kp-cell-matter
+      - kp-cell-membrane
+      - kp-cell-energy
+      - kp-cell-nucleus
+    misconceptions:
+      - 把这句话当成要背的口号，说不清它由物质、能量、信息这三个方面支撑
+    difficulty: 3

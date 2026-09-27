@@ -3,7 +3,10 @@ node_modules/
 /out/
 /dist/
 /release/
-/build/
+# 注意：写成 /build/* 而不是 /build/ —— 父目录被整体忽略时，文件级"例外"是无效的
+/build/*
+# 例外：应用图标是需要长期留存的自有资产（不是构建产物；electron-builder 从这里取）
+!/build/icon.ico
 /tmp/
 __pycache__/
 *.pyc
