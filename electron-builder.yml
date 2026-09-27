@@ -20,19 +20,11 @@ win:
     - portable
     - nsis
   artifactName: ${productName}-${version}-win-${arch}.${ext}
-  # 【为什么关掉】electron-builder 打包 Windows 时会下载 winCodeSign 工具，该压缩包含 macOS 的
-  #   .dylib 软链接；在没有管理员权限、也没开"开发者模式"的 Windows 上，7-Zip 解压会因
-  #   "客户端没有所需的特权"而失败，整个打包中断（2026-09-27 再次实测复现：errorOut 指向
-  #   darwin/10.12/lib/libcrypto.dylib 与 libssl.dylib 的符号链接）。
-  #
-  #   ⚠️ 这个开关同时决定"自定义图标能否写进 exe"（图标与版本信息都靠它）。
-  #   当前状态：**图标未嵌入**（exe 用 Electron 默认图标），因为本机没有符号链接权限。
-  #   要打开它，二选一（都需要人工操作）：
-  #     1) 开"开发者模式"：设置 → 系统 → 开发者选项（Win11）/ 更新和安全 → 开发者选项（Win10）→ 打开；
-  #        然后把本项改成 true，重跑 `pnpm build:win`
-  #     2) 用管理员权限开一个终端，再跑 `pnpm build:win`
-  #   图标文件已就位：`build/icon.ico`（7 种尺寸，来自选定草稿；build/ 已在 .gitignore）
-  signAndEditExecutable: false
+  # 【为什么又打开了（2026-09-27）】自定义图标必须经过这一步才能写进 exe（图标与版本信息都靠它）。
+  #   前置：需要"开发者模式"或管理员权限，否则下载的 winCodeSign 在解压时会因创建符号链接
+  #   被拒（"客户端没有所需的特权"）而中断。用户已开启开发者模式，实测打包通过。
+  #   注意：这个开关只负责"改写资源"，**不等于代码签名**——没有证书时签名仍会被跳过。
+  signAndEditExecutable: true
 
 # 安装版（NSIS）：给学生"双击安装"的那条路。
 # 与便携版的关键差别（也是它存在的理由）：

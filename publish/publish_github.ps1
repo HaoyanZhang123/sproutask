@@ -115,6 +115,18 @@ if (Test-Path $evalCases) {
     Write-Host "  + evals/cases/"
 }
 
+# 应用图标：**唯一允许进入公开产物的二进制文件**（例外在下方 $binaryAllowList 里显式登记）
+# 为什么破例：没有它，从公开仓库构建出来的 exe 只能是 Electron 默认图标（见 publish/README.md）
+$iconSource = Join-Path $repoRoot 'build/icon.ico'
+if (Test-Path $iconSource) {
+    $iconDir = Join-Path $target 'build'
+    New-Item -ItemType Directory -Path $iconDir -Force | Out-Null
+    Copy-Item -LiteralPath $iconSource -Destination (Join-Path $iconDir 'icon.ico') -Force
+    Write-Host "  + build/icon.ico（应用图标；二进制白名单内唯一允许项）"
+} else {
+    Write-Warning "未找到 build/icon.ico：公开产物将没有自定义图标"
+}
+
 # ── 1b. 文档：架构与规范（公开版）+ ADR（派生并清洗） ───────
 $docsTarget = Join-Path $target 'docs'
 $adrTarget = Join-Path $docsTarget 'adr'
@@ -208,10 +220,18 @@ $forbidden = @(
 $binaryExtensions = @('.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.zip', '.gz',
                      '.exe', '.dll', '.node', '.woff', '.woff2', '.ttf', '.docx', '.xlsx', '.pptx')
 
+# 二进制白名单：**只允许"应用图标"这一个**（相对 target 的路径，比较时转小写）。
+# 破例理由：图标是软件本身的必要资产，没有它公开仓库构建出来的 exe 没有自定义图标；
+# 它由我们自己生成（不含任何研究材料/个人信息），且路径固定、可审计。新增条目必须在这里登记理由。
+$binaryAllowList = @('build\icon.ico')
+
 $allFiles = Get-ChildItem -LiteralPath $target -Recurse -File -Force |
     Where-Object { $_.FullName -notmatch '\\node_modules\\|\\\.git\\' }
 $scannable = $allFiles | Where-Object { $binaryExtensions -notcontains $_.Extension.ToLower() }
-$binaries = $allFiles | Where-Object { $binaryExtensions -contains $_.Extension.ToLower() }
+$binaries = $allFiles | Where-Object {
+    $rel = $_.FullName.Substring($target.Length).TrimStart('\').ToLower()
+    ($binaryExtensions -contains $_.Extension.ToLower()) -and ($binaryAllowList -notcontains $rel)
+}
 
 Write-Host "  🔍 扫描范围：$($scannable.Count) 个文件（含无扩展名文件、.vue 与 pnpm-lock.yaml）"
 
