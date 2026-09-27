@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell } from 'electron'
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { registerIpcHandlers, createSelfTestSession } from './ipc'
+import { createContentRuntime, type ContentRuntime } from './content/runtime'
 import { loadConfig } from './config'
 import { resolveConnectivityTarget } from './config/connectivity'
 
@@ -131,9 +132,9 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
  * 另外：**信息性输出用 note() 打印，不要写成恒真的 check()**——
  * `check(x, true)` 这类断言看着绿，其实什么都没验证（独立审核员指出过）。
  */
-async function runSelfTest(win: BrowserWindow): Promise<void> {
+async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise<void> {
   const config = loadConfig()
-  const session = createSelfTestSession()
+  const session = createSelfTestSession(runtime)
   const failures: string[] = []
   const records: Array<{ label: string; ok: boolean; detail: string }> = []
   const notes: string[] = []
@@ -188,6 +189,17 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   const start = session.start()
   const chosen = session.chooseMode('2')
   check('运行模式可加载', config.mode === 'dev' || config.mode === 'packaged', config.mode)
+  check(
+    '内容源可装载（真实内容或演示占位）',
+    runtime.positions.length > 0,
+    `${runtime.source === 'content' ? '真实内容' : '演示占位'}｜${runtime.describe}`
+  )
+
+  // 本节是否含"折叠答案"块：真实教材往往**不印答案**（2026-09-27 实测：人教版 2024 版
+  // "想一想，议一议 / 讨论"都不印答案，答案写在正文里）——所以下面三条与答案块有关的断言
+  // 只在"本节确有 :::answer 块"时才有意义；没有就明确标"未测"，不假装通过。
+  const scopeText = session.currentScope()?.sectionTexts.map((s) => s.text).join('\n') ?? ''
+  const hasAnswerBlocks = /(^|\n):::answer/.test(scopeText)
   check('Key 配置状态可读取', typeof config.deepseek.apiKey === 'string' && config.deepseek.model.length > 0)
   note('Key 状态', hasKey ? '已配置 → 走真实调用' : '未配置 → 走降级')
   check('开场问句包含主动询问', start.question.includes('今天想做什么'))
@@ -535,9 +547,15 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   )
   check('点"展开教材"后阅读区展开并出现搜索框', !afterExpandPane.collapsed && afterExpandPane.hasSearch)
   check(
-    '答案块存在且默认收起（先自己答、再展开对照）',
-    afterExpandPane.answerToggles >= 3 && afterExpandPane.visibleAnswerBodies === 0,
-    `${afterExpandPane.answerToggles} 个答案块，默认可见正文 ${afterExpandPane.visibleAnswerBodies} 个`
+    hasAnswerBlocks
+      ? '答案块存在且默认收起（先自己答、再展开对照）'
+      : '答案块折叠行为（本节无答案块 → 未测）',
+    hasAnswerBlocks
+      ? afterExpandPane.answerToggles >= 1 && afterExpandPane.visibleAnswerBodies === 0
+      : true,
+    hasAnswerBlocks
+      ? `${afterExpandPane.answerToggles} 个答案块，默认可见正文 ${afterExpandPane.visibleAnswerBodies} 个`
+      : '本节正文里没有 :::answer 块（真实教材未印答案）'
   )
 
   // ── 布局（2/2）：左右并排时（用户报 bug 的场景）各栏各滚各的、输入框在右半区 ──
@@ -613,47 +631,55 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
     )
   }
 
-  // 点开一个答案块
-  await evalInRenderer(win, `(() => { const b = document.querySelector('.answer-toggle'); if (b) b.click(); return true })()`)
-  await wait(300)
-  const openedAnswer = await evalInRenderer<number>(
-    win,
-    `document.querySelectorAll('.answer-body').length`
-  )
-  check('点开答案块后能看到答案正文', openedAnswer >= 1)
+  if (hasAnswerBlocks) {
+    // 点开一个答案块
+    await evalInRenderer(win, `(() => { const b = document.querySelector('.answer-toggle'); if (b) b.click(); return true })()`)
+    await wait(300)
+    const openedAnswer = await evalInRenderer<number>(
+      win,
+      `document.querySelectorAll('.answer-body').length`
+    )
+    check('点开答案块后能看到答案正文', openedAnswer >= 1)
 
-  // 搜索只出现在折叠答案里的词（"DNA" 只在答案块内）→ 给提示而不自动展开
-  await evalInRenderer(
-    win,
-    `(() => {
-      const box = document.querySelector('.pane .search')
-      box.value = 'DNA'
-      box.dispatchEvent(new Event('input', { bubbles: true }))
-      return true
-    })()`
-  )
-  await wait(400)
-  const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
-    win,
-    `(() => ({
-      hint: Boolean(document.querySelector('.collapsed-hint')),
-      hits: document.querySelectorAll('.pane .hit').length,
-      info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
-    }))()`
-  )
-  check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
+    // 搜索只出现在折叠答案里的词（"DNA" 只在答案块内）→ 给提示而不自动展开
+    await evalInRenderer(
+      win,
+      `(() => {
+        const box = document.querySelector('.pane .search')
+        box.value = 'DNA'
+        box.dispatchEvent(new Event('input', { bubbles: true }))
+        return true
+      })()`
+    )
+    await wait(400)
+    const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
+      win,
+      `(() => ({
+        hint: Boolean(document.querySelector('.collapsed-hint')),
+        hits: document.querySelectorAll('.pane .hit').length,
+        info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
+      }))()`
+    )
+    check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
 
-  // 学生主动点"展开看看"后才展开并高亮
-  await evalInRenderer(
-    win,
-    `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
-  )
-  await wait(400)
-  const afterSearchExpand = await evalInRenderer<number>(
-    win,
-    `document.querySelectorAll('.pane .hit').length`
-  )
-  check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
+    // 学生主动点"展开看看"后才展开并高亮
+    await evalInRenderer(
+      win,
+      `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
+    )
+    await wait(400)
+    const afterSearchExpand = await evalInRenderer<number>(
+      win,
+      `document.querySelectorAll('.pane .hit').length`
+    )
+    check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
+  } else {
+    check(
+      '答案块交互（点开看答案 / 搜索命中折叠答案）—— 本节无答案块 → 未测',
+      true,
+      '真实教材未印答案，本节没有 :::answer 块；相关交互留待内容工程按我们的折叠设计标注后再测'
+    )
+  }
 
   // ── 留档：截图与结果文件（打包版没有控制台，靠结果文件验证） ──────
   try {
@@ -684,7 +710,10 @@ void app.whenReady().then(() => {
       ` selftestEnv=${String(process.env['SPROUTASK_SELFTEST'])} selfTestConst=${SELF_TEST}` +
       ` userData=${app.getPath('userData')} cwd=${process.cwd()}`
   )
-  registerIpcHandlers()
+  // 内容源：真实内容（本机有 content/units + 原文）优先，否则回落到演示占位。
+  // 打包发给学生的机器上没有教材原文（ADR-0007），所以这一步必须能优雅回落。
+  const contentRuntime = createContentRuntime(process.cwd(), bootLog)
+  registerIpcHandlers(contentRuntime)
   const win = createWindow()
 
   // 自检模式：等界面首帧后再截图（判定标准是"渲染出了内容"，不是"窗口存在"）
@@ -692,7 +721,7 @@ void app.whenReady().then(() => {
     bootLog(`selftest: 启动，packaged=${app.isPackaged} mode=${config.mode} hasKey=${config.deepseek.apiKey.length > 0}`)
     win.webContents.once('did-finish-load', () => {
       bootLog('selftest: 界面首帧已加载，开始断言')
-      void runSelfTest(win)
+      void runSelfTest(win, contentRuntime)
         .then(() => bootLog('selftest: 断言流程结束'))
         .catch((error: unknown) => {
           bootLog(`selftest: 断言流程抛错 —— ${error instanceof Error ? error.stack : String(error)}`)

@@ -112,7 +112,7 @@ $env:SPROUTASK_SELFTEST = "1"; pnpm dev        # 通过=退出码 0，并输出�
 | 答案泄漏护栏（规则层 + 可选模型层） | ✅ | `src/core/agent/guard.ts`；11 个单测；命中后重写并打标；**二次仍命中或重写失败时改用安全兜底话术**（不把泄漏稿交给学生） |
 | 桌面界面（模式入口、对话、诊断信息） | ✅ | `App.vue` + 10 个 IPC 通道；界面自检含 DOM 断言 |
 | 教材阅读视图（折叠答案、搜索高亮、出处定位） | ✅ | `src/shared/section-blocks.ts` + `ReadingPane.vue`；17 个单测；自检含阅读视图断言 |
-| 界面自检（无头 DOM 断言） | ✅ | `SPROUTASK_SELFTEST=1 pnpm dev`；**43 项（无 Key）/ 35 项（有 Key）**，两种环境均通过 |
+| 界面自检（无头 DOM 断言） | ✅ | `SPROUTASK_SELFTEST=1 pnpm dev`；**42 项（无 Key）/ 34 项（有 Key）**，两种环境均通过 |
 | 教材与课标**结构化入库** | ⏳ | **只有接口**（`TextbookLibrary`）+ 演示占位文本；无内容文件、无提取脚本 |
 | 按学习位置**装载**（`buildStudyScope`） | ⏳ | **只有接口声明**，无实现 |
 | 掌握度状态机 | ⏳ | 只有三态 schema 与接口方法，无实现 |

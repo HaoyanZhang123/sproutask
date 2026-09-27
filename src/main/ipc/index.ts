@@ -5,13 +5,12 @@ import {
   DeepSeekClient,
   LLMError,
   ToolRegistry,
-  createDefaultTools,
-  createDemoScope
+  createDefaultTools
 } from '../../core'
 import { parseSectionBlocks } from '../../shared/section-blocks'
-import type { StudyScope } from '../../core'
 import { describeConfig, loadConfig, readUserConfig, saveUserConfig } from '../config'
 import { resolveConnectivityTarget } from '../config/connectivity'
+import type { ContentRuntime } from '../content/runtime'
 
 /**
  * IPC 处理器注册表。
@@ -43,7 +42,10 @@ const ConfigTestInput = z.object({
 /** 会话单例（当前只有一次会话；多会话与持久化待后续迭代） */
 let session: ChatSession | null = null
 
-function createSession(): ChatSession {
+/** 内容源由主进程在启动时装载并注入（真实内容/演示内容的回落逻辑在 `content/runtime.ts`） */
+let contentRuntime: ContentRuntime | null = null
+
+function createSession(runtime: ContentRuntime): ChatSession {
   const config = loadConfig()
   const client = new DeepSeekClient({
     apiKey: config.deepseek.apiKey,
@@ -51,30 +53,30 @@ function createSession(): ChatSession {
     model: config.deepseek.model
   })
 
-  // 内容库（TextbookLibrary）尚未实现，先用演示内容占位
-  const demo = createDemoScope()
-  const getSectionText = async (sectionId: string): Promise<string | null> =>
-    demo.sectionTexts.find((section) => section.sectionId === sectionId)?.text ?? null
+  const firstPosition = runtime.positions[0]
+  if (!firstPosition) throw new Error('内容源没有可用的学习位置（positions 为空）')
 
   return new ChatSession({
     client,
     registry: new ToolRegistry(createDefaultTools()),
-    scopeFactory: (mode) => createDemoScope(mode) as StudyScope,
-    getSectionText,
+    // 注：ChatSession 的 scopeFactory 目前是同步且只收 mode；多单元位置选择需要把它改成接收 position
+    //（属接口调整，另开一件事）。当前只有一个单元，用首个位置即可。
+    scopeFactory: (mode) => runtime.scopeFor(firstPosition.position, mode),
+    getSectionText: runtime.getSectionText,
     studentId: 'S00', // 编号由教师分配；接入本地记录后改为读取已分配的编号
-    positions: demo.unit.sections.map((section) => ({
-      position: { volumeId: '7s', unitId: demo.unit.id, sectionId: section.id },
-      label: section.title
-    }))
+    positions: runtime.positions
   })
 }
 
 function getSession(): ChatSession {
-  session ??= createSession()
+  if (!contentRuntime) throw new Error('内容源尚未初始化：请在启动时调用 registerIpcHandlers(runtime)')
+  session ??= createSession(contentRuntime)
   return session
 }
 
-export function registerIpcHandlers(): void {
+export function registerIpcHandlers(runtime: ContentRuntime): void {
+  contentRuntime = runtime
+
   ipcMain.handle('app:ping', (_event, payload: unknown) => {
     const input = PingInput.parse(payload)
     return { reply: `pong: ${input.message}`, at: new Date().toISOString() }
@@ -220,6 +222,6 @@ function describeConnectivityError(error: LLMError): string {
 }
 
 /** 开发期自检用：把会话能力暴露给主进程自检脚本（不经过 IPC） */
-export function createSelfTestSession(): ChatSession {
-  return createSession()
+export function createSelfTestSession(runtime: ContentRuntime): ChatSession {
+  return createSession(runtime)
 }

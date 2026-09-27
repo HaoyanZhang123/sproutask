@@ -26,6 +26,26 @@ export const KnowledgePointsFileSchema = z.object({
 })
 export type KnowledgePointsFile = z.infer<typeof KnowledgePointsFileSchema>
 
+/**
+ * 课标要求（`content/units/<unit>/curriculum.yaml`，可选）。
+ * 只放"条目编号 + 短引用 + 来源"，不放课标全文（版权与体积，见 docs/adr/ADR-0007）。
+ */
+export const CurriculumFileSchema = z.object({
+  requirements: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        /** 来源文件名，如「义务教育生物学课程标准（2022年版）」 */
+        source: z.string().min(1),
+        /** 要求原文（短引用） */
+        text: z.string().min(1),
+        kpId: z.string().optional()
+      })
+    )
+    .default([])
+})
+export type CurriculumFile = z.infer<typeof CurriculumFileSchema>
+
 export interface ContentIssue {
   level: 'error' | 'warn'
   message: string
