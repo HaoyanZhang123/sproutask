@@ -6,10 +6,15 @@ directories:
 files:
   - out/**
   - package.json
-# 教学内容随包分发（教材原文不入库，打包时若缺失则 Agent 会提示未配置）
-extraResources:
-  - from: content
-    to: content
+# ⛔ 不要把 content/ 整体随包分发（2026-09-27 决策，见 docs/adr/ADR-0007）：
+#    content/textbook/ 放的是**教材原文**（版权物，许可写明"仅供个人学习、未经授权不得另做他用"）。
+#    方案 A 的边界是：**原文只留在本机、绝不随包分发、绝不进公开仓库**。
+#    将来若要随包的是"我们自己编写的结构"（content/units/），只能单独映射该子目录：
+#      extraResources:
+#        - from: content/units
+#          to: content/units
+#    这条规则由 tests/packaging-guard.test.ts 自动把关（整体映射 content/ 会让测试变红）。
+extraResources: []
 win:
   target:
     - portable

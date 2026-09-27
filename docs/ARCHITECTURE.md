@@ -193,7 +193,10 @@ L0 人格 / L1 教学纪律 / **L2 教材与课标约束** / L3 学情摘要（�
 - Windows：**两种形态并存**（见 `docs/adr/ADR-0006`）——
   `portable` 便携版（免安装，规避机房权限）与 `nsis` 安装版（per-user、不需要管理员、可卸载）；
   macOS：`dmg`（GitHub Actions 构建，**尚未构建过**）
-- 教学内容（`content/units` 结构 + 教材原文）经 `extraResources` 随包分发
-  （⚠️ **现状**：`content/` 下只有说明文件，教材尚未入库，因此随包发放的是自编占位文本）
+- 教学内容的**分发边界**（见 `docs/adr/ADR-0007`）：只有"我们自己编写的结构"（`content/units/`）
+  才允许随包；**教材原文（`content/textbook/`）只在本机，绝不随包、绝不进公开仓库**
+  （教材许可写明"仅供个人学习使用，未经授权不得另做他用"）。
+  现状：`content/` 下只有说明文件，因此随包内容为空，运行时用的是 `src/core/content/demo.ts` 的演示占位文本
+- 该边界由 `tests/packaging-guard.test.ts` 自动把关（打包配置不得整体映射 `content/`）
 - 未签名应用会被 SmartScreen 拦截 → 分发时附"仍要运行"说明
 - 仅向本班小范围提供，不公开传播（合规锚点）
