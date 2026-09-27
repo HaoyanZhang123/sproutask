@@ -11,6 +11,7 @@ import {
 import { parseSectionBlocks } from '../../shared/section-blocks'
 import type { StudyScope } from '../../core'
 import { describeConfig, loadConfig, readUserConfig, saveUserConfig } from '../config'
+import { resolveConnectivityTarget } from '../config/connectivity'
 
 /**
  * IPC 处理器注册表。
@@ -155,21 +156,31 @@ export function registerIpcHandlers(): void {
    * 连通性测试：用"输入框里的 Key"（没填则用已保存的/环境变量）真实发一次最小请求。
    * 目的：让学生在拿到软件之前，老师就能确认"这台电脑能不能连上模型"。
    * Key 只在这一方向经过 IPC（渲染 → 主进程），永远不会回传。
+   *
+   * ⚠️ 安全约束（见 `config/connectivity.ts`）：调用方**改了接口地址**却没填 Key 时，
+   * 拒绝复用已保存的 Key —— 否则等于把密钥发给了它指定的任意网址。
    */
   ipcMain.handle('config:test', async (_event, raw) => {
     const input = ConfigTestInput.parse(raw ?? {})
     const saved = describeConfig()
-    const apiKey =
-      input.apiKey?.trim() || process.env['DEEPSEEK_API_KEY'] || readUserConfig().deepseekApiKey || ''
 
-    if (!apiKey) {
-      return { ok: false, kind: 'missing-key', message: '还没有填写 API Key' }
+    const target = resolveConnectivityTarget({
+      inputApiKey: input.apiKey,
+      inputBaseUrl: input.baseUrl,
+      inputModel: input.model,
+      savedApiKey: process.env['DEEPSEEK_API_KEY'] ?? readUserConfig().deepseekApiKey ?? '',
+      savedBaseUrl: saved.baseUrl,
+      savedModel: saved.model
+    })
+
+    if (!target.ok) {
+      return { ok: false, kind: target.kind, message: target.message }
     }
 
     const client = new DeepSeekClient({
-      apiKey,
-      baseUrl: input.baseUrl?.trim() || saved.baseUrl,
-      model: input.model?.trim() || saved.model
+      apiKey: target.apiKey,
+      baseUrl: target.baseUrl,
+      model: target.model
     })
 
     const startedAt = Date.now()
