@@ -752,7 +752,7 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
   // 不经过 IPC（开发者路径，刻意不写学生数据）。所以这条断言必须在点完按钮、发过消息之后查。
   const persisted = await describePersistence()
   check(
-    '界面上的一轮对话已落盘（本机 JSONL，可导出做研习统计）',
+    '界面上的一轮对话已落盘（本机 JSONL，可导出做学习统计）',
     persisted.turnCount >= 2,
     `${persisted.turnCount} 条消息｜会话 ${persisted.sessionId ?? '(未建立)'}`
   )
@@ -789,7 +789,7 @@ void app.whenReady().then(() => {
   // 内容源：真实内容（本机有 content/units + 原文）优先，否则回落到演示占位。
   // 打包发给学生的机器上没有教材原文（ADR-0007），所以这一步必须能优雅回落。
   const contentRuntime = createContentRuntime(process.cwd(), bootLog)
-  // 本机数据（JSONL）：对话与掌握度变更都落在这里；退出后仍可读，供研习统计与匿名化导出
+  // 本机数据（JSONL）：对话与掌握度变更都落在这里；退出后仍可读，供学习统计与匿名化导出
   const { store, dataDir } = createJsonlStudentStore(join(app.getPath('userData'), 'data'))
   bootLog(`数据目录：${dataDir}`)
   registerIpcHandlers(contentRuntime, { store, dataDir })

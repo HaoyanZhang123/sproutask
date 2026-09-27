@@ -16,7 +16,7 @@ import type { StudentStore } from '../../core/storage'
  * 设计要点（对应 ADR-0003 里"实现时要定的两条"）：
  *   1. **按会话分文件**：一条会话一个文件，便于单会话导出与匿名化引用；会话时间在文件名与头里
  *   2. **只追加、不重排**：一轮一行完整 JSON；崩溃最多丢最后一行（读取时跳过读不出来的行并计数）
- *   3. 掌握度是"变更日志"：同一知识点的最新一条决定当前状态，历史一条不删（研习要看演进）
+ *   3. 掌握度是"变更日志"：同一知识点的最新一条决定当前状态，历史一条不删（看的是演进过程）
  *
  * 合规：只存学生编号（`S01`）、对话与标记；不写姓名等个人信息（接口注释里的约束）。
  */
@@ -167,7 +167,7 @@ export function createJsonlStudentStore(dataDir: string): JsonlStore {
         const prev = byKp.get(record.kpId)
         byKp.set(record.kpId, {
           ...record,
-          // 状态取最新一条；证据取并集（历史不丢，研习要看演进）
+          // 状态取最新一条；证据取并集（历史不丢，能看到演进过程）
           evidence: [...new Set([...(prev?.evidence ?? []), ...record.evidence])]
         })
       }

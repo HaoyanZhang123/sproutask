@@ -5,7 +5,7 @@ import { touchedKnowledgePoints } from '../src/main/storage/mastery-touch'
 /**
  * 参与度启发式（不是掌握度判定）：
  * 重点是**别把它做得太松**——"细胞"这种几乎每个标题都有的词不能拿来匹配，
- * 否则学生随便说一句就把整节知识点都标成"探索中"，研习数据就被污染了。
+ * 否则学生随便说一句就把整节知识点都标成"探索中"，学习数据就被污染了。
  */
 
 const kp = (id: string, title: string): KnowledgePoint => ({

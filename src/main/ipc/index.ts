@@ -232,7 +232,7 @@ export function registerIpcHandlers(
    * 一轮对话：走完整 Agent 循环（工具调用 + 答案泄漏护栏 + 降级）。
    *
    * 落盘顺序（重要）：**先写学生的话，再调用模型**——模型失败时问题仍在本机，
-   * 研习统计不会因为一次网络故障丢掉学生真实说过的话。
+   * 学习统计不会因为一次网络故障丢掉学生真实说过的话。
    */
   ipcMain.handle('agent:chat', async (_event, payload: unknown) => {
     const input = ChatInput.parse(payload)
