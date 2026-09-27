@@ -1,7 +1,8 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { registerIpcHandlers, createSelfTestSession } from './ipc'
+import { registerIpcHandlers, createSelfTestSession, endCurrentSession, describePersistence } from './ipc'
+import { createJsonlStudentStore, latestSession } from './storage/jsonl-store'
 import { createContentRuntime, type ContentRuntime } from './content/runtime'
 import { loadConfig } from './config'
 import { resolveConnectivityTarget } from './config/connectivity'
@@ -132,7 +133,7 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
  * 另外：**信息性输出用 note() 打印，不要写成恒真的 check()**——
  * `check(x, true)` 这类断言看着绿，其实什么都没验证（独立审核员指出过）。
  */
-async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise<void> {
+async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir: string): Promise<void> {
   const config = loadConfig()
   const session = createSelfTestSession(runtime)
   const failures: string[] = []
@@ -187,6 +188,21 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
 
   // ── 主进程侧装配 ───────────────────────────────────────────
   const start = session.start()
+
+  // "接着上次继续"：本机已有历史会话时，开场问题必须提到上次学到哪儿
+  // （关掉应用再打开仍记得位置——③ 的可见验收点；干净机器上没有历史，这条自动跳过）
+  const prior = latestSession(dataDir, 'S00')
+  if (prior) {
+    const label =
+      runtime.positions.find((item) => item.position.sectionId === prior.position.sectionId)?.label ?? ''
+    check(
+      '接着上次：开场问题提到上次学到哪一节（关掉应用再打开仍记得）',
+      label.length > 0 && start.question.includes(label),
+      label ? `上次：${label}` : '（历史会话的位置不在当前内容里）'
+    )
+  } else {
+    check('接着上次（本机还没有历史会话 → 未测）', true, '第一次使用时的正常情况')
+  }
   const chosen = session.chooseMode('2')
   check('运行模式可加载', config.mode === 'dev' || config.mode === 'packaged', config.mode)
   check(
@@ -705,6 +721,16 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
     )
   }
 
+  // ── 落盘验证（放在**界面交互之后**）────────────────────────────
+  // 落盘发生在 IPC 边界，也就是"界面上真实走一遍"的路径；自检自己直连 ChatSession 的那条路
+  // 不经过 IPC（开发者路径，刻意不写学生数据）。所以这条断言必须在点完按钮、发过消息之后查。
+  const persisted = await describePersistence()
+  check(
+    '界面上的一轮对话已落盘（本机 JSONL，可导出做研习统计）',
+    persisted.turnCount >= 2,
+    `${persisted.turnCount} 条消息｜会话 ${persisted.sessionId ?? '(未建立)'}`
+  )
+
   // ── 留档：截图与结果文件（打包版没有控制台，靠结果文件验证） ──────
   try {
     const image = await win.webContents.capturePage()
@@ -737,7 +763,10 @@ void app.whenReady().then(() => {
   // 内容源：真实内容（本机有 content/units + 原文）优先，否则回落到演示占位。
   // 打包发给学生的机器上没有教材原文（ADR-0007），所以这一步必须能优雅回落。
   const contentRuntime = createContentRuntime(process.cwd(), bootLog)
-  registerIpcHandlers(contentRuntime)
+  // 本机数据（JSONL）：对话与掌握度变更都落在这里；退出后仍可读，供研习统计与匿名化导出
+  const { store, dataDir } = createJsonlStudentStore(join(app.getPath('userData'), 'data'))
+  bootLog(`数据目录：${dataDir}`)
+  registerIpcHandlers(contentRuntime, { store, dataDir })
   const win = createWindow()
 
   // 自检模式：等界面首帧后再截图（判定标准是"渲染出了内容"，不是"窗口存在"）
@@ -745,7 +774,7 @@ void app.whenReady().then(() => {
     bootLog(`selftest: 启动，packaged=${app.isPackaged} mode=${config.mode} hasKey=${config.deepseek.apiKey.length > 0}`)
     win.webContents.once('did-finish-load', () => {
       bootLog('selftest: 界面首帧已加载，开始断言')
-      void runSelfTest(win, contentRuntime)
+      void runSelfTest(win, contentRuntime, dataDir)
         .then(() => bootLog('selftest: 断言流程结束'))
         .catch((error: unknown) => {
           bootLog(`selftest: 断言流程抛错 —— ${error instanceof Error ? error.stack : String(error)}`)
@@ -765,5 +794,8 @@ void app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  // 退出前给本次会话写上结束时间（老师可据此统计一次学习时长）
+  void endCurrentSession(new Date().toISOString()).finally(() => {
+    if (process.platform !== 'darwin') app.quit()
+  })
 })
