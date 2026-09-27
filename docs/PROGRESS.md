@@ -57,10 +57,10 @@ pnpm dev                  # 打开桌面窗口
 | 对话界面（模式入口 + 气泡 + 诊断） | ✅ | `App.vue` + 10 个 IPC 通道；界面自检含 DOM 断言 |
 | **教材阅读视图（折叠答案/搜索/出处定位）** | ✅ | `shared/section-blocks.ts` + `ReadingPane.vue`；17 个单测（`tests/content-blocks.test.ts`）；自检含阅读视图断言 |
 | 界面自检（无头 DOM 断言） | ✅ | `SPROUTASK_SELFTEST=1 pnpm dev`；**42 项（无 Key）/ 34 项（有 Key）**，2026-09-27 两环境实跑均 exit 0 |
-| 教材与课标**结构化入库** | ⏳ | **只有接口**（`TextbookLibrary`）+ 演示占位文本；无内容文件、无提取脚本 |
-| 按学习位置**装载**（`buildStudyScope`） | ⏳ | **只有接口声明**，无实现 |
+| 教材与课标**结构化入库** | 🚧 | **案例单元已入库**：`content/units/u-cell-basic-unit/`（5 个知识点、印刷页出处、Zod 契约）+ 本机教材原文（OCR 提取，**未逐字核对**）+ `pnpm content:validate`；**课标尚未入库**、全册未做 |
+| 按学习位置**装载**（`buildStudyScope`） | ✅ | `src/core/content/scope.ts`（纯装配）+ `src/main/content/{file-library,runtime}.ts`（本机读取与降级）；**真实内容优先、缺原文回落演示占位**；dev 自检实测报告"真实内容｜1 个单元 / 5 个知识点 / 1 节原文" |
 | 掌握度状态机 | ⏳ | 只有三态 schema（`unlearned/exploring/mastered`）+ 接口方法，无实现 |
-| 本地存储（SQLite / JSONL） | ⏳ | 只有 `StudentStore` 接口，无实现 |
+| 本地存储（SQLite / JSONL） | ⏳ | 只有 `StudentStore` 接口，无实现（**选型已定：JSONL**，理由见 `docs/adr/ADR-0003` 决策二） |
 | 打包（便携 exe / 安装 exe / dmg） | ✅ | Windows：便携版 `SproutAsk-0.1.0-win-x64.exe`（已发布，SHA256 与 Release 附件一致）+ **安装版 `SproutAsk-Setup-0.1.0-x64.exe`**（2026-09-27 装机自检 35/35 后卸载验证）；**macOS dmg 仍未构建**（无 Mac 环境） |
 | 开源发布 | ✅ | <https://github.com/HaoyanZhang123/sproutask>（公开仓库）；本地产物在 `E:\my-project\sproutask` |
 
