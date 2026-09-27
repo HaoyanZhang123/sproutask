@@ -13,7 +13,7 @@ import {
   type EvalCase,
   type EvalResult
 } from '../src/core/eval/runner'
-import { createDemoScope } from './demo-scope'
+import { createContentRuntime } from '../src/main/content/runtime'
 import { loadDotEnv, readDeepSeekEnv } from './_env'
 
 /**
@@ -60,7 +60,15 @@ async function main(): Promise<void> {
   console.log(`   提示词版本：${PROMPT_VERSION}｜模型：${env.model}\n`)
 
   const client = new DeepSeekClient({ apiKey: env.apiKey, baseUrl: env.baseUrl, model: env.model })
-  const scope = createDemoScope()
+
+  // 内容源：真实教材优先（本机有 content/units + 原文时），否则用演示占位内容。
+  // 与桌面应用走同一套装配逻辑，保证"评测看到的上下文"和"学生看到的上下文"一致。
+  const runtime = createContentRuntime(process.cwd(), (line) => console.log(`   ${line}`))
+  const firstPosition = runtime.positions[0]
+  if (!firstPosition) throw new Error('内容源没有可用的学习位置')
+  const scope = runtime.scopeFor(firstPosition.position, 'review')
+  console.log(`   内容源：${runtime.source === 'content' ? '真实教材' : '演示占位'}｜${runtime.describe}`)
+  console.log(`   位置：${firstPosition.label}\n`)
   const results: EvalResult[] = []
 
   for (const testCase of cases) {
@@ -92,7 +100,13 @@ async function main(): Promise<void> {
     generatedAt
   })
 
-  const outDir = join('evals', 'reports')
+  // 报告落点：
+  //   - 演示内容（无教材原文）→ evals/reports/（可进 git，作为提示词迭代依据）
+  //   - **真实教材** → content/textbook/_eval-reports/（本机目录，已被 .gitignore 覆盖）：
+  //     模型回复会引用课本原句，按 ADR-0007"教材原文只在本机、不进仓库"处理
+  const outDir = runtime.source === 'content'
+    ? join('content', 'textbook', '_eval-reports')
+    : join('evals', 'reports')
   mkdirSync(outDir, { recursive: true })
   // 文件名带"日期-时分秒"：同一天多次跑批不再互相覆盖（评测结果天然有波动，需要保留每一轮证据）
   const stamp = `${generatedAt.slice(0, 10)}-${generatedAt.slice(11, 19).replace(/:/g, '')}`
