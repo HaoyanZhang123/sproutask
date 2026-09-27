@@ -1,7 +1,8 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { registerIpcHandlers, createSelfTestSession } from './ipc'
+import { registerIpcHandlers, createSelfTestSession, endCurrentSession, describePersistence } from './ipc'
+import { createJsonlStudentStore, latestSession } from './storage/jsonl-store'
 import { createContentRuntime, type ContentRuntime } from './content/runtime'
 import { loadConfig } from './config'
 import { resolveConnectivityTarget } from './config/connectivity'
@@ -14,6 +15,12 @@ import { resolveConnectivityTarget } from './config/connectivity'
 
 /** 开发期自检：无头验证"主进程侧装配 + 界面能否渲染"，不需要人工点击 */
 const SELF_TEST = process.env['SPROUTASK_SELFTEST'] === '1'
+
+/**
+ * 自检里用来"试连"的**假 Key**（必然连不上）。
+ * 它不是真 Key；同时用于判定"这串假 Key 有没有被界面回显出来"（泄露检查）。
+ */
+const FAKE_KEY = ['sk', 'fake', 'key', 'for', 'selftest'].join('-')
 
 /**
  * 打包版没有控制台，出问题时只能靠文件。
@@ -132,7 +139,7 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
  * 另外：**信息性输出用 note() 打印，不要写成恒真的 check()**——
  * `check(x, true)` 这类断言看着绿，其实什么都没验证（独立审核员指出过）。
  */
-async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise<void> {
+async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir: string): Promise<void> {
   const config = loadConfig()
   const session = createSelfTestSession(runtime)
   const failures: string[] = []
@@ -187,6 +194,21 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
 
   // ── 主进程侧装配 ───────────────────────────────────────────
   const start = session.start()
+
+  // "接着上次继续"：本机已有历史会话时，开场问题必须提到上次学到哪儿
+  // （关掉应用再打开仍记得位置——③ 的可见验收点；干净机器上没有历史，这条自动跳过）
+  const prior = latestSession(dataDir, 'S00')
+  if (prior) {
+    const label =
+      runtime.positions.find((item) => item.position.sectionId === prior.position.sectionId)?.label ?? ''
+    check(
+      '接着上次：开场问题提到上次学到哪一节（关掉应用再打开仍记得）',
+      label.length > 0 && start.question.includes(label),
+      label ? `上次：${label}` : '（历史会话的位置不在当前内容里）'
+    )
+  } else {
+    check('接着上次（本机还没有历史会话 → 未测）', true, '第一次使用时的正常情况')
+  }
   const chosen = session.chooseMode('2')
   check('运行模式可加载', config.mode === 'dev' || config.mode === 'packaged', config.mode)
   check(
@@ -200,6 +222,22 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
   // 只在"本节确有 :::answer 块"时才有意义；没有就明确标"未测"，不假装通过。
   const scopeText = session.currentScope()?.sectionTexts.map((s) => s.text).join('\n') ?? ''
   const hasAnswerBlocks = /(^|\n):::answer/.test(scopeText)
+
+  // 搜索探针：从"折叠答案"里取一小段**只在答案块里出现**的文字，
+  // 用来验"搜到折叠内容时只提示、不自动展开"。写死一个词（如 DNA）在真实教材上会失效——
+  // 它很可能同时出现在正文里（2026-09-27 换真实内容时实测）。
+  const answerBlockTexts = [...scopeText.matchAll(/:::answer[^\n]*\n([\s\S]*?):::/g)].map((m) =>
+    (m[1] ?? '').replace(/\s+/g, '')
+  )
+  const flatBodyText = scopeText.replace(/:::answer[\s\S]*?:::/g, '').replace(/\s+/g, '')
+  let answerProbe = ''
+  for (const block of answerBlockTexts) {
+    for (let i = 0; i + 6 <= block.length && !answerProbe; i += 1) {
+      const candidate = block.slice(i, i + 6)
+      if (!flatBodyText.includes(candidate)) answerProbe = candidate
+    }
+    if (answerProbe) break
+  }
   check('Key 配置状态可读取', typeof config.deepseek.apiKey === 'string' && config.deepseek.model.length > 0)
   note('Key 状态', hasKey ? '已配置 → 走真实调用' : '未配置 → 走降级')
   check('开场问句包含主动询问', start.question.includes('今天想做什么'))
@@ -247,22 +285,29 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
   const configUi = await evalInRenderer<{
     shown: boolean
     leaksKey: boolean
+    leakSample: string
     saveDisabled: boolean
     hasTestButton: boolean
     text: string
+    emptyKeyInput: boolean
   }>(
     win,
     `(() => {
       const panel = document.querySelector('.config')
       const save = document.querySelector('.config .save-btn')
       const keyInput = document.querySelector('.config .key-input')
+      const body = document.body.innerText
       return {
         shown: Boolean(panel),
-        // 界面上不得出现任何 Key 片段（连 sk- 掩码都不许）
-        leaksKey: /sk-[A-Za-z0-9]/.test(document.body.innerText),
+        // 界面上不得出现任何 Key 片段（连掩码都不许）。
+        // ⚠️ 探针口径（2026-09-27 实测修正）：原先写成 /sk-[A-Za-z0-9]/ 太糙——
+        //    测试目录名 "sproutask-clean2-…" 里的 "sk-c" 就会命中，报出假阳性。
+        //    现在按**真实 Key 形态**判定：sk- 后面至少 20 位字母数字（真实 Key 是 32 位）。
+        leaksKey: /sk-[A-Za-z0-9]{20,}/.test(body),
+        leakSample: ((body.match(/.{0,24}sk-[A-Za-z0-9]{20,}.{0,24}/) ?? [''])[0] || '').trim(),
         saveDisabled: save ? save.disabled : true,
         hasTestButton: Boolean(document.querySelector('.config .test-btn')),
-        text: document.body.innerText,
+        text: body,
         emptyKeyInput: keyInput ? keyInput.value === '' : false
       }
     })()`
@@ -270,7 +315,11 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
 
   if (!hasKey) {
     check('未配置 Key：先弹出"首次运行配置"界面', configUi.shown)
-    check('配置界面不显示 Key 内容（连掩码都不给）', !configUi.leaksKey)
+    check(
+      '配置界面不显示 Key 内容（连掩码都不给）',
+      !configUi.leaksKey,
+      configUi.leaksKey ? `命中片段：${configUi.leakSample}` : '未出现 sk- 形态的字符串'
+    )
     check('Key 还没填时"保存并开始"不可点（防手滑）', configUi.saveDisabled)
     check('提供"先试连一下"与"稍后再说"两个出口', configUi.hasTestButton)
 
@@ -279,7 +328,7 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
       win,
       `(() => {
         const input = document.querySelector('.config .key-input')
-        input.value = ['sk', 'fake', 'key', 'for', 'selftest'].join('-')
+        input.value = ${JSON.stringify(FAKE_KEY)}
         input.dispatchEvent(new Event('input', { bubbles: true }))
         return true
       })()`
@@ -293,15 +342,20 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
 
     await evalInRenderer(win, `(() => { const b = document.querySelector('.config .test-btn'); if (b) b.click(); return true })()`)
     await wait(4500)
-    const testResult = await evalInRenderer<{ text: string; busy: boolean; leaksKey: boolean }>(
+    const testResult = await evalInRenderer<{ text: string; busy: boolean; leaksKey: boolean; leakSample: string }>(
       win,
       `(() => {
         const msg = document.querySelector('.config .message')
         const btn = document.querySelector('.config .test-btn')
+        const body = document.body.innerText
         return {
           text: msg ? msg.innerText : '',
           busy: btn ? btn.disabled : true,
-          leaksKey: /sk-[A-Za-z0-9]/.test(document.body.innerText)
+          // 试连后：既要判"真实 Key 形态"，也要判"刚才注入的那串假 Key 有没有被回显"
+          // （注意：这段脚本在**渲染进程**里跑，主进程的变量必须用 JSON.stringify 注入）
+          leaksKey: /sk-[A-Za-z0-9]{20,}/.test(body) || body.includes(${JSON.stringify(FAKE_KEY)}),
+          leakSample: ((body.match(/.{0,24}sk-[A-Za-z0-9]{20,}.{0,24}/) ?? [''])[0] || '').trim() ||
+            (body.includes(${JSON.stringify(FAKE_KEY)}) ? '回显了注入的假 Key' : '')
         }
       })()`
     )
@@ -310,7 +364,11 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
       testResult.text.length > 0 && !testResult.busy && !/Error|error:|stack/.test(testResult.text),
       testResult.text.slice(0, 30)
     )
-    check('试连过程与结果都不泄露 Key', !testResult.leaksKey)
+    check(
+      '试连过程与结果都不泄露 Key',
+      !testResult.leaksKey,
+      testResult.leaksKey ? `命中片段：${testResult.leakSample}` : '未出现 sk- 形态的字符串'
+    )
 
     // "稍后再说" → 回到正常流程
     await evalInRenderer(win, `(() => { const b = document.querySelector('.config .skip-btn'); if (b) b.click(); return true })()`)
@@ -641,38 +699,46 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
     )
     check('点开答案块后能看到答案正文', openedAnswer >= 1)
 
-    // 搜索只出现在折叠答案里的词（"DNA" 只在答案块内）→ 给提示而不自动展开
-    await evalInRenderer(
-      win,
-      `(() => {
-        const box = document.querySelector('.pane .search')
-        box.value = 'DNA'
-        box.dispatchEvent(new Event('input', { bubbles: true }))
-        return true
-      })()`
-    )
-    await wait(400)
-    const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
-      win,
-      `(() => ({
-        hint: Boolean(document.querySelector('.collapsed-hint')),
-        hits: document.querySelectorAll('.pane .hit').length,
-        info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
-      }))()`
-    )
-    check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
+    // 搜索"只在折叠答案里出现"的那段文字 → 给提示而不自动展开
+    if (answerProbe) {
+      await evalInRenderer(
+        win,
+        `(() => {
+          const box = document.querySelector('.pane .search')
+          box.value = ${JSON.stringify(answerProbe)}
+          box.dispatchEvent(new Event('input', { bubbles: true }))
+          return true
+        })()`
+      )
+      await wait(400)
+      const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
+        win,
+        `(() => ({
+          hint: Boolean(document.querySelector('.collapsed-hint')),
+          hits: document.querySelectorAll('.pane .hit').length,
+          info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
+        }))()`
+      )
+      check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
 
-    // 学生主动点"展开看看"后才展开并高亮
-    await evalInRenderer(
-      win,
-      `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
-    )
-    await wait(400)
-    const afterSearchExpand = await evalInRenderer<number>(
-      win,
-      `document.querySelectorAll('.pane .hit').length`
-    )
-    check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
+      // 学生主动点"展开看看"后才展开并高亮
+      await evalInRenderer(
+        win,
+        `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
+      )
+      await wait(400)
+      const afterSearchExpand = await evalInRenderer<number>(
+        win,
+        `document.querySelectorAll('.pane .hit').length`
+      )
+      check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
+    } else {
+      check(
+        '搜索命中折叠答案（本节答案块里取不到唯一探针 → 未测）',
+        true,
+        '折叠答案文字与正文重复度过高，取不到"只出现在答案里"的片段'
+      )
+    }
   } else {
     check(
       '答案块交互（点开看答案 / 搜索命中折叠答案）—— 本节无答案块 → 未测',
@@ -680,6 +746,16 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
       '真实教材未印答案，本节没有 :::answer 块；相关交互留待内容工程按我们的折叠设计标注后再测'
     )
   }
+
+  // ── 落盘验证（放在**界面交互之后**）────────────────────────────
+  // 落盘发生在 IPC 边界，也就是"界面上真实走一遍"的路径；自检自己直连 ChatSession 的那条路
+  // 不经过 IPC（开发者路径，刻意不写学生数据）。所以这条断言必须在点完按钮、发过消息之后查。
+  const persisted = await describePersistence()
+  check(
+    '界面上的一轮对话已落盘（本机 JSONL，可导出做学习统计）',
+    persisted.turnCount >= 2,
+    `${persisted.turnCount} 条消息｜会话 ${persisted.sessionId ?? '(未建立)'}`
+  )
 
   // ── 留档：截图与结果文件（打包版没有控制台，靠结果文件验证） ──────
   try {
@@ -713,7 +789,10 @@ void app.whenReady().then(() => {
   // 内容源：真实内容（本机有 content/units + 原文）优先，否则回落到演示占位。
   // 打包发给学生的机器上没有教材原文（ADR-0007），所以这一步必须能优雅回落。
   const contentRuntime = createContentRuntime(process.cwd(), bootLog)
-  registerIpcHandlers(contentRuntime)
+  // 本机数据（JSONL）：对话与掌握度变更都落在这里；退出后仍可读，供学习统计与匿名化导出
+  const { store, dataDir } = createJsonlStudentStore(join(app.getPath('userData'), 'data'))
+  bootLog(`数据目录：${dataDir}`)
+  registerIpcHandlers(contentRuntime, { store, dataDir })
   const win = createWindow()
 
   // 自检模式：等界面首帧后再截图（判定标准是"渲染出了内容"，不是"窗口存在"）
@@ -721,7 +800,7 @@ void app.whenReady().then(() => {
     bootLog(`selftest: 启动，packaged=${app.isPackaged} mode=${config.mode} hasKey=${config.deepseek.apiKey.length > 0}`)
     win.webContents.once('did-finish-load', () => {
       bootLog('selftest: 界面首帧已加载，开始断言')
-      void runSelfTest(win, contentRuntime)
+      void runSelfTest(win, contentRuntime, dataDir)
         .then(() => bootLog('selftest: 断言流程结束'))
         .catch((error: unknown) => {
           bootLog(`selftest: 断言流程抛错 —— ${error instanceof Error ? error.stack : String(error)}`)
@@ -741,5 +820,8 @@ void app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  // 退出前给本次会话写上结束时间（老师可据此统计一次学习时长）
+  void endCurrentSession(new Date().toISOString()).finally(() => {
+    if (process.platform !== 'darwin') app.quit()
+  })
 })

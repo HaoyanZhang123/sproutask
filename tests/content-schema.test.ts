@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { parse as parseYaml } from 'yaml'
 import {
+  CurriculumFileSchema,
   KnowledgePointsFileSchema,
   UnitFileSchema,
   validateContent,
@@ -108,6 +109,29 @@ describe('内容语义校验（validateContent）', () => {
       })
     })
     expect(warnsOf(issues).join()).toContain('没有标点')
+  })
+
+  it('抓出：课标要求指向不存在的知识点（写错一个字母就悄悄失效）', () => {
+    const curriculumFile = CurriculumFileSchema.parse({
+      requirements: [
+        { id: '1.1', source: '义务教育生物学课程标准（2022年版）', text: '细胞是生物体结构和功能的基本单位', kpId: 'kp-typo' },
+        { id: '1.1.5', source: '义务教育生物学课程标准（2022年版）', text: '细胞核是遗传信息库', kpId: 'kp-a' }
+      ]
+    })
+    const issues = validateContent({
+      unitFile: UnitFileSchema.parse(unitFile),
+      kpFile: KnowledgePointsFileSchema.parse({ knowledgePoints: [kp()] }),
+      curriculumFile
+    })
+    const errs = errorsOf(issues)
+    expect(errs.join()).toContain('kp-typo')
+    expect(errs.join()).not.toContain('kp-a')
+  })
+
+  it('课标要求：条目编号是字符串（1.1 不能被 YAML 解析成小数）', () => {
+    // 若写成 id: 1.1（不加引号），YAML 会解析成数字 1.1，Zod 会拒绝——这条用例守住这个坑
+    expect(CurriculumFileSchema.safeParse({ requirements: [{ id: 1.1, source: 's', text: 't' }] }).success).toBe(false)
+    expect(CurriculumFileSchema.safeParse({ requirements: [{ id: '1.1', source: 's', text: 't' }] }).success).toBe(true)
   })
 
   it('提醒：出处没有页码', () => {

@@ -7,10 +7,14 @@ import {
   ToolRegistry,
   createDefaultTools
 } from '../../core'
+import type { Turn, TurnFlag } from '../../core/domain'
+import type { StudentStore } from '../../core/storage'
 import { parseSectionBlocks } from '../../shared/section-blocks'
 import { describeConfig, loadConfig, readUserConfig, saveUserConfig } from '../config'
 import { resolveConnectivityTarget } from '../config/connectivity'
 import type { ContentRuntime } from '../content/runtime'
+import { latestSession } from '../storage/jsonl-store'
+import { touchedKnowledgePoints } from '../storage/mastery-touch'
 
 /**
  * IPC 处理器注册表。
@@ -45,6 +49,16 @@ let session: ChatSession | null = null
 /** 内容源由主进程在启动时装载并注入（真实内容/演示内容的回落逻辑在 `content/runtime.ts`） */
 let contentRuntime: ContentRuntime | null = null
 
+/** 本机数据存储（JSONL；选型见 docs/adr/ADR-0003 决策二） */
+let persistence: { store: StudentStore; dataDir: string } | null = null
+
+/** 学生编号：由教师分配，不存真实姓名。当前单人版固定 S00，将来从本机记录里读 */
+const STUDENT_ID = 'S00'
+
+/** 本次运行的会话 id 与轮次计数（用于给每条消息生成稳定 id） */
+let currentSessionId: string | null = null
+let turnSeq = 0
+
 function createSession(runtime: ContentRuntime): ChatSession {
   const config = loadConfig()
   const client = new DeepSeekClient({
@@ -56,6 +70,18 @@ function createSession(runtime: ContentRuntime): ChatSession {
   const firstPosition = runtime.positions[0]
   if (!firstPosition) throw new Error('内容源没有可用的学习位置（positions 为空）')
 
+  // 接着上次继续：上次会话的位置与标签，让开场问题能提到"上次你在……"
+  const last = persistence ? latestSession(persistence.dataDir, STUDENT_ID) : null
+  const lastPosition = last
+    ? {
+        position: last.position,
+        label:
+          runtime.positions.find((item) => item.position.sectionId === last.position.sectionId)?.label ??
+          last.position.sectionId ??
+          ''
+      }
+    : null
+
   return new ChatSession({
     client,
     registry: new ToolRegistry(createDefaultTools()),
@@ -63,9 +89,100 @@ function createSession(runtime: ContentRuntime): ChatSession {
     //（属接口调整，另开一件事）。当前只有一个单元，用首个位置即可。
     scopeFactory: (mode) => runtime.scopeFor(firstPosition.position, mode),
     getSectionText: runtime.getSectionText,
-    studentId: 'S00', // 编号由教师分配；接入本地记录后改为读取已分配的编号
-    positions: runtime.positions
+    studentId: STUDENT_ID,
+    positions: runtime.positions,
+    lastPosition
   })
+}
+
+/**
+ * 落盘一条消息。**学生的话在调用模型之前就落**——哪怕模型失败/崩溃，问题也不会丢。
+ * 存储不可用时只记日志、不抛错：数据记录不该让对话挂掉。
+ */
+async function persistTurn(
+  sessionId: string,
+  role: 'user' | 'assistant',
+  content: string,
+  flags: TurnFlag[] = []
+): Promise<string> {
+  turnSeq += 1
+  const id = `${sessionId}-${role === 'user' ? 'u' : 'a'}${turnSeq}`
+  if (!persistence) return id
+  const turn: Turn = {
+    id,
+    sessionId,
+    role,
+    content,
+    flags,
+    createdAt: new Date().toISOString()
+  }
+  try {
+    await persistence.store.appendTurn(turn)
+  } catch (error) {
+    console.error(`落盘失败（不影响对话）：${error instanceof Error ? error.message : String(error)}`)
+  }
+  return id
+}
+
+/** 第一次选定学习模式时建立会话记录（这时才拿得到 mode 与 position） */
+async function ensurePersistedSession(): Promise<void> {
+  if (!persistence || currentSessionId) return
+  const chat = getSession()
+  const scope = chat.currentScope()
+  const state = chat.getState()
+  if (!scope || !state.mode) return
+  const startedAt = new Date().toISOString()
+  const id = `${startedAt.slice(0, 19).replace(/[:T]/g, '-')}-${STUDENT_ID}`
+  currentSessionId = id
+  try {
+    await persistence.store.upsertStudent({ id: STUDENT_ID, createdAt: startedAt })
+    await persistence.store.createSession({
+      id,
+      studentId: STUDENT_ID,
+      studyMode: state.mode,
+      position: scope.position,
+      startedAt
+    })
+  } catch (error) {
+    console.error(`建立会话记录失败：${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
+/** 本轮学生的话提到了哪些知识点 → 记"探索中"（参与痕迹，不是掌握度判定，见 mastery-touch.ts） */
+async function recordMasteryTouches(studentMessage: string, evidenceTurnId: string): Promise<void> {
+  if (!persistence) return
+  const scope = getSession().currentScope()
+  if (!scope) return
+  const touched = touchedKnowledgePoints(scope.knowledgePoints, studentMessage)
+  const updatedAt = new Date().toISOString()
+  for (const kpId of touched) {
+    try {
+      await persistence.store.setMasteryState(STUDENT_ID, kpId, 'exploring', evidenceTurnId, updatedAt)
+    } catch (error) {
+      console.error(`记录掌握度失败（不影响对话）：${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+}
+
+/** 退出前收尾：给会话写上结束时间（便于统计一次学习时长） */
+export async function endCurrentSession(endedAt: string): Promise<void> {
+  if (!persistence || !currentSessionId) return
+  try {
+    await persistence.store.endSession(currentSessionId, endedAt)
+  } catch {
+    /* 退出路径上不抛错 */
+  }
+}
+
+/** 自检用：确认"这一轮真的落到本机文件里了"（不是只存在内存里） */
+export async function describePersistence(): Promise<{ sessionId: string | null; turnCount: number }> {
+  if (!persistence || !currentSessionId) return { sessionId: currentSessionId, turnCount: 0 }
+  try {
+    const turns = await persistence.store.listTurns(currentSessionId)
+    return { sessionId: currentSessionId, turnCount: turns.length }
+  } catch {
+    return { sessionId: currentSessionId, turnCount: 0 }
+  }
 }
 
 function getSession(): ChatSession {
@@ -74,8 +191,12 @@ function getSession(): ChatSession {
   return session
 }
 
-export function registerIpcHandlers(runtime: ContentRuntime): void {
+export function registerIpcHandlers(
+  runtime: ContentRuntime,
+  store?: { store: StudentStore; dataDir: string }
+): void {
   contentRuntime = runtime
+  persistence = store ?? null
 
   ipcMain.handle('app:ping', (_event, payload: unknown) => {
     const input = PingInput.parse(payload)
@@ -83,20 +204,50 @@ export function registerIpcHandlers(runtime: ContentRuntime): void {
   })
 
   /** 开场：Agent 主动询问想做什么，返回四个选项 */
-  ipcMain.handle('session:start', () => {
-    getSession().reset()
-    return getSession().start()
+  ipcMain.handle('session:start', async () => {
+    const chat = getSession()
+    chat.reset()
+    // 首次打开就登记学生，保证本机数据目录从一开始就有他的编号（不存姓名）
+    if (persistence) {
+      try {
+        if (!(await persistence.store.getStudent(STUDENT_ID))) {
+          await persistence.store.upsertStudent({ id: STUDENT_ID, createdAt: new Date().toISOString() })
+        }
+      } catch (error) {
+        console.error(`登记学生失败：${error instanceof Error ? error.message : String(error)}`)
+      }
+    }
+    return chat.start()
   })
 
-  ipcMain.handle('session:chooseMode', (_event, payload: unknown) => {
+  ipcMain.handle('session:chooseMode', async (_event, payload: unknown) => {
     const input = ChooseModeInput.parse(payload)
-    return getSession().chooseMode(input.input)
+    const result = getSession().chooseMode(input.input)
+    // 这时才拿得到"模式 + 位置" → 建立本次会话记录（一个应用运行 = 一次会话）
+    await ensurePersistedSession()
+    return result
   })
 
-  /** 一轮对话：走完整 Agent 循环（工具调用 + 答案泄漏护栏 + 降级） */
+  /**
+   * 一轮对话：走完整 Agent 循环（工具调用 + 答案泄漏护栏 + 降级）。
+   *
+   * 落盘顺序（重要）：**先写学生的话，再调用模型**——模型失败时问题仍在本机，
+   * 学习统计不会因为一次网络故障丢掉学生真实说过的话。
+   */
   ipcMain.handle('agent:chat', async (_event, payload: unknown) => {
     const input = ChatInput.parse(payload)
-    return await getSession().chat(input.message)
+    const chat = getSession()
+    const sessionId = currentSessionId
+    if (sessionId) await persistTurn(sessionId, 'user', input.message)
+
+    const result = await chat.chat(input.message)
+
+    // 未选模式时返回的是 { needsMode: true, message }，没有回复可存
+    if (sessionId && 'reply' in result) {
+      const turnId = await persistTurn(sessionId, 'assistant', result.reply, [...result.flags])
+      await recordMasteryTouches(input.message, turnId)
+    }
+    return result
   })
 
   ipcMain.handle('session:state', () => getSession().getState())
