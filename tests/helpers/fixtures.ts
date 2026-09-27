@@ -8,7 +8,7 @@ export function makeScope(overrides: Partial<StudyScope> = {}): StudyScope {
     mode: 'review',
     unit: {
       id: 'u-cell-basic-unit',
-      title: '细胞是生命活动的基本单位',
+      title: '第一单元 生物和细胞',
       grade: '七年级上',
       edition: '人教版',
       sections: [{ id: 's1', title: '细胞的生活' }]

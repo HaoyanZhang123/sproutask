@@ -13,7 +13,7 @@
 ## 计划中的单元结构（格式待定，见 ADR-0003）
 
 ```
-content/units/u-cell-basic-unit/        # 人教版七上 第二单元第一章（首个录入单元）
+content/units/u-cell-basic-unit/        # 人教版七上 第一单元第二章（首个录入单元）
 ├─ unit.yaml      # 单元信息 + 小节列表（section 的 textRef 指向 content/textbook/）
 └─ knowledge-points.yaml   # 知识点：标题、概括、出处、前置知识、常见误区、难度
 ```

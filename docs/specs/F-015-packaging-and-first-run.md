@@ -94,7 +94,9 @@
 - **没有自定义图标**：用的是 Electron 默认图标（打包日志明确提示 "default Electron icon is used"）；
   做图标需要 `.ico` 文件，且要注意发布扫描会把二进制文件当作硬失败，需要另行约定
 - **没有代码签名**：Windows 首次运行可能弹 SmartScreen 提示，学生需要点"更多信息 → 仍要运行"；
-  分发给学生时应在说明里写清这一步
+  分发给学生时应在说明里写清这一步。
+  **2026-09-27 决定暂不购买证书**（传统证书约 ¥1000+/年且需硬件令牌；Azure Trusted Signing 约 $9.99/月；
+  SignPath 对开源项目免费）——当前阶段不构成阻塞，正式对外分发前再补，见 `docs/adr/ADR-0006`
 - **打包体积偏大**（72 MB）：`app.asar` 18 MB 里含 vue 的传递依赖（渲染层其实已被 Vite 打包），
   可优化为把 vue/pinia 移到 devDependencies；这属于优化项，未擅自改动
 - **`dmg`（macOS）从未构建过**，也没有 Mac 环境；`build:mac` 属未验证路径

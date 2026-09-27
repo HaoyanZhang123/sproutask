@@ -45,7 +45,7 @@ describe('会话：开场与模式选择', () => {
       ok: true,
       mode: 'review',
       modeLabel: '复习',
-      positionLabel: '第二单元第一章第四节 细胞的生活'
+      positionLabel: '第一单元第二章第四节 细胞的生活'
     })
     expect(session.getState().mode).toBe('review')
   })

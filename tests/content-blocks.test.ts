@@ -100,7 +100,7 @@ describe('搜索高亮切分', () => {
 })
 
 describe('出处定位', () => {
-  const candidates = ['第二单元第一章第四节 细胞的生活', '细胞的生活', '细胞膜']
+  const candidates = ['第一单元第二章第四节 细胞的生活', '细胞的生活', '细胞膜']
 
   it('优先命中候选词里最长的那个（避免只定位到宽泛词）', () => {
     const reply = '你看教材里"细胞的生活"这一节的第二段，再想想细胞膜的作用？'
@@ -108,8 +108,8 @@ describe('出处定位', () => {
   })
 
   it('候选词更长时优先（章节全称优于小节名）', () => {
-    const reply = '见第二单元第一章第四节 细胞的生活'
-    expect(extractCitation(reply, candidates)).toBe('第二单元第一章第四节 细胞的生活')
+    const reply = '见第一单元第二章第四节 细胞的生活'
+    expect(extractCitation(reply, candidates)).toBe('第一单元第二章第四节 细胞的生活')
   })
 
   it('没有候选词命中时退回"第X节/第X章"形式', () => {
