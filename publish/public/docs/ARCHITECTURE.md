@@ -159,7 +159,8 @@ interface StudentStore {               // 数据存哪（实现可替换）
 - Windows：两种形态并存 —— `portable` 便携版（免安装，规避受限终端环境的安装权限问题）
   与 `nsis` 安装版（装到当前用户目录、**不需要管理员权限**、可正常卸载；安装包单独命名以免与便携版冲突）
 - macOS：`dmg`（需在 macOS 或 CI 的 macOS runner 上构建）
-- 教学内容的**随包分发为计划中**：需要自行在 `electron-builder.yml` 添加 `extraResources`
-  指向本地内容目录（见该文件注释）；无论是否随包，教材原文都不进版本库
+- 教学内容的随包分发**默认关闭**：`electron-builder.yml` 的 `extraResources` 为空。
+  若要让"自己编写的内容结构"随包，只映射该子目录（例如 `content/units/`）；
+  **教材原文属于版权物：只放本机、绝不随包、不进版本库**
 - 打包命令：`pnpm build:win`（便携版与安装版，均已实测）/ `pnpm build:mac`（**尚未实测**）
 - 未签名的桌面应用可能被系统安全提示拦截 → 分发时附"如何继续运行"的说明
