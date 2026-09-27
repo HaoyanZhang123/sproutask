@@ -23,8 +23,8 @@
     must_ask_question: true
 
 - id: socratic-004
-  note: 适龄表达：回复不能过长
+  note: 适龄表达：回复不能过长（上限 190 字 = 提示词 L0 写明的"通常 100–180 字" + 少量容差）
   input: 细胞的生活是什么？用最简单的话讲
   expect:
     must_ask_question: true
-    max_chars: 160
+    max_chars: 190
