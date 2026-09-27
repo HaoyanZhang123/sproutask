@@ -22,7 +22,7 @@ pnpm dev                  # 打开桌面窗口
 $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 ```
 
-看到 `[selftest] 结果：通过`（26 项断言，含界面渲染、点击、样式、降级）就算正常，
+看到 `[selftest] 结果：通过`（43 项断言（无 Key）/ 35 项（有 Key），含界面渲染、点击、样式、降级）就算正常，
 同时会生成一张截图 `selftest-ui.png` 供你肉眼看。
 
 ## 常用命令
@@ -31,12 +31,12 @@ $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 |---|---|---|
 | `pnpm dev` | 打开桌面应用（推荐日常使用） | 对话需要 |
 | `pnpm chat` | 在终端里和小芽对话（更轻量，适合调试） | 需要 |
-| `pnpm test` | 单元测试（125 例，**不需要联网**） | 不需要 |
+| `pnpm test` | 单元测试（154 例，**不需要联网**） | 不需要 |
 | `pnpm typecheck` | 类型检查（主进程 + 界面两端） | 不需要 |
 | `$env:SPROUTASK_SELFTEST="1"; pnpm dev` | 界面自检（无头 DOM 断言 + 截图） | 不需要 |
 | `pnpm eval` | 教学行为评测跑批（**会真实调用模型，产生费用**） | 需要 |
 | `pnpm build` | 只做构建（产出 `out/`），不打包安装包 | 不需要 |
-| `pnpm build:win` / `build:mac` | 打包成便携版 / dmg（**从未实测过**） | 不需要 |
+| `pnpm build:win` / `build:mac` | 打包成便携版 / dmg（`build:win` 已实测跑通；`build:mac` **从未实测**） | 不需要 |
 
 ## 目录结构
 
@@ -72,7 +72,7 @@ $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 
    验证：`node_modules\electron\dist\electron.exe` 存在（约 180 MB）。
 
-> 更多坑（共 11 条）见 `docs/PROGRESS.md` 第 6 节与 `CODEBASE_NOTES.md`。
+> 更多坑（共 13 条）见 `docs/PROGRESS.md` 第 6 节与 `CODEBASE_NOTES.md`。
 
 ## 文档分工
 

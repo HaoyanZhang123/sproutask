@@ -41,11 +41,14 @@
 
 ## 任务状态
 
+> 说明：各行"测试 N/N""自检 N 项"记录的是**该需求验收当时**的口径；当前总数一律以
+> `docs/PROGRESS.md` §3/§4 为准（2026-09-27：`pnpm test` 154 例；界面自检 43/35 项）。
+
 | 编号 | 任务 | 里程碑 | 状态 | 证据落点 |
 |---|---|---|---|---|
 | F-001 | 仓库骨架与规范落地 | M0 | ✅ 完成 | `specs/F-001-repo-skeleton.md`（实测结论） |
-| F-002 | 分层提示词 v1 与 DeepSeek 流式客户端 | M1 | ✅ 完成；**真实 API 联调未做（缺 Key）** | `specs/F-002-prompt-layers-and-llm-client.md` |
-| F-003 | 评测集与 `pnpm eval` 报告 | M1 | ✅ 完成（骨架+判定）；**真实跑批未做（缺 Key）** | `specs/F-003-eval-harness.md` |
+| F-002 | 分层提示词 v1 与 DeepSeek 流式客户端 | M1 | ✅ 完成；**真实 API 已联调**（2026-09-26 评测跑批与真实对话均跑通） | `specs/F-002-prompt-layers-and-llm-client.md` |
+| F-003 | 评测集与 `pnpm eval` 报告 | M1 | ✅ 完成；**真实跑批已做**（15/15，报告在 `evals/reports/`） | `specs/F-003-eval-harness.md` |
 | F-004 | 教材文本提取工具（全册 PDF → 分册/章/节 Markdown） | M2 | ⏳ 未开始（等教材版本） | 待建 spec |
 | F-005 | 课标与教学材料提取 + 课标↔知识点映射 | M2 | ⏳ 未开始 | 待建 spec |
 | F-006 | 内容格式定案 + 全册结构化入库 + 校验命令 | M2 | ⏳ 未开始（等 Q3/Q6 落地） | 待建 spec |

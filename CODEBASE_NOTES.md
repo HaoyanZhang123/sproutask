@@ -3,26 +3,28 @@
 > 本文件只放**技术事实**（含数字），规范条款放 `AGENTS.md` / `docs/`。
 > 每个数字都带**基线与过期判据**；过期不改写，移入 `archive/`。
 
-## 1. 仓库坐标（基线：2026-09-22）
+## 1. 仓库坐标（基线：2026-09-27）
 
 | 项 | 值 |
 |---|---|
 | Git 仓库根 | `E:/DSH/workspaces/ai4edu` |
 | 会话可见工作路径 | `D:\dsh\ai4edu`（同一仓库的另一路径视图；`Get-Item` 可能报"找不到项"） |
 | 远端 | 无（自有本地仓）；分支 `main`；提交身份唯一 `张灏焱 <1814914856@qq.com>` |
-| 跟踪文件数 | 113（2026-09 完成 F-011 时计数；`git ls-files`） |
-| 公开产物 | `E:\my-project\sproutask` → <https://github.com/HaoyanZhang123/sproutask>（独立单/多提交仓） |
+| 提交数 | 41（2026-09-27 实测；`git log --oneline`） |
+| 跟踪文件数 | 134（2026-09-27 实测；`git ls-files`） |
+| 公开产物 | `E:\my-project\sproutask` → <https://github.com/HaoyanZhang123/sproutask>（独立单/多提交仓；2026-09-27 已全部推送） |
 
 **过期判据**：`git rev-parse --show-toplevel` 的输出与上表不符 → 本节过期。
+提交数/跟踪文件数会随开发自然增长，**每次会话更新 PROGRESS 时顺手回写**（数字与实测不符即过期）。
 
-## 2. 版本基线（基线日期：2026-09-22，`node -v` / `pnpm -v` / `python --version`）
+## 2. 版本基线（基线日期：2026-09-27，`node -v` / `pnpm -v` / `python --version`）
 
 | 工具 | 实测值 |
 |---|---|
 | Node | `v24.19.0` |
 | pnpm | `11.21.0` |
-| Python | `3.13.15` ⚠️ 同日另一次读到 `3.11.9` —— PATH 在多 shell 间不一致，**以现场实测为准** |
-| Electron | `33.4.11`（`node_modules/electron/package.json`） |
+| Python | `3.13.15`（`C:\Users\<user>\AppData\Local\Programs\Python\Python313`）⚠️ 历史上另一次读到 `3.11.9`，PATH 在多 shell 间不一致，**以现场实测为准** |
+| Electron | `33.4.11`（`node_modules/electron/package.json`；打包版 exe 的版本信息里也是它） |
 | Vitest | `2.1.9`（测试输出） |
 | 平台 | Windows（`pwsh`） |
 
@@ -53,10 +55,11 @@
 | 10 | 管道喂多行 stdin 给 `pnpm chat` 只消费第一行 | Node `readline` 在"没有 pending question"时到达的行会被丢弃 | 交互式流程别用管道测；要自动化改用**逐步写入 stdin**（`ProcessStartInfo.RedirectStandardInput` + 延时） | 若将来 chat 改用一次性读取全部输入 → 可简化 |
 | 11 | `pnpm dev` 报 `TypeError: Cannot read properties of undefined (reading 'whenReady')`，而代码本身没问题 | 环境里存在 `ELECTRON_RUN_AS_NODE=1`（模拟 CI 时常被设置后忘记清理）→ Electron 以**纯 Node** 启动，`require('electron')` 返回 npm 包而不是 Electron API，`electron.app` 因此为 undefined | `Remove-Item Env:ELECTRON_RUN_AS_NODE` 后重跑；`src/main/index.ts` 已加"启动前自检"，命中即打印可读诊断并退出（不再抛晦涩的 TypeError） | 若 `src/main/index.ts` 里那段自检被删 → 恢复它 |
 | 12 | **发布扫描失败后仍然镜像并提交了公开仓库**（绕过了自己的闸门） | 我把 `publish_github.ps1` 的输出用 `Select-String` 过滤后就直接 `robocopy` + `git commit`，**没检查脚本退出码**；扫描报 ❌ 的那次照样提交成功 | 流程改为：**以退出码为闸门**——`if ($LASTEXITCODE -ne 0) { 不镜像、不提交 }`；这次已 `git reset --soft` 撤掉未推送的坏提交并重做 | 当镜像/提交命令与发布脚本写在同一条命令里时 → 必须显式检查退出码 |
+| 13 | 源码里的"内部编号"（需求号）与"密钥形态字符串"（自检用的假 Key）会让公开扫描硬失败 | 源码注释与自检脚本也算发布内容；密钥规则是 `sk-[A-Za-z0-9]{16,}`，一个假 Key 也会命中 | 源码里不写内部编号（改用描述性措辞）；假 Key 用数组拼接（`['sk','fake'].join('-')`）避免命中正则 | 新增自检脚本/注释后跑一次发布扫描 |
 
 ## 5. 提交身份（✅ 已规范化，2026-09-24）
 
-**现状**：全部 19 个提交的作者与提交者均为 `张灏焱 <1814914856@qq.com>`（仓库配置身份），
+**现状**（2026-09-27 复核）：全部 41 个提交的作者与提交者均为 `张灏焱 <1814914856@qq.com>`（仓库配置身份），
 分支唯一（`main`），`git log --pretty='%an <%ae>' | Sort-Object -Unique` 只返回一种。
 
 **历史漂移（已修复，仅作记录）**：
@@ -70,18 +73,25 @@
 **修复方式**：`git filter-branch --env-filter`——命中漂移身份即 `unset`，让 git 回落到仓库配置
 （筛子脚本刻意只用 ASCII 判断，避免中文写进 sh 脚本的编码风险）。
 **验证**：重写前后 `HEAD^{tree}` 哈希一致（`700f5021…`）→ 只改身份、内容一字未动；
-提交数仍 19；工作区干净；`pnpm test` 105/105；`git fsck` 无异常。
+提交数仍 19（**当时口径**）；工作区干净；`pnpm test` 105/105（**当时口径**）；`git fsck` 无异常。
 旧对象已 `reflog expire` + `gc --prune=now` 清除，备份 bundle 留在 `E:\_backups\`。
 同时把分支名由 `master` 改为 `main`，与 `docs/CONVENTIONS.md` 的约定一致。
 
 **过期判据**：`git log --pretty='%an <%ae>' | Sort-Object -Unique` 出现第二种身份 → 本节过期。
 
-## 6. 未验证事项（诚实声明）
+## 6. 未验证事项（诚实声明，基线 2026-09-27）
 
-- DeepSeek 真实 API **已确认可达、鉴权头正确**（2026-09：用无效 Key 实测返回 401，
-  被映射为 `auth` 降级路径），但**从未用有效 Key 完成一次成功对话**（本机无有效 `.env`）。
-  因此流式分片在真实报文下的形态、工具调用增量累积的正确性，仍**只有离线单测支撑**。
-- 打包（`electron-builder`）从未实际执行过；公开版 `electron-builder.yml` 只做静态检查。
-- 教材与课标内容工程（M2）尚未开始，当前用的是**自编占位文本**（`src/core/content/demo.ts`），
-  不是真实教材原文。
-| 13 | 源码里的"内部编号"（`F-015`）与"密钥形态字符串"（自检用的假 Key `sk-…`）会让公开扫描硬失败 | 源码注释与自检脚本也算发布内容；密钥规则是 `sk-[A-Za-z0-9]{16,}`，一个假 Key 也会命中 | 源码里不写内部编号（改用描述性措辞）；假 Key 用数组拼接（`['sk','fake'].join('-')`）避免命中正则 | 新增自检脚本/注释后跑一次发布扫描 |
+- **真实 API 已跑通，但"原始报文形态"仍无存档**：`pnpm eval` 15/15、打包版真实对话 105/125 字、
+  本机 `.env` 有有效 Key —— 都说明链路通了；但没有人把一次真实 SSE 原始报文留档，
+  所以"流式分片边界"仍只有离线单测支撑。复现判据：`evals/reports/` 下有真实调用生成的报告。
+- **打包已实际执行**（`release\SproutAsk-0.1.0-win-x64.exe`，72.35 MB；SHA256 与 GitHub Release
+  附件逐字节一致）。**仍未验证**：干净机器首次运行、macOS `dmg`（无 Mac 环境）、
+  代码签名与自定义图标（当前 exe 的版本信息还是 Electron 默认值）。
+- **教材与课标内容工程（M2）尚未开始**：当前用的是自编占位文本（`src/core/content/demo.ts`），
+  不是真实教材原文；`content/` 下只有说明文件。这是"给真实学生使用"前必须解决的前置。
+- **界面自检是程序操作 DOM**（`executeJavaScript`），不等于真人鼠标路径；真人手感未验证。
+- **研习数据通道还不存在**：产品尚无本地存储（F-013 未实现），对话关掉即消失；
+  而 `docs/研习设计.md` 把"对话记录"列为 RQ2 的数据来源 —— 预试前需据此调整设计或先做 F-013。
+- **发布版二进制与公开源码 tag 差一行**：v0.1.0-alpha 的 exe 是在"假 Key 改为数组拼接"那次修复
+  **之前**构建的，因此二进制里留着自检用的字面串（假 Key，无安全风险）。以后发版建议先打 tag 再从 tag 构建。
+

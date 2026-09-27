@@ -35,7 +35,7 @@
 | 本地存储 | ⏳ 待定：SQLite 或 JSONL（接口已定，见 §6） |
 | 测试 | Vitest |
 | 打包 | electron-builder（win: portable exe；mac: dmg，GitHub Actions 构建） |
-| 开发期工具 | Python 3.11+（`tools/`，教材与课标文本提取，不进 exe） |
+| 开发期工具 | Python 3.11+（`tools/`，不进 exe）。⚠️ **现状**：`tools/` 目前只有 `md_to_docx.py`（问卷等文档转换）；教材/课标文本提取脚本属 M2 **待建** |
 
 ## 3. 目录结构
 
@@ -160,9 +160,9 @@ L0 人格 / L1 教学纪律 / **L2 教材与课标约束** / L3 学情摘要（�
 ## 8. 内容工程流水线（全册）
 
 ```
-① 教材 PDF（全册）→ tools/extract_textbook.py
+① 教材 PDF（全册）→ tools/extract_textbook.py（⚠️ **待建**，M2）
      → content/textbook/<volume>/<unit>/<section>.md（不进 git）
-② 课标 PDF → tools/extract_curriculum.py
+② 课标 PDF → tools/extract_curriculum.py（⚠️ **待建**，M2）
      → content/curriculum/<source>.md（不进 git）
 ③ 结构化：章节索引 + 知识点 + 常见误区 + 课标↔知识点映射
      → content/units/<unit>/*（进 git，格式待定，见 ADR-0003）
@@ -192,5 +192,6 @@ L0 人格 / L1 教学纪律 / **L2 教材与课标约束** / L3 学情摘要（�
 
 - Windows：`portable` 便携版（免安装，规避机房权限）；macOS：`dmg`（GitHub Actions 构建）
 - 教学内容（`content/units` 结构 + 教材原文）经 `extraResources` 随包分发
+  （⚠️ **现状**：`content/` 下只有说明文件，教材尚未入库，因此随包发放的是自编占位文本）
 - 未签名应用会被 SmartScreen 拦截 → 分发时附"仍要运行"说明
 - 仅向本班小范围提供，不公开传播（合规锚点）

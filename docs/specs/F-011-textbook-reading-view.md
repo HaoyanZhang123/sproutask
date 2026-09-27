@@ -72,6 +72,12 @@ Agent 提到出处时教材区自动定位并高亮。这是方案 D 的第二�
 - **界面自检 26 项**（原 17 项 + 阅读视图 9 项），**无 Key 与有 Key 两种环境均通过**
 - mutation-check：给 `src/shared` 加一行 `import`、给渲染组件加一行越层 `import` → 对应把关各自变红；还原后全绿
 
+> **2026-09-27 复审**（接手审计）：上列数字为**当时口径**。当前 `tests/content-blocks.test.ts` 为
+> **17 例**、`pnpm test` 总计 **154 例**、界面自检 **43 项（无 Key）/ 35 项（有 Key）**；
+> 另外，原先写在 `tests/smoke.test.ts` 里的"渲染进程不得越层"与"`src/shared` 零依赖"两条把关
+> 已被审计实测出 6 条可绕过路径，现已抽成 `findRendererViolations` / `findSharedViolations`
+> 并补齐变异用例。结论（能力已实现、把关有效）不变，仅数字与实现方式更新。
+
 ## 6. 明确不做
 
 - 不做逐字流式（F-010 的决策，理由见该 spec）
