@@ -57,12 +57,24 @@ const HAS_PUNCTUATION = /[、，；。：,;:]/
 export function validateContent(input: {
   unitFile: UnitFile
   kpFile: KnowledgePointsFile
+  /** 课标要求文件（可选；有则校验 kpId 是否指向存在的知识点） */
+  curriculumFile?: CurriculumFile
 }): ContentIssue[] {
   const issues: ContentIssue[] = []
   const { unit } = input.unitFile
   const kps = input.kpFile.knowledgePoints
   const sectionIds = new Set(unit.sections.map((s) => s.id))
   const kpIds = new Set(kps.map((kp) => kp.id))
+
+  // 0) 课标要求里的 kpId 必须指向存在的知识点（写错一个字母就悄悄失效，必须挡住）
+  for (const requirement of input.curriculumFile?.requirements ?? []) {
+    if (requirement.kpId && !kpIds.has(requirement.kpId)) {
+      issues.push({
+        level: 'error',
+        message: `课标要求 ${requirement.id} 指向不存在的知识点：${requirement.kpId}`
+      })
+    }
+  }
 
   // 1) 重复 id
   const seen = new Set<string>()

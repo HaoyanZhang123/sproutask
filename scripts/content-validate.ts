@@ -2,10 +2,12 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse as parseYaml } from 'yaml'
 import {
+  CurriculumFileSchema,
   KnowledgePointsFileSchema,
   UnitFileSchema,
   validateContent,
-  type ContentIssue
+  type ContentIssue,
+  type CurriculumFile
 } from '../src/core/content/schema'
 
 /**
@@ -41,7 +43,21 @@ function validateUnitDir(dir: string): ContentIssue[] {
     return [{ level: 'error', message: `${kpPath} 结构不合法：${kpFile.error.issues[0]?.message}` }]
   }
 
-  issues.push(...validateContent({ unitFile: unitFile.data, kpFile: kpFile.data }))
+  // 课标要求（可选）：只放条目编号与短引用，原文不进仓库（ADR-0007）
+  const curriculumPath = join(dir, 'curriculum.yaml')
+  let curriculumFile: CurriculumFile | undefined
+  if (existsSync(curriculumPath)) {
+    const parsed = CurriculumFileSchema.safeParse(parseYaml(readFileSync(curriculumPath, 'utf-8')))
+    if (!parsed.success) {
+      return [{ level: 'error', message: `${curriculumPath} 结构不合法：${parsed.error.issues[0]?.message}` }]
+    }
+    curriculumFile = parsed.data
+    if (curriculumFile.requirements.length === 0) {
+      issues.push({ level: 'warn', message: `${curriculumPath} 里没有任何课标要求` })
+    }
+  }
+
+  issues.push(...validateContent({ unitFile: unitFile.data, kpFile: kpFile.data, curriculumFile }))
 
   // 教材原文只在本机：文件不存在时给出 warn（不是 error），并提示怎么补
   for (const section of unitFile.data.unit.sections) {
