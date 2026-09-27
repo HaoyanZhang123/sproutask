@@ -47,8 +47,8 @@
 
 ## 4. 现在的真实状态（2026-09-27 复审实测）
 
-**规模**：41 次提交 / 134 个跟踪文件 / 单测 **154 例** / 教学行为评测 **15 条用例** /
-界面自检 **43 项断言（无 Key）· 35 项（有 Key）** / `main/index.ts` 669 行 / `App.vue` 539 行。
+**规模**：**53 次提交 / 154 个跟踪文件** / 单测 **176 例** / 教学行为评测 **15 条用例** /
+界面自检 **42 项断言（无 Key）· 34 项（有 Key）** / `main/index.ts` 697 行 / `App.vue` 539 行。
 
 **已完成且有实测**（详见 `docs/PROGRESS.md` 第 3 节的逐条表）：
 
@@ -162,7 +162,7 @@ pnpm prompts:compare                            # v1/v2 提示词语气并排对
 ### 6.7 工程质量与可维护性
 
 - 我自报的弱点（欢迎确认或推翻）：
-  - `src/main/index.ts` **669 行**，其中大量是自检脚本 —— 自检与产品代码同文件，建议拆分
+  - `src/main/index.ts` **697 行**，其中大量是自检脚本 —— 自检与产品代码同文件，建议拆分
   - `App.vue` **539 行**，组件只拆出了 `ReadingPane.vue` 与 `ConfigPanel.vue`
   - 会话是**单例**（`src/main/ipc/index.ts` 与 `core/agent/session.ts`），只支持一次会话
   - 没有 pre-commit hook；质量门靠自觉 + CI（CI 只做 typecheck/test，**不测打包、不跑 eval**）

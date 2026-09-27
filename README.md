@@ -22,7 +22,7 @@ pnpm dev                  # 打开桌面窗口
 $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 ```
 
-看到 `[selftest] 结果：通过`（43 项断言（无 Key）/ 35 项（有 Key），含界面渲染、点击、样式、降级）就算正常，
+看到 `[selftest] 结果：通过`（42 项断言（无 Key）/ 34 项（有 Key），含界面渲染、点击、样式、降级）就算正常，
 同时会生成一张截图 `selftest-ui.png` 供你肉眼看。
 
 ## 常用命令
@@ -31,7 +31,7 @@ $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 |---|---|---|
 | `pnpm dev` | 打开桌面应用（推荐日常使用） | 对话需要 |
 | `pnpm chat` | 在终端里和小芽对话（更轻量，适合调试） | 需要 |
-| `pnpm test` | 单元测试（154 例，**不需要联网**） | 不需要 |
+| `pnpm test` | 单元测试（176 例，**不需要联网**） | 不需要 |
 | `pnpm typecheck` | 类型检查（主进程 + 界面两端） | 不需要 |
 | `$env:SPROUTASK_SELFTEST="1"; pnpm dev` | 界面自检（无头 DOM 断言 + 截图） | 不需要 |
 | `pnpm eval` | 教学行为评测跑批（**会真实调用模型，产生费用**） | 需要 |

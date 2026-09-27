@@ -5,6 +5,7 @@
 
 # 溯源信息（不参与契约校验，人工核对用）
 provenance:
+  volumeId: rjb-7s
   edition: 人教版《生物学》七年级上册（2024 新版）
   unit: 第一单元 生物和细胞
   chapter: 第二章 认识细胞

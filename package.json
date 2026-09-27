@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "芽问（SproutAsk）—— 本地优先的初中生物学习 Agent",
   "private": true,
-  "author": "",
+  "author": "HaoyanZhang123",
   "license": "UNLICENSED",
   "main": "./out/main/index.js",
   "packageManager": "pnpm@11.21.0",
