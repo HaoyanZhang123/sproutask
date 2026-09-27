@@ -17,6 +17,12 @@ import { resolveConnectivityTarget } from './config/connectivity'
 const SELF_TEST = process.env['SPROUTASK_SELFTEST'] === '1'
 
 /**
+ * 自检里用来"试连"的**假 Key**（必然连不上）。
+ * 它不是真 Key；同时用于判定"这串假 Key 有没有被界面回显出来"（泄露检查）。
+ */
+const FAKE_KEY = ['sk', 'fake', 'key', 'for', 'selftest'].join('-')
+
+/**
  * 打包版没有控制台，出问题时只能靠文件。
  * 启动过程与自检的关键节点都追加写到这里。
  *
@@ -279,22 +285,29 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
   const configUi = await evalInRenderer<{
     shown: boolean
     leaksKey: boolean
+    leakSample: string
     saveDisabled: boolean
     hasTestButton: boolean
     text: string
+    emptyKeyInput: boolean
   }>(
     win,
     `(() => {
       const panel = document.querySelector('.config')
       const save = document.querySelector('.config .save-btn')
       const keyInput = document.querySelector('.config .key-input')
+      const body = document.body.innerText
       return {
         shown: Boolean(panel),
-        // 界面上不得出现任何 Key 片段（连 sk- 掩码都不许）
-        leaksKey: /sk-[A-Za-z0-9]/.test(document.body.innerText),
+        // 界面上不得出现任何 Key 片段（连掩码都不许）。
+        // ⚠️ 探针口径（2026-09-27 实测修正）：原先写成 /sk-[A-Za-z0-9]/ 太糙——
+        //    测试目录名 "sproutask-clean2-…" 里的 "sk-c" 就会命中，报出假阳性。
+        //    现在按**真实 Key 形态**判定：sk- 后面至少 20 位字母数字（真实 Key 是 32 位）。
+        leaksKey: /sk-[A-Za-z0-9]{20,}/.test(body),
+        leakSample: ((body.match(/.{0,24}sk-[A-Za-z0-9]{20,}.{0,24}/) ?? [''])[0] || '').trim(),
         saveDisabled: save ? save.disabled : true,
         hasTestButton: Boolean(document.querySelector('.config .test-btn')),
-        text: document.body.innerText,
+        text: body,
         emptyKeyInput: keyInput ? keyInput.value === '' : false
       }
     })()`
@@ -302,7 +315,11 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
 
   if (!hasKey) {
     check('未配置 Key：先弹出"首次运行配置"界面', configUi.shown)
-    check('配置界面不显示 Key 内容（连掩码都不给）', !configUi.leaksKey)
+    check(
+      '配置界面不显示 Key 内容（连掩码都不给）',
+      !configUi.leaksKey,
+      configUi.leaksKey ? `命中片段：${configUi.leakSample}` : '未出现 sk- 形态的字符串'
+    )
     check('Key 还没填时"保存并开始"不可点（防手滑）', configUi.saveDisabled)
     check('提供"先试连一下"与"稍后再说"两个出口', configUi.hasTestButton)
 
@@ -311,7 +328,7 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
       win,
       `(() => {
         const input = document.querySelector('.config .key-input')
-        input.value = ['sk', 'fake', 'key', 'for', 'selftest'].join('-')
+        input.value = ${JSON.stringify(FAKE_KEY)}
         input.dispatchEvent(new Event('input', { bubbles: true }))
         return true
       })()`
@@ -325,15 +342,20 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
 
     await evalInRenderer(win, `(() => { const b = document.querySelector('.config .test-btn'); if (b) b.click(); return true })()`)
     await wait(4500)
-    const testResult = await evalInRenderer<{ text: string; busy: boolean; leaksKey: boolean }>(
+    const testResult = await evalInRenderer<{ text: string; busy: boolean; leaksKey: boolean; leakSample: string }>(
       win,
       `(() => {
         const msg = document.querySelector('.config .message')
         const btn = document.querySelector('.config .test-btn')
+        const body = document.body.innerText
         return {
           text: msg ? msg.innerText : '',
           busy: btn ? btn.disabled : true,
-          leaksKey: /sk-[A-Za-z0-9]/.test(document.body.innerText)
+          // 试连后：既要判"真实 Key 形态"，也要判"刚才注入的那串假 Key 有没有被回显"
+          // （注意：这段脚本在**渲染进程**里跑，主进程的变量必须用 JSON.stringify 注入）
+          leaksKey: /sk-[A-Za-z0-9]{20,}/.test(body) || body.includes(${JSON.stringify(FAKE_KEY)}),
+          leakSample: ((body.match(/.{0,24}sk-[A-Za-z0-9]{20,}.{0,24}/) ?? [''])[0] || '').trim() ||
+            (body.includes(${JSON.stringify(FAKE_KEY)}) ? '回显了注入的假 Key' : '')
         }
       })()`
     )
@@ -342,7 +364,11 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime, dataDir:
       testResult.text.length > 0 && !testResult.busy && !/Error|error:|stack/.test(testResult.text),
       testResult.text.slice(0, 30)
     )
-    check('试连过程与结果都不泄露 Key', !testResult.leaksKey)
+    check(
+      '试连过程与结果都不泄露 Key',
+      !testResult.leaksKey,
+      testResult.leaksKey ? `命中片段：${testResult.leakSample}` : '未出现 sk- 形态的字符串'
+    )
 
     // "稍后再说" → 回到正常流程
     await evalInRenderer(win, `(() => { const b = document.querySelector('.config .skip-btn'); if (b) b.click(); return true })()`)
