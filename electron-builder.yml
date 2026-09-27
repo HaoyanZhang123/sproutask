@@ -6,12 +6,14 @@ files:
   - out/**
   - package.json
 
-# 教学内容的说明（不随版本库分发）
-#   教材与课程标准原文涉及版权，只保存在本地；如需随安装包分发，
-#   请自行添加 extraResources 指向你的本地内容目录，例如：
+# 教学内容的说明（本仓库不随包任何内容）
+#   教材与课程标准原文涉及版权，只保存在本地、**绝不随包、绝不进版本库**。
+#   如果你自己编写了"内容结构"（知识点 / 课标条目 / 页码出处），可以只映射那一个子目录：
 #     extraResources:
-#       - from: content
-#         to: content
+#       - from: content/units
+#         to: content/units
+#   ⚠️ 不要整体映射 content/：那会把教材原文一起打进安装包（版权风险）。
+#   提示：被映射的目录必须真实存在，否则 electron-builder 会打包失败。
 win:
   target:
     - portable

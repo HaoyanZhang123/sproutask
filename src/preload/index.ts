@@ -48,6 +48,12 @@ const api = {
     grade: string
     sectionTitle: string
     mode: string
+    /** 本机有没有教材正文（没有时界面提示对照自己手里的课本，见 ADR-0007） */
+    hasLocalText: boolean
+    /** 印刷页起始页提示，如"第 28 页" */
+    pageHint: string | null
+    /** 内容来源：content＝内容工程产物；demo＝开发期演示占位 */
+    source: 'content' | 'demo'
     blocks: Array<{
       type: 'text' | 'think' | 'answer'
       title?: string

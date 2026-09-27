@@ -265,12 +265,20 @@ export function registerIpcHandlers(
     const section = scope.sectionTexts[0]
     if (!section) return null
 
+    const sectionMeta = scope.unit.sections.find((item) => item.id === section.sectionId)
+
     return {
       unitTitle: scope.unit.title,
       edition: scope.unit.edition,
       grade: scope.unit.grade,
       sectionTitle: section.title,
       mode: scope.mode,
+      // 本机有没有教材正文：没有时界面要**明确告诉学生对照课本**，而不是显示占位文本（ADR-0007）
+      hasLocalText: section.text.trim().length > 0,
+      // 印刷页起始页：正文不在本机时，它是"翻到课本哪一页"的依据
+      pageHint: sectionMeta?.page ? `第 ${sectionMeta.page} 页` : null,
+      // 演示占位内容（开发机没提供内容时才会出现）必须显式标注，避免被误当成真课本
+      source: contentRuntime?.source ?? 'demo',
       blocks: parseSectionBlocks(section.text),
       knowledgePoints: scope.knowledgePoints.map((kp) => ({
         id: kp.id,

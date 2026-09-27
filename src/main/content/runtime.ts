@@ -37,49 +37,59 @@ export interface ContentRuntime {
   notes: string[]
 }
 
-export function createContentRuntime(rootDir: string, log?: (line: string) => void): ContentRuntime {
-  const loaded = loadContentLibrary(rootDir)
+export function createContentRuntime(
+  rootDirs: string | string[],
+  log?: (line: string) => void
+): ContentRuntime {
+  // 打包版内容在 resources/ 下，开发版在仓库根 → 按顺序试，第一个能装载的胜出
+  const roots = (Array.isArray(rootDirs) ? rootDirs : [rootDirs]).filter((root) => root.length > 0)
+  let loaded: LoadedContent | null = null
+  let usedRoot = ''
+  for (const root of roots) {
+    loaded = loadContentLibrary(root)
+    if (loaded) {
+      usedRoot = root
+      break
+    }
+  }
   const notes = loaded?.notes ?? []
 
   if (loaded) {
     const positions = positionsOf(loaded)
-    const usable = positions.find((item) => {
-      const source = sourceForPosition(loaded, item.position)
+    const withText = positions.filter((item) => {
+      const source = sourceForPosition(loaded!, item.position)
       return source ? hasUsableText(source, item.position) : false
-    })
-    if (usable) {
-      log?.(`内容源：真实内容（${describeLoaded(loaded)}）`)
-      for (const note of notes) log?.(`内容装载提示：${note}`)
-      return {
-        source: 'content',
-        describe: describeLoaded(loaded),
-        positions,
-        scopeFor: (position, mode) => {
-          const source = sourceForPosition(loaded, position)
-          if (!source) throw new Error(`没有该单元的内容：${position.unitId}`)
-          return assembleStudyScope({ source, position, mode })
-        },
-        getSectionText: async (sectionId) => {
-          for (const unit of loaded.units) {
-            const text = loaded.byUnit[unit.id]?.sectionTexts[sectionId]
-            if (text !== undefined) return text
-          }
-          return null
-        },
-        notes
-      }
+    }).length
+    const describe = describeLoaded(loaded)
+    log?.(`内容目录：${usedRoot}`)
+    log?.(
+      withText > 0
+        ? `内容源：真实内容（${describe}）`
+        : `内容源：真实结构（${describe}）——**本机没有教材正文**，将引导学生对照课本`
+    )
+    for (const note of notes) log?.(`内容装载提示：${note}`)
+    return {
+      source: 'content',
+      describe,
+      positions,
+      scopeFor: (position, mode) => {
+        const source = sourceForPosition(loaded!, position)
+        if (!source) throw new Error(`没有该单元的内容：${position.unitId}`)
+        return assembleStudyScope({ source, position, mode })
+      },
+      getSectionText: async (sectionId) => {
+        for (const unit of loaded!.units) {
+          const text = loaded!.byUnit[unit.id]?.sectionTexts[sectionId]
+          if (text !== undefined) return text
+        }
+        return null
+      },
+      notes
     }
-    const reason = `装了 ${loaded.units.length} 个单元，但都取不到教材原文（原文只在本机）`
-    log?.(`内容源：演示占位——${reason}`)
-    return demoRuntime(demoReasons(notes, reason))
   }
 
-  log?.('内容源：演示占位——本机没有 content/units（内容工程尚未产出或未提取）')
+  log?.('内容源：演示占位——本机没有 content/units（开发机未提取，或公开仓库不含内容）')
   return demoRuntime(notes)
-}
-
-function demoReasons(notes: string[], extra: string): string[] {
-  return [...notes, extra]
 }
 
 function demoRuntime(notes: string[]): ContentRuntime {

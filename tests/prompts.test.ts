@@ -32,6 +32,23 @@ const scope: StudyScope = {
 }
 
 describe('提示词分层装配', () => {
+  it('本机没有教材正文时：提示词明确禁止编造原文，并要求学生念课本（打包分发后的学生机情形）', () => {
+    const prompt = buildSystemPrompt({ scope: { ...scope, sectionTexts: [{ sectionId: 's1', title: '第四节 细胞的生活', text: '' }] } })
+    // 不许把"没有正文"当成"正文是空的"
+    expect(prompt).toContain('本机没有存放教材正文')
+    expect(prompt).toContain('不要引用、不要编造课本原句')
+    // 仍要把知识点给模型（引导才有依据）
+    expect(prompt).toContain('细胞膜控制物质进出')
+    // 不能出现空的"教材原文"标题后什么都没有而不作说明
+    expect(prompt).not.toMatch(/【教材原文（唯一事实来源）】[\s\S]*?【本部分应掌握的知识点】\s*$/)
+  })
+
+  it('有正文时不该出现"没有正文"的那段话（避免误伤）', () => {
+    const prompt = buildSystemPrompt({ scope })
+    expect(prompt).not.toContain('本机没有存放教材正文')
+    expect(prompt).toContain('细胞的生活需要物质和能量')
+  })
+
   it('版本号可追踪（当前 v2：去 AI 腔版本）', () => {
     expect(PROMPT_VERSION).toBe('v2')
   })
