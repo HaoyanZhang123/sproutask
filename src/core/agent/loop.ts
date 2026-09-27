@@ -198,7 +198,7 @@ export async function runAgentTurn(input: AgentTurnInput): Promise<AgentTurnResu
       )
       guardResult = recheck
       if (recheck.leaked) {
-        // 二次仍命中：标记保留（供研习统计），但**不把这份稿子交给学生**
+        // 二次仍命中：标记保留（供后续统计），但**不把这份稿子交给学生**
         reply = SAFE_FALLBACK_REPLY
       } else {
         reply = retryText
