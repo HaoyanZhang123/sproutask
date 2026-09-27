@@ -22,7 +22,7 @@ pnpm dev                  # 打开桌面窗口
 $env:SPROUTASK_SELFTEST = "1"; pnpm dev
 ```
 
-看到 `[selftest] 结果：通过`（42 项断言（无 Key）/ 34 项（有 Key），含界面渲染、点击、样式、降级）就算正常，
+看到 `[selftest] 结果：通过`（44 项断言（无 Key）/ 36 项（有 Key），含界面渲染、点击、样式、降级）就算正常，
 同时会生成一张截图 `selftest-ui.png` 供你肉眼看。
 
 ## 常用命令

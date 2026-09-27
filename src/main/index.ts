@@ -200,6 +200,22 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
   // 只在"本节确有 :::answer 块"时才有意义；没有就明确标"未测"，不假装通过。
   const scopeText = session.currentScope()?.sectionTexts.map((s) => s.text).join('\n') ?? ''
   const hasAnswerBlocks = /(^|\n):::answer/.test(scopeText)
+
+  // 搜索探针：从"折叠答案"里取一小段**只在答案块里出现**的文字，
+  // 用来验"搜到折叠内容时只提示、不自动展开"。写死一个词（如 DNA）在真实教材上会失效——
+  // 它很可能同时出现在正文里（2026-09-27 换真实内容时实测）。
+  const answerBlockTexts = [...scopeText.matchAll(/:::answer[^\n]*\n([\s\S]*?):::/g)].map((m) =>
+    (m[1] ?? '').replace(/\s+/g, '')
+  )
+  const flatBodyText = scopeText.replace(/:::answer[\s\S]*?:::/g, '').replace(/\s+/g, '')
+  let answerProbe = ''
+  for (const block of answerBlockTexts) {
+    for (let i = 0; i + 6 <= block.length && !answerProbe; i += 1) {
+      const candidate = block.slice(i, i + 6)
+      if (!flatBodyText.includes(candidate)) answerProbe = candidate
+    }
+    if (answerProbe) break
+  }
   check('Key 配置状态可读取', typeof config.deepseek.apiKey === 'string' && config.deepseek.model.length > 0)
   note('Key 状态', hasKey ? '已配置 → 走真实调用' : '未配置 → 走降级')
   check('开场问句包含主动询问', start.question.includes('今天想做什么'))
@@ -641,38 +657,46 @@ async function runSelfTest(win: BrowserWindow, runtime: ContentRuntime): Promise
     )
     check('点开答案块后能看到答案正文', openedAnswer >= 1)
 
-    // 搜索只出现在折叠答案里的词（"DNA" 只在答案块内）→ 给提示而不自动展开
-    await evalInRenderer(
-      win,
-      `(() => {
-        const box = document.querySelector('.pane .search')
-        box.value = 'DNA'
-        box.dispatchEvent(new Event('input', { bubbles: true }))
-        return true
-      })()`
-    )
-    await wait(400)
-    const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
-      win,
-      `(() => ({
-        hint: Boolean(document.querySelector('.collapsed-hint')),
-        hits: document.querySelectorAll('.pane .hit').length,
-        info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
-      }))()`
-    )
-    check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
+    // 搜索"只在折叠答案里出现"的那段文字 → 给提示而不自动展开
+    if (answerProbe) {
+      await evalInRenderer(
+        win,
+        `(() => {
+          const box = document.querySelector('.pane .search')
+          box.value = ${JSON.stringify(answerProbe)}
+          box.dispatchEvent(new Event('input', { bubbles: true }))
+          return true
+        })()`
+      )
+      await wait(400)
+      const searched = await evalInRenderer<{ hint: boolean; hits: number; info: string }>(
+        win,
+        `(() => ({
+          hint: Boolean(document.querySelector('.collapsed-hint')),
+          hits: document.querySelectorAll('.pane .hit').length,
+          info: document.querySelector('.match-info') ? document.querySelector('.match-info').textContent : ''
+        }))()`
+      )
+      check('搜索命中折叠答案时只提示、不自动展开', searched.hint, searched.info)
 
-    // 学生主动点"展开看看"后才展开并高亮
-    await evalInRenderer(
-      win,
-      `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
-    )
-    await wait(400)
-    const afterSearchExpand = await evalInRenderer<number>(
-      win,
-      `document.querySelectorAll('.pane .hit').length`
-    )
-    check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
+      // 学生主动点"展开看看"后才展开并高亮
+      await evalInRenderer(
+        win,
+        `(() => { const b = document.querySelector('.collapsed-hint .link'); if (b) b.click(); return true })()`
+      )
+      await wait(400)
+      const afterSearchExpand = await evalInRenderer<number>(
+        win,
+        `document.querySelectorAll('.pane .hit').length`
+      )
+      check('点"展开看看"后命中处出现高亮', afterSearchExpand >= 1, `${afterSearchExpand} 处高亮`)
+    } else {
+      check(
+        '搜索命中折叠答案（本节答案块里取不到唯一探针 → 未测）',
+        true,
+        '折叠答案文字与正文重复度过高，取不到"只出现在答案里"的片段'
+      )
+    }
   } else {
     check(
       '答案块交互（点开看答案 / 搜索命中折叠答案）—— 本节无答案块 → 未测',

@@ -27,4 +27,5 @@ unit:
       # 印刷页起始（"出处"用它；范围见 provenance.printedPages）
       page: 28
       # 指向本机教材原文（不进 git；换机器需要重新提取）
-      textRef: content/textbook/rjb-7s/第一单元/第二章/第四节-细胞的生活.reviewed.md
+      # .annotated.md = 按我们自己的折叠块设计标注过的版本（问题→:::think，回答→:::answer）
+      textRef: content/textbook/rjb-7s/第一单元/第二章/第四节-细胞的生活.annotated.md

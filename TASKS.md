@@ -42,7 +42,7 @@
 ## 任务状态
 
 > 说明：各行"测试 N/N""自检 N 项"记录的是**该需求验收当时**的口径；当前总数一律以
-> `docs/PROGRESS.md` §3/§4 为准（2026-09-27：`pnpm test` 176 例；界面自检 42/34 项）。
+> `docs/PROGRESS.md` §3/§4 为准（2026-09-27：`pnpm test` 176 例；界面自检 44/36 项）。
 
 | 编号 | 任务 | 里程碑 | 状态 | 证据落点 |
 |---|---|---|---|---|
@@ -60,7 +60,7 @@
 | F-012 | 按模式自动折叠/展开阅读区 | M4 | 🟡 部分完成（复习/做题默认收起已实现，见 F-011）；剩余细化待做 | 同上 |
 | F-013 | 存储实现（SQLite / JSONL）+ 掌握度状态机 | M4 | ⏳ 未开始（等 Q4） | 待建 spec |
 | F-014 | 前后测问卷、评分说明与知情同意材料 | M5 | ✅ 材料齐备 + **Word 版已生成**（4 份 .docx） | `specs/F-014-questionnaire-and-consent.md` + `docs/研习材料/`（4 md + 4 docx） |
-| F-015 | 打包（exe 便携版 / dmg）与首次运行配置向导 | M6 | ✅ Windows 便携版已跑通（含首次运行配置；dmg 未验证） | `specs/F-015-packaging-and-first-run.md`；`ConfigPanel.vue`；自检 42 项 |
+| F-015 | 打包（exe 便携版 / dmg）与首次运行配置向导 | M6 | ✅ Windows 便携版已跑通（含首次运行配置；dmg 未验证） | `specs/F-015-packaging-and-first-run.md`；`ConfigPanel.vue`；自检全过（数量随环境与内容变动） |
 | F-016 | 研习数据整理（问卷统计、对话编码、图表） | M6 | ⏳ 未开始 | 待建 spec |
 | F-017 | 开源发布（导出干净仓库并推送到 GitHub） | M3 完成后 | ✅ **已发布**：<https://github.com/HaoyanZhang123/sproutask>（public）；CI 每推必跑 |
 | F-018 | 去 AI 味（界面文案 + 模型语气） | M4 | ✅ 完成（提示词升 v2；`pnpm eval` **15/15**；新增 `pnpm prompts:compare` 对照工具） | `specs/F-018-tone-and-copy.md`；`src/core/prompts/v2/`；测试 127/127 |
