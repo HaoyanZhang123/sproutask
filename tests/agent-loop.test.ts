@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_MAX_ITERATIONS, runAgentTurn } from '@core/agent/loop'
+import { DEFAULT_MAX_ITERATIONS, runAgentTurn, SAFE_FALLBACK_REPLY } from '@core/agent/loop'
 import { ToolRegistry } from '@core/agent/tools'
 import { getSectionTextTool } from '@core/agent/tools/get-section-text'
 import { flagForTeacherTool } from '@core/agent/tools/flag-for-teacher'
@@ -110,7 +110,7 @@ describe('Agent 循环：答案泄漏护栏', () => {
     expect(strictHint).toBeDefined()
   })
 
-  it('重生成后仍泄漏：保留标记但不再无限重试', async () => {
+  it('重生成后仍泄漏：保留标记，且**不把泄漏原稿交给学生**', async () => {
     const client = new RecordingClient([
       { content: '答案是细胞膜控制物质进出。', toolCalls: [] },
       { content: '答案就是细胞膜控制物质进出，记住了吗？', toolCalls: [] }
@@ -119,6 +119,29 @@ describe('Agent 循环：答案泄漏护栏', () => {
     expect(client.callCount).toBe(2)
     expect(result.flags).toContain('answer-leak-guard-triggered')
     expect(result.guard.regenerated).toBe(true)
+    expect(result.guard.triggered).toBe(true)
+    // 二次仍命中 → 学生看到安全兜底话术，而不是那份泄漏的稿子
+    expect(result.reply).toBe(SAFE_FALLBACK_REPLY)
+    expect(result.reply).not.toContain('细胞膜控制物质进出')
+  })
+
+  it('重写那次调用失败：不回退到泄漏原稿，仍给学生安全话术', async () => {
+    let call = 0
+    const flaky = {
+      name: 'flaky',
+      async chat() {
+        call += 1
+        if (call === 1) return { content: '答案是细胞膜控制物质进出。', toolCalls: [] }
+        throw new LLMError('network', '读取流式响应中断：socket hang up')
+      }
+    }
+    const result = await runAgentTurn(makeInput(flaky as never))
+
+    expect(result.reply).toBe(SAFE_FALLBACK_REPLY)
+    expect(result.reply).not.toContain('细胞膜')
+    expect(result.flags).toContain('answer-leak-guard-triggered')
+    expect(result.guard.triggered).toBe(true)
+    expect(result.guard.regenerated).toBe(false)
   })
 
   it('合格回复不会触发重生成（避免浪费调用）', async () => {

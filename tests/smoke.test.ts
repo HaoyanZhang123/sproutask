@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { KnowledgePointSchema, MasteryRecordSchema } from '@core/domain'
 import { MockLLMClient } from '@core/llm'
-import { findLayeringViolations } from './helpers/layering'
+import { findLayeringViolations, findRendererViolations, findSharedViolations } from './helpers/layering'
 
 /* ── 领域契约 ─────────────────────────────────────────────── */
 
@@ -97,10 +97,8 @@ describe('分层依赖铁律', () => {
   it('shared 层必须是零依赖纯代码（三层都可引用，所以绝不能引入任何 import）', () => {
     const offenders: string[] = []
     for (const file of walk('src/shared')) {
-      const source = readFileSync(file, 'utf-8')
-      if (/^\s*import\s/m.test(source) || /\brequire\s*\(/.test(source)) {
-        offenders.push(file)
-      }
+      const findings = findSharedViolations(readFileSync(file, 'utf-8'))
+      if (findings.length > 0) offenders.push(`${file}（${findings.join('；')}）`)
     }
     expect(
       offenders,
@@ -116,9 +114,8 @@ describe('分层依赖铁律', () => {
     ]
     const offenders: string[] = []
     for (const file of rendererFiles) {
-      const source = readFileSync(file, 'utf-8')
-      const banned = /from\s+['"](?:@core|@main|\.\.\/core|\.\.\/main|\.\.\/\.\.\/core|\.\.\/\.\.\/main)[^'"]*['"]/
-      if (banned.test(source)) offenders.push(file)
+      const findings = findRendererViolations(readFileSync(file, 'utf-8'))
+      if (findings.length > 0) offenders.push(`${file}（${findings.join('；')}）`)
     }
     expect(
       offenders,
@@ -170,6 +167,71 @@ describe('把关逻辑自身（防止"测试没测到点上"）', () => {
     ]
     for (const source of legal) {
       expect(findLayeringViolations(source)).toEqual([])
+    }
+  })
+})
+
+describe('把关逻辑自身：渲染进程越层（含审计实测的漏网写法）', () => {
+  const bypasses: Array<[string, string]> = [
+    ['别名 @core', `import type { Turn } from '@core/domain'`],
+    ['别名 @main', `import { x } from '@main/ipc'`],
+    ['相对两级 ../../core', `import { x } from '../../core/domain'`],
+    // 以下四条是 2026-09 独立审计实测"旧版可绕过"，必须持续覆盖
+    ['相对三级 ../../../core（components/ 下正好够到 src/core）', `import { x } from '../../../core/domain'`],
+    ['相对四级 ../../../../core', `import { x } from '../../../../core'`],
+    ['动态 import()', `const m = await import('../../core/domain')`],
+    ['副作用 import（没有 from）', `import '../../core/domain'`],
+    ['export ... from', `export * from '../../core/domain'`],
+    ['require()', `const m = require('../../../core/domain')`],
+    ['绝对路径', `import { x } from 'E:/proj/src/core/domain'`]
+  ]
+
+  it.each(bypasses)('能抓出绕过写法：%s', (_label, source) => {
+    expect(findRendererViolations(source).length).toBeGreaterThan(0)
+  })
+
+  it('不误伤合法写法（vue/pinia/@shared/@renderer/本地相对路径）', () => {
+    const legal = [
+      `import { ref } from 'vue'`,
+      `import { createPinia } from 'pinia'`,
+      `import { extractCitation } from '@shared/section-blocks'`,
+      `import App from './App.vue'`,
+      `import Pane from '../components/ReadingPane.vue'`,
+      `import './styles/base.css'`,
+      `import { x } from './core/local-helper'`, // renderer 自己的 core 子目录，不是越层
+      `import { y } from '../../core-utils/helper'`, // 名字像但不是 core 目录
+      `// 注释里举例：import { x } from '../../core/domain'（注释不算违规）`
+    ]
+    for (const source of legal) {
+      expect(findRendererViolations(source), source).toEqual([])
+    }
+  })
+})
+
+describe('把关逻辑自身：shared 零依赖（含审计实测的漏网写法）', () => {
+  const bypasses: Array<[string, string]> = [
+    ['静态 import', `import { ref } from 'vue'`],
+    ['副作用 import', `import 'vue'`],
+    // 以下三条是 2026-09 独立审计实测"旧版可绕过"，必须持续覆盖
+    ['export ... from', `export { ref } from 'vue'`],
+    ['export * from', `export * from 'vue'`],
+    ['动态 import()', `const v = await import('vue')`],
+    ['require()', `const v = require('vue')`],
+    ['带注释的动态 import', `const v = await import(/* @vite-ignore */ 'vue')`]
+  ]
+
+  it.each(bypasses)('能抓出绕过写法：%s', (_label, source) => {
+    expect(findSharedViolations(source).length).toBeGreaterThan(0)
+  })
+
+  it('不误伤纯函数与注释', () => {
+    const legal = [
+      `export function parse(text: string): string[] { return text.split('\\n') }`,
+      `const s = 'import { ref } from vue 只是字符串'`,
+      `// 这里不许 import 任何东西（注释里提到不算违规）`
+    ]
+    for (const source of legal) {
+      expect(findSharedViolations(source), source).toEqual([])
     }
   })
 })

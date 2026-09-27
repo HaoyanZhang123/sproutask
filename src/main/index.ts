@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { registerIpcHandlers, createSelfTestSession } from './ipc'
 import { loadConfig } from './config'
+import { resolveConnectivityTarget } from './config/connectivity'
 
 /**
  * 主进程入口。
@@ -192,6 +193,20 @@ async function runSelfTest(win: BrowserWindow): Promise<void> {
   check('开场问句包含主动询问', start.question.includes('今天想做什么'))
   check('提供四个模式选项', start.options.length === 4, start.options.map((o) => o.label).join('/'))
   check('选择"2"解析为复习', chosen.ok && chosen.mode === 'review')
+
+  // 安全断言（纯策略、不联网、不碰真实配置）：
+  // 改了接口地址又没填 Key 时，绝不允许复用已保存的 Key —— 那等于把密钥发给任意网址。
+  const endpointProbe = resolveConnectivityTarget({
+    inputApiKey: '',
+    inputBaseUrl: 'https://example.invalid/v1',
+    savedApiKey: ['saved', 'key', 'for', 'selftest'].join('-'),
+    savedBaseUrl: 'https://api.deepseek.com',
+    savedModel: 'deepseek-chat'
+  })
+  check(
+    '试连：改了接口地址又没填 Key 时拒绝复用已保存的 Key',
+    !endpointProbe.ok && endpointProbe.kind === 'endpoint-changed'
+  )
 
   const chat = await session.chat('细胞的生活需要什么？')
   const reply = 'reply' in chat ? chat.reply : ''

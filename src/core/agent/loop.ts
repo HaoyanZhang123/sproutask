@@ -10,7 +10,9 @@ import type { ToolContext } from './tools/types'
  *
  * 一轮的完整流程：
  *   组装上下文 → 调模型（带工具）→ 有工具调用则执行并回填 → 直到产出最终回答
- *   → 答案泄漏护栏 → 命中则用更严格的指令重新生成一次 → 返回结果（落库由调用方负责）
+ *   → 答案泄漏护栏 → 命中则用更严格的指令重新生成一次
+ *   → 二次仍命中或重写失败，则改用安全兜底话术（绝不把泄漏原稿交给学生）
+ *   → 返回结果（落库由调用方负责）
  *
  * 设计约束：
  *   - 循环上限（默认 5），防空转；超限也要给出可读回复，不能挂住
@@ -20,6 +22,19 @@ import type { ToolContext } from './tools/types'
  */
 
 export const DEFAULT_MAX_ITERATIONS = 5
+
+/**
+ * 护栏兜底话术。
+ *
+ * 为什么需要：护栏判定命中后，如果"重写仍命中"或"重写那次调用失败"，
+ * 早先的实现会把**已判定泄漏的原稿**照样交给学生——那等于答应了不给答案却还是给了。
+ * 这两种情况下宁可少说一句，也不能破约：只保留"去哪儿找 + 自己说"的引导。
+ *
+ * 文案要求（与 L0/L1 一致）：不出现结论、不出现技术词，以问句收尾。
+ */
+export const SAFE_FALLBACK_REPLY =
+  '这一段我想让你自己从课本里拿——你翻到我们刚说的那一节，看看它是怎么写的。' +
+  '找到了就用你自己的话跟我说说：你看到的第一句是什么？'
 
 export interface AgentTurnInput {
   client: LLMClient
@@ -181,14 +196,16 @@ export async function runAgentTurn(input: AgentTurnInput): Promise<AgentTurnResu
         { reply: retryText, scope: input.prompt.scope },
         input.leakGuard
       )
-      reply = retryText
       guardResult = recheck
       if (recheck.leaked) {
-        // 二次仍命中：保留标记（统计用），但不再无限重试
-        flags.push('answer-leak-guard-triggered')
+        // 二次仍命中：标记保留（供后续统计），但**不把这份稿子交给学生**
+        reply = SAFE_FALLBACK_REPLY
+      } else {
+        reply = retryText
       }
     } catch {
-      // 重生成失败：保留原回复与标记，降级不抛错
+      // 重写失败：同样只给学生安全话术——绝不回退到已判定泄漏的原稿
+      reply = SAFE_FALLBACK_REPLY
     }
   }
 
