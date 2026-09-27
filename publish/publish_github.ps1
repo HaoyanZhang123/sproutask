@@ -91,9 +91,14 @@ $adrRewrites = [ordered]@{
 }
 $adrSourceDir = Join-Path $repoRoot 'docs/adr'
 # 注意：PowerShell 的 -Filter 不支持 [1-4] 这类字符范围，必须用 Where-Object 过滤
+# 导出范围：ADR-0001~0004（技术决策）+ ADR-0006（分发形态）+ ADR-0007（内容分发边界）。
+#   ADR-0006/0007 是 2026-09-27 追加的：源码注释里引用了它们（图标、教材原文不随包），
+#   不导出会让公开读者点空；且这两条本身就是对外的分发与合规说明。
+#   **ADR-0005 继续排除**：它记录的是研究材料的公开范围（含研究组织与问卷相关语境），
+#   不属"软件本身"（见 docs/adr/ADR-0005 与 publish/README.md）。
 $adrFiles = @(
     Get-ChildItem -LiteralPath $adrSourceDir -Filter 'ADR-*.md' -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -match '^ADR-000[1-4]-' }
+        Where-Object { $_.Name -match '^ADR-000[1-4]-' -or $_.Name -match '^ADR-0006-' -or $_.Name -match '^ADR-0007-' }
 )
 
 foreach ($dir in $dirs) {
