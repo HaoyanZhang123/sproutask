@@ -1,0 +1,8 @@
+# 机器产物：随时可由 Markdown 重新生成，不入版本库
+# （三份 Markdown + 术语表才是有价值的事实源）
+.facts.json
+.state.json
+.cyd.json
+.inbox.jsonl
+.versions/
+index.html

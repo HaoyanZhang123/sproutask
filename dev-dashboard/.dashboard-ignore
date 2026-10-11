@@ -1,0 +1,28 @@
+# 内部工程与工具链：这些是"怎么做"的细节，不是"用户能得到什么"。
+# 本项目的产品级事实以 FEATURES.md / PRODUCT.md / NOW.md 为准，逐次变更历史见 git。
+# 采集到的这些路径属内部实现，不代表用户可感知的进展，统一忽略。
+
+src/**
+tests/**
+scripts/**
+tools/**
+evals/**
+publish/**
+docs/**
+build/**
+backend/**
+.github/**
+
+# 环境与配置：跑起来需要的零件，不是产品价值
+*.json
+*.yaml
+*.yml
+*.ts
+*.js
+*.md
+.env.example
+.npmrc
+pnpm-lock.yaml
+
+# 各处的说明文件：写给我们自己看的内部文档
+**/README.md
