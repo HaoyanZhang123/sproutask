@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "block.cell.ocr.1",
+  "sourceRefId": "source.p18",
+  "type": "paragraph",
+  "originalText": "fixture OCR original text (kept, never overwritten)",
+  "revisedText": "fixture revised text",
+  "extractionMethod": "ocr",
+  "textConfidence": 0.92,
+  "reviewState": "curator_checked"
+}

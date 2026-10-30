@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@edu/knowledge": ["../knowledge/src/index.ts"],
+      "@edu/learner": ["../learner/src/index.ts"],
+      "@edu/storage": ["../storage/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts"]
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "attempt.cell.transfer",
+  "requestId": "request.attempt.transfer",
+  "learnerId": "learner.local.default",
+  "sessionId": "session.cell.1",
+  "courseEditionId": "course.biology-7a",
+  "packVersion": "1.0.0",
+  "activityId": "activity.cell-transfer",
+  "activityVersion": "1",
+  "conceptIds": [
+    "concept.cell"
+  ],
+  "inputType": "text",
+  "answerAssetId": null,
+  "answerText": "fixture answer: 例如神经细胞和红细胞形态不同。",
+  "submittedAt": "2026-10-29T08:10:00Z",
+  "helpUsed": [
+    {
+      "kind": "answer",
+      "usedAt": "2026-10-29T08:10:00Z"
+    }
+  ],
+  "evidenceIds": [
+    "evidence.cell.transfer"
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "pdfPages": [
+      2,
+      3
+    ],
+    "supplementaryPdfPages": [
+      1,
+      146
+    ],
+    "ocrRun": "run-20261029T185619+0800",
+    "baseline": "T03 OCR (Windows.Media.Ocr, zh-Hans-CN)",
+    "generatedAt": "2026-10-30T16:33:34.754Z",
+    "note": "版权页为 PDF 第 2–3 页；ISBN/条码实际位于封底 PDF 第 146 页，作为补充页读取并已标注 evidence.pdfPage。"
+  },
+  "fields": {
+    "isbn13": {
+      "value": "978-7-107-38263-5",
+      "raw": "I S B N 9 7 8 · 7 · 1 0 7 · 3 8 2 6 3 · 5",
+      "evidence": {
+        "pdfPage": 146,
+        "blockIds": [
+          "block:e9a885311e6fc09d2085737c"
+        ],
+        "snippet": "ISBN978·7·107·38263·5"
+      },
+      "confidence": "high",
+      "status": "verified_text"
+    },
+    "isbn10": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "barcodeNumber": {
+      "value": "9787107382635",
+      "raw": "9 7 8 7 1 0 7 3 8 2 6 3 5 >",
+      "evidence": {
+        "pdfPage": 146,
+        "blockIds": [
+          "block:41f433b674314fb806140b8d",
+          "block:e9a885311e6fc09d2085737c"
+        ],
+        "snippet": "9787107382635>"
+      },
+      "confidence": "high",
+      "status": "verified_text"
+    },
+    "edition": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "printing": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "publisher": {
+      "value": "人民教育出版社",
+      "raw": "人 民 教 育 出 版 社",
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [
+          "block:4b4204d9a000b92bc48908da"
+        ],
+        "snippet": "人 民 教 育 出 版 社"
+      },
+      "confidence": "high",
+      "status": "verified_text"
+    },
+    "publishDate": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "price": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "printedSheets": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "format": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "bookNumber": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    },
+    "copyrightNotice": {
+      "value": "版权所有·侵权必究",
+      "raw": "版 权 所 有 · 侵 权 必 究",
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [
+          "block:3aa746e6c9e470eb22b855e5"
+        ],
+        "snippet": "版 权 所 有 · 侵 权 必 究"
+      },
+      "confidence": "high",
+      "status": "verified_text"
+    },
+    "copyrightTermYears": {
+      "value": null,
+      "raw": null,
+      "evidence": {
+        "pdfPage": 3,
+        "blockIds": [],
+        "snippet": null
+      },
+      "confidence": "low",
+      "status": "unverified"
+    }
+  },
+  "notes": "本轮只读 T03 OCR 缓存（Windows.Media.Ocr, zh-Hans-CN），全部为机器识别，未经人眼核对；未联网、未调用模型、未看原书。\n版权页（PDF 第 3 页）共 27 个 block，经逐一检查没有任何含\"版次/印次/定价/开本/印张/第 N 版/次印刷\"字样的 block——即该页版次印次小字块整块未被 OCR 识别（该书该部分通常紧邻条形码、字号极小），故 edition/printing/publishDate/price/printedSheets/format/bookNumber 一律 value:null、status:unverified、confidence:low，未用常识或其它印次推算。\nISBN-13 与条码数字取自封底（PDF 第 146 页）：OCR 同时读出\"ISBN 978·7·107·38263·5\"与条码下方\"9787107382635\"，两处数字一致，互为交叉印证，故 confidence:high；但来源是机器识别，仍需人眼对一次书。注意 ISBN 不在第 2–3 页版权页上（该页未读出 ISBN），第 146 页为补充页。\nISBN-10 未读出（该书条码为 13 位 EAN，通常不再印 ISBN-10）。\n版权声明只读到\"版权所有·侵权必究\"，未读出任何年限表述（如\"××年内不得复制\"），故 copyrightTermYears 为 null。\n同页 OCR 乱码可证明识别质量：\"人民教育出版社\"被切成单字 block（出/网/版…）、网址识别为\"http://VHsw.pep.com/cn\"、邮编识别为\"1m081\"（应为 100081）。这些字段即便读出也不应直接采信。\n读不到的字段：isbn10、edition、printing、publishDate、price、printedSheets、format、bookNumber、copyrightTermYears——原因见上（OCR 未读出/被条码遮挡/该页小字块缺失），不得据常识填补。"
+}

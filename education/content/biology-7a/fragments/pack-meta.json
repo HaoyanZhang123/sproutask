@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "pack.biology-7a.observation",
+  "version": "2.0.0",
+  "courseEditionId": "course.biology-7a",
+  "scope": "full_volume",
+  "coverageStatus": "complete",
+  "status": "candidate",
+  "generatedAt": "2026-10-29T11:45:00Z",
+  "title": "人教版生物学七年级上册全册内容包（T14 全册候选包）",
+  "statusRationale": "T14 完成全册真实目录冻结、概念/活动/rubric/关系/出处与覆盖台账，并只做 AI 首次静态检查（machine_checked）。按 05 §4 与 T04 发布规则，published 需要 human_curator 决策；本包保持 candidate：结构上 full_volume+complete 可由 G2 复核，但 formal 学习/基准发布需人工审阅后再发布。",
+  "notFullVolume": false,
+  "inherits": "pack.biology-7a.observation@1.0.0（T05 首节）的 8 个概念与活动；section 1 内容保持稳定 id，全册包新增其余 21 节。"
+}

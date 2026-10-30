@@ -1,0 +1,1413 @@
+{
+  "schemaVersion": 1,
+  "note": "T05 + T14 来源锚点：封面/版权/目录 + 首节 + 全册各节标题/学习目标/正文定义块。key 决定 SourceRef id：source.bio7a.<key>。原文只在本机 T03 证据。",
+  "baselineRun": "run-20261029T185619+0800",
+  "baselineJob": "import:2b97e28b318c",
+  "refs": [
+    {
+      "key": "cover.series",
+      "blockId": "block:fa15e797ee1ee29eda3e8383",
+      "note": "封面：义务教育教科书"
+    },
+    {
+      "key": "cover.grade",
+      "blockId": "block:5ccce87523b65886c40afa7d",
+      "note": "封面：七年级（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "cover.subject",
+      "blockId": "block:e68966e0206551f641144a15",
+      "note": "封面：生物学（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "cover.volume",
+      "blockId": "block:c06026f494cf7d39e5952b71",
+      "note": "封面：上册（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "copyright.title",
+      "blockId": "block:e82b1d6f71e80ca7d6c2a435",
+      "note": "版权页：义务教育教科书"
+    },
+    {
+      "key": "copyright.publisher",
+      "blockId": "block:4b4204d9a000b92bc48908da",
+      "note": "版权页：人民教育出版社"
+    },
+    {
+      "key": "toc.heading",
+      "blockId": "block:ec06de0c4d53bd404e9edd00",
+      "note": "目录页标题（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "toc.unit1.title",
+      "blockId": "block:b03851129a3c0877d962484a",
+      "note": "目录：第一单元"
+    },
+    {
+      "key": "toc.unit1.name",
+      "blockId": "block:4f2dffcf98c5a3fb9b99cab5",
+      "note": "目录：生物和细胞"
+    },
+    {
+      "key": "toc.ch1.title",
+      "blockId": "block:6ad7b69c705debfb12693f0c",
+      "note": "目录：认识生物"
+    },
+    {
+      "key": "toc.ch1.s1.title",
+      "blockId": "block:93c3d3128d7cbbab219eab0e",
+      "note": "目录：观察周边环境中的生物"
+    },
+    {
+      "key": "toc.ch1.s2.title",
+      "blockId": "block:7edecb00c4ffd15519df2991",
+      "note": "目录：生物的特征"
+    },
+    {
+      "key": "section.heading",
+      "blockId": "block:75eb0a4c64145dcd54f8dcb9",
+      "note": "正文：第一节标题"
+    },
+    {
+      "key": "chapter.opener.context",
+      "blockId": "block:d41ac1fe16733ebf9be59322",
+      "note": "章首导语：通过观察、比较和讨论认识生物"
+    },
+    {
+      "key": "chapter.opener.fabre",
+      "blockId": "block:3717d71d0689f9b0dfa149b9",
+      "note": "章首：法布尔关于反复观察的引文位置"
+    },
+    {
+      "key": "section.selfstudy",
+      "blockId": "block:a3eae8e50d0024e0638a37ed",
+      "note": "通过本节学习，你将知道"
+    },
+    {
+      "key": "section.goal.observe",
+      "blockId": "block:f12fa8c8731670b5acd55b02",
+      "note": "目标：怎样进行观察"
+    },
+    {
+      "key": "section.goal.organism",
+      "blockId": "block:556549589f0cc9813a4eb3d0",
+      "note": "目标：怎样观察生物"
+    },
+    {
+      "key": "c1.basic-method",
+      "blockId": "block:6b346f05eab1301ca9b455c5",
+      "note": "观察是学习生物学的基本方法"
+    },
+    {
+      "key": "c1.not-casual",
+      "blockId": "block:bea3ba8eb17d1bf5a976d1bd",
+      "note": "观察不是随便看看"
+    },
+    {
+      "key": "c1.purpose-plan",
+      "blockId": "block:4702fc464489def652184782",
+      "note": "观察要有目的、有计划"
+    },
+    {
+      "key": "c1.science-basic",
+      "blockId": "block:c7abc85f0b39bee8a2bd1940",
+      "note": "观察是科学探究的一种基本方法"
+    },
+    {
+      "key": "c2.purpose",
+      "blockId": "block:99c57ae59d2e7fc6dc0ef6d9",
+      "note": "确定观察目的"
+    },
+    {
+      "key": "c2.purpose-examples",
+      "blockId": "block:768159db8cbe17c0b63a497d",
+      "note": "观察目的示例"
+    },
+    {
+      "key": "c2.object",
+      "blockId": "block:7fd817b9621bbbfacbed44dc",
+      "note": "明确观察对象"
+    },
+    {
+      "key": "c2.plant-focus",
+      "blockId": "block:528045e4b78501fda7c219f4",
+      "note": "观察植物的关注点"
+    },
+    {
+      "key": "c2.animal-focus",
+      "blockId": "block:0ec11200923632befee06b7f",
+      "note": "观察动物的关注点"
+    },
+    {
+      "key": "c2.leek-question",
+      "blockId": "block:37304d64b741ab01b77ffca0",
+      "note": "议一议：区分韭菜与小麦"
+    },
+    {
+      "key": "c3.campus",
+      "blockId": "block:d7ccc29091a875993003bb5b",
+      "note": "观察校园、公园或林地的生物"
+    },
+    {
+      "key": "c3.order",
+      "blockId": "block:5fd552229085b0878c37003d",
+      "note": "观察要按一定顺序"
+    },
+    {
+      "key": "c3.record",
+      "blockId": "block:b263781dd59b6e4ce860f880",
+      "note": "做好观察记录"
+    },
+    {
+      "key": "c3.truthful",
+      "blockId": "block:b167e961cde0db4efeee2fa8",
+      "note": "真实客观记录"
+    },
+    {
+      "key": "c3.record-table",
+      "blockId": "block:75200df3596361b51fbeef8b",
+      "note": "观察记录表"
+    },
+    {
+      "key": "c3.communicate",
+      "blockId": "block:378207f8ae763f1c59b97928",
+      "note": "交流观察结果"
+    },
+    {
+      "key": "c4.different",
+      "blockId": "block:4a83eb889c1cd6d9c2111d2f",
+      "note": "不同同学可能得到不同观察结果"
+    },
+    {
+      "key": "c4.factors",
+      "blockId": "block:e9ee263a34b4fa17d0c56036",
+      "note": "哪些因素影响观察结果"
+    },
+    {
+      "key": "c4.compare",
+      "blockId": "block:c8736cff2ee3e3193becca7d",
+      "note": "共同点与不同点"
+    },
+    {
+      "key": "c4.further",
+      "blockId": "block:c875723291aa2f52ad948669",
+      "note": "进一步观察如何进行"
+    },
+    {
+      "key": "c5.tools",
+      "blockId": "block:978e62cb8e123d720f315a0d",
+      "note": "肉眼/放大镜/显微镜/望远镜"
+    },
+    {
+      "key": "c5.devices",
+      "blockId": "block:8567352ac1b7ef4102a9818b",
+      "note": "照相机/摄像机/录音机"
+    },
+    {
+      "key": "c5.measure",
+      "blockId": "block:7e425c639f8f16761bed4888",
+      "note": "有时还需要测量"
+    },
+    {
+      "key": "c5.bird-tools",
+      "blockId": "block:8240b4cc2a0378e2e589ad5e",
+      "note": "用望远镜和照相机观察鸟"
+    },
+    {
+      "key": "c6.protect-plant",
+      "blockId": "block:d6b04880ecabd2d783fc2015",
+      "note": "不要破坏植物"
+    },
+    {
+      "key": "c6.protect-bird",
+      "blockId": "block:f06b9e378fb5dffa2fad89ba",
+      "note": "不影响鸟类正常生活"
+    },
+    {
+      "key": "c6.safety-group",
+      "blockId": "block:c1cc450c9e39e16512ccd149",
+      "note": "注意安全，分组进行"
+    },
+    {
+      "key": "c6.clothing",
+      "blockId": "block:10226c05e5cd8a3366a8daa1",
+      "note": "着装颜色不要过鲜"
+    },
+    {
+      "key": "c6.quiet",
+      "blockId": "block:c11b9f549d6f0a6433f533c1",
+      "note": "保持安静"
+    },
+    {
+      "key": "c6.no-flash",
+      "blockId": "block:ce347218383310b90c6507e3",
+      "note": "不要使用闪光灯"
+    },
+    {
+      "key": "c6.field-safety",
+      "blockId": "block:36e5cb1e0dde0484699bdbc3",
+      "note": "野外观察注意安全、听从老师安排"
+    },
+    {
+      "key": "c7.think",
+      "blockId": "block:d81734256338c60b4854b531",
+      "note": "观察过程中要积极思考"
+    },
+    {
+      "key": "c7.raise",
+      "blockId": "block:6d28cefec4e10744d96b7ba4",
+      "note": "发现问题，提出问题"
+    },
+    {
+      "key": "c7.cat-rabbit",
+      "blockId": "block:e033890366bcdff64572c3ab",
+      "note": "猫和兔双眼位置的观察问题"
+    },
+    {
+      "key": "c7.value",
+      "blockId": "block:4c75ba8f621a7549649bc67c",
+      "note": "讨论谁的问题更有探究价值"
+    },
+    {
+      "key": "c8.compare-purpose",
+      "blockId": "block:0cb26e0f6e93ab2c35f4713b",
+      "note": "观察并比较不同生物"
+    },
+    {
+      "key": "c8.poplar-willow",
+      "blockId": "block:29961be945043272bdd39cfa",
+      "note": "分清杨树和柳树"
+    },
+    {
+      "key": "c8.features",
+      "blockId": "block:e43ba564bb045482618f2930",
+      "note": "比较树干、枝条、叶的形状和颜色"
+    },
+    {
+      "key": "c8.flowers",
+      "blockId": "block:3e1d8835985a03f29416bd95",
+      "note": "比较花的不同"
+    },
+    {
+      "key": "c8.habitat",
+      "blockId": "block:7420b73bb216b138ec18d6f6",
+      "note": "比较生活环境"
+    },
+    {
+      "key": "c8.bougainvillea",
+      "blockId": "block:a7f46cb0727467a1059e7e5e",
+      "note": "光叶子花：叶和花的形状、颜色"
+    },
+    {
+      "key": "ex.observation-choice",
+      "blockId": "block:1e61e3828899e3d492722204",
+      "note": "练习与应用：观察叙述选择题（原题不复制，只登记考查方向）"
+    },
+    {
+      "key": "ex.baicaoyuan",
+      "blockId": "block:17fe33553274b44306335507",
+      "note": "练习与应用：文学作品中的动植物与环境（原题不复制）"
+    },
+    {
+      "key": "ex.leaf-arrangement",
+      "blockId": "block:8c3461f74e497f18491887b4",
+      "note": "拓展应用：叶的排列方式（原题不复制）"
+    },
+    {
+      "key": "ex.unknown-species",
+      "blockId": "block:ebb7ca14f46f99171f35a929",
+      "note": "拓展应用：观察并设法认识不认识的生物（原题不复制）"
+    },
+    {
+      "key": "sec.u1ch1s2.heading",
+      "blockId": "block:46d27d9c850324c9c095a6aa",
+      "note": "第二节 生物的特征 heading PDF16"
+    },
+    {
+      "key": "sec.u1ch1s2.obj1",
+      "blockId": "block:b554e3db56e3346d26625118",
+      "note": "第二节 生物的特征 objective 1 PDF16"
+    },
+    {
+      "key": "sec.u1ch1s2.obj2",
+      "blockId": "block:b282396629a0fdbde3407dfa",
+      "note": "第二节 生物的特征 objective 2 PDF16"
+    },
+    {
+      "key": "sec.u1ch1s2.obj3",
+      "blockId": "block:4139be9b95c22d0ac213193d",
+      "note": "第二节 生物的特征 review：怎样判断一个物体是否有生命？生物有哪些共同特征？（PDF16，替代“特征？”截断块）"
+    },
+    {
+      "key": "sec.u1ch1s2.body1",
+      "blockId": "block:d411d5511bd111cf87c1152b",
+      "note": "第二节 生物的特征 body 1 PDF19"
+    },
+    {
+      "key": "sec.u1ch1s2.body2",
+      "blockId": "block:666b7688f3172af3b4e8332c",
+      "note": "第二节 生物的特征 body 2 PDF20"
+    },
+    {
+      "key": "sec.u1ch1s2.body3",
+      "blockId": "block:a9874a625cb3c58220dd9f26",
+      "note": "第二节 生物的特征 body 3 PDF20"
+    },
+    {
+      "key": "sec.u1ch2s1.heading",
+      "blockId": "block:640f9008cb81b36fb63088bb",
+      "note": "第一节 学习使用显微镜 heading PDF21"
+    },
+    {
+      "key": "sec.u1ch2s1.obj1",
+      "blockId": "block:f9ac2452f8db8c31160cb795",
+      "note": "第一节 学习使用显微镜 objective 1 PDF22"
+    },
+    {
+      "key": "sec.u1ch2s1.obj2",
+      "blockId": "block:f77d8aa4f96a981794171684",
+      "note": "第一节 显微镜 objective 引导句：通过本节学习，你将知道（PDF22，替代“样的？”截断块）"
+    },
+    {
+      "key": "sec.u1ch2s1.obj3",
+      "blockId": "block:fd38c7d85eb8148a23f8b120",
+      "note": "第一节 学习使用显微镜 objective 3 PDF22"
+    },
+    {
+      "key": "sec.u1ch2s1.obj4",
+      "blockId": "block:18fd11da3f244d92f0dec590",
+      "note": "第一节 学习使用显微镜 objective 4 PDF22"
+    },
+    {
+      "key": "sec.u1ch2s1.body1",
+      "blockId": "block:8fe8152eee185d34e3a72ffe",
+      "note": "第一节 学习使用显微镜 body 1 PDF26"
+    },
+    {
+      "key": "sec.u1ch2s2.heading",
+      "blockId": "block:800c79ced1d6dbe9b92941f3",
+      "note": "第二节 植物细胞 heading PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.obj1",
+      "blockId": "block:6257845f8208b210231777f0",
+      "note": "第二节 植物细胞 objective 1 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.obj2",
+      "blockId": "block:75b8a156f7faead82a643079",
+      "note": "第二节 植物细胞 objective 2 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.obj3",
+      "blockId": "block:b8f5dbc2b38bacb9a875b2e4",
+      "note": "第二节 植物细胞 objective 3 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.obj4",
+      "blockId": "block:f8eebd2897a54aabe88a8703",
+      "note": "第二节 植物细胞 objective 4 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.obj5",
+      "blockId": "block:822da7615a05461882b3a3a5",
+      "note": "第二节 植物细胞 objective 5 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.body1",
+      "blockId": "block:c3058306a175c5b958c133de",
+      "note": "第二节 植物细胞 body 1 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.body2",
+      "blockId": "block:bfc8aaa271fca22eb17bb6cc",
+      "note": "第二节 植物细胞 body 2 PDF27"
+    },
+    {
+      "key": "sec.u1ch2s2.body3",
+      "blockId": "block:0b1bb397e5f66ecca477266a",
+      "note": "第二节 植物细胞 body 3 PDF29"
+    },
+    {
+      "key": "sec.u1ch2s2.body4",
+      "blockId": "block:188e3b11a3922f335d1f84ac",
+      "note": "第二节 植物细胞 body 4 PDF30"
+    },
+    {
+      "key": "sec.u1ch2s3.heading",
+      "blockId": "block:48e6ec7e85d3fac5a007afa9",
+      "note": "第三节 动物细胞 heading PDF32"
+    },
+    {
+      "key": "sec.u1ch2s3.obj1",
+      "blockId": "block:fafe2eba699be55af7f9a38a",
+      "note": "第三节 动物细胞 objective 1 PDF32"
+    },
+    {
+      "key": "sec.u1ch2s3.obj2",
+      "blockId": "block:7222800bc0132df2692feb59",
+      "note": "第三节 动物细胞 objective 2 PDF32"
+    },
+    {
+      "key": "sec.u1ch2s3.obj3",
+      "blockId": "block:d4bf4f07f8bf4780b238d796",
+      "note": "第三节 动物细胞 objective 3 PDF32"
+    },
+    {
+      "key": "sec.u1ch2s3.obj4",
+      "blockId": "block:94bbc857e006ce4a47456c66",
+      "note": "第三节 动物细胞 objective 4 PDF32"
+    },
+    {
+      "key": "sec.u1ch2s3.obj5",
+      "blockId": "block:0c6dde2626ed6281bf8e7833",
+      "note": "第三节 动物细胞 objective 5 PDF32"
+    },
+    {
+      "key": "sec.u1ch2s3.body1",
+      "blockId": "block:7091c4fde0223f80237e77ba",
+      "note": "第三节 动物细胞 body 1 PDF34"
+    },
+    {
+      "key": "sec.u1ch2s3.body2",
+      "blockId": "block:aa13d3dcf9b6c17028c5948e",
+      "note": "第三节 动物细胞 body 2 PDF35"
+    },
+    {
+      "key": "sec.u1ch2s3.body3",
+      "blockId": "block:b4cf856ef19896c889da2295",
+      "note": "第三节 动物细胞 body 3 PDF35"
+    },
+    {
+      "key": "sec.u1ch2s3.body4",
+      "blockId": "block:6ea1cf513dfc5c0d126ceff2",
+      "note": "第三节 动物细胞 body 4 PDF35"
+    },
+    {
+      "key": "sec.u1ch2s4.heading",
+      "blockId": "block:a882850028fbb62ca4767dde",
+      "note": "第四节 细胞的生活 heading PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.obj1",
+      "blockId": "block:14453677e630cce040e7b18d",
+      "note": "第四节 细胞的生活 objective 1 PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.obj2",
+      "blockId": "block:9484cda110f9a4bd85cc3d7f",
+      "note": "第四节 细胞的生活 objective 2 PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.obj3",
+      "blockId": "block:71b274b933d3655634da324f",
+      "note": "第四节 细胞的生活 objective 3 PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.obj4",
+      "blockId": "block:dde300ee3091e8b845e21636",
+      "note": "第四节 细胞的生活 objective 4 PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.obj5",
+      "blockId": "block:88f33df5263b2231a1b46a28",
+      "note": "第四节 细胞的生活 objective 5 PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.body1",
+      "blockId": "block:b6ab754dc0f010ca302aaf28",
+      "note": "第四节 细胞的生活 body 1 PDF37"
+    },
+    {
+      "key": "sec.u1ch2s4.body2",
+      "blockId": "block:649311c8e9d3156bf8bafa4c",
+      "note": "第四节 细胞的生活 body 2 PDF39"
+    },
+    {
+      "key": "sec.u1ch2s4.body3",
+      "blockId": "block:dc199983114da01995084cbb",
+      "note": "第四节 细胞的生活 body 3 PDF39"
+    },
+    {
+      "key": "sec.u1ch2s4.body4",
+      "blockId": "block:73a5b34341681f2733fb8499",
+      "note": "第四节 细胞的生活 body 4 PDF39"
+    },
+    {
+      "key": "sec.u1ch3s1.heading",
+      "blockId": "block:c083077bec207cfdd2944e0e",
+      "note": "第一节 细胞通过分裂产生新细胞 heading PDF42"
+    },
+    {
+      "key": "sec.u1ch3s1.obj1",
+      "blockId": "block:de3c53c187e536cd4e25f715",
+      "note": "第一节 细胞通过分裂产生新细胞 objective 1 PDF42"
+    },
+    {
+      "key": "sec.u1ch3s1.obj2",
+      "blockId": "block:cd96a4d50f081e41d267fea2",
+      "note": "第一节 细胞通过分裂产生新细胞 objective 2 PDF42"
+    },
+    {
+      "key": "sec.u1ch3s1.obj3",
+      "blockId": "block:932df5fedc190161cfae8e72",
+      "note": "第一节 细胞通过分裂产生新细胞 objective 3 PDF42"
+    },
+    {
+      "key": "sec.u1ch3s1.obj4",
+      "blockId": "block:aea5be22e1216e0c55ea0691",
+      "note": "第一节 细胞通过分裂产生新细胞 objective 4 PDF42"
+    },
+    {
+      "key": "sec.u1ch3s1.body1",
+      "blockId": "block:b877b5a1e137d69ee28f27c6",
+      "note": "第一节 细胞通过分裂产生新细胞 body 1 PDF42"
+    },
+    {
+      "key": "sec.u1ch3s1.body2",
+      "blockId": "block:f5e5e18899537efcee2348b7",
+      "note": "第一节 细胞通过分裂产生新细胞 body 2 PDF44"
+    },
+    {
+      "key": "sec.u1ch3s1.body3",
+      "blockId": "block:76b273199f13440506044c72",
+      "note": "第一节 细胞通过分裂产生新细胞 body 3 PDF45"
+    },
+    {
+      "key": "sec.u1ch3s1.body4",
+      "blockId": "block:2716b98cb2b7a4d9e312e118",
+      "note": "第一节 细胞通过分裂产生新细胞 body 4 PDF45"
+    },
+    {
+      "key": "sec.u1ch3s2.heading",
+      "blockId": "block:3a7466843ca506b153637f39",
+      "note": "第二节 动物体的结构层次 heading PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.obj1",
+      "blockId": "block:0c39fc75673e0e67c3434d37",
+      "note": "第二节 动物体的结构层次 objective 1 PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.obj2",
+      "blockId": "block:dd3973301860a67b17bc9b38",
+      "note": "第二节 动物体的结构层次 objective 2 PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.obj3",
+      "blockId": "block:7a7c6a8c56834645fcc2142f",
+      "note": "第二节 动物体的结构层次 body：动物和人体的发育一般都是从一个细胞开始的（PDF47，替代“成的？”截断块）"
+    },
+    {
+      "key": "sec.u1ch3s2.obj4",
+      "blockId": "block:6230defc0da3c748a17797f0",
+      "note": "第二节 动物体的结构层次 objective 4 PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.obj5",
+      "blockId": "block:bfef8f6abe9121d461d9306d",
+      "note": "第二节 动物体的结构层次 objective 5 PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.body1",
+      "blockId": "block:27a4e937b44a1b84695d9b4d",
+      "note": "第二节 动物体的结构层次 body 1 PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.body2",
+      "blockId": "block:29be4ef4944f75b112f4d4ab",
+      "note": "第二节 动物体的结构层次 body 2 PDF47"
+    },
+    {
+      "key": "sec.u1ch3s2.body3",
+      "blockId": "block:0c41403839815fe303d1752f",
+      "note": "第二节 动物体的结构层次 body 3 PDF48"
+    },
+    {
+      "key": "sec.u1ch3s2.body4",
+      "blockId": "block:da194bf3f57866d784f3e450",
+      "note": "第二节 动物体的结构层次 body 4 PDF50"
+    },
+    {
+      "key": "sec.u1ch3s3.heading",
+      "blockId": "block:96297b476f7e2dfd87ff19fa",
+      "note": "第三节 植物体的结构层次 heading PDF52"
+    },
+    {
+      "key": "sec.u1ch3s3.obj1",
+      "blockId": "block:0633ecb4a41b8e0c655ae0d3",
+      "note": "第三节 植物体的结构层次 objective 1 PDF52"
+    },
+    {
+      "key": "sec.u1ch3s3.obj2",
+      "blockId": "block:c78a4e47d7bc415bea382ab7",
+      "note": "第三节 植物体的结构层次 objective 2 PDF52"
+    },
+    {
+      "key": "sec.u1ch3s3.obj3",
+      "blockId": "block:55825341a9444809b4226846",
+      "note": "第三节 植物体的结构层次 objective 3 PDF52"
+    },
+    {
+      "key": "sec.u1ch3s3.obj4",
+      "blockId": "block:d3f4e022ce2c611e13f3cfa2",
+      "note": "第三节 植物体的结构层次 objective 4 PDF52"
+    },
+    {
+      "key": "sec.u1ch3s3.body1",
+      "blockId": "block:7765636445d22c8877f06809",
+      "note": "第三节 植物体的结构层次 body 1 PDF53"
+    },
+    {
+      "key": "sec.u1ch3s3.body2",
+      "blockId": "block:39e95d671caf0c9c57897b4f",
+      "note": "第三节 植物体的结构层次 body 2 PDF53"
+    },
+    {
+      "key": "sec.u1ch3s3.body3",
+      "blockId": "block:cfe78252ae4d71dc83800139",
+      "note": "第三节 植物体的结构层次 body 3 PDF54"
+    },
+    {
+      "key": "sec.u1ch3s4.heading",
+      "blockId": "block:c67b493f449d9cff692a0930",
+      "note": "第四节 单细胞生物 heading PDF55"
+    },
+    {
+      "key": "sec.u1ch3s4.obj1",
+      "blockId": "block:a639c31a78770704d8e462e3",
+      "note": "第四节 单细胞生物 objective 1 PDF55"
+    },
+    {
+      "key": "sec.u1ch3s4.obj2",
+      "blockId": "block:c1ec72b5c659d13b8e735c64",
+      "note": "第四节 单细胞生物 objective 2 PDF55"
+    },
+    {
+      "key": "sec.u1ch3s4.obj3",
+      "blockId": "block:970673eae1b446acb9e28e9e",
+      "note": "第四节 单细胞生物 objective 3 PDF55"
+    },
+    {
+      "key": "sec.u1ch3s4.obj4",
+      "blockId": "block:c851251ac80ecb3181d4ba57",
+      "note": "第四节 单细胞生物 objective 4 PDF55"
+    },
+    {
+      "key": "sec.u1ch3s4.body1",
+      "blockId": "block:b4c6d9e091b40d7e2b388a0e",
+      "note": "第四节 单细胞生物 body 1 PDF56"
+    },
+    {
+      "key": "sec.u1ch3s4.body2",
+      "blockId": "block:455cc754f478bf05787c164e",
+      "note": "第四节 单细胞生物 body 2 PDF57"
+    },
+    {
+      "key": "sec.u1ch3s4.body3",
+      "blockId": "block:ab4c4cec1cdd26711b6c4162",
+      "note": "第四节 单细胞生物 body 3 PDF59"
+    },
+    {
+      "key": "sec.u1ch3s4.body4",
+      "blockId": "block:158e92a5232b55582acca068",
+      "note": "第四节 单细胞生物 body 4 PDF59"
+    },
+    {
+      "key": "sec.u2ch1s1.heading",
+      "blockId": "block:17c4376c7571327f000d76db",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 heading PDF67"
+    },
+    {
+      "key": "sec.u2ch1s1.obj1",
+      "blockId": "block:7581ede5425bc74d0c157645",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 objective 1 PDF67"
+    },
+    {
+      "key": "sec.u2ch1s1.obj2",
+      "blockId": "block:a14f9e61df32518a1c3a93d8",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 objective 2 PDF67"
+    },
+    {
+      "key": "sec.u2ch1s1.obj3",
+      "blockId": "block:a6fe35875a0a25c4fcf283a4",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 objective 3 PDF67"
+    },
+    {
+      "key": "sec.u2ch1s1.obj4",
+      "blockId": "block:db9261db9b009753e2fc1ce8",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 objective 4 PDF67"
+    },
+    {
+      "key": "sec.u2ch1s1.body1",
+      "blockId": "block:abc1d4b71edeff4ad01b6a4f",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 body 1 PDF69"
+    },
+    {
+      "key": "sec.u2ch1s1.body2",
+      "blockId": "block:aa8af43eeccf114fa899a497",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 body 2 PDF69"
+    },
+    {
+      "key": "sec.u2ch1s1.body3",
+      "blockId": "block:eb6e72c4a4d320a7966aed4b",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 body 3 PDF70"
+    },
+    {
+      "key": "sec.u2ch1s1.body4",
+      "blockId": "block:adb8ac235abe33f824db865a",
+      "note": "第一节 藻类、苔藓植物和蕨类植物 body 4 PDF70"
+    },
+    {
+      "key": "sec.u2ch1s2.heading",
+      "blockId": "block:74b9dcbc6d07b021d93864bf",
+      "note": "第二节 种子植物 heading PDF74"
+    },
+    {
+      "key": "sec.u2ch1s2.obj1",
+      "blockId": "block:8eb7ec90cde917f35c18dca9",
+      "note": "第二节 种子植物 objective 1 PDF74"
+    },
+    {
+      "key": "sec.u2ch1s2.obj2",
+      "blockId": "block:6a63047b522f78915b74a6be",
+      "note": "第二节 种子植物 objective 2 PDF74"
+    },
+    {
+      "key": "sec.u2ch1s2.obj3",
+      "blockId": "block:cf0a7806a07f6772cc8e3fa0",
+      "note": "第二节 种子植物 objective 3 PDF74"
+    },
+    {
+      "key": "sec.u2ch1s2.obj4",
+      "blockId": "block:ad6bf8acbf6020de050fec26",
+      "note": "第二节 种子植物 objective 4 PDF74"
+    },
+    {
+      "key": "sec.u2ch1s2.obj5",
+      "blockId": "block:6b0ac0ae2d6015ba8d8a7e07",
+      "note": "第二节 种子植物 objective 5 PDF74"
+    },
+    {
+      "key": "sec.u2ch1s2.body1",
+      "blockId": "block:c1c31fca27528db9444db88d",
+      "note": "第二节 种子植物 body 1 PDF76"
+    },
+    {
+      "key": "sec.u2ch1s2.body2",
+      "blockId": "block:e7c9c4e1aa46fae8a4623e13",
+      "note": "第二节 种子植物 body 2 PDF77"
+    },
+    {
+      "key": "sec.u2ch1s2.body3",
+      "blockId": "block:05b3a3f3d7421fcd6d53f744",
+      "note": "第二节 种子植物 body 3 PDF77"
+    },
+    {
+      "key": "sec.u2ch1s2.body4",
+      "blockId": "block:a3996da43263153e3eaebe84",
+      "note": "第二节 种子植物 body 4 PDF79"
+    },
+    {
+      "key": "sec.u2ch2s1.heading",
+      "blockId": "block:235015162f6237f28561e1d6",
+      "note": "第一节 无脊椎动物 heading PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.obj1",
+      "blockId": "block:69da10713eafa6fdcca85d0c",
+      "note": "第一节 无脊椎动物 objective 1 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.obj2",
+      "blockId": "block:2489da8fb583edd11a2f270b",
+      "note": "第一节 无脊椎动物 objective 2 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.obj3",
+      "blockId": "block:55d3134efaeaab3b3f31de85",
+      "note": "第一节 无脊椎动物 objective 3 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.obj4",
+      "blockId": "block:c5f4a42bb435d234e64c3a30",
+      "note": "第一节 无脊椎动物 objective 4 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.body1",
+      "blockId": "block:8e75447f99ff818f0409462c",
+      "note": "第一节 无脊椎动物 body 1 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.body2",
+      "blockId": "block:4ffc855a8f1ebae7724f9002",
+      "note": "第一节 无脊椎动物 body 2 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.body3",
+      "blockId": "block:1e696c9a17479787b0d8b472",
+      "note": "第一节 无脊椎动物 body 3 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s1.body4",
+      "blockId": "block:cae41673a4e8e5c3ec2e2de6",
+      "note": "第一节 无脊椎动物 body 4 PDF82"
+    },
+    {
+      "key": "sec.u2ch2s2.heading",
+      "blockId": "block:478bef36a6e9c40b360d3c70",
+      "note": "第二节 脊椎动物 heading PDF88"
+    },
+    {
+      "key": "sec.u2ch2s2.obj1",
+      "blockId": "block:6ee13a3d56c876036a148992",
+      "note": "第二节 脊椎动物 objective 1 PDF88"
+    },
+    {
+      "key": "sec.u2ch2s2.obj2",
+      "blockId": "block:799ce10b1b4443d96b144fb8",
+      "note": "第二节 脊椎动物 objective 2 PDF88"
+    },
+    {
+      "key": "sec.u2ch2s2.obj3",
+      "blockId": "block:2d4c82a3e541fef83f560e5d",
+      "note": "第二节 脊椎动物 objective 3 PDF88"
+    },
+    {
+      "key": "sec.u2ch2s2.body1",
+      "blockId": "block:d1b6b3c44cbf51e0055614f8",
+      "note": "第二节 脊椎动物 body 1 PDF88"
+    },
+    {
+      "key": "sec.u2ch2s2.body2",
+      "blockId": "block:7ffde0c56e64bff6f01ebe1c",
+      "note": "第二节 脊椎动物 body 2 PDF91"
+    },
+    {
+      "key": "sec.u2ch2s2.body3",
+      "blockId": "block:dc59d934b4de27a79236f866",
+      "note": "第二节 脊椎动物 body 3 PDF92"
+    },
+    {
+      "key": "sec.u2ch2s2.body4",
+      "blockId": "block:aab296df69a5ffbd2f8ab55a",
+      "note": "第二节 脊椎动物 body 4 PDF93"
+    },
+    {
+      "key": "sec.u2ch2s3.heading",
+      "blockId": "block:cadbcdf2051940026f9c07a3",
+      "note": "第三节 两栖动物和爬行动物 heading PDF94"
+    },
+    {
+      "key": "sec.u2ch2s3.obj1",
+      "blockId": "block:ed7460d1a3cee10486be4c77",
+      "note": "第三节 两栖动物和爬行动物 objective 1 PDF94"
+    },
+    {
+      "key": "sec.u2ch2s3.obj2",
+      "blockId": "block:9cc1790f3cac458f65fd9a4e",
+      "note": "第三节 两栖动物和爬行动物 objective 2 PDF94"
+    },
+    {
+      "key": "sec.u2ch2s3.obj3",
+      "blockId": "block:cb7c12f3a0da664b3def36ed",
+      "note": "第三节 两栖动物和爬行动物 objective 3 PDF94"
+    },
+    {
+      "key": "sec.u2ch2s3.obj4",
+      "blockId": "block:d3c8f8a65bf7583e141c8e27",
+      "note": "第三节 两栖动物和爬行动物 objective 4 PDF94"
+    },
+    {
+      "key": "sec.u2ch2s3.body1",
+      "blockId": "block:ead749ac13b63eab9a943d01",
+      "note": "第三节 两栖动物和爬行动物 body 1 PDF94"
+    },
+    {
+      "key": "sec.u2ch2s3.body2",
+      "blockId": "block:5582e0d1830683e5baefea7c",
+      "note": "第三节 两栖动物和爬行动物 body 2 PDF95"
+    },
+    {
+      "key": "sec.u2ch2s3.body3",
+      "blockId": "block:823421d77529da28e3994e29",
+      "note": "第三节 两栖动物和爬行动物 body 3 PDF96"
+    },
+    {
+      "key": "sec.u2ch2s3.body4",
+      "blockId": "block:776fb6642028648984877e4d",
+      "note": "第三节 两栖动物和爬行动物 body 4 PDF97"
+    },
+    {
+      "key": "sec.u2ch2s4.heading",
+      "blockId": "block:9c3989b9ae033481dbd96805",
+      "note": "第四节 鸟和哺乳动物 heading PDF99"
+    },
+    {
+      "key": "sec.u2ch2s4.obj1",
+      "blockId": "block:ace042130ee5f8c04727112e",
+      "note": "第四节 鸟和哺乳动物 objective 1 PDF99"
+    },
+    {
+      "key": "sec.u2ch2s4.obj2",
+      "blockId": "block:949eb49a9cec9a6e6869f94a",
+      "note": "第四节 鸟和哺乳动物 objective 2 PDF99"
+    },
+    {
+      "key": "sec.u2ch2s4.obj3",
+      "blockId": "block:f372d861f209d73b737518c2",
+      "note": "第四节 鸟和哺乳动物 objective 3 PDF99"
+    },
+    {
+      "key": "sec.u2ch2s4.obj4",
+      "blockId": "block:279b20a378bc5bc9f37bffa6",
+      "note": "第四节 鸟和哺乳动物 objective 4 PDF99"
+    },
+    {
+      "key": "sec.u2ch2s4.obj5",
+      "blockId": "block:21172a16433938f2de1adc06",
+      "note": "第四节 鸟和哺乳动物 objective 5 PDF99"
+    },
+    {
+      "key": "sec.u2ch2s4.body1",
+      "blockId": "block:1dfb06103ccb50ee01307032",
+      "note": "第四节 鸟和哺乳动物 body 1 PDF101"
+    },
+    {
+      "key": "sec.u2ch2s4.body2",
+      "blockId": "block:85d4c6709f2a92a7ba746aa0",
+      "note": "第四节 鸟和哺乳动物 body 2 PDF101"
+    },
+    {
+      "key": "sec.u2ch2s4.body3",
+      "blockId": "block:011d34539553937ef87fd903",
+      "note": "第四节 鸟和哺乳动物 body 3 PDF101"
+    },
+    {
+      "key": "sec.u2ch2s4.body4",
+      "blockId": "block:f0f9e379da1696add3620e94",
+      "note": "第四节 鸟和哺乳动物 body 4 PDF103"
+    },
+    {
+      "key": "sec.u2ch3s1.heading",
+      "blockId": "block:4e9cf6e3d3dd81034dea1888",
+      "note": "第一节 微生物的分布 heading PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.obj1",
+      "blockId": "block:b1054983938435daee594c00",
+      "note": "第一节 微生物的分布 objective 1 PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.obj2",
+      "blockId": "block:135b61125677285a52fb0401",
+      "note": "第一节 微生物的分布 review：什么是微生物？说说你知道的微生物有哪些（PDF107，替代“哪些？”截断块）"
+    },
+    {
+      "key": "sec.u2ch3s1.obj3",
+      "blockId": "block:0b728d5ba9b32cab47875ffa",
+      "note": "第一节 微生物的分布 objective 3 PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.obj4",
+      "blockId": "block:30d38f57197953135b5cd74e",
+      "note": "第一节 微生物的分布 objective 4 PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.obj5",
+      "blockId": "block:6ee6da24d5215ddb0cf0ff5c",
+      "note": "第一节 微生物的分布 objective 5 PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.body1",
+      "blockId": "block:f6c5732b5608c19e23af5f81",
+      "note": "第一节 微生物的分布 body 1 PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.body2",
+      "blockId": "block:4a9ebdb27111aecf3947fc36",
+      "note": "第一节 微生物的分布 body 2 PDF107"
+    },
+    {
+      "key": "sec.u2ch3s1.body3",
+      "blockId": "block:775946b5ec7face45f98d4da",
+      "note": "第一节 微生物的分布 body 3 PDF109"
+    },
+    {
+      "key": "sec.u2ch3s1.body4",
+      "blockId": "block:cd0134f5894ad10a4ddb654a",
+      "note": "第一节 微生物的分布 body 4 PDF110"
+    },
+    {
+      "key": "sec.u2ch3s2.heading",
+      "blockId": "block:1281efbb69da110a0a7c3cf2",
+      "note": "第二节 细菌 heading PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.obj1",
+      "blockId": "block:f2868411f2c7776a8311ba08",
+      "note": "第二节 细菌 objective 1 PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.obj2",
+      "blockId": "block:b05ce919f5a5ffd3d8a870ea",
+      "note": "第二节 细菌 objective 2 PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.obj3",
+      "blockId": "block:6771303edeba360b47c917bd",
+      "note": "第二节 细菌 objective 3 PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.obj4",
+      "blockId": "block:78319a55ec3cc4cc1ff36461",
+      "note": "第二节 细菌 objective 4 PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.obj5",
+      "blockId": "block:da4d4030f67af31b61961a15",
+      "note": "第二节 细菌 objective 5 PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.body1",
+      "blockId": "block:7ea26c10efd1aef4c069011d",
+      "note": "第二节 细菌 body 1 PDF112"
+    },
+    {
+      "key": "sec.u2ch3s2.body2",
+      "blockId": "block:b6b56be9ca478fdfb0c90726",
+      "note": "第二节 细菌 body 2 PDF113"
+    },
+    {
+      "key": "sec.u2ch3s2.body3",
+      "blockId": "block:8d437ed9f7f56ebacfb99cfc",
+      "note": "第二节 细菌 body 3 PDF113"
+    },
+    {
+      "key": "sec.u2ch3s2.body4",
+      "blockId": "block:22c02691d7f85534e623ba8d",
+      "note": "第二节 细菌 body 4 PDF113"
+    },
+    {
+      "key": "sec.u2ch3s3.heading",
+      "blockId": "block:ea2eaca64c2b1711dd1846c8",
+      "note": "第三节 真菌 heading PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.obj1",
+      "blockId": "block:8a6da98b84509650c4b3399d",
+      "note": "第三节 真菌 objective 1 PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.obj2",
+      "blockId": "block:cdc916a8c23e2ae00e894c98",
+      "note": "第三节 真菌 objective 2 PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.obj3",
+      "blockId": "block:bd4d2ddff8440a78ea621632",
+      "note": "第三节 真菌 objective 3 PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.obj4",
+      "blockId": "block:bfdb3e5fde818dca533b5446",
+      "note": "第三节 真菌 objective 4 PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.obj5",
+      "blockId": "block:8bdc7320786ae301bc8110d3",
+      "note": "第三节 真菌 objective 5 PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.body1",
+      "blockId": "block:fc801b8784127b00cf4e02c2",
+      "note": "第三节 真菌 body 1 PDF118"
+    },
+    {
+      "key": "sec.u2ch3s3.body2",
+      "blockId": "block:7901c8a0bf5fe0f0d7586612",
+      "note": "第三节 真菌 body 2 PDF119"
+    },
+    {
+      "key": "sec.u2ch3s3.body3",
+      "blockId": "block:6a9806e784829eedc200c2a3",
+      "note": "第三节 真菌 body 3 PDF120"
+    },
+    {
+      "key": "sec.u2ch3s3.body4",
+      "blockId": "block:8ea1a9cd2e7deeb688222c18",
+      "note": "第三节 真菌 body 4 PDF121"
+    },
+    {
+      "key": "sec.u2ch3s4.heading",
+      "blockId": "block:448aae09de1706f9dd1c2e82",
+      "note": "第四节 病毒 heading PDF123"
+    },
+    {
+      "key": "sec.u2ch3s4.obj1",
+      "blockId": "block:cb4e179ceb70b4629eb27a5c",
+      "note": "第四节 病毒 objective 1 PDF123"
+    },
+    {
+      "key": "sec.u2ch3s4.obj2",
+      "blockId": "block:e121957de1538e644e485af8",
+      "note": "第四节 病毒 objective 2 PDF123"
+    },
+    {
+      "key": "sec.u2ch3s4.obj3",
+      "blockId": "block:54dc02817fd0e128cdf1a8c0",
+      "note": "第四节 病毒 objective 3 PDF123"
+    },
+    {
+      "key": "sec.u2ch3s4.body1",
+      "blockId": "block:ed0548e8ed130b2aff5cce09",
+      "note": "第四节 病毒 body 1 PDF124"
+    },
+    {
+      "key": "sec.u2ch3s4.body2",
+      "blockId": "block:3bb83f5e295766a910cf422d",
+      "note": "第四节 病毒 body 2 PDF125"
+    },
+    {
+      "key": "sec.u2ch3s4.body3",
+      "blockId": "block:3c46f3cda8b3571c934e3821",
+      "note": "第四节 病毒 body 3 PDF125"
+    },
+    {
+      "key": "sec.u2ch3s4.body4",
+      "blockId": "block:51a09fac7fe67a856d01b780",
+      "note": "第四节 病毒 body 4 PDF126"
+    },
+    {
+      "key": "sec.u2ch4s1.heading",
+      "blockId": "block:0cbd3ff5d02031e255af9394",
+      "note": "第一节 尝试对生物进行分类 heading PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.obj1",
+      "blockId": "block:42f9b518694fac9fd5f73e38",
+      "note": "第一节 尝试对生物进行分类 objective 1 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.obj2",
+      "blockId": "block:403b26e61dc0c0afa05f6c9a",
+      "note": "第一节 尝试对生物进行分类 objective 2 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.obj3",
+      "blockId": "block:ffe9f2dddeee512fc783c83f",
+      "note": "第一节 尝试对生物进行分类 objective 3 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.obj4",
+      "blockId": "block:781a49b1534cc0e5011a6ede",
+      "note": "第一节 尝试对生物进行分类 objective 4 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.body1",
+      "blockId": "block:b50c09b416857c6c3ccc5f7b",
+      "note": "第一节 尝试对生物进行分类 body 1 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.body2",
+      "blockId": "block:44a9cc689e6a82cc9d424c39",
+      "note": "第一节 尝试对生物进行分类 body 2 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.body3",
+      "blockId": "block:b98180cd41f934fac437563d",
+      "note": "第一节 尝试对生物进行分类 body 3 PDF131"
+    },
+    {
+      "key": "sec.u2ch4s1.body4",
+      "blockId": "block:7fbaf65ce515908d1a036987",
+      "note": "第一节 尝试对生物进行分类 body 4 PDF133"
+    },
+    {
+      "key": "sec.u2ch4s2.heading",
+      "blockId": "block:432366ff5aa6289959a8f9d9",
+      "note": "第二节 从种到界 heading PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.obj1",
+      "blockId": "block:052a70f4ff82f9241fc7f2db",
+      "note": "第二节 从种到界 objective 1 PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.obj2",
+      "blockId": "block:2a2bde7f21d264a22370055d",
+      "note": "第二节 从种到界 小标题：分类等级（PDF136，替代“哪些？”截断块）"
+    },
+    {
+      "key": "sec.u2ch4s2.obj3",
+      "blockId": "block:a9f58be82140bcdb5025dc32",
+      "note": "第二节 从种到界 objective 3 PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.obj4",
+      "blockId": "block:ba8328b4b68cea2802a35466",
+      "note": "第二节 从种到界 body：生物命名法探索与国际统一规则（PDF139，替代“什么？”截断块）"
+    },
+    {
+      "key": "sec.u2ch4s2.obj5",
+      "blockId": "block:4aca391d91e31600bdcb581e",
+      "note": "第二节 从种到界 objective 5 PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.body1",
+      "blockId": "block:efd39dae06d48bb5415924e3",
+      "note": "第二节 从种到界 body 1 PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.body2",
+      "blockId": "block:c4bcae7a92afd11cd503c5e7",
+      "note": "第二节 从种到界 body 2 PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.body3",
+      "blockId": "block:56d118678385644709ef0db7",
+      "note": "第二节 从种到界 body 3 PDF136"
+    },
+    {
+      "key": "sec.u2ch4s2.body4",
+      "blockId": "block:cecd2febe5d6ffe9008ba3dd",
+      "note": "第二节 从种到界 body 4 PDF138"
+    },
+    {
+      "key": "ch.u1ch2.heading",
+      "blockId": "block:ee93254bf32f61a8310cad70",
+      "note": "T14 全册目录/项目锚点 21（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "ch.u1ch2.title",
+      "blockId": "block:59e27472ed228f82b58ba555",
+      "note": "T14 全册目录/项目锚点 21"
+    },
+    {
+      "key": "ch.u1ch3.heading",
+      "blockId": "block:78beb5550bb7b907ad8fba4a",
+      "note": "T14 全册目录/项目锚点 42（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "ch.u1ch3.title",
+      "blockId": "block:9a0fb330ce54386c69070a13",
+      "note": "T14 全册目录/项目锚点 42"
+    },
+    {
+      "key": "ch.u2ch1.title",
+      "blockId": "block:3b72fdfa69981049c1c8565a",
+      "note": "T14 全册目录/项目锚点 67"
+    },
+    {
+      "key": "ch.u2ch2.heading",
+      "blockId": "block:aa1aecfb024e0ceb59c23b28",
+      "note": "T14 全册目录/项目锚点 82（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "ch.u2ch2.title",
+      "blockId": "block:3e31e77a846ef385f6e948e7",
+      "note": "T14 全册目录/项目锚点 82"
+    },
+    {
+      "key": "ch.u2ch3.heading",
+      "blockId": "block:2f45c36512f7ec82c68510c1",
+      "note": "T14 全册目录/项目锚点 107（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "ch.u2ch3.title",
+      "blockId": "block:a2756f3db77b89f2d6509465",
+      "note": "T14 全册目录/项目锚点 107"
+    },
+    {
+      "key": "ch.u2ch4.heading",
+      "blockId": "block:0a1c1c01f3505db8091d93cd",
+      "note": "T14 全册目录/项目锚点 131（真实短标题，非 OCR 截断）"
+    },
+    {
+      "key": "ch.u2ch4.title",
+      "blockId": "block:6b4c6973c31828e35568b64a",
+      "note": "T14 全册目录/项目锚点 131"
+    },
+    {
+      "key": "unit.u2.heading",
+      "blockId": "block:92f70bd58a7430586e310bc0",
+      "note": "T14 全册目录/项目锚点 65"
+    },
+    {
+      "key": "unit.u2.title",
+      "blockId": "block:7bf4fead330a55bcb1f73509",
+      "note": "T14 全册目录/项目锚点 65"
+    },
+    {
+      "key": "project.u1.title",
+      "blockId": "block:0e95fb74623fbd1959429942",
+      "note": "T14 全册目录/项目锚点 60"
+    },
+    {
+      "key": "project.u2.title",
+      "blockId": "block:56edb08362190801fe43f5d5",
+      "note": "T14 全册目录/项目锚点 129"
+    },
+    {
+      "key": "sec.u2ch2s1.groups-extra",
+      "blockId": "block:21a9c2853b4c7dc2ee0959d1",
+      "note": "第一节 无脊椎动物 body：类群还有软体动物…（PDF85）"
+    },
+    {
+      "key": "sec.u2ch2s1.echinoderm",
+      "blockId": "block:eb2388bf36b7acfd61211c26",
+      "note": "第一节 无脊椎动物 body：棘皮动物…（PDF85）"
+    },
+    {
+      "key": "sec.u2ch4s2.binomial",
+      "blockId": "block:948fdbda1816bf877e01145c",
+      "note": "第二节 从种到界 body：双名法是林奈建立的（PDF139）"
+    },
+    {
+      "key": "sec.u1ch3s4.human",
+      "blockId": "block:6d7643b510e8800ac366223f",
+      "note": "第四节 单细胞生物 body：蓝细菌大量繁殖引发赤潮（PDF59）"
+    },
+    {
+      "key": "sec.u2ch2s2.human",
+      "blockId": "block:811fd8a18cef3c1ed9465277",
+      "note": "第二节 脊椎动物 body：鱼与人类生活的关系（PDF92）"
+    },
+    {
+      "key": "sec.u2ch2s3.human",
+      "blockId": "block:086d7b242e7c68481aa1395b",
+      "note": "第三节 两栖动物和爬行动物 body：与人类生活的关系（PDF97）"
+    },
+    {
+      "key": "sec.u2ch2s4.human",
+      "blockId": "block:1f123d0755f5c0d479c1e8db",
+      "note": "第四节 鸟和哺乳动物 body：与人类生活的关系（PDF104）"
+    },
+    {
+      "key": "sec.u2ch3s2.human",
+      "blockId": "block:135bf69f3389170cfb39be50",
+      "note": "第二节 细菌 body：细菌与人类的关系（PDF114）"
+    },
+    {
+      "key": "sec.u2ch3s3.human",
+      "blockId": "block:4b055d0b813dc3b38ea82d00",
+      "note": "第三节 真菌 body：真菌与人类的关系（PDF121）"
+    },
+    {
+      "key": "sec.u2ch3s4.human",
+      "blockId": "block:1ee5f6e2b5a9aae0c96201ae",
+      "note": "第四节 病毒 body：病毒与人类的关系（PDF125）"
+    },
+    {
+      "key": "sec.u2ch2s1.human-body",
+      "blockId": "block:349ff0f363811b1cd7a76f61",
+      "note": "第一节 无脊椎动物 body：无脊椎动物与人类生活的关系（PDF85）"
+    },
+    {
+      "key": "sec.u1ch2s2.temp-slide",
+      "blockId": "block:cc343c75fbe276b8eef1e426",
+      "note": "第二节 植物细胞 body：通过制作植物细胞临时装片观察（PDF27）"
+    }
+  ]
+}

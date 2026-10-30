@@ -1,0 +1,21 @@
+{
+  "name": "@edu/client-map",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-agnostic DOM map UI: textbook tree, bounded chapter-local concept graph, relation semantics and three-axis state. Consumes the T08 shell page/panel contract and the T04/T06 read models.",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "edu": {
+    "uiBase": "@edu/client-shell (source seam; T13 must promote or bundle)",
+    "fixture": "src/fixture.ts is explicitly fixture-only (演示数据，非真实教材/API)"
+  }
+}

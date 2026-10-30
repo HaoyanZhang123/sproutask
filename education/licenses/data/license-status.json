@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "kind": "t16-license-status",
+  "generator": "education/licenses/tools/build-notice-v2.mjs",
+  "basis": {
+    "inventory": {
+      "path": ".local/evidence/T00/run-01/40-licenses/license-inventory.json",
+      "sha256": "8a096371fb93089e3f577b120084051a04fdc9a7ea7de7579f50bd8343f88f2d",
+      "packages": 558
+    },
+    "payload": {
+      "path": "education/dist/student/app/node_modules",
+      "topLevelEntries": 193
+    },
+    "missingLicenses": {
+      "count": 18,
+      "supplemented": 1,
+      "absent": 17
+    },
+    "texts": 169
+  },
+  "shipped": 546,
+  "trimmed": 12,
+  "trimGroups": [
+    {
+      "id": "office",
+      "title": "Office 转换（LibreOffice Kit，MPL-2.0）",
+      "packages": [
+        "@deepseek-ai/libreoffice-kit@0.1.5",
+        "@deepseek-ai/libreoffice-kit-win32-x64@0.1.5"
+      ]
+    },
+    {
+      "id": "office-skill",
+      "title": "Office 技能入口（MIT）",
+      "packages": [
+        "@deepseek-ai/dsh-office-to-pdf@0.2.1-rc.3",
+        "@deepseek-ai/dsh-skill-office@0.2.1-rc.3"
+      ]
+    },
+    {
+      "id": "speech",
+      "title": "语音识别 / 语音输入（Apache-2.0）",
+      "packages": [
+        "@deepseek-ai/dsh-experimental-api-speech-to-text@0.2.1-rc.3",
+        "@deepseek-ai/dsh-experimental-client-ui-voice-input@0.2.1-rc.3",
+        "@deepseek-ai/dsh-experimental-speech-to-text@0.2.1-rc.3",
+        "@deepseek-ai/dsh-experimental-speech-to-text-sensevoice@0.2.1-rc.3",
+        "@deepseek-ai/dsh-experimental-voice-input-bundle@0.2.1-rc.3"
+      ]
+    },
+    {
+      "id": "speech-native",
+      "title": "sherpa-onnx 原生库（Apache-2.0）",
+      "packages": [
+        "sherpa-onnx-node@1.13.8",
+        "sherpa-onnx-win-x64@1.13.8"
+      ]
+    },
+    {
+      "id": "pty",
+      "title": "node-pty（MIT）",
+      "packages": [
+        "node-pty@1.2.0-beta.15"
+      ]
+    }
+  ],
+  "mustShip": [
+    {
+      "name": "@img/sharp-win32-x64",
+      "shipped": true
+    },
+    {
+      "name": "sharp",
+      "shipped": true
+    }
+  ],
+  "lgpl": {
+    "text": "texts/9a7e34fbf3903507.txt",
+    "sha256": "9a7e34fbf3903507665e3ec7ca8b3d0c11f73bf2d5a0d754a079ab9f505bafef",
+    "bytes": 316506,
+    "libvipsFiles": [
+      "libvips-42.dll",
+      "libvips-cpp-8.18.7.dll"
+    ]
+  },
+  "staleInputs": {
+    "data/license-manifest.json#trimRoots": "Stale: it still lists sharp/@img as trim roots. Payload-presence in this file is authoritative; trimRoots is not used."
+  }
+}

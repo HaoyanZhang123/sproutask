@@ -1,0 +1,35 @@
+{
+  "job": {
+    "schemaVersion": 1,
+    "id": "import.job.1",
+    "requestId": "request.import.1",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "stage": "extract",
+    "status": "cancelled",
+    "checkpoint": {
+      "stage": "extract",
+      "lastCompletedUnit": 10,
+      "parserCacheKey": null
+    },
+    "completedUnits": 10,
+    "totalUnits": 42,
+    "error": null,
+    "retryable": true,
+    "parserVersion": "pdf-parser-v1",
+    "modelVersion": "fixture-model-v0",
+    "costUsage": {
+      "calls": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "estimatedCostUsd": 0
+    },
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-29T09:00:00Z"
+  },
+  "update": {
+    "stage": "concepts",
+    "status": "running",
+    "completedUnits": 20,
+    "updatedAt": "2026-10-29T09:00:00Z"
+  }
+}

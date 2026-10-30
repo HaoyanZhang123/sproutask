@@ -1,37 +1,27 @@
-# 依赖与构建产物
-# 注意：这里全部**锚定仓库根**（前导 /）——曾因写成 `content/` 而误伤了 `src/core/content/`，
-# 导致导出仓库缺两个源文件、TypeScript 编不过。凡与源码目录同名的规则都必须锚定。
+# 根目录忽略规则（公开导出仓库从仓库根直接 pnpm install / 构建时生效）
+# 说明：education/.gitignore 管 education/ 内部；本文件管仓库根与跨目录产物。
+
+# 依赖
 node_modules/
-/out/
-/dist/
-/release/
-# 注意：写成 /build/* 而不是 /build/ —— 父目录被整体忽略时，文件级"例外"是无效的
-/build/*
-# 例外：应用图标（软件自身的资产，随仓库分发，打包时由 electron-builder 取用）
-!/build/icon.ico
-/tmp/
-__pycache__/
-*.pyc
 
-# 教材 / 课标等受版权内容：只保存在本地，**绝不提交**
-# （公开文档里教用户把内容放到 content/，所以这里必须有规则兜住）
-/content/
-*.docx
+# 本地私有数据（教材原文、密钥、证据都留在 .local，永不进版本库）
+education/.local/
 
-# 环境与密钥
+# 构建产物
+education/dist/
+education/coverage/
+*.tsbuildinfo
+
+# 教材原文/导出的 PDF（版权材料，绝不入库）
+*.pdf
+
+# 环境与密钥（真实 key 只放在 education/.local/secrets/）
 .env
 .env.local
 .env.*.local
 
-# 运行时数据（本地数据库 / 日志）
-data/
+# 日志
 *.log
-
-# 开发期自检产物（SPROUTASK_SELFTEST=1 的界面截图）
-selftest-*.png
-
-# 评测跑批生成的报告（含模型原始输出，属本地产物）
-evals/reports/
 
 # 编辑器与系统
 .vscode/*

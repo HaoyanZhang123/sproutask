@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "attempt.image.1",
+  "criteria": [
+    {
+      "criterionId": "criterion.cell.identify",
+      "met": "unclear",
+      "rationale": "fixture unclear"
+    }
+  ],
+  "feedback": "fixture feedback",
+  "uncertainties": [
+    "image blurry"
+  ],
+  "evidenceCandidates": [
+    {
+      "conceptId": "concept.cell",
+      "kind": "label",
+      "observation": "fixture guessed label",
+      "criterionResults": [
+        {
+          "criterionId": "criterion.cell.identify",
+          "result": "unclear",
+          "note": null
+        }
+      ],
+      "assistance": "unassisted",
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "assessmentOrigin": "rule",
+      "modelRunId": null,
+      "uncertainty": null
+    }
+  ],
+  "requiresClarification": true,
+  "sourceRefs": [
+    "source.p18"
+  ],
+  "graderVersion": "rule-v1"
+}

@@ -1,144 +1,84 @@
-# 芽问 SproutAsk 🌱
+<p align="center">
+  <img src="docs/images/cover.png" alt="SproutAsk cover: dark banner with the 芽问 / SproutAsk wordmarks and a stylized 观察 → 推理 → 理解 panel" width="100%">
+</p>
+<p align="center"><sub>Design illustration — not a product screenshot.</sub></p>
 
-> 一个**本地优先**的初中生物学习 Agent：不给答案，而是通过提问带着学生自己把知识想明白。
+<h1 align="center">SproutAsk · 芽问</h1>
+<p align="center">A local-first biology learning agent built on the DSH runtime.</p>
+<p align="center"><a href="README.zh.md">中文</a></p>
 
-## 下载试用（Windows）
+<p align="center">
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH" src="https://img.shields.io/badge/runtime-DSH%200.2.1--rc.3-1f6feb"></a>
+  <a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-3178c6"></a>
+  <a href="https://nodejs.org/"><img alt="Node.js" src="https://img.shields.io/badge/Node.js-24-3c873a"></a>
+  <a href="https://pnpm.io/"><img alt="pnpm" src="https://img.shields.io/badge/pnpm-11-f69220"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-2ea44f"></a>
+</p>
 
-最新试用版 **[v0.1.0-alpha](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.1.0-alpha)** —— 便携版 exe，约 72 MB，免安装。
+## Overview
 
-1. 下载后**双击就能打开**（首次运行 Windows 可能提示"已保护你的电脑"——本版尚未做代码签名，请点「更多信息」→「仍要运行」）
-2. 第一次打开会请你填一个 **DeepSeek API Key**（本软件不含 Key，需自备；在 platform.deepseek.com 创建）
-3. 填好保存即可开始；想改 Key 点右上角「设置」
+SproutAsk is a study workspace for one student on one Windows PC. It pairs a real DSH agent session with a verified content pack for 人教版 2024 七年级上册生物学 (PEP Grade 7, Volume 1): the learner reads a concept, answers, receives explanation or correction with textbook citations, and keeps a local record of what was understood.
 
-> 这是**早期试用版**：教材内容目前是演示占位文本（不是真实课本原文）、学情不落库。
-> 功能进度以文末「开发状态」为准。
+Two things matter more than feature count here — **the tutor runs on a real DSH runtime rather than a look-alike chat**, and **learning judgements rest on recorded evidence rather than on message counts**. Every explanation is bound to a source page in the textbook the student imported.
 
-一个装在电脑上的**桌面应用**（不是网页）。
+## Features
 
-通用 AI 助手在学科学习上有一个根本问题：**它太急着给答案**。学生一提问就得到结论，
-看起来"效率高"，实际上绕过了思考；再加上它的回答不锚定教材，学生容易学到与课本不一致的说法。
+- **Concept map separated from the table of contents.** The directory tree and the prerequisite/related graph are different views; prerequisite edges carry a basis and are never derived from chapter order.
+- **Three independent axes.** Learning progress, understanding evidence and review activity are stored and shown separately; self-report is kept apart and never written into a judgement.
+- **Guided first, explicit when needed.** The tutor asks, hints and demonstrates, but may also explain, show a worked example, or state the answer — and marks answers it disclosed, so evidence stays honest.
+- **Answers with citations.** Explanatory turns carry source id plus PDF page and printed page; the textbook text itself stays on the local machine.
+- **Image answers behind a pre-model quality gate.** Blurry, tilted or blank photos are sent back for clarification before any model call; a graded image is persisted once, and repeated submissions do not re-grade.
+- **Recoverable local journal.** Append-only event log with snapshots, crash recovery, stale-lock self-healing, export and confirmed deletion.
 
-芽问反过来做：
+## Installation
 
-> 本 README 描述的是**目标形态**（含下文架构与流程）；各项功能的实际进度见文末「开发状态」。
+Download from [Releases](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.0):
 
-- **引导而非告知**——永不直接给出完整答案，用提问和分级提示引导学生自己说出来
-- **教材与课标为准**——以教材原文与课程标准要求作为唯一事实依据，超纲问题婉拒并引回课本
-- **答案有出处**——回答会指明"教材第X章第X节"（界面内自动定位到该段落的阅读视图在开发中）
-- **本地优先**——Agent 的目标、学情状态、工具与策略全在本地运行，云端只承担推理
-- **防抄作业**——由教学纪律提示词 + 标记工具兜住，把"直接给我答案"转为"我们一起分析"
+- `SproutAsk-Setup-0.3.0-x64.exe` — per-user installer, **no administrator rights**, installs to `%LOCALAPPDATA%\SproutAsk\current`
+- `SproutAsk-0.3.0-x64-portable.zip` — unpack anywhere and run `launcher.cmd`
 
----
+The installer is **not code-signed**, so Windows shows an "unknown publisher" prompt. `SHA256SUMS.txt` is included for verification.
 
-## 它怎么工作
+## Usage
 
-```
-┌─ 学生电脑：芽问（Agent 本体）────────────────────────────┐
-│  Electron + Vue3 界面（当前：对话；教材阅读视图与互动实验在开发中）│
-│  Agent 运行时（TypeScript）：                                │
-│   ├─ 意图询问：主动问"预习/复习/做题/拓展"，学生四选一         │
-│   ├─ 工具箱：已实现 取教材原文 / 标记超纲与抄作业意图          │
-│   │           （出题、生成互动实验、记录掌握度在开发中）        │
-│   ├─ 学情数据：本地存储（知识点掌握度 + 对话记录）——接口已定，实现开发中 │
-│   └─ 教材内容：按册/章/节结构化入库，按学习位置装载（不整册塞进上下文）│
-└──────────────┬───────────────────────────────────────────────┘
-               └─→ 大模型 API（推理"外脑"，支持工具调用）
-```
+1. Start **SproutAsk** from the Start menu or the desktop shortcut.
+2. Open `/account` and paste a DeepSeek API key. It is encrypted locally and never shown again. **Restart the app** — the key is loaded at process start by design.
+3. Import your own copy of the textbook PDF, then pick a concept from the library or the map and start learning.
+4. Without a key the app stays in local mode: materials, map and records are readable, cloud reasoning is explicitly unavailable.
 
-**设计要点**
+## Configuration
 
-- **分层依赖铁律**：界面 → 主进程 → 核心领域逻辑；核心层不得依赖桌面框架
-  （由 `pnpm test` 自动把关，违反即测试失败）
-- **只依赖一个模型 API Key**：教材按"册 → 章 → 节"结构化装载，不需要向量数据库
-- **提示词分层可版本化**：人格 / 教学纪律 / 教材与课标约束 / 学情 / 会话上下文，
-  教学规则的改动走新版本而非原地修改，便于对比效果
-- **答案泄漏护栏**：回答产出后做一次自检"是否把答案说出来了"，命中则用更严格的指令重新生成一次
-- **可离线测试**：内置 Mock 模型客户端，**单元测试无需联网**（`SPROUTASK_MODE=mock` 的"不联网跑通全流程"尚未实现）
+| Item | Value |
+|---|---|
+| Model | DeepSeek official API, `deepseek-flash`; API key only (account sign-in is not offered) |
+| Key storage | `%LOCALAPPDATA%\SproutAsk\data\secrets\model-key.dat`, DPAPI-encrypted, host side only |
+| Learning data | `%LOCALAPPDATA%\SproutAsk\data` (journal, snapshots, imported materials) |
+| Network | loopback only; the local service never binds a public interface |
 
----
-
-## 快速开始
-
-环境：Node ≥ 20、pnpm ≥ 9（CI 用 `package.json` 的 `packageManager` 指定的版本）
-
-```powershell
-pnpm install
-cp .env.example .env        # 填入你的模型 API Key（DeepSeek）
-
-pnpm dev                    # 启动桌面应用
-pnpm chat                   # 在终端里与 Agent 对话（含意图询问流程）
-pnpm eval                   # 教学行为评测跑批（会真实调用模型，注意费用）
-
-pnpm typecheck              # 类型检查（主进程/渲染进程两端）
-pnpm test                   # 单元测试（无需联网）
-
-# 界面自检：在真实应用里操作 DOM 并断言（渲染 / 交互 / 样式 / 降级），无需人工点击
-$env:SPROUTASK_SELFTEST = "1"; pnpm dev        # 通过=退出码 0，并输出截图 selftest-ui.png
-```
-
-> 国内网络下 Electron 二进制可能需要镜像，见 README 末尾"常见问题"。
-
----
-
-## 目录结构
+## Project Structure
 
 ```
-├─ src/
-│  ├─ main/       # 桌面主进程：窗口、IPC、配置（可用 node:*）
-│  ├─ preload/    # contextBridge 桥接（只转发，无业务逻辑）
-│  ├─ renderer/   # Vue3 界面（无 Node 权限）
-│  └─ core/       # ⭐ 纯领域逻辑：契约、Agent、提示词、模型客户端
-├─ scripts/       # 开发期脚本（终端对话、评测跑批）
-├─ evals/cases/   # 教学行为评测用例（写在 YAML 里，可读可改）
-└─ tests/         # 单元测试
+education/packages/   domain, storage, importer, knowledge, learner, tutor, visuals
+education/client/     framework-free DOM UI: shell, library, map, study, visuals
+education/runtime/    DSH host/client plugins, adapters, composition, launchers
+education/content/    biology-7a pack: concepts, activities, rubrics, relations, sources
+education/licenses/   third-party notices, incl. libvips LGPL-3.0 obligations
 ```
 
----
+## Releases
 
-## 开发状态
+See [v0.3.0 release notes](docs/releases/v0.3.0.md). `main` still carries the earlier Electron 0.2.x line; this DSH rebuild ships on branch `education-v0.3.0`.
 
-> 图例：✅ 已完成且有实测 ｜ 🟡 代码就绪但**未实测** ｜ 🚧 做了一半 ｜ ⏳ 未开始
-> 本表 2026-09-27 逐条与代码核对过；**每个"已完成"都附了证据**，不写没有实测支撑的话。
+## Current status and limits
 
-| 能力 | 状态 | 证据 / 说明 |
-|---|---|---|
-| 工程骨架（分层、领域契约、CI） | ✅ | 五层目录齐；Zod 契约；CI 在 GitHub Actions 上跑绿过 |
-| 分层提示词（L0–L4，当前 v2） | ✅ | `src/core/prompts/v2/`；v1 冻结作 A/B 基线；11 个单测 |
-| 模型客户端 + 流式 SSE 解析 | ✅ | 代码与 10 个单测齐；**真实 API 已跑通**（评测跑批与打包版真实对话），原始报文形态无存档 |
-| 教学行为评测（15 条用例） | ✅ | `pnpm eval` **已真实跑通 15/15**，报告在 `evals/reports/`；判定为关键词/问号/引用格式规则，语义等价判断不了（报告里已注明） |
-| 意图询问（预习/复习/做题/拓展 + 位置） | ✅ | `src/core/agent/intent.ts`；25 个单测；终端实测 |
-| Agent 循环（工具调用、上限、降级） | ✅ | `src/core/agent/loop.ts`；10 个单测 + 变异测试；端到端验证到"鉴权失败 → 可读降级" |
-| 工具调用（2 个工具、Zod→JSON Schema） | ✅ | `get_section_text`、`flag_for_teacher`；14 个单测 |
-| 答案泄漏护栏（规则层 + 可选模型层） | ✅ | `src/core/agent/guard.ts`；11 个单测；命中后重写并打标；**二次仍命中或重写失败时改用安全兜底话术**（不把泄漏稿交给学生） |
-| 桌面界面（模式入口、对话、诊断信息） | ✅ | `App.vue` + 10 个 IPC 通道；界面自检含 DOM 断言 |
-| 教材阅读视图（折叠答案、搜索高亮、出处定位） | ✅ | `src/shared/section-blocks.ts` + `ReadingPane.vue`；17 个单测；自检含阅读视图断言 |
-| 界面自检（无头 DOM 断言） | ✅ | `SPROUTASK_SELFTEST=1 pnpm dev`；**44 项（无 Key）/ 36 项（有 Key）**，两种环境均通过 |
-| 教材与课标**结构化入库** | ⏳ | **只有接口**（`TextbookLibrary`）+ 演示占位文本；无内容文件、无提取脚本 |
-| 按学习位置**装载**（`buildStudyScope`） | ⏳ | **只有接口声明**，无实现 |
-| 掌握度状态机 | ⏳ | 只有三态 schema 与接口方法，无实现 |
-| 本地存储（SQLite / JSONL） | ⏳ | 只有 `StudentStore` 接口，无实现；**关掉应用学情即丢失** |
-| 打包（便携版 / 安装版 / dmg） | ✅ | **Windows 便携版已发布**：[v0.1.0-alpha](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.1.0-alpha)（含首次运行配置界面）；**安装版（NSIS）也已跑通**（本机静默安装 + 卸载验证）；macOS 未构建、未做代码签名 |
+This is a **frozen engineering build with known gaps**, not a finished student product.
 
-**一句话**："对话 + 教材视图"这条主链路已跑通并被自动验证；**"教材内容"与"记住学生"两块还是空的**。
+- Gate status: G1 (first-section loop) PARTIAL · G2 (full volume and teaching) FAIL/PARTIAL · G3 (Windows artifact) PARTIAL · final acceptance **not reached**.
+- Figure captions were visually checked only by sampling **8 of 73** (7 consistent, 1 undecidable); the remaining 65 await human review.
+- Edition, printing run, price and ISBN-line fields are `unverified` in the content pack; ISBN-13 `978-7-107-38263-5` was read from the back cover.
+- No clean-machine verification, no code signature, no learning-effect study — no claim of improved understanding or grades is made.
+- The UI has DOM-level assertions but no browser visual review; image answers were not tested with real phone photos.
 
----
+## License
 
-## 常见问题
-
-**Electron 二进制下载失败？** 用国内镜像后重装：
-
-```powershell
-$env:ELECTRON_MIRROR = "https://npmmirror.com/mirrors/electron/"
-pnpm install
-# 若仍失败，手动补装：
-cd node_modules/electron; node install.js
-```
-
-**`ERR_PNPM_IGNORED_BUILDS`？** pnpm 10+ 默认拦截依赖的构建脚本，
-放行名单写在 `pnpm-workspace.yaml` 的 `allowBuilds`。
-
----
-
-## 许可
-
-MIT License，详见 [LICENSE](LICENSE)。
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 HaoyanZhang123.

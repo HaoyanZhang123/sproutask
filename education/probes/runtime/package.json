@@ -1,0 +1,10 @@
+{
+  "name": "edu-dsh-runtime-probe",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "T00 isolated DSH runtime probe. Not a product package; never published.",
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.2.1-rc.3"
+  }
+}

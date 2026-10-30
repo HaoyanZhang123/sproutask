@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "source.invalid",
+  "bookInstanceId": "book.biology-7a.local",
+  "baselineSourceId": null,
+  "pdfPage": 0,
+  "printedPage": "1",
+  "bbox": null,
+  "blockId": null,
+  "figureId": null,
+  "verification": {
+    "state": "human_checked",
+    "actorKind": "human_curator",
+    "checkedAt": "2026-10-02T09:00:00Z",
+    "notes": "fixture source mapping"
+  }
+}

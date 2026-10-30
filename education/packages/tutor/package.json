@@ -1,0 +1,25 @@
+{
+  "name": "@edu/tutor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Teaching orchestration (learn/review), education tool factory, evidence guard and biology Skill wiring for the education workspace.",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@edu/domain": "workspace:*",
+    "@edu/knowledge": "workspace:*",
+    "@edu/learner": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}
