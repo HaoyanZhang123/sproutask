@@ -1,0 +1,21 @@
+{
+  "name": "@edu/client-library",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-agnostic DOM library UI: baseline/candidate/unavailable textbooks, import progress/resume/cancel, and controlled source reading. Reuses the T08 shell public UI seam.",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "edu": {
+    "uiBase": "@edu/client-shell (source seam; T13 must promote or bundle)",
+    "fixture": "src/fixture-data.ts is explicitly fixture-only"
+  }
+}

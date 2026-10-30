@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "note": "Per-concept rubrics (2 criteria: 基础理解 + 变式/迁移). 关键标准/可接受表达/常见误概念/反例/迁移题，供 T09/T11/T12 批改与反馈引用；阈值为产品启发式，不是已验证科学结论。",
+  "rubrics": [
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.meaning",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.meaning"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c1.define",
+          "description": "能说明观察是有目的、有计划的仔细察看，并把它与随意看看区分开",
+          "acceptableEvidence": [
+            "用自己的话说出观察含有目的和计划",
+            "把观察与“随便看看”区分开并给出理由",
+            "指出观察是学习生物学的基本方法之一"
+          ],
+          "commonMisconceptions": [
+            "看见过就等于观察过",
+            "观察是被动的看，不需要计划和思考"
+          ],
+          "counterExamples": [
+            "认为每天路过校园就等于观察过那里的植物"
+          ],
+          "transferItems": [
+            "判断“我每天路过，所以早就观察过了”这种说法并说明理由"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c1.not-casual",
+            "source.bio7a.c1.purpose-plan",
+            "source.bio7a.c1.basic-method"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c1.role",
+          "description": "能说明观察与比较、讨论或提问之间的关系（至少一项）",
+          "acceptableEvidence": [
+            "说明观察之后还需要比较、交流或思考",
+            "举出由观察引出问题或比较的例子"
+          ],
+          "commonMisconceptions": [
+            "观察结束就等于认识完成"
+          ],
+          "counterExamples": [
+            "只把看到的写下来，不做任何比较、交流或追问"
+          ],
+          "transferItems": [
+            "说明为什么“观察、比较和讨论”常一起使用"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.chapter.opener.context",
+            "source.bio7a.c7.raise"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.purpose-object",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.purpose-object"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c2.purpose",
+          "description": "能为一个观察任务写出明确的观察目的",
+          "acceptableEvidence": [
+            "目的具体到形态、结构、生活环境、生活习性、比较异同中的至少一类",
+            "能说明目的会决定需要观察哪些内容"
+          ],
+          "commonMisconceptions": [
+            "没有目的也可以开始观察",
+            "目的写得越大越完整"
+          ],
+          "counterExamples": [
+            "把目的写成“了解生物”这类无法指导观察的笼统说法"
+          ],
+          "transferItems": [
+            "为“比较校园里两棵树”写出一条可执行的观察目的"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c2.purpose",
+            "source.bio7a.c2.purpose-examples"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c2.object",
+          "description": "能明确观察对象，并列出至少两项可观察的具体内容",
+          "acceptableEvidence": [
+            "植物：植株高度、形态、生长环境等至少两项",
+            "动物：形态特点、运动方式、生活环境等至少两项",
+            "说明观察对象要具体到某种生物"
+          ],
+          "commonMisconceptions": [
+            "观察对象写“生物”就够了",
+            "观察内容可以随便看，不需要事先确定"
+          ],
+          "counterExamples": [
+            "任务只写“看看树”，没有可核对的具体项目"
+          ],
+          "transferItems": [
+            "把“观察校园里的两种树”拆成至少两项具体观察内容"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c2.object",
+            "source.bio7a.c2.plant-focus",
+            "source.bio7a.c2.animal-focus"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.order-record",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.order-record"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c3.sequence",
+          "description": "能按合理顺序描述一次观察活动的过程",
+          "acceptableEvidence": [
+            "顺序包含确定目的、明确对象、观察记录、交流结果四个环节（措辞可不同）",
+            "能说明按顺序观察有助于不遗漏、可复核"
+          ],
+          "commonMisconceptions": [
+            "观察顺序无所谓，看到什么算什么"
+          ],
+          "counterExamples": [
+            "先写结论，再补几条观察记录"
+          ],
+          "transferItems": [
+            "把打乱的四个环节重新排序并说明理由"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c3.order",
+            "source.bio7a.c3.record",
+            "source.bio7a.c3.communicate"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c3.record",
+          "description": "能说出观察记录的要素，并说明记录要真实、及时",
+          "acceptableEvidence": [
+            "列出时间、地点、天气、观察人、生物名称、特征、生活环境中的至少三项",
+            "说明记录应及时、真实客观，不能凭回忆补记",
+            "能指出记录要写现象与特征，而不只是结论"
+          ],
+          "commonMisconceptions": [
+            "记录可以事后凭记忆补",
+            "只记录符合预期的现象"
+          ],
+          "counterExamples": [
+            "观察一周后才凭印象补写记录",
+            "记录里只有“这棵树很漂亮”"
+          ],
+          "transferItems": [
+            "给一份缺项的观察记录表指出缺了什么"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c3.truthful",
+            "source.bio7a.c3.record-table",
+            "source.bio7a.c3.record"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.variation",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.variation"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c4.explain",
+          "description": "能解释不同同学对同一对象的观察结果可能不同的原因（至少两项）",
+          "acceptableEvidence": [
+            "指出位置或角度、时间或天气、工具、经验或注意力、记录方式中的至少两项",
+            "能说明因素与差异之间的联系，而不只是罗列名词"
+          ],
+          "commonMisconceptions": [
+            "结果不同说明一定有人观察错了",
+            "差异都是因为有人不认真"
+          ],
+          "counterExamples": [
+            "把所有差异都归因于“有人造假”"
+          ],
+          "transferItems": [
+            "两位同学画出的叶形不一样，写出两种可能原因"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c4.different",
+            "source.bio7a.c4.factors"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c4.improve",
+          "description": "能提出减少观察差异或进一步观察的具体做法",
+          "acceptableEvidence": [
+            "统一时间、地点、观察项目或记录格式",
+            "借助工具或测量、多次观察、与同伴核对记录",
+            "通过查资料或继续追踪观察解决疑问"
+          ],
+          "commonMisconceptions": [
+            "再看一眼就够了",
+            "差异不需要处理"
+          ],
+          "counterExamples": [
+            "只凭一次观察就下结论"
+          ],
+          "transferItems": [
+            "为“两位同学结果不同”设计一个核对方案"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c4.further"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.tools",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.tools"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c5.choose",
+          "description": "能根据观察对象和目的选择合适的观察工具或手段",
+          "acceptableEvidence": [
+            "为远距离对象选择望远镜等，为细微结构选择放大镜或显微镜",
+            "为记录选择照相机、摄像机或录音设备，为比较大小选择测量",
+            "选择时能说明理由"
+          ],
+          "commonMisconceptions": [
+            "工具越高级越好",
+            "观察只能靠肉眼"
+          ],
+          "counterExamples": [
+            "用显微镜观察远处的鸟",
+            "为了看细节把植物拔起来"
+          ],
+          "transferItems": [
+            "分别为“看远处的鸟”和“看叶表面的细微结构”选择工具并说明理由"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c5.tools",
+            "source.bio7a.c5.bird-tools"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c5.limit",
+          "description": "能说明工具和测量在观察中的作用与限制",
+          "acceptableEvidence": [
+            "说明工具帮助看清、记录或比较，但仍需目的与思考",
+            "说明测量能提供可比较的数据"
+          ],
+          "commonMisconceptions": [
+            "拍照就等于完成观察",
+            "有工具就不需要记录"
+          ],
+          "counterExamples": [
+            "只拍照，不记录特征也不思考"
+          ],
+          "transferItems": [
+            "解释“为什么有了相机还要写观察记录”"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c5.devices",
+            "source.bio7a.c5.measure"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.safety-ethics",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.safety-ethics"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c6.protect",
+          "description": "能说出观察时保护生物的具体做法（至少三条）",
+          "acceptableEvidence": [
+            "不采摘、不折断植物",
+            "不追赶、不惊扰动物，保持安静，衣着颜色不鲜亮",
+            "拍鸟时不用闪光灯，必要时远距离观察"
+          ],
+          "commonMisconceptions": [
+            "只要不弄死就不算伤害",
+            "用闪光灯拍照没关系"
+          ],
+          "counterExamples": [
+            "为了看清把鸟从巢里赶出来"
+          ],
+          "transferItems": [
+            "为公园观鸟列出三条不打扰鸟的做法"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c6.protect-plant",
+            "source.bio7a.c6.protect-bird",
+            "source.bio7a.c6.no-flash"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c6.safety",
+          "description": "能说出野外观察的安全要求（至少两条）",
+          "acceptableEvidence": [
+            "分组行动、听从老师安排",
+            "注意地形、天气、不明生物，不单独离队"
+          ],
+          "commonMisconceptions": [
+            "安全只是老师的事"
+          ],
+          "counterExamples": [
+            "单独离队到远处观察"
+          ],
+          "transferItems": [
+            "说明每条安全要求是在保护自己还是保护生物"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c6.safety-group",
+            "source.bio7a.c6.field-safety"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.to-question",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.to-question"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c7.origin",
+          "description": "能说明问题可以从观察到的现象中产生",
+          "acceptableEvidence": [
+            "指出观察到的具体现象",
+            "说明由该现象引出的疑问",
+            "把“现象—问题”的对应关系说清楚"
+          ],
+          "commonMisconceptions": [
+            "问题与观察无关，可以凭空想"
+          ],
+          "counterExamples": [
+            "提出的问题与观察到的现象没有关系"
+          ],
+          "transferItems": [
+            "从猫和兔眼睛位置的现象说出它可能引出什么问题"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c7.cat-rabbit",
+            "source.bio7a.c7.raise"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c7.value",
+          "description": "能提出与观察现象相关、可进一步探究的问题并说明理由",
+          "acceptableEvidence": [
+            "问题具体，能通过进一步观察、实验或查资料检验",
+            "能比较两个问题哪个更值得探究并给出理由"
+          ],
+          "commonMisconceptions": [
+            "问题越奇怪越有价值",
+            "只要提出问题就算完成"
+          ],
+          "counterExamples": [
+            "提出无法观察或检验的问题当作探究问题"
+          ],
+          "transferItems": [
+            "针对“雨后墙角出现蜗牛”提出两个可探究问题并取舍"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c7.value"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "rubric.bio7a.observation.comparison",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": ["concept.bio7a.observation.comparison"],
+      "criteria": [
+        {
+          "criterionId": "criterion.bio7a.c8.features",
+          "description": "能为相似生物选择可比较的特征（至少两项）",
+          "acceptableEvidence": [
+            "选择叶形、气味、树干、枝条、花、生活环境等可观察、可比较的特征",
+            "说明所选特征为什么能用于区分"
+          ],
+          "commonMisconceptions": [
+            "长得像就是同一种生物",
+            "只看一个特征就能下结论"
+          ],
+          "counterExamples": [
+            "凭“感觉像韭菜”就判定是韭菜"
+          ],
+          "transferItems": [
+            "为区分韭菜和小麦选出两项比较特征"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c2.leek-question",
+            "source.bio7a.c8.features"
+          ]
+        },
+        {
+          "criterionId": "criterion.bio7a.c8.method",
+          "description": "能说明比较时要用共同标准、逐项对照，必要时借助工具或多次观察",
+          "acceptableEvidence": [
+            "用同一套标准逐项比较",
+            "必要时借助工具、测量、追踪生长过程或查资料",
+            "比较后能说出共同点与不同点"
+          ],
+          "commonMisconceptions": [
+            "比较就是随便看看哪个好看"
+          ],
+          "counterExamples": [
+            "拿韭菜的叶和小麦的根作比较"
+          ],
+          "transferItems": [
+            "说明比较杨树和柳树时还要注意什么"
+          ],
+          "feedbackSourceRefs": [
+            "source.bio7a.c8.compare-purpose",
+            "source.bio7a.c8.poplar-willow",
+            "source.bio7a.c8.habitat"
+          ]
+        }
+      ],
+      "reviewState": "machine_checked"
+    }
+  ]
+}

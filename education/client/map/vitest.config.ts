@@ -1,0 +1,12 @@
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'happy-dom',
+    include: ['test/**/*.test.ts'],
+    globals: false,
+    restoreMocks: true,
+    clearMocks: true,
+    testTimeout: 30000,
+  },
+});

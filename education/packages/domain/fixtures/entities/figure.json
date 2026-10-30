@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "figure.cell.1",
+  "sourceRefId": "source.p26",
+  "type": "diagram",
+  "originalAssetId": "asset.figure.cell",
+  "activeAssetId": "asset.figure.cell",
+  "caption": "fixture cell diagram (synthetic)",
+  "extractionMethod": "manual",
+  "reviewState": "curator_checked"
+}

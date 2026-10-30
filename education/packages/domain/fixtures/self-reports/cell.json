@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "self-report.cell.1",
+  "learnerId": "learner.local.default",
+  "courseEditionId": "course.biology-7a",
+  "packVersion": "1.0.0",
+  "conceptId": "concept.cell",
+  "claimedState": "can_explain",
+  "createdAt": "2026-10-29T09:00:00Z"
+}

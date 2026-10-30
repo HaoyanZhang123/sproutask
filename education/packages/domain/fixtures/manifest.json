@@ -1,0 +1,601 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "education/scripts/build-fixtures.mjs",
+  "description": "Minimal contract fixtures from 05 §8. Synthetic content only; no textbook text or images.",
+  "cases": [
+    {
+      "id": "pack.valid.partial",
+      "kind": "contentPack",
+      "file": "packs/valid-partial.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "pack.valid.full",
+      "kind": "contentPack",
+      "file": "packs/valid-full.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "pack.valid.candidate",
+      "kind": "contentPack",
+      "file": "packs/valid-candidate.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "pack.hash.partial",
+      "kind": "contentHash",
+      "file": "packs/valid-partial.json",
+      "expect": {
+        "matches": true
+      }
+    },
+    {
+      "id": "pack.hash.full",
+      "kind": "contentHash",
+      "file": "packs/valid-full.json",
+      "expect": {
+        "matches": true
+      }
+    },
+    {
+      "id": "pack.hash.candidate",
+      "kind": "contentHash",
+      "file": "packs/valid-candidate.json",
+      "expect": {
+        "matches": true
+      }
+    },
+    {
+      "id": "pack.invalid.self-loop",
+      "kind": "contentPack",
+      "file": "packs/invalid-self-loop.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "RELATION_SELF_LOOP"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.prereq-cycle",
+      "kind": "contentPack",
+      "file": "packs/invalid-prereq-cycle.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "RELATION_CYCLE"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.dangling-placement",
+      "kind": "contentPack",
+      "file": "packs/invalid-dangling-placement.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "DANGLING_REFERENCE"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.duplicate-id",
+      "kind": "contentPack",
+      "file": "packs/invalid-duplicate-id.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "DUPLICATE_ID"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.schema-version",
+      "kind": "contentPack",
+      "file": "packs/invalid-schema-version.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "SCHEMA_VERSION_MISMATCH"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.related-order",
+      "kind": "contentPack",
+      "file": "packs/invalid-related-order.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "RELATION_ENDPOINT_ORDER"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.partial-complete",
+      "kind": "contentPack",
+      "file": "packs/invalid-partial-complete.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "PACK_SCOPE_INVALID"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.unknown-field",
+      "kind": "contentPack",
+      "file": "packs/invalid-unknown-field.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "UNKNOWN_FIELD"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.dangling-rubric",
+      "kind": "contentPack",
+      "file": "packs/invalid-dangling-rubric.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "DANGLING_REFERENCE"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.published-missing-source",
+      "kind": "contentPack",
+      "file": "packs/invalid-published-missing-source.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "MISSING_SOURCE"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.toc-cycle",
+      "kind": "contentPack",
+      "file": "packs/invalid-toc-cycle.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "TOC_CYCLE"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.toc-orphan",
+      "kind": "contentPack",
+      "file": "packs/invalid-toc-orphan.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "TOC_ORPHAN"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.full-partial",
+      "kind": "contentPack",
+      "file": "packs/invalid-full-partial.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "COVERAGE_INCOMPLETE"
+        ]
+      }
+    },
+    {
+      "id": "pack.invalid.content-hash",
+      "kind": "contentPack",
+      "file": "packs/invalid-content-hash.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "pack.hash.mismatch",
+      "kind": "contentHash",
+      "file": "packs/invalid-content-hash.json",
+      "expect": {
+        "matches": false
+      }
+    },
+    {
+      "id": "entity.course-edition",
+      "kind": "courseEdition",
+      "file": "entities/course-edition.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "entity.book-instance",
+      "kind": "bookInstance",
+      "file": "entities/book-instance.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "entity.source-ref",
+      "kind": "sourceRef",
+      "file": "entities/source-ref.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "entity.source-ref.unknown-printed-page",
+      "kind": "sourceRef",
+      "file": "entities/source-ref-unknown-printed-page.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "entity.source-ref.invalid-page",
+      "kind": "sourceRef",
+      "file": "entities/source-ref-invalid-page.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "INVALID_NUMBER"
+        ]
+      }
+    },
+    {
+      "id": "entity.source-ref.missing-printed-page",
+      "kind": "sourceRef",
+      "file": "entities/source-ref-missing-printed-page.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "MISSING_FIELD"
+        ]
+      }
+    },
+    {
+      "id": "entity.source-block",
+      "kind": "sourceBlock",
+      "file": "entities/source-block.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "entity.figure",
+      "kind": "figure",
+      "file": "entities/figure.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "entity.learner",
+      "kind": "learner",
+      "file": "entities/learner.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "session.active",
+      "kind": "session",
+      "file": "sessions/active.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "session.completed",
+      "kind": "session",
+      "file": "sessions/completed.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "session.invalid-active-ended",
+      "kind": "session",
+      "file": "sessions/invalid-active-ended.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "SESSION_STATE_INVALID"
+        ]
+      }
+    },
+    {
+      "id": "attempt.unassisted",
+      "kind": "attempt",
+      "file": "attempts/unassisted.json",
+      "expect": {
+        "ok": true,
+        "assistance": "unassisted"
+      }
+    },
+    {
+      "id": "attempt.assisted",
+      "kind": "attempt",
+      "file": "attempts/assisted.json",
+      "expect": {
+        "ok": true,
+        "assistance": "assisted"
+      }
+    },
+    {
+      "id": "attempt.invalid-answer",
+      "kind": "attempt",
+      "file": "attempts/invalid-answer.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "ATTEMPT_ANSWER_INVALID"
+        ]
+      }
+    },
+    {
+      "id": "evidence.unassisted",
+      "kind": "evidence",
+      "file": "evidence/unassisted.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "evidence.assisted",
+      "kind": "evidence",
+      "file": "evidence/assisted.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "assessment.supported.valid",
+      "kind": "assessmentBundle",
+      "file": "assessments/supported-valid.json",
+      "expect": {
+        "ok": true,
+        "state": "supported"
+      }
+    },
+    {
+      "id": "assessment.supported.insufficient",
+      "kind": "assessmentBundle",
+      "file": "assessments/supported-insufficient.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "ASSESSMENT_WITHOUT_EVIDENCE"
+        ]
+      }
+    },
+    {
+      "id": "assessment.supported.counter-evidence",
+      "kind": "assessmentBundle",
+      "file": "assessments/supported-counter-evidence.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "ASSESSMENT_COUNTER_EVIDENCE"
+        ]
+      }
+    },
+    {
+      "id": "assessment.candidate-supported",
+      "kind": "assessmentForSession",
+      "file": "assessments/candidate-supported.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "CANDIDATE_STRONG_CLAIM"
+        ]
+      }
+    },
+    {
+      "id": "assessment.pending-supported",
+      "kind": "assessment",
+      "file": "assessments/pending-supported.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "LOW_CONFIDENCE_UPGRADE"
+        ]
+      }
+    },
+    {
+      "id": "progress.reviewed-and-due",
+      "kind": "progress",
+      "file": "progress/reviewed-and-due.json",
+      "expect": {
+        "ok": true,
+        "everReviewed": true,
+        "isDue": true,
+        "now": "2026-10-29T09:00:00Z"
+      }
+    },
+    {
+      "id": "progress.learned-needs-support",
+      "kind": "progress",
+      "file": "progress/learned-needs-support.json",
+      "expect": {
+        "ok": true,
+        "state": "needs_support"
+      }
+    },
+    {
+      "id": "progress.no-evidence",
+      "kind": "progress",
+      "file": "progress/no-evidence.json",
+      "expect": {
+        "ok": true,
+        "state": "unassessed"
+      }
+    },
+    {
+      "id": "progress.invalid-supported-stale",
+      "kind": "progress",
+      "file": "progress/invalid-supported-stale.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "PROGRESS_INVARIANT"
+        ]
+      }
+    },
+    {
+      "id": "self-report.valid",
+      "kind": "selfReport",
+      "file": "self-reports/cell.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "import.await-review",
+      "kind": "importJob",
+      "file": "import/await-review.json",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "import.cancel-late-result",
+      "kind": "importTransition",
+      "file": "import/cancel-late-result.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "IMPORT_LATE_RESULT"
+        ]
+      }
+    },
+    {
+      "id": "import.invalid-completed-await-review",
+      "kind": "importJob",
+      "file": "import/invalid-completed-await-review.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "IMPORT_INVARIANT"
+        ]
+      }
+    },
+    {
+      "id": "compatibility.rename-unverified",
+      "kind": "compatibility",
+      "file": "compatibility/rename-unverified.json",
+      "expect": {
+        "ok": true,
+        "projectionReason": "compatibility_unverified",
+        "carryLearningHistory": false,
+        "staleEvidence": true
+      }
+    },
+    {
+      "id": "compatibility.rename-verified",
+      "kind": "compatibility",
+      "file": "compatibility/rename-verified.json",
+      "expect": {
+        "ok": true,
+        "projectionReason": "requires_current_pack_evidence",
+        "carryLearningHistory": true,
+        "staleEvidence": false
+      }
+    },
+    {
+      "id": "compatibility.rubric-changed-verified",
+      "kind": "compatibility",
+      "file": "compatibility/rubric-changed-verified.json",
+      "expect": {
+        "ok": true,
+        "projectionReason": "evidence_stale",
+        "carryLearningHistory": false,
+        "staleEvidence": true
+      }
+    },
+    {
+      "id": "grade.unclear-image",
+      "kind": "grade",
+      "file": "grade/unclear-image.json",
+      "expect": {
+        "ok": true,
+        "requiresClarification": true
+      }
+    },
+    {
+      "id": "grade.invalid-clarification-with-evidence",
+      "kind": "grade",
+      "file": "grade/invalid-clarification-with-evidence.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "GRADE_CLARIFICATION_CONFLICT"
+        ]
+      }
+    },
+    {
+      "id": "snapshot.invalid",
+      "kind": "snapshot",
+      "file": "snapshots/invalid.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "INVALID_NUMBER"
+        ]
+      }
+    },
+    {
+      "id": "event.late-session-response",
+      "kind": "sessionOutput",
+      "file": "events/late-session-response.json",
+      "expect": {
+        "ok": false,
+        "errorCodes": [
+          "STALE_REVISION"
+        ]
+      }
+    },
+    {
+      "id": "journal.duplicate-request-id",
+      "kind": "journalText",
+      "file": "journal/duplicate-request-id.jsonl",
+      "expect": {
+        "ok": true,
+        "duplicateRequestIds": [
+          "request.duplicate"
+        ]
+      }
+    },
+    {
+      "id": "journal.tail-half-line",
+      "kind": "journalText",
+      "file": "journal/tail-half-line.jsonl",
+      "expect": {
+        "ok": true,
+        "tailPartial": true
+      }
+    },
+    {
+      "id": "journal.middle-corruption",
+      "kind": "journalText",
+      "file": "journal/middle-corruption.jsonl",
+      "expect": {
+        "ok": false,
+        "corruptLines": [
+          2
+        ]
+      }
+    }
+  ]
+}

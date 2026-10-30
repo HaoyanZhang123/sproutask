@@ -1,0 +1,34 @@
+{
+  "map": {
+    "schemaVersion": 1,
+    "id": "compatibility.1.0.0-to-1.1.0",
+    "courseEditionId": "course.biology-7a",
+    "fromPackVersion": "1.0.0",
+    "toPackVersion": "1.1.0",
+    "fromContentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "toContentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "mappings": [
+      {
+        "fromConceptId": "concept.cell",
+        "toConceptIds": [
+          "concept.cell"
+        ],
+        "kind": "rubric_changed",
+        "rationale": "fixture rubric change",
+        "review": {
+          "verified": true,
+          "actorKind": "human_curator",
+          "checkedAt": "2026-10-02T09:00:00Z",
+          "notes": "fixture verification record"
+        },
+        "evidenceEffect": "recheck"
+      }
+    ],
+    "createdAt": "2026-10-02T09:00:00Z"
+  },
+  "expectProjection": {
+    "reason": "evidence_stale",
+    "carryLearningHistory": false,
+    "staleEvidence": true
+  }
+}

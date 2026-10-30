@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "description": "T01 task -> package/test routing for scoped typecheck/test commands. Missing paths are reported as not implemented (non-zero), never skipped silently.",
+  "tasks": {
+    "T01": {
+      "title": "workspace and contract freeze",
+      "owner": "T01",
+      "phaseGate": "domainReady",
+      "projects": ["packages/domain", "runtime"],
+      "tests": ["packages/domain", "runtime"],
+      "reason": null
+    },
+    "T02": {
+      "title": "journal storage and recovery",
+      "owner": "T02",
+      "phaseGate": "runtimeReady",
+      "projects": ["packages/storage"],
+      "tests": ["packages/storage"],
+      "reason": "packages/storage is owned by T02 and has not been implemented yet"
+    },
+    "T03": {
+      "title": "PDF import and OCR",
+      "owner": "T03",
+      "phaseGate": "runtimeReady",
+      "projects": ["packages/importer"],
+      "tests": ["packages/importer"],
+      "reason": "packages/importer is owned by T03 and has not been implemented yet; real textbook PDF is still missing"
+    },
+    "T04": {
+      "title": "knowledge graph and publishing",
+      "owner": "T04",
+      "phaseGate": "runtimeReady",
+      "projects": ["packages/knowledge"],
+      "tests": ["packages/knowledge"],
+      "reason": "packages/knowledge is owned by T04 and has not been implemented yet"
+    },
+    "T05": {
+      "title": "first section content",
+      "owner": "T05",
+      "phaseGate": "runtimeReady",
+      "projects": ["content/biology-7a/tools"],
+      "tests": [],
+      "reason": "content/biology-7a/tools holds the content authoring tooling; the pack itself is validated by content:validate"
+    },
+    "T06": {
+      "title": "learner projection and review policy",
+      "owner": "T06",
+      "phaseGate": "runtimeReady",
+      "projects": ["packages/learner"],
+      "tests": ["packages/learner"],
+      "reason": "packages/learner is owned by T06 and has not been implemented yet"
+    },
+    "T07": {
+      "title": "tutor tools and biology skill",
+      "owner": "T07",
+      "phaseGate": "runtimeReady",
+      "projects": ["packages/tutor", "skills/biology"],
+      "tests": ["packages/tutor"],
+      "reason": "packages/tutor is owned by T07 and depends on T00.runtimeReady; it has not been implemented yet"
+    },
+    "T08": {
+      "title": "client shell",
+      "owner": "T08",
+      "phaseGate": "runtimeReady",
+      "projects": ["client/shell"],
+      "tests": ["client/shell"],
+      "reason": "client/shell is owned by T08 and its framework is frozen only after T00.runtimeReady"
+    },
+    "T09": {
+      "title": "library UI",
+      "owner": "T09",
+      "phaseGate": "runtimeReady",
+      "projects": ["client/library"],
+      "tests": ["client/library"],
+      "reason": "client/library is owned by T09 and has not been implemented yet"
+    },
+    "T10": {
+      "title": "concept map UI",
+      "owner": "T10",
+      "phaseGate": "runtimeReady",
+      "projects": ["client/map"],
+      "tests": ["client/map"],
+      "reason": "client/map is owned by T10 and has not been implemented yet"
+    },
+    "T11": {
+      "title": "visuals and image feedback",
+      "owner": "T11",
+      "phaseGate": "runtimeReady",
+      "projects": ["packages/visuals", "client/visuals"],
+      "tests": ["packages/visuals", "client/visuals"],
+      "reason": "visuals are owned by T11 and require a real vision model route; not implemented yet"
+    },
+    "T12": {
+      "title": "study UI",
+      "owner": "T12",
+      "phaseGate": "runtimeReady",
+      "projects": ["client/study"],
+      "tests": ["client/study"],
+      "reason": "client/study is owned by T12 and has not been implemented yet"
+    },
+    "T13": {
+      "title": "first section integration",
+      "owner": "T13",
+      "phaseGate": "runtimeReady",
+      "projects": [],
+      "tests": ["tests/integration"],
+      "reason": "tests/integration requires T05/T12 and a bound DSH runtime; not implemented yet"
+    },
+    "T14": {
+      "title": "full volume content",
+      "owner": "T14",
+      "phaseGate": "runtimeReady",
+      "projects": ["content/biology-7a/tools"],
+      "tests": [],
+      "reason": "content/biology-7a/tools holds the content authoring tooling; the full-volume pack is validated by content:validate"
+    },
+    "T15": {
+      "title": "full volume and teaching acceptance",
+      "owner": "T15",
+      "phaseGate": "runtimeReady",
+      "projects": [],
+      "tests": ["tests/education"],
+      "reason": "tests/education requires T13/T14 and a live model budget; not implemented yet"
+    },
+    "T16": {
+      "title": "Windows packaging",
+      "owner": "T16",
+      "phaseGate": "runtimeReady",
+      "projects": ["desktop"],
+      "tests": ["desktop"],
+      "reason": "desktop packaging is owned by T16 and requires T00 sourceReady + a built runtime; not implemented yet"
+    },
+    "T17": {
+      "title": "independent final acceptance",
+      "owner": "T17",
+      "phaseGate": "runtimeReady",
+      "projects": [],
+      "tests": ["tests/final"],
+      "reason": "final acceptance tests are owned by T17 and require a packaged product; not implemented yet"
+    }
+  }
+}

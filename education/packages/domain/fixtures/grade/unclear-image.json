@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "attemptId": "attempt.image.1",
+  "criteria": [
+    {
+      "criterionId": "criterion.cell.identify",
+      "met": "unclear",
+      "rationale": "fixture image is too blurry to judge"
+    }
+  ],
+  "feedback": "fixture feedback: 图片无法辨认，请重传或改用文字描述。",
+  "uncertainties": [
+    "image blurry"
+  ],
+  "evidenceCandidates": [],
+  "requiresClarification": true,
+  "sourceRefs": [
+    "source.p18"
+  ],
+  "graderVersion": "rule-v1"
+}

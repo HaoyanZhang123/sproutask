@@ -1,0 +1,6 @@
+node_modules/
+.pnpm-store/
+*.log
+tmp/
+out/
+*.local.*

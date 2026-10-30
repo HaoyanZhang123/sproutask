@@ -1,0 +1,19 @@
+{
+  "name": "@edu/probe-root",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "T00 probe client root occupant. Replaces the default layout root with a static education root. Not a product package.",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": ["@deepseek-ai/dsh-client-ui-renderer"]
+    }
+  }
+}

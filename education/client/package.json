@@ -1,0 +1,8 @@
+{
+  "name": "@edu/client-base",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared framework-agnostic TypeScript config base for education/client/* packages. Not a pnpm workspace member.",
+  "license": "MIT"
+}

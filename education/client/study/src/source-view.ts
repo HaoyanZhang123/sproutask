@@ -1,0 +1,76 @@
+/** Source popover: PDF page order and printed page label are never mixed. */
+
+import {
+  Modal,
+  h,
+  statusChip,
+} from '../../shell/src/index.js';
+import type { StudySource } from './types.js';
+
+const VERIFICATION_LABELS: Record<StudySource['verification'], string> = {
+  unverified: '来源待核实',
+  machine_matched: '来源机器匹配',
+  human_checked: '来源人工核对',
+  rejected: '来源被拒绝',
+};
+
+export function openSourcePopover(
+  parent: HTMLElement,
+  trigger: HTMLElement,
+  sources: readonly StudySource[],
+  sourceRefId: string,
+): void {
+  const source = sources.find((entry) => entry.sourceRefId === sourceRefId) ?? null;
+  const content = h('div', { 'data-testid': 'study-source-popover' });
+  if (source === null) {
+    content.append(
+      h('h3', { class: 'edu-card__title' }, '出处暂时不可用'),
+      h(
+        'p',
+        { class: 'edu-state__body' },
+        '没有找到这个来源的页码信息；不会跳到任意页面，也不会编造教材引用。',
+      ),
+    );
+  } else {
+    content.append(
+      h(
+        'div',
+        { class: 'edu-study-source-grid' },
+        h(
+          'div',
+          { class: 'edu-study-source-box', 'data-testid': 'study-source-pdf' },
+          h('p', { class: 'edu-muted' }, 'PDF 页序（1 基）'),
+          h('p', { class: 'edu-study-source-value' }, `PDF 第 ${source.pdfPage} 页`),
+        ),
+        h(
+          'div',
+          { class: 'edu-study-source-box', 'data-testid': 'study-source-printed' },
+          h('p', { class: 'edu-muted' }, '印刷页码（课本页脚/页眉标签）'),
+          h(
+            'p',
+            { class: 'edu-study-source-value' },
+            source.printedPage === null ? '未识别（不推算）' : `课本第 ${source.printedPage} 页`,
+          ),
+        ),
+      ),
+      h(
+        'p',
+        { class: 'edu-muted' },
+        'PDF 页序与印刷页码是不同单位，不能互相替代；未识别印刷页时不做偏移猜测。',
+      ),
+      h(
+        'p',
+        { class: 'edu-inline-actions' },
+        statusChip(VERIFICATION_LABELS[source.verification], source.verification === 'human_checked' ? 'positive' : 'attention'),
+        h('span', { class: 'edu-muted' }, `来源：${source.label}`),
+      ),
+      h(
+        'p',
+        { class: 'edu-muted' },
+        '查看出处不会提交作答、不会完成活动；关闭后焦点返回刚才的出处按钮。',
+      ),
+    );
+  }
+  const modal = new Modal('出处', content, '关闭出处');
+  modal.open(trigger, parent);
+}

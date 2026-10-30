@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "evidence.cell.explain",
+  "attemptId": "attempt.cell.explain",
+  "learnerId": "learner.local.default",
+  "courseEditionId": "course.biology-7a",
+  "packVersion": "1.0.0",
+  "conceptId": "concept.cell",
+  "kind": "explain",
+  "observation": "fixture observation: explained the cell as the basic unit",
+  "criterionResults": [
+    {
+      "criterionId": "criterion.cell.identify",
+      "result": "met",
+      "note": null
+    }
+  ],
+  "assistance": "unassisted",
+  "sourceRefs": [
+    "source.p18"
+  ],
+  "assessmentOrigin": "rule",
+  "modelRunId": null,
+  "uncertainty": null,
+  "validity": "current",
+  "createdAt": "2026-10-29T08:10:00Z"
+}

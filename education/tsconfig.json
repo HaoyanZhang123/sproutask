@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["node"],
+    "paths": {
+      "@edu/domain": ["packages/domain/src/index.ts"]
+    }
+  },
+  "include": ["packages/domain/src/**/*.ts", "runtime/src/**/*.ts"]
+}

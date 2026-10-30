@@ -1,0 +1,613 @@
+﻿#!/usr/bin/env node
+/**
+ * A2/T16 鈥?generate the third-party license NOTICE bundle (UTF-8, no BOM).
+ *
+ * Inputs: T00 license inventory/summary, T16 hoisted payload, supplemented
+ * upstream texts, Node.js LICENSE, and the 5A trim decision.
+ * Outputs: education/licenses/{NOTICE,THIRD-PARTY-LICENSES,NODEJS-NOTICE,
+ * FONTS-NOTICE,NATIVE-BINARIES,EXCLUDED,README}.md + texts/** + data/**.
+ *
+ * All texts are copied byte-for-byte from upstream files; packages whose
+ * tarball has no license text are recorded as "upstream did not provide text".
+ */
+
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const educationRoot = path.resolve(here, '..', '..');
+const licensesRoot = path.join(educationRoot, 'licenses');
+const textsRoot = path.join(licensesRoot, 'texts');
+const dataRoot = path.join(licensesRoot, 'data');
+const hoisted = path.join(educationRoot, '.local', 'cache', 'T16', 'hoisted-test', 'node_modules');
+const inventoryPath = path.join(educationRoot, '.local/evidence/T00/run-01/40-licenses/license-inventory.json');
+const summaryPath = path.join(educationRoot, '.local/evidence/T00/run-01/40-licenses/license-summary.json');
+const missingPath = path.join(dataRoot, 'missing-licenses.json');
+const nodeLicensePath = 'resources/runtime/primary-runtime/dependencies/node/LICENSE';
+const nodeExePath = 'resources/runtime/primary-runtime/dependencies/node/bin/node.exe';
+
+const TRIM_ROOTS = [
+  '@deepseek-ai/libreoffice-kit',
+  '@deepseek-ai/libreoffice-kit-win32-x64',
+  'sherpa-onnx-node',
+  'sherpa-onnx-win-x64',
+  'node-pty',
+];
+const CATEGORY_ORDER = [
+  'MIT',
+  'Apache-2.0',
+  'BSD-3-Clause',
+  'BSD-2-Clause',
+  'ISC',
+  '0BSD',
+  'Unlicense',
+  'Python-2.0',
+  '(MIT OR CC0-1.0)',
+  'MPL-2.0',
+  'Apache-2.0 AND LGPL-3.0-or-later',
+];
+const FONT_PACKAGES = ['@deepseek-ai/dsh-client-ui-theme', '@deepseek-ai/dsh-web-frontend'];
+
+const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
+const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));
+const rel = (file) => path.relative(educationRoot, file).split(path.sep).join('/');
+const pkgDir = (name) => path.join(hoisted, ...name.split('/'));
+
+function walk(dir) {
+  const files = [];
+  const visit = (current) => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) visit(full);
+      else files.push(full);
+    }
+  };
+  visit(dir);
+  return files;
+}
+
+function readTexts(record) {
+  const dir = pkgDir(record.name);
+  const texts = [];
+  const seen = new Set();
+  const add = (file) => {
+    const buffer = readFileSync(file);
+    texts.push({
+      source: `node_modules/${record.name}/${path.relative(dir, file).split(path.sep).join('/')}`,
+      sha256: sha256(buffer),
+      text: buffer.toString('utf8'),
+      buffer,
+    });
+    seen.add(file);
+  };
+  for (const file of record.licenseFiles ?? []) {
+    const full = path.join(dir, file.file);
+    if (existsSync(full)) add(full);
+  }
+  if (FONT_PACKAGES.includes(record.name)) {
+    for (const full of walk(dir)) {
+      if (!seen.has(full) && /montserrat.*ofl/i.test(path.basename(full))) add(full);
+    }
+  }
+  return texts;
+}
+
+function supplementTexts(name) {
+  const base = path.join(textsRoot, 'supplemented');
+  if (!existsSync(base)) return [];
+  const prefix = `${name.replaceAll('@', '').replaceAll('/', '__')}@`;
+  const texts = [];
+  for (const dir of readdirSync(base).filter((entry) => entry.startsWith(prefix))) {
+    for (const full of walk(path.join(base, dir))) {
+      const buffer = readFileSync(full);
+      texts.push({
+        source: `licenses/texts/supplemented/${path.relative(base, full).split(path.sep).join('/')}`,
+        sha256: sha256(buffer),
+        text: buffer.toString('utf8'),
+        buffer,
+      });
+    }
+  }
+  return texts;
+}
+
+function copyrightLine(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const candidate = lines.find(
+    (line) =>
+      /copyright|\(c\)\s|漏/i.test(line) &&
+      !/\[yyyy\]|\{yyyy\}|<year>|yyyy|name of copyright owner/i.test(line) &&
+      !/the above copyright notice|permission is hereby|all copies or substantial|provided that the above/i.test(line),
+  );
+  return candidate ?? null;
+}
+
+function trimClosure(names) {
+  const nameSet = new Set(names);
+  const deps = new Map();
+  const reverse = new Map();
+  for (const name of names) {
+    const file = path.join(pkgDir(name), 'package.json');
+    const list = existsSync(file)
+      ? Object.keys({
+          ...(readJson(file).dependencies ?? {}),
+          ...(readJson(file).optionalDependencies ?? {}),
+        }).filter((dep) => nameSet.has(dep))
+      : [];
+    deps.set(name, list);
+    for (const dep of list) reverse.set(dep, [...(reverse.get(dep) ?? []), name]);
+  }
+  const removed = new Set(TRIM_ROOTS.filter((name) => nameSet.has(name)));
+  const queue = [...removed];
+  while (queue.length > 0) {
+    for (const dep of deps.get(queue.shift()) ?? []) {
+      if (!removed.has(dep)) {
+        removed.add(dep);
+        queue.push(dep);
+      }
+    }
+  }
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const name of [...removed]) {
+      if (TRIM_ROOTS.includes(name)) continue;
+      if ((reverse.get(name) ?? []).some((parent) => !removed.has(parent))) {
+        removed.delete(name);
+        changed = true;
+      }
+    }
+  }
+  return removed;
+}
+
+function main() {
+  const inventory = readJson(inventoryPath);
+  const summary = readJson(summaryPath);
+  const missing = readJson(missingPath);
+  const katexTexts = missing.katex === null ? [] : supplementTexts('katex');
+  const missingByName = new Map(missing.packages.map((item) => [item.name, item]));
+  const trimmed = trimClosure(inventory.map((record) => record.name));
+
+  mkdirSync(textsRoot, { recursive: true });
+  mkdirSync(dataRoot, { recursive: true });
+
+  const entries = inventory.map((record) => {
+    const texts = [...readTexts(record), ...supplementTexts(record.name)];
+    return {
+      name: record.name,
+      version: record.version,
+      license: record.license ?? 'UNKNOWN',
+      official: record.official === true,
+      ships: trimmed.has(record.name) ? 'no (5A trim)' : 'yes',
+      texts,
+      copyright: texts.length === 0 ? null : copyrightLine(texts[0].text),
+      missingInfo: missingByName.get(record.name) ?? null,
+      binaryAssets: record.binaryAssets ?? [],
+    };
+  });
+
+  const unique = new Map();
+  for (const texts of [...entries.map((entry) => entry.texts), katexTexts]) {
+    for (const text of texts) {
+      const bucket = unique.get(text.sha256) ?? { sha256: text.sha256, buffer: text.buffer, sources: [] };
+      bucket.sources.push(text.source);
+      unique.set(text.sha256, bucket);
+    }
+  }
+  const textIndex = [];
+  for (const item of [...unique.values()].sort((a, b) => (a.sha256 < b.sha256 ? -1 : 1))) {
+    const file = path.join(textsRoot, `${item.sha256.slice(0, 16)}.txt`);
+    writeFileSync(file, item.buffer);
+    textIndex.push({
+      file: rel(file),
+      localFile: `texts/${item.sha256.slice(0, 16)}.txt`,
+      sha256: item.sha256,
+      bytes: item.buffer.byteLength,
+      sources: item.sources,
+    });
+  }
+  const byHash = new Map(textIndex.map((item) => [item.sha256, item]));
+
+  let node = null;
+  if (existsSync(nodeLicensePath)) {
+    const buffer = readFileSync(nodeLicensePath);
+    const file = path.join(textsRoot, 'nodejs-LICENSE.txt');
+    writeFileSync(file, buffer);
+    node = {
+      source: nodeLicensePath,
+      file: rel(file),
+      localFile: 'texts/nodejs-LICENSE.txt',
+      sha256: sha256(buffer),
+      bytes: buffer.byteLength,
+      exe: existsSync(nodeExePath)
+        ? { path: nodeExePath, bytes: statSync(nodeExePath).size, sha256: sha256(readFileSync(nodeExePath)) }
+        : null,
+    };
+  }
+
+  const fonts = [];
+  for (const name of FONT_PACKAGES) {
+    const dir = pkgDir(name);
+    for (const file of walk(dir)) {
+      if (!/\.(woff2?|ttf|otf)$/i.test(path.basename(file))) continue;
+      const buffer = readFileSync(file);
+      fonts.push({
+        package: name,
+        path: path.relative(dir, file).split(path.sep).join('/'),
+        bytes: buffer.byteLength,
+        sha256: sha256(buffer),
+        family: /montserrat/i.test(path.basename(file)) ? 'Montserrat' : /katex/i.test(path.basename(file)) ? 'KaTeX' : 'other',
+      });
+    }
+  }
+
+  const binaries = [];
+  for (const entry of entries) {
+    if (entry.binaryAssets.length === 0) continue;
+    binaries.push({
+      name: entry.name,
+      version: entry.version,
+      license: entry.license,
+      ships: entry.ships,
+      files: entry.binaryAssets.map((asset) => {
+        const full = path.join(pkgDir(entry.name), asset);
+        if (!existsSync(full)) return { path: asset.split(path.sep).join('/'), present: false };
+        const buffer = readFileSync(full);
+        return { path: asset.split(path.sep).join('/'), present: true, bytes: buffer.byteLength, sha256: sha256(buffer) };
+      }),
+    });
+  }
+
+  const generatedAt = new Date().toISOString();
+  const manifest = {
+    generatedAt,
+    inventory: { path: rel(inventoryPath), sha256: sha256(readFileSync(inventoryPath)), packages: inventory.length },
+    packageCount: entries.length,
+    officialPackages: summary.officialPackages,
+    thirdPartyPackages: summary.thirdPartyPackages,
+    uniqueLicenseTexts: textIndex.length,
+    missingLicenseTextCount: summary.packagesWithoutLicenseFile.length,
+    supplementedCount: entries.filter((entry) => entry.missingInfo?.status === 'supplemented').length,
+    upstreamAbsentCount: entries.filter((entry) => entry.missingInfo?.status === 'absent-in-tarball').length,
+    trimRoots: TRIM_ROOTS,
+    trimmedApproxClosure: trimmed.size,
+    node,
+    katex:
+      katexTexts[0] === undefined
+        ? null
+        : { version: missing.katex.version, sha256: katexTexts[0].sha256, file: byHash.get(katexTexts[0].sha256)?.file ?? null },
+    fonts,
+    binaries,
+  };
+  writeFileSync(path.join(dataRoot, 'license-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  writeFileSync(path.join(dataRoot, 'license-text-index.json'), `${JSON.stringify(textIndex, null, 2)}\n`, 'utf8');
+
+  /* NOTICE.md */
+  const grouped = new Map();
+  for (const entry of entries) grouped.set(entry.license, [...(grouped.get(entry.license) ?? []), entry]);
+  const categories = [
+    ...CATEGORY_ORDER.filter((category) => grouped.has(category)),
+    ...[...grouped.keys()].filter((category) => !CATEGORY_ORDER.includes(category)).sort(),
+  ];
+  const notice = [
+    '# 绗笁鏂硅鍙?NOTICE锛圱hird-Party Notices锛?,
+    '',
+    `鐢熸垚鏃堕棿锛?{generatedAt}锛堟満鍣ㄧ敓鎴愶紱涓嶆槸娉曞緥鎰忚锛塦,
+    '',
+    '鏈枃浠惰鐩?DSH 鍥哄畾 npm 闂寘锛坄@deepseek-ai/dsh@0.2.1-rc.3`锛夌殑 558 涓寘锛?06 瀹樻柟 / 252 绗笁鏂癸級锛屼互鍙婂皢闅?Windows 浜х墿鍒嗗彂鐨?Node.js 杩愯鏃躲€?,
+    '',
+    '**5A 瑁佸壀璇存槑**锛氱敤鎴峰凡鎵瑰噯鍘绘帀 office / speech / PTY / sharp 缁勪欢銆俙闅忓寘` 鍒楋細`yes` = 涓ょ褰㈡€侀兘闅忓寘锛沗no (5A trim)` = 浠呭瓨鍦ㄤ簬褰撳墠鍏ㄩ噺闂寘锛岃鍓悗涓嶉殢瀛︾敓鍖呭垎鍙戯紙鍩轰簬 package.json 渚濊禆闂寘鐨勮繎浼煎垽鏂紝鏈€缁堜互鎵撳寘娓呭崟涓哄噯锛夈€?,
+    '',
+    '姣忎釜鍖呯殑瀹屾暣璁稿彲鏂囨湰瑙?`THIRD-PARTY-LICENSES.md`锛坄texts/<sha256鍓?6浣?.txt`锛屾寜鍐呭鍘婚噸锛夈€傜己涓婃父鏂囨湰鐨勫寘鍗曠嫭鍒楀嚭锛屼笉缂栭€犺鍙枃鏈€?,
+    '',
+    '## 1. 鍖呮竻鍗曪紙鎸夎鍙垎缁勶級',
+    '',
+  ];
+  for (const category of categories) {
+    const list = grouped.get(category).sort((a, b) => a.name.localeCompare(b.name));
+    notice.push(`### ${category}锛?{list.length} 鍖咃級`, '', '| 鍖呭悕 | 鐗堟湰 | 璁稿彲 | 鐗堟潈琛?| 闅忓寘 | 鏂囨湰 |', '|---|---|---|---|---|---|');
+    for (const entry of list) {
+      const textCell =
+        entry.texts.length === 0
+          ? '涓婃父鏈彁渚涙枃鏈紙瑙?搂2锛?
+          : [...new Set(entry.texts.map((text) => byHash.get(text.sha256).localFile))]
+              .map((file) => `[${path.basename(file)}](${file})`)
+              .join('<br>');
+      notice.push(`| \`${entry.name}\` | ${entry.version} | ${entry.license} | ${entry.copyright ?? '瑙佽鍙叏鏂?} | ${entry.ships} | ${textCell} |`);
+    }
+    notice.push('');
+  }
+  notice.push('## 2. 18 涓己璁稿彲鏂囨湰鍖呯殑澶勭悊缁撴灉', '');
+  notice.push(
+    '鏉ユ簮锛歍00 `license-summary.json` 鐨?`packagesWithoutLicenseFile`銆傚鐞嗘柟寮忥細涓嬭浇瀵瑰簲绮剧‘鐗堟湰 tarball 鍒?`.local/cache/T16/tarballs`锛堜笉杩?Git锛夛紝瑙ｅ寘鏌ユ壘 `LICENSE/COPYING/NOTICE`銆?,
+    '',
+    '| 鍖呭悕 | 鐗堟湰 | 璁稿彲 | tarball 鏂囨湰 | 澶勭悊缁撴灉 |',
+    '|---|---|---|---|---|',
+  );
+  for (const label of summary.packagesWithoutLicenseFile) {
+    const name = label.includes('@') ? label.slice(0, label.lastIndexOf('@')) : label;
+    const entry = entries.find((item) => item.name === name);
+    const info = missingByName.get(name);
+    const textCell =
+      entry === undefined || entry.texts.length === 0
+        ? '鈥?
+        : [...new Set(entry.texts.map((text) => byHash.get(text.sha256).localFile))]
+            .map((file) => `[${path.basename(file)}](${file})`)
+            .join('<br>');
+    const status =
+      info?.status === 'supplemented' ? '宸茶ˉ鍏? : info?.status === 'absent-in-tarball' ? '涓婃父鏈彁渚涙枃鏈? : (info?.status ?? '鏈鐞?);
+    notice.push(
+      `| \`${name}\` | ${entry?.version ?? '?'} | ${entry?.license ?? '?'} | ${textCell} | ${status}${info?.registryUrl === undefined ? '' : `锛?{info.registryUrl}锛塦} |`,
+    );
+  }
+  notice.push(
+    '',
+    '瀵逛簬鈥滀笂娓告湭鎻愪緵鏂囨湰鈥濈殑 17 涓寘锛歯pm tarball 鍐呭彧鏈?`license` 瀛楁澹版槑锛屾病鏈夎鍙叏鏂囥€傛湰 NOTICE 涓嶅鍒跺叾浠栭」鐩枃鏈紝涔熶笉鎶?SPDX 鏍囪瘑褰撲綔鏂囨湰銆傚垎鍙戝墠搴旓細鈶犲悜涓婃父浠撳簱鍙栧緱璇ョ増鏈?LICENSE 鍏ㄦ枃锛涒憽鎴栨浛鎹㈣渚濊禆锛涒憿鍙栧緱鏂囨湰鍓嶄笉寰楀０绉拌鍖呰鍙叏鏂囧凡闅忓寘銆?,
+    '',
+    '## 3. 鍒嗗彂涔夊姟鎽樿',
+    '',
+    '- MIT / ISC / BSD-2 / BSD-3 / 0BSD / Unlicense锛氫繚鐣欑増鏉冨０鏄庝笌璁稿彲鍏ㄦ枃锛圔SD-3 鍙﹀惈涓嶅緱鑳屼功鏉℃锛夈€?,
+    '- Apache-2.0锛氶檮 LICENSE锛涘寘鍐呭鏈?NOTICE 涓€骞朵繚鐣欍€?,
+    '- MPL-2.0锛坙ibreoffice-kit 涓ゅ寘锛屽凡瑁佸壀锛夛細濡傛仮澶嶅垎鍙戯紝闇€闄?MPL 鍏ㄦ枃涓?NOTICE锛屽苟鎻愪緵瀵瑰簲婧愮爜鑾峰彇鏂瑰紡銆?,
+    '- LGPL-3.0-or-later锛坰harp/libvips锛屽凡瑁佸壀锛夛細濡傛仮澶嶅垎鍙戯紝闇€闄?LGPL 鏂囨湰銆佸厑璁告浛鎹㈠簱骞舵彁渚涙簮鐮佽幏鍙栨柟寮忋€?,
+    '- 瀛椾綋锛歁ontserrat OFL-1.1銆並aTeX MIT锛岃 `FONTS-NOTICE.md`銆?,
+    '- Node.js锛歁IT + bundled notices锛岃 `NODEJS-NOTICE.md`銆?,
+    '- 鏈」鐩嚜鏈変唬鐮佸綋鍓嶄负绉佹湁/UNLICENSED锛涗骇鍝佸寲璁稿彲鐢辩敤鎴峰喅瀹氥€?,
+    '',
+  );
+  writeFileSync(path.join(licensesRoot, 'NOTICE.md'), `${notice.join('\n')}\n`, 'utf8');
+
+  /* THIRD-PARTY-LICENSES.md */
+  const indexDoc = [
+    '# 绗笁鏂硅鍙叏鏂囩储寮曪紙Third-Party License Texts锛?,
+    '',
+    `鐢熸垚鏃堕棿锛?{generatedAt}锛涘叡 ${textIndex.length} 浠藉幓閲嶆枃鏈€?{entries.length} 涓寘銆傛枃浠跺悕 = 鍐呭 SHA-256 鍓?16 浣嶃€俙,
+    '',
+    '## 鏂囨湰鏂囦欢',
+    '',
+    '| 鏂囨湰鏂囦欢 | SHA-256 | 瀛楄妭 | 寮曠敤鍖呮暟 |',
+    '|---|---|---|---|',
+  ];
+  for (const item of textIndex) {
+    const count = entries.filter((entry) => entry.texts.some((text) => text.sha256 === item.sha256)).length;
+    indexDoc.push(`| [${path.basename(item.localFile)}](${item.localFile}) | \`${item.sha256}\` | ${item.bytes} | ${count} |`);
+  }
+  indexDoc.push('', '## 鍖?鈫?鏂囨湰鏄犲皠', '', '| 鍖?| 鐗堟湰 | 璁稿彲 | 鏂囨湰鏂囦欢锛堝幓閲嶏級 |', '|---|---|---|---|');
+  for (const entry of [...entries].sort((a, b) => a.name.localeCompare(b.name))) {
+    const files =
+      entry.texts.length === 0
+        ? '涓婃父鏈彁渚涙枃鏈?
+        : [...new Set(entry.texts.map((text) => byHash.get(text.sha256).localFile))]
+            .map((file) => `[${path.basename(file)}](${file})`)
+            .join('<br>');
+    indexDoc.push(`| \`${entry.name}\` | ${entry.version} | ${entry.license} | ${files} |`);
+  }
+  writeFileSync(path.join(licensesRoot, 'THIRD-PARTY-LICENSES.md'), `${indexDoc.join('\n')}\n`, 'utf8');
+
+  /* NODEJS-NOTICE.md */
+  const nodeDoc = [
+    '# Node.js 杩愯鏃惰鍙笌绗笁鏂瑰０鏄?,
+    '',
+    'Windows 浜х墿灏嗚嚜甯?Node.js 杩愯鏃讹紙`app/node/node.exe`锛夛紱鎸?Node.js 鍒嗗彂瑕佹眰淇濈暀鍏?LICENSE锛堝惈 bundled third-party notices锛夈€?,
+    '',
+  ];
+  if (node === null) {
+    nodeDoc.push('**BLOCKED**锛氭湭鎵惧埌 Node.js 鍙戣鍖?LICENSE锛屾湭鐢熸垚鏂囨湰锛涢渶浠庢渶缁堥殢鍖?node.exe 鍚岀洰褰曞鍒?LICENSE銆?);
+  } else {
+    nodeDoc.push(
+      `- 婧愭枃浠讹細\`${node.source}\``,
+      `- 宸叉敹褰曞叏鏂囷細[${node.localFile}](${node.localFile})锛圫HA-256 \`${node.sha256}\`锛?{node.bytes} B锛塦,
+      node.exe === null
+        ? '- 瀵瑰簲 node.exe锛氭湭鎵惧埌'
+        : `- 瀵瑰簲 node.exe锛歕`${node.exe.path}\`锛?{node.exe.bytes} B锛孲HA-256 \`${node.exe.sha256}\`锛夛紱鐗堟湰鐢辨闈㈣繍琛屾椂娓呭崟澹版槑涓?v24.21.0銆俙,
+      '',
+      '## 鏂囨湰鍐呭璇存槑',
+      '',
+      'Node.js LICENSE 鏂囦欢鍖呭惈 Node.js MIT 涓昏鍙€乂8/OpenSSL/ICU 绛?bundled 搴撶殑璁稿彲澹版槑锛屼互鍙?鈥淭he externally maintained libraries used by Node.js are:鈥?涔嬪悗鐨勭涓夋柟搴撴钀姐€傚畬鏁存枃鏈寜瀛楄妭澶嶅埗鍒颁笂杩?`texts/nodejs-LICENSE.txt`锛屼笉鍦ㄦ湰鏂囬噸澶嶇矘璐达紝閬垮厤鏂囨湰婕傜Щ銆?,
+      '',
+      '## 鍒嗗彂娉ㄦ剰',
+      '',
+      '- 蹇呴』闅?`node.exe` 涓€璧峰垎鍙戝畬鏁?LICENSE锛屼笉寰楀垹鍑忕涓夋柟娈佃惤銆?,
+      '- Node.js 鍟嗘爣涓庡畼鏂硅儗涔︿笉鐢?MIT 璁稿彲鎺堜簣锛涗骇鍝佸懡鍚?缃插悕鍙ｅ緞闇€浜哄伐纭銆?,
+      '- 鏈€缁堜骇鐗?node.exe 鐗堟湰/鍝堝笇蹇呴』涓庨殢鍖?LICENSE 鐨勭増鏈竴鑷达紱鍗囩骇 Node 鍚庡繀椤婚噸鏂板鍒?LICENSE 骞堕噸绠楀搱甯屻€?,
+    );
+  }
+  writeFileSync(path.join(licensesRoot, 'NODEJS-NOTICE.md'), `${nodeDoc.join('\n')}\n`, 'utf8');
+
+  /* FONTS-NOTICE.md */
+  const montserrat = entries
+    .filter((entry) => FONT_PACKAGES.includes(entry.name))
+    .flatMap((entry) => entry.texts)
+    .find((text) => /SIL OPEN FONT LICENSE/i.test(text.text) && /montserrat/i.test(text.source));
+  const katex = katexTexts[0] ?? null;
+  const fontDoc = [
+    '# 瀛椾綋璧勪骇璁稿彲锛圡ontserrat / KaTeX锛?,
+    '',
+    '鏈骇鍝侀殢 DSH web 鍓嶇鍒嗗彂涓ょ粍瀛椾綋锛歁ontserrat锛堢晫闈㈠瓧浣擄級涓?KaTeX 瀛椾綋锛堟暟瀛︽帓鐗堬級銆傛湰鏂囦欢璁板綍鏉ユ簮銆佽鍙€佸瓧浣撳悕涓庡搱甯屻€?,
+    '',
+    '## Montserrat锛圫IL Open Font License 1.1锛?,
+    '',
+  ];
+  if (montserrat === undefined) {
+    fontDoc.push('**BLOCKED**锛氭湭鍦ㄩ棴鍖呬腑鎵惧埌 Montserrat OFL 鏂囨湰锛涗笉寰楀垎鍙戝瓧浣撱€?);
+  } else {
+    const meta = byHash.get(montserrat.sha256);
+    const reserved = montserrat.text.split(/\r?\n/).find((line) => /with reserved font name|reserved font names?\s*[:=]/i.test(line));
+    fontDoc.push(
+      `- 涓婃父鏂囨湰锛歕`${montserrat.source}\``,
+      `- 宸叉敹褰曞叏鏂囷細[${meta.localFile}](${meta.localFile})锛圫HA-256 \`${montserrat.sha256}\`锛?{meta.bytes} B锛塦,
+      `- 淇濈暀瀛椾綋鍚嶆潯娆撅細${reserved === undefined ? '璇?OFL 鏂囨湰鐨勭増鏉冭鏈０鏄?Reserved Font Name锛堜粎鍚?OFL 1.1 瀹氫箟娈碉級锛涗粛闇€浜哄伐鏍稿涓婃父鐗堟湰銆? : `鈥?{reserved.trim()}鈥漙}`,
+      '',
+      '| 瀛椾綋鏂囦欢 | 鍖?| 瀛楄妭 | SHA-256 |',
+      '|---|---|---|---|',
+    );
+    for (const file of fonts.filter((item) => item.family === 'Montserrat')) {
+      fontDoc.push(`| \`${file.path}\` | \`${file.package}\` | ${file.bytes} | \`${file.sha256}\` |`);
+    }
+  }
+  fontDoc.push('', '## KaTeX 瀛椾綋锛圡IT锛?, '');
+  if (katex === null) {
+    fontDoc.push('**BLOCKED**锛氭湭鍙栧緱 KaTeX MIT 鏂囨湰锛涗笉寰楀垎鍙?KaTeX 瀛椾綋銆?);
+  } else {
+    const meta = byHash.get(katex.sha256);
+    fontDoc.push(
+      `- 涓婃父锛欿aTeX v${missing.katex.version}锛堥棴鍖呬腑鏃?katex 鍖咃紱瀛椾綋闅?\`@deepseek-ai/dsh-web-frontend\` 鎵撳寘锛塦,
+      `- 宸叉敹褰?MIT 鍏ㄦ枃锛歔${meta.localFile}](${meta.localFile})锛圫HA-256 \`${katex.sha256}\`锛?{meta.bytes} B锛塦,
+      `- npm 鏉ユ簮锛?{missing.katex.registryUrl}`,
+      '',
+      '| 瀛椾綋鏂囦欢 | 鍖?| 瀛楄妭 | SHA-256 |',
+      '|---|---|---|---|',
+    );
+    for (const file of fonts.filter((item) => item.family === 'KaTeX')) {
+      fontDoc.push(`| \`${file.path}\` | \`${file.package}\` | ${file.bytes} | \`${file.sha256}\` |`);
+    }
+    fontDoc.push(
+      '',
+      '**浜哄伐纭**锛欿aTeX 瀛椾綋鐢变笂娓告瀯寤哄苟宓屽叆 DSH 鍓嶇锛屾湭璁板綍鍏剁簿纭?KaTeX 鐗堟湰锛涙湰鏂囦欢浣跨敤 npm 鏈€鏂扮増 MIT 鏂囨湰銆傝嫢瑕佹眰涓ユ牸鐗堟湰瀵瑰簲锛屽簲浠?DSH 鍙戝竷鏂瑰彇寰楁瀯寤烘椂 KaTeX 鐗堟湰骞跺鏍搞€?,
+    );
+  }
+  fontDoc.push('', '## 宸茶鍓瓧浣?, '', 'LibreOffice 闅忓寘瀛椾綋灞炰簬 MPL-2.0 鐨?`libreoffice-kit-win32-x64`锛屽凡鎸?5A 瑁佸壀锛涘鎭㈠ office 缁勪欢锛岄渶閲嶆柊绾冲叆瀛椾綋璁稿彲涓?NOTICE銆?, '');
+  writeFileSync(path.join(licensesRoot, 'FONTS-NOTICE.md'), `${fontDoc.join('\n')}\n`, 'utf8');
+
+  /* NATIVE-BINARIES.md */
+  const nativeDoc = [
+    '# 鍘熺敓浜岃繘鍒舵竻鍗曚笌璁稿彲浠ュ強杩愯搴撹鏄?,
+    '',
+    '鏂囦欢鍝堝笇鏉ヨ嚜褰撳墠鍏ㄩ噺闂寘锛坄education/.local/cache/T16/hoisted-test/node_modules`锛夈€俙no (5A trim)` 鍖呭湪瑁佸壀鍚庝笉闅忓鐢熷寘鍒嗗彂銆?,
+    '',
+    '| 鍖?| 鐗堟湰 | 璁稿彲 | 闅忓寘 | 鏂囦欢锛堢浉瀵瑰寘鐩綍锛?| 瀛楄妭 | SHA-256 |',
+    '|---|---|---|---|---|---|---|',
+  ];
+  for (const entry of binaries) {
+    for (const file of entry.files) {
+      nativeDoc.push(
+        `| \`${entry.name}\` | ${entry.version} | ${entry.license} | ${entry.ships} | \`${file.path}\` | ${file.bytes ?? '鈥?} | ${file.sha256 === undefined ? '鈥? : `\`${file.sha256}\``} |`,
+      );
+    }
+  }
+  nativeDoc.push(
+    '',
+    '## 杩愯搴?,
+    '',
+    '- `koffi` 涓?`node-addon-require-builtin`锛歂-API 妯″潡锛岄€氬父闇€瑕佺洰鏍囨満鍏峰 **Microsoft Visual C++ 2015鈥?022 Redistributable (x64)**锛涘繀椤诲湪骞插噣鏍囧噯鐢ㄦ埛鏈哄疄娴嬶紙T16锛夈€?,
+    '- `node-pty`锛堝凡瑁佸壀锛夛細`conpty.dll`/`OpenConsole.exe` 鏉ヨ嚜 Windows Terminal锛圡IT锛夛紱濡傛仮澶?PTY锛岄渶闅忓寘淇濈暀鍏惰鍙苟纭 VC++ 杩愯搴撱€?,
+    '- `sharp`/`libvips`锛堝凡瑁佸壀锛孉pache-2.0 AND LGPL-3.0-or-later锛夛細濡傛仮澶嶏紝蹇呴』婊¤冻 LGPL 鏇挎崲/婧愮爜涔夊姟锛堣 `EXCLUDED.md`锛夈€?,
+    '- `sherpa-onnx`锛堝凡瑁佸壀锛孉pache-2.0锛夛細濡傛仮澶嶏紝onnxruntime DLL 涓庢ā鍨?璇煶璧勪骇闇€鍗曠嫭鏍稿璁稿彲涓庝綋绉€?,
+    '- `@vscode/ripgrep-win32-x64`锛圡IT锛夛細`rg.exe` 闈欐€佷簩杩涘埗锛屾棤棰濆杩愯搴撹姹傦紙浠嶅簲鍦ㄥ共鍑€鏈洪獙璇侊級銆?,
+    '- `libreoffice-kit`锛堝凡瑁佸壀锛孧PL-2.0锛夛細鍏?exe 涓?`program/license.txt`/NOTICE 闇€闅忔仮澶嶅悗鐨勫寘鍒嗗彂銆?,
+    '',
+    '## 妫€鏌ュ懡浠?,
+    '',
+    '```powershell',
+    'node education/scripts/packaging/scan-payload.mjs <payload-dir> --json',
+    '```',
+    '',
+  );
+  writeFileSync(path.join(licensesRoot, 'NATIVE-BINARIES.md'), `${nativeDoc.join('\n')}\n`, 'utf8');
+
+  /* EXCLUDED.md */
+  const excluded = entries.filter((entry) => trimmed.has(entry.name)).sort((a, b) => a.name.localeCompare(b.name));
+  const excludedDoc = [
+    '# 5A 瑁佸壀璁板綍涓庢仮澶嶄箟鍔★紙EXCLUDED锛?,
+    '',
+    '鐢ㄦ埛宸叉壒鍑?**5A 瑁佸壀**锛氫粠瀛︾敓鍖呯Щ闄?office銆佽闊炽€丳TY銆乻harp/libvips 缁勪欢銆傛湰鏂囦欢璁板綍褰撳墠鍏ㄩ噺闂寘涓瓨鍦ㄣ€佽鍓悗涓嶉殢瀛︾敓鍖呭垎鍙戠殑缁勪欢锛屼互鍙婃仮澶嶆椂闇€鎵挎媴鐨勯澶栬鍙箟鍔°€?,
+    '',
+    '> `瑁佸壀闂寘` 鐢?package.json 渚濊禆鍥捐繎浼艰绠楋紙roots = 涓嬪垪 7 涓寘锛涘叡浜緷璧栦繚鐣欙級锛涙渶缁堜互 T16 鎵撳寘娓呭崟/payload 鎵弿涓哄噯銆?,
+    '',
+    '## 鐩存帴瑁佸壀鐨勬牴鍖?,
+    '',
+    '| 鍖?| 鐗堟湰 | 璁稿彲 | 璇存槑 |',
+    '|---|---|---|---|',
+  ];
+  const rootNotes = {
+    '@deepseek-ai/libreoffice-kit': 'office 杞崲锛圡PL-2.0锛?,
+    '@deepseek-ai/libreoffice-kit-win32-x64': 'LibreOffice 浜岃繘鍒?+ 瀛椾綋锛圡PL-2.0锛?,
+    sharp: '鍥惧儚澶勭悊涓诲寘锛圓pache-2.0锛?,
+    '@img/sharp-win32-x64': 'libvips DLL + sharp 鍘熺敓妯″潡锛圓pache-2.0 AND LGPL-3.0-or-later锛?,
+    'sherpa-onnx-node': '璇煶璇嗗埆锛圓pache-2.0锛?,
+    'sherpa-onnx-win-x64': 'onnxruntime/sherpa DLL锛圓pache-2.0锛?,
+    'node-pty': 'PTY/缁堢锛圡IT锛?,
+  };
+  for (const root of TRIM_ROOTS) {
+    const entry = entries.find((item) => item.name === root);
+    excludedDoc.push(`| \`${root}\` | ${entry?.version ?? '?'} | ${entry?.license ?? '?'} | ${rootNotes[root] ?? ''} |`);
+  }
+  excludedDoc.push('', `## 杩戜技瑁佸壀闂寘锛?{excluded.length} 鍖咃級`, '', '| 鍖?| 鐗堟湰 | 璁稿彲 |', '|---|---|---|');
+  for (const entry of excluded) excludedDoc.push(`| \`${entry.name}\` | ${entry.version} | ${entry.license} |`);
+  excludedDoc.push(
+    '',
+    '## 濡傛仮澶嶅垎鍙戦渶鎵挎媴鐨勯澶栦箟鍔?,
+    '',
+    '### MPL-2.0锛坙ibreoffice-kit銆乴ibreoffice-kit-win32-x64锛?,
+    '- 闄?MPL-2.0 鍏ㄦ枃涓庡寘鍐?NOTICE/`program/license.txt`锛?,
+    '- 鎻愪緵 MPL 瑕嗙洊鏂囦欢鐨勬簮鐮佽幏鍙栨柟寮忥紙鍗充娇鏈慨鏀癸紝涔熻鑳借鎺ユ敹鑰呭彇寰楀搴旀簮鐮侊級锛?,
+    '- 涓嶅緱鎶?MPL 浠ｇ爜鏀规垚涓撴湁鍐嶅垎鍙戯紱淇敼鏂囦欢闇€淇濈暀淇敼璇存槑涓庢棩鏈燂紱',
+    '- LibreOffice 瀛椾綋涓?`program/license.txt` 闅忓寘淇濈暀銆?,
+    '',
+    '### LGPL-3.0-or-later锛園img/sharp-win32-x64 / libvips DLL锛?,
+    '- 闄?LGPL-3.0 鍏ㄦ枃涓?Apache-2.0 鏂囨湰锛堣鍖呬负 `Apache-2.0 AND LGPL-3.0-or-later`锛夛紱',
+    '- 鍔ㄦ€侀摼鎺ヤ笉寰楅樆姝㈢敤鎴锋浛鎹?LGPL 搴擄紙DLL 鍙浛鎹級锛涙彁渚?libvips 瀵瑰簲婧愮爜鑾峰彇鏂瑰紡锛?,
+    '- 鑻ヤ慨鏀?libvips锛屽繀椤绘寜 LGPL 鎻愪緵淇敼鍚庣殑婧愮爜銆?,
+    '',
+    '### Apache-2.0锛坰harp 涓诲寘銆乻herpa-onnx 涓ゅ寘锛?,
+    '- 闄?LICENSE锛涘寘鍐?NOTICE锛堝鏈夛級淇濈暀锛涗慨鏀规枃浠堕渶鏍囨敞銆?,
+    '',
+    '### MIT锛坣ode-pty锛?,
+    '- 闄?MIT 鍏ㄦ枃涓庣増鏉冭锛沗conpty.dll`/`OpenConsole.exe` 鏉ヨ嚜 Windows Terminal锛圡IT锛夐渶涓€骞朵繚鐣欍€?,
+    '',
+    '### 鍏朵粬',
+    '- 鎭㈠鍚庡繀椤婚噸璺?`education/scripts/packaging/scan-payload.mjs` 骞堕噸鏂扮敓鎴?NOTICE/鏂囨湰绱㈠紩锛?,
+    '- 5A 瑁佸壀涓嶆敼鍙樿嚜鏈変唬鐮佽鍙紙浠嶄负绉佹湁/UNLICENSED锛夛紱',
+    '- 鎭㈠缁勪欢浼氭樉钁楀鍔犱綋绉笌 VC++ 杩愯搴撲緷璧栵紙瑙?`NATIVE-BINARIES.md`锛夈€?,
+    '',
+  );
+  writeFileSync(path.join(licensesRoot, 'EXCLUDED.md'), `${excludedDoc.join('\n')}\n`, 'utf8');
+
+  /* README.md */
+  const readme = [
+    '# 璁稿彲涓?NOTICE 鐢熸垚璇存槑锛圓2/T16锛?,
+    '',
+    '鏈洰褰曟槸 Windows 浜х墿 `licenses/` 鐨勬簮锛氱涓夋柟 NOTICE銆佽鍙叏鏂囩储寮曘€丯ode.js/瀛椾綋/鍘熺敓浜岃繘鍒跺０鏄庝笌 5A 瑁佸壀璁板綍銆?,
+    '',
+    '## 鏂囦欢',
+    '',
+    '- `NOTICE.md`锛氭寜璁稿彲鍒嗙粍鐨?558 鍖呮竻鍗曪紙鐗堟潈琛屻€佹槸鍚﹂殢鍖呫€佹枃鏈摼鎺ワ級涓?18 涓己鏂囨湰鍖呯殑澶勭悊缁撴灉锛?,
+    '- `THIRD-PARTY-LICENSES.md`锛氬幓閲嶈鍙叏鏂囩储寮?+ 鍖呪啋鏂囨湰鏄犲皠锛?,
+    '- `texts/`锛氭寜 SHA-256 鍓?16 浣嶅懡鍚嶇殑璁稿彲鍏ㄦ枃锛沗texts/supplemented/` 涓?18 鍖呰ˉ鍏ㄤ腑瀹為檯鍙栧緱鐨勪笂娓告枃鏈紱`texts/nodejs-LICENSE.txt` 涓?Node.js 鍙戣鍖?LICENSE锛?,
+    '- `NODEJS-NOTICE.md`銆乣FONTS-NOTICE.md`銆乣NATIVE-BINARIES.md`銆乣EXCLUDED.md`锛氫笓椤硅鏄庯紱',
+    '- `data/license-manifest.json`銆乣data/missing-licenses.json`銆乣data/license-text-index.json`锛氭満鍣ㄥ彲璇绘竻鍗曚笌鍝堝笇銆?,
+    '',
+    '## 濡備綍鏇存柊',
+    '',
+    '```powershell',
+    '# 1) 琛ュ叏缂烘枃鏈寘锛堝彧鍦?.local/cache/T16 涓嬭浇 tarball锛屼笉杩?Git锛?,
+    'node education/licenses/tools/fetch-missing-licenses.mjs',
+    '# 2) 閲嶆柊鐢熸垚 NOTICE/绱㈠紩/涓撻」璇存槑',
+    'node education/licenses/tools/build-notice.mjs',
+    '# 3) 鎵弿寰呮墦鍖?payload锛堟嫆缁?PDF/椤靛浘/绉樺瘑/journal/涓汉鏁版嵁锛?,
+    'node education/scripts/packaging/scan-payload.mjs <payload-dir> --json',
+    '```',
+    '',
+    '## 绾︽潫涓庡０鏄?,
+    '',
+    '- **涓嶆槸娉曞緥鎰忚**锛氭湰鐩綍鏄伐绋嬪綊鍥犳潗鏂欙紝鏈€缁堝垎鍙戝悎瑙勭敱鐢ㄦ埛/娉曞姟纭銆?,
+    '- 璁稿彲鏂囨湰鍏ㄩ儴鎸夊瓧鑺傚鍒惰嚜涓婃父鏂囦欢锛?7 涓寘鐨勪笂娓?tarball 鏃犳枃鏈紝宸叉寜鈥滀笂娓告湭鎻愪緵鏂囨湰鈥濊褰曟潵婧?URL/鐗堟湰锛屾湭缂栭€犮€?,
+    '- 5A 瑁佸壀鍚庣殑瀹為檯 payload 浠ユ墦鍖呮竻鍗曚笌 `scan-payload` 缁撴灉涓哄噯锛沗EXCLUDED.md` 鐨勯棴鍖呬负杩戜技鍊笺€?,
+    '- 闇€浜哄伐纭锛氣憼DeepSeek/Node.js/鏁欐潗绛夊晢鏍囦笌缃插悕鍙ｅ緞锛涒憽Montserrat OFL 淇濈暀瀛椾綋鍚嶄笌 KaTeX 绮剧‘鐗堟湰銆?,
+    '',
+  ];
+  writeFileSync(path.join(licensesRoot, 'README.md'), `${readme.join('\n')}\n`, 'utf8');
+
+  process.stdout.write(
+    `NOTICE generated: packages=${entries.length} uniqueTexts=${textIndex.length} supplemented=${manifest.supplementedCount} absent=${manifest.upstreamAbsentCount} trimmed=${trimmed.size}\n`,
+  );
+}
+
+main();
+
