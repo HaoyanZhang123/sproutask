@@ -67,7 +67,7 @@ education/licenses/   第三方许可清单（含 libvips LGPL-3.0 义务）
 
 ## 发布
 
-见 [v0.3.0 发布说明](docs/releases/v0.3.0.md)。`main` 仍是旧的 Electron 0.2.x 线；本次 DSH 重构线发布在分支 `education-v0.3.0`。
+见 [v0.3.0 发布说明](docs/releases/v0.3.0.md)。DSH 重构线现已合并到 `main`；旧的 Electron 0.2.x 源码保留在仓库中供追溯。
 
 ## 当前状态与已知限制
 

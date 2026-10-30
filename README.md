@@ -67,7 +67,7 @@ education/licenses/   third-party notices, incl. libvips LGPL-3.0 obligations
 
 ## Releases
 
-See [v0.3.0 release notes](docs/releases/v0.3.0.md). `main` still carries the earlier Electron 0.2.x line; this DSH rebuild ships on branch `education-v0.3.0`.
+See [v0.3.0 release notes](docs/releases/v0.3.0.md). The DSH rebuild is now on `main`; the previous Electron 0.2.x sources remain in the tree for history.
 
 ## Current status and limits
 
