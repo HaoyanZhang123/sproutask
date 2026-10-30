@@ -1,0 +1,23 @@
+{
+  "name": "@edu/client-visuals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-free DOM views for controlled diagrams, answer forms (choice/text/label/relation), image answer flow and GradeResult feedback; mounts into shell slots study:visuals / study:feedback.",
+  "license": "UNLICENSED",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "edu": {
+    "bundle": {
+      "status": "not-built",
+      "owner": "T13/T16",
+      "note": "Framework-free DOM panels; the loader-protocol bundle for client packages is not produced by T11."
+    }
+  }
+}

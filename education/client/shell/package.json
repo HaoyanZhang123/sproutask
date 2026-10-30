@@ -1,0 +1,34 @@
+{
+  "name": "@edu/client-shell",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-agnostic DOM education shell: root layout, navigation, home/resume, records, account status, page/slot mount contracts. No React/Vue and no runtime dependencies.",
+  "license": "UNLICENSED",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client-entry.ts",
+      "import": "./src/client-entry.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": ["@deepseek-ai/dsh-client-ui-renderer"]
+    }
+  },
+  "edu": {
+    "bundle": {
+      "status": "not-built",
+      "owner": "T13/T16",
+      "note": "The loader-protocol bundle (window.__ModuleLoader__) and the React root-slot bridge are not produced by T08; src/client-entry.ts is the frozen registration seam."
+    }
+  }
+}

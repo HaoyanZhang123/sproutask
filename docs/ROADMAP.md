@@ -1,5 +1,7 @@
 # 路线图（ROADMAP）
 
+> 下文保留旧F系列路线。DSH教育重构的R01–R18及T00–T17以[重构交接](rebuild/00-START.md)和[自动执行协议](rebuild/08-execution.md)为准，进度仍只写[PROGRESS](PROGRESS.md)。
+
 > 本文件管**里程碑定义、需求编号（F-0XX）与待决策清单**。
 > **进度状态一律以 `docs/PROGRESS.md` 为准**（唯一事实来源），本表不重复维护状态。
 > **需求编号规则**：`F-0XX`，每条需求对应 `docs/specs/F-0XX-*.md`。

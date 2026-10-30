@@ -1,0 +1,12 @@
+﻿{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "@edu/visuals": ["../../runtime/src/shims/visuals-shim.d.ts"]
+    }
+  },
+  "include": ["**/*.ts"]
+}

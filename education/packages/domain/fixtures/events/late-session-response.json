@@ -1,0 +1,21 @@
+{
+  "envelope": {
+    "schemaVersion": 1,
+    "eventId": "event.session.output.1",
+    "topic": "session.output",
+    "entityId": "session.cell.1",
+    "revision": 3,
+    "seq": 10,
+    "payload": {
+      "conceptId": "concept.cell",
+      "sessionId": "session.cell.1",
+      "text": "fixture late output",
+      "isMock": false
+    }
+  },
+  "expected": {
+    "sessionId": "session.cell.1",
+    "revision": 5,
+    "conceptId": "concept.cell"
+  }
+}

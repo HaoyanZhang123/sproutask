@@ -1,0 +1,26 @@
+{
+  "name": "@edu/knowledge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TOC index, concept graph queries, source resolution and content publication services (T04).",
+  "license": "UNLICENSED",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "bin": {
+    "edu-validate-pack": "./bin/validate-pack.mjs"
+  },
+  "files": ["src", "bin"],
+  "dependencies": {
+    "@edu/domain": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

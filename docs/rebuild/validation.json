@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "kind": "handoff-static-validation-not-product-tests",
+  "checkedAt": "2026-10-29T09:38:09.244Z",
+  "workspace": "E:\\DSH\\workspaces\\ai4edu",
+  "documents": 31,
+  "tasks": 18,
+  "phaseGates": 21,
+  "requirements": 18,
+  "acceptanceCases": 36,
+  "localLinksChecked": 331,
+  "brokenLinks": [],
+  "unorderedWriteScopeOverlaps": [],
+  "errors": [],
+  "productImplementationDirectoryExists": false,
+  "productTestsRun": false,
+  "coverage": {
+    "requirements": {
+      "R01": [
+        "T00",
+        "T01",
+        "T07",
+        "T13",
+        "T16"
+      ],
+      "R14": [
+        "T00",
+        "T07",
+        "T08",
+        "T11",
+        "T16"
+      ],
+      "R18": [
+        "T00",
+        "T01",
+        "T13",
+        "T15",
+        "T16"
+      ],
+      "R09": [
+        "T01",
+        "T06",
+        "T10",
+        "T12"
+      ],
+      "R15": [
+        "T01",
+        "T02",
+        "T06",
+        "T08",
+        "T13",
+        "T16"
+      ],
+      "R16": [
+        "T01",
+        "T04",
+        "T07"
+      ],
+      "R17": [
+        "T02",
+        "T03",
+        "T07",
+        "T09",
+        "T11",
+        "T12",
+        "T13"
+      ],
+      "R02": [
+        "T03",
+        "T09",
+        "T16"
+      ],
+      "R03": [
+        "T03",
+        "T04",
+        "T05",
+        "T09",
+        "T13",
+        "T14",
+        "T15"
+      ],
+      "R04": [
+        "T04",
+        "T05",
+        "T14",
+        "T15"
+      ],
+      "R05": [
+        "T04",
+        "T10",
+        "T14"
+      ],
+      "R06": [
+        "T05",
+        "T07",
+        "T12",
+        "T13",
+        "T14",
+        "T15"
+      ],
+      "R07": [
+        "T05",
+        "T06",
+        "T07",
+        "T12",
+        "T13",
+        "T14",
+        "T15"
+      ],
+      "R08": [
+        "T06",
+        "T10",
+        "T12",
+        "T15"
+      ],
+      "R12": [
+        "T08",
+        "T12",
+        "T13"
+      ],
+      "R13": [
+        "T08",
+        "T09",
+        "T10",
+        "T12"
+      ],
+      "R10": [
+        "T11",
+        "T14",
+        "T15"
+      ],
+      "R11": [
+        "T11",
+        "T13",
+        "T15"
+      ]
+    },
+    "acceptance": {
+      "A01": [
+        "T00",
+        "T07",
+        "T13"
+      ],
+      "A02": [
+        "T00",
+        "T01",
+        "T16"
+      ],
+      "A03": [
+        "T00",
+        "T08"
+      ],
+      "A24": [
+        "T00",
+        "T07",
+        "T08",
+        "T11",
+        "T13"
+      ],
+      "A27": [
+        "T01",
+        "T07",
+        "T16"
+      ],
+      "A28": [
+        "T01",
+        "T04"
+      ],
+      "A25": [
+        "T02",
+        "T06",
+        "T13"
+      ],
+      "A26": [
+        "T02"
+      ],
+      "A33": [
+        "T02",
+        "T08"
+      ],
+      "A04": [
+        "T03"
+      ],
+      "A05": [
+        "T03",
+        "T16"
+      ],
+      "A06": [
+        "T03",
+        "T09"
+      ],
+      "A07": [
+        "T03",
+        "T04",
+        "T09"
+      ],
+      "A29": [
+        "T03",
+        "T07",
+        "T09",
+        "T11",
+        "T12",
+        "T13"
+      ],
+      "A08": [
+        "T04",
+        "T05",
+        "T09",
+        "T13",
+        "T14",
+        "T15"
+      ],
+      "A11": [
+        "T04",
+        "T10",
+        "T14"
+      ],
+      "A10": [
+        "T05",
+        "T14",
+        "T15"
+      ],
+      "A14": [
+        "T06",
+        "T07",
+        "T12",
+        "T13",
+        "T15"
+      ],
+      "A15": [
+        "T06"
+      ],
+      "A16": [
+        "T06"
+      ],
+      "A17": [
+        "T06",
+        "T08"
+      ],
+      "A18": [
+        "T06",
+        "T10",
+        "T12"
+      ],
+      "A13": [
+        "T07",
+        "T12",
+        "T13",
+        "T15"
+      ],
+      "A22": [
+        "T08",
+        "T12",
+        "T13",
+        "T16"
+      ],
+      "A23": [
+        "T08",
+        "T09",
+        "T10",
+        "T12"
+      ],
+      "A12": [
+        "T10"
+      ],
+      "A19": [
+        "T11",
+        "T14",
+        "T15"
+      ],
+      "A20": [
+        "T11",
+        "T13",
+        "T15"
+      ],
+      "A21": [
+        "T11",
+        "T12",
+        "T13"
+      ],
+      "A30": [
+        "T13",
+        "T15"
+      ],
+      "A35": [
+        "T13",
+        "T15"
+      ],
+      "A09": [
+        "T14",
+        "T15"
+      ],
+      "A34": [
+        "T15"
+      ],
+      "A31": [
+        "T16"
+      ],
+      "A32": [
+        "T16"
+      ]
+    }
+  },
+  "documentHashes": {
+    "docs/rebuild/02-user-flows.md": "671ecd80f1321a4c8ce924b1692532026242a89a2361cf7609552576630d4fbf",
+    "docs/rebuild/01-product-contract.md": "13d6a48355654cf6f22e32e8eb2082f247699c49fc15cf07b0e22dfdf6e1a7c5",
+    "docs/rebuild/05-data-contracts.md": "837505fc59f611afb5512b3f2085780a6a3e4b6c193ccc0248b4d21eb2f17da7",
+    "docs/rebuild/06-system-design.md": "a1db736657c816bb1eee3cb113626c3439a62b717bf4466928014a68dd692077",
+    "docs/rebuild/00-START.md": "d1542d8504ed72b9ad17eda04ccbdbdc440d8dadc27c13afb959f62747a48b63",
+    "docs/rebuild/03-evidence.md": "5089454f0953fc502d72f1eccf59422602300d391962f419a2b1558444e5a775",
+    "docs/rebuild/tasks/T00-runtime.md": "bfedabf369129e924c1a2e8bee17bac4e17a18389ee350c7e95937670a5a3b4e",
+    "docs/rebuild/tasks/T01-foundation.md": "e976e0dfe76d8db404266ff89cfa5f20ded8f72d5e0bc0afb3627e4f7db01918",
+    "docs/rebuild/tasks/T02-storage.md": "a1857a8a90b746f4c2b4835294b11a72f26c41e7b52505e8e4e9787b443d9e65",
+    "docs/rebuild/tasks/T03-importer.md": "e388b9a07007eb77ae6805b563fd13349d903ebd41b1ba3623d5356a68025136",
+    "docs/rebuild/tasks/T04-knowledge.md": "724793ebae0a202b094bb9a338084692c31ae69fbe81db53b0321f8cffdc1835",
+    "docs/rebuild/tasks/T05-first-section.md": "201993192aa56612cad3b5113f98602c8e6a5874b85b7915cc0066162053fd8a",
+    "docs/rebuild/tasks/T06-learner.md": "ece51bb790064f2c2e9ae4b86398959aaf94fa5a59bb6d9dbfbcd8de2e8398cf",
+    "docs/rebuild/tasks/T07-tutor.md": "1a8f07df5b1a7f7d9a62f16f642887d3b3927d1b8f6a3a325fa0af5baad13ff0",
+    "docs/rebuild/tasks/T08-ui-shell.md": "95f56767fdc165247045c77c685c97e275bf70f0e2fe1aa7689ca974a962c266",
+    "docs/rebuild/tasks/T09-ui-library.md": "78808105bd00aeb8c8493d5dcb4687bb445d2feb9d1f555aa4cf68012f1fc563",
+    "docs/rebuild/tasks/T10-ui-map.md": "20f951ace5166279ed93ef292432e9d3f8e4f546bb0153e097f30198d7762b91",
+    "docs/rebuild/tasks/T11-visuals-grading.md": "5dba00b183ffcc35111a79d2e82d8cd71ee8818c3c6284c401f7a1a3191b85c5",
+    "docs/rebuild/tasks/T12-ui-study.md": "95ac0da55dc17558f01f9485195ec72d8353e6955b75a628d1835cbd18fe0988",
+    "docs/rebuild/tasks/T13-vertical-integration.md": "28283eac161b4643f2b3a600bb0d2c627624280f745f80481ffc0ea7f79aeff8",
+    "docs/rebuild/tasks/T14-full-volume.md": "4ec78da4f8aafad814b408f2571cd05434c4dd199280d5afaaa1d2ef795ebcb9",
+    "docs/rebuild/tasks/T15-quality.md": "f25988d0dd96ab0f7a89e043c21e790018dcf2b8bb92694eca270b0f2117aa8a",
+    "docs/rebuild/tasks/T16-desktop.md": "395f26fdee999bc219982586ec1d053c449f59442de5a4604a535871fadf3f15",
+    "docs/rebuild/tasks/T17-final-audit.md": "3859862bd60163978e32b7ccd352549f5e82b25e6fdbefced20ff46c47808af2",
+    "docs/rebuild/04-dsh-integration.md": "7a68d8db6a07f8ea33fd19f695f143a629677078bc987b2742f220d222eb5b6b",
+    "docs/rebuild/07-acceptance.md": "8c67dac741bd8c25bbe0b25183a43075d4a4900620fe175139a9ad256af2dc44",
+    "docs/rebuild/09-report-template.md": "af6d73ae95fb4d0dc2da48a1df74cd2505d88869f47019e85d770689084eb244",
+    "docs/rebuild/MASTER-PROMPT.md": "9f7422ec28ffa3b7ea171ff26f556685d3f2658570b1d0a9bfc57c06c7be95bf",
+    "docs/rebuild/SUBAGENT-PROMPT.md": "631f245c26034efc66e5729a9bb92b4df177a6f90928c26c6b54ca5412f9164f",
+    "docs/rebuild/08-execution.md": "9cafd706ab10e3f7fe306ee34c48df2ff9fa50231d3719108838449bc088d9a8",
+    "docs/rebuild/10-review.md": "f234e71ae07b42e245a016cc926805073d5e60d8905f8910099a4b03f44b402a"
+  },
+  "taskIndexSha256": "40d4fdf4c3bf118d13456af38c79f89f21626f9f43ef0698f33b7c0f7b59013e"
+}

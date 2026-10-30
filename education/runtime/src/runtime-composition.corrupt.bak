@@ -1,0 +1,470 @@
+﻿/**
+ * Education runtime composition root (phase B).
+ *
+ * Wires the frozen domain ports to real local packages and the fixed DSH host:
+ * knowledge (real T05 candidate pack + source catalog), learner projection and
+ * storage, rule grading (visuals), tutor tool registry, DSH tutor gateway,
+ * host capabilities/auth status, i18n/DTO services and a page registry.
+ *
+ * Side effects are limited to the isolated data root passed by the host; the
+ * client learns nothing about credentials (only auth status).
+ */
+
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import type {
+  AuthStatus,
+  Clock,
+  ContentQuery,
+  EventStore,
+  GradePort,
+  HostPort,
+  Id,
+  IdGenerator,
+  ImportPort,
+  KnowledgePort,
+  LearnerProjectionStore,
+  RequestContext,
+  RuntimeCapabilities,
+  ServiceResult,
+  Session,
+  Timestamp,
+  TutorCapabilities,
+  TutorGateway,
+} from '@edu/domain';
+import { errResult, okResult } from '@edu/domain';
+import { StorageService } from '@edu/storage';
+import { createSourceCatalog, KnowledgeService, loadPack } from '@edu/knowledge';
+import { createLearnerFeature, LearnerService } from '@edu/learner';
+import {
+  adaptTutorGateway,
+  createEducationToolRegistry,
+  createTutorService,
+  type EducationToolRegistry,
+  type TutorToolDependencies,
+} from '@edu/tutor';
+import type { PackKey } from '@edu/domain';
+import { createRuleGradePort } from './adapters/rule-grade.js';
+import {
+  assertDshTutorHost,
+  createDshTutorGateway,
+  dshVersionDescriptor,
+  type DshAgentsLike,
+  type DshSessionsLike,
+} from './adapters/dsh-tutor.js';
+import { createNotBoundTutorGateway } from './adapters/dsh-not-bound.js';
+import { createSystemClock } from './adapters/system-clock.js';
+import { createSequentialIdGenerator } from './adapters/sequential-ids.js';
+import { PageRegistry } from './pages.js';
+
+export interface I18nService {
+  readonly locale: 'zh-CN';
+  t(key: string): string;
+  readonly messages: Readonly<Record<string, string>>;
+}
+
+export interface DtoService {
+  shellBootstrap(): {
+    readonly title: string;
+    readonly learnerId: string;
+    readonly packKey: PackKey;
+    readonly trustMode: 'candidate';
+    readonly fixtureData: false;
+    readonly packVersion: string;
+    readonly conceptCount: number;
+    readonly tools: readonly string[];
+  };
+}
+
+export interface EducationRuntimeOptions {
+  readonly workspaceRoot: string;
+  readonly dataRoot: string;
+  readonly env?: NodeJS.ProcessEnv;
+  readonly agents?: DshAgentsLike;
+  readonly sessions?: DshSessionsLike;
+  readonly dshVersion?: string;
+  readonly learnerId?: string;
+  readonly model?: { readonly provider: string; readonly model: string; readonly maxTokens?: number };
+  readonly onAudit?: (event: unknown) => void;
+}
+
+export interface EducationRuntimeComposition {
+  readonly status: 'ready' | 'degraded';
+  readonly blockers: readonly string[];
+  readonly clock: Clock;
+  readonly ids: IdGenerator;
+  readonly storage: StorageService;
+  readonly learner: LearnerService;
+  readonly knowledge: KnowledgeService;
+  readonly content: ContentQuery;
+  readonly knowledgePort: KnowledgePort;
+  readonly eventStore: EventStore;
+  readonly grade: GradePort;
+  readonly tutorGateway: TutorGateway;
+  readonly tutor: ReturnType<typeof createTutorService>;
+  readonly tools: EducationToolRegistry;
+  readonly host: HostPort;
+  readonly pages: PageRegistry;
+  readonly i18n: I18nService;
+  readonly dto: DtoService;
+  readonly packKey: PackKey;
+  readonly services: {
+    readonly clock: Clock;
+    readonly ids: IdGenerator;
+    readonly eventStore: EventStore;
+    readonly contentQuery: ContentQuery;
+    readonly knowledge: KnowledgePort;
+    readonly grade: GradePort;
+    readonly imports: ImportPort;
+    readonly learnerStore: LearnerProjectionStore;
+    readonly host: HostPort;
+    readonly tutor: TutorGateway;
+  };
+  liveSelftest(): Promise<ServiceResult<{ readonly text: string; readonly sessionId: string }>>;
+  close(): void;
+}
+
+const MESSAGES: Record<string, string> = {
+  'app.title': '鏁欒偛瀛︿範宸ヤ綔鍖?,
+  'nav.library': '鏁欐潗搴?,
+  'nav.map': '鍦板浘',
+  'nav.workspace': '宸ヤ綔鍖?,
+  'nav.records': '璁板綍',
+  'status.localFirst': '瀛︿範璁板綍淇濆瓨鍦ㄦ湰鏈?,
+  'status.fixture': '寮€鍙戦樁娈典娇鐢ㄧず渚嬫暟鎹?,
+  'auth.apiKeyConfigured': 'API Key 宸查厤缃?,
+  'auth.apiKeyMissing': 'API Key 鏈厤缃?,
+  'error.unavailable': '褰撳墠鍔熻兘涓嶅彲鐢?,
+};
+
+function readJson(file: string): unknown {
+  return JSON.parse(readFileSync(file, 'utf8')) as unknown;
+}
+
+function unavailableImportPort(): ImportPort {
+  const fail = <T>(): ServiceResult<T> =>
+    errResult('NOT_IMPLEMENTED', 'PDF import is not wired into the phase-B host yet (T13/T03)', false);
+  return {
+    start: async () => fail(),
+    status: async () => fail(),
+    cancel: async () => fail(),
+    resume: async () => fail(),
+  };
+}
+
+function createI18n(): I18nService {
+  return {
+    locale: 'zh-CN',
+    messages: MESSAGES,
+    t(key: string): string {
+      return MESSAGES[key] ?? key;
+    },
+  };
+}
+
+function createHostPort(input: {
+  readonly dshBound: boolean;
+  readonly dshVersion: string;
+  readonly text: boolean;
+  readonly image: boolean;
+  readonly tools: readonly string[];
+  readonly authMethod: 'api_key' | 'none';
+  readonly authStatus: 'available' | 'unavailable' | 'unknown';
+  readonly checkedAt: Timestamp;
+}): HostPort {
+  const capabilitiesBase = {
+    dsh: input.dshBound
+      ? dshVersionDescriptor(input.dshVersion)
+      : { bound: false as const, version: null, sourceRef: null },
+    model: { text: input.text, image: input.image },
+    tools: input.tools,
+    network: 'loopback_only' as const,
+  };
+  const capabilities: RuntimeCapabilities = capabilitiesBase;
+  const auth: AuthStatus = {
+    method: input.authMethod,
+    status: input.authStatus,
+    lastCheckedAt: input.checkedAt,
+    accountRef: null,
+  };
+  return {
+    async capabilities(): Promise<ServiceResult<RuntimeCapabilities>> {
+      return okResult(capabilities, 0);
+    },
+    async authStatus(): Promise<ServiceResult<AuthStatus>> {
+      return okResult(auth, 0);
+    },
+  };
+}
+
+function selftestSession(input: {
+  readonly learnerId: string;
+  readonly packKey: PackKey;
+  readonly conceptId: string;
+  readonly now: Timestamp;
+}): Session {
+  return {
+    schemaVersion: 1,
+    id: `session.edu.selftest.${Date.parse(input.now)}`,
+    learnerId: input.learnerId,
+    courseEditionId: input.packKey.courseEditionId,
+    packVersion: input.packKey.packVersion,
+    trustMode: 'candidate',
+    conceptId: input.conceptId,
+    mode: 'learn',
+    status: 'active',
+    startedAt: input.now,
+    endedAt: null,
+    resumeCursor: { activityId: null, cursor: null },
+    dshSessionId: null,
+  };
+}
+
+export async function composeEducationRuntime(
+  options: EducationRuntimeOptions,
+): Promise<ServiceResult<EducationRuntimeComposition>> {
+  const clock = createSystemClock();
+  const ids = createSequentialIdGenerator({ prefix: 'edu' });
+  const learnerId = options.learnerId ?? 'learner.local.default';
+  const workspaceRoot = path.resolve(options.workspaceRoot);
+  const contentRoot = path.join(workspaceRoot, 'content', 'biology-7a');
+
+  let packJson: unknown;
+  let sourceRefsJson: { readonly refs?: readonly unknown[] };
+  let courseEditionJson: { readonly bookInstance?: unknown; readonly courseEdition?: unknown };
+  let blockIndexJson: { readonly blocks?: readonly Record<string, unknown>[] };
+  try {
+    packJson = readJson(path.join(contentRoot, 'pack.json'));
+    sourceRefsJson = readJson(path.join(contentRoot, 'source', 'source-refs.json')) as typeof sourceRefsJson;
+    courseEditionJson = readJson(path.join(contentRoot, 'source', 'course-edition.json')) as typeof courseEditionJson;
+    blockIndexJson = readJson(path.join(contentRoot, 'source', 'block-index.json')) as typeof blockIndexJson;
+  } catch (error) {
+    return errResult('STORAGE_FAILED', `education content could not be read: ${(error as Error).message}`, false);
+  }
+  const loaded = loadPack(packJson);
+  if (!loaded.ok) {
+    return errResult('CONTRACT_REJECTED', 'the content pack failed knowledge validation', false);
+  }
+  const pack = loaded.value.pack;
+  const blocks = (blockIndexJson.blocks ?? []).map((block, index) => {
+    const type = block['type'];
+    return {
+      schemaVersion: 1 as const,
+      id: typeof block['blockId'] === 'string' ? block['blockId'] : `block.missing.${index}`,
+      sourceRefId: typeof block['sourceRefId'] === 'string' ? block['sourceRefId'] : '',
+      type:
+        type === 'heading' || type === 'caption' || type === 'table' || type === 'list'
+          ? type
+          : ('paragraph' as const),
+      originalText: `[source text withheld from runtime bundle; sha256=${
+        typeof block['textSha256'] === 'string' ? block['textSha256'] : 'unknown'
+      }]`,
+      revisedText: null,
+      extractionMethod: 'ocr' as const,
+      textConfidence:
+        typeof block['textConfidence'] === 'number' ? block['textConfidence'] : 0.5,
+      reviewState: 'curator_checked' as const,
+    };
+  });
+  const catalog = createSourceCatalog({
+    bookInstances: courseEditionJson.bookInstance === undefined ? [] : [courseEditionJson.bookInstance],
+    sourceRefs: sourceRefsJson.refs ?? [],
+    sourceBlocks: blocks,
+  });
+  if (!catalog.ok) {
+    return errResult('CONTRACT_REJECTED', 'the source catalog failed domain validation', false);
+  }
+  const knowledge = new KnowledgeService({ sources: catalog.value });
+  knowledge.registerPack(packJson);
+
+  const storageResult = await StorageService.open({
+    root: path.resolve(options.dataRoot),
+    clock,
+    ids,
+  });
+  if (!storageResult.ok) {
+    return errResult(storageResult.error.code, storageResult.error.message, storageResult.error.retryable, storageResult.error.detailsRef);
+  }
+  const storage = storageResult.data;
+  const learnerFeature = await createLearnerFeature({ storage, clock, ids, learnerId });
+  if (!learnerFeature.ok) {
+    storage.close();
+    return errResult(learnerFeature.error.code, learnerFeature.error.message, learnerFeature.error.retryable, learnerFeature.error.detailsRef);
+  }
+  const learner = learnerFeature.data.learner;
+
+  const packKey: PackKey = { courseEditionId: pack.courseEditionId, packVersion: pack.version };
+  const firstConcept = pack.concepts[0]?.id;
+  if (firstConcept === undefined) {
+    storage.close();
+    return errResult('CONTRACT_REJECTED', 'the content pack contains no concept', false);
+  }
+
+  const env = options.env ?? process.env;
+  const apiKeyPresent = (env['DEEPSEEK_API_KEY'] ?? '').trim().length > 0;
+  const model = options.model ?? {
+    provider: 'deepseek-official',
+    model: 'deepseek-flash',
+    maxTokens: 3200,
+  };
+  const dshBound = assertDshTutorHost({ agents: options.agents, sessions: options.sessions });
+  const dshAgents = dshBound ? (options.agents as DshAgentsLike) : null;
+  const dshSessions = dshBound ? (options.sessions as DshSessionsLike) : null;
+  const tutorGateway: TutorGateway =
+    dshAgents !== null && dshSessions !== null
+      ? createDshTutorGateway({
+          agents: dshAgents,
+          sessions: dshSessions,
+          model,
+          authStatus: apiKeyPresent ? 'available' : 'unavailable',
+          image: true,
+          clock,
+          dshVersion: options.dshVersion ?? '0.2.1-rc.3',
+          onTurn: (info) => options.onAudit?.({ kind: 'tutor.turn', ...info }),
+          onDebug: (record) => options.onAudit?.({ kind: 'dsh.debug', ...record }),
+        })
+      : createNotBoundTutorGateway();
+
+  const grade = createRuleGradePort();
+  const tutor = createTutorService({
+    content: knowledge,
+    learner,
+    gateway: adaptTutorGateway({ gateway: tutorGateway, gradePort: grade }),
+    clock,
+    ids,
+    learnerId,
+    packKey,
+    onAudit: (event) => options.onAudit?.(event),
+  });
+  const toolsDeps: TutorToolDependencies = {
+    content: knowledge,
+    learner,
+    clock,
+    ids,
+    learnerId,
+    packKey,
+    onAudit: (event) => options.onAudit?.(event),
+  };
+  const tools = createEducationToolRegistry(toolsDeps);
+
+  const host = createHostPort({
+    dshBound,
+    dshVersion: options.dshVersion ?? '0.2.1-rc.3',
+    text: true,
+    image: true,
+    tools: tools.names,
+    authMethod: apiKeyPresent ? 'api_key' : 'none',
+    authStatus: apiKeyPresent ? 'available' : 'unavailable',
+    checkedAt: clock.now(),
+  });
+
+  const pages = new PageRegistry();
+  const pageSpecs = [
+    ['home', '/', '棣栭〉'],
+    ['library', '/library', '鏁欐潗搴?],
+    ['map', '/map', '鍦板浘'],
+    ['workspace', '/workspace', '宸ヤ綔鍖?],
+    ['records', '/records', '璁板綍'],
+    ['account', '/account', '璐︽埛'],
+  ] as const;
+  for (const [id, route, title] of pageSpecs) {
+    pages.register({
+      id,
+      path: route,
+      title,
+      requiresLearner: true,
+      mount() {
+        /* The client shell owns DOM; the host registry only publishes routes. */
+      },
+      unmount() {
+        /* no host-side DOM to tear down */
+      },
+    });
+  }
+
+  const i18n = createI18n();
+  const dto: DtoService = {
+    shellBootstrap() {
+      return {
+        title: i18n.t('app.title'),
+        learnerId,
+        packKey,
+        trustMode: 'candidate',
+        fixtureData: false,
+        packVersion: pack.version,
+        conceptCount: pack.concepts.length,
+        tools: tools.names,
+      };
+    },
+  };
+  const imports = unavailableImportPort();
+  const blockers: string[] = [];
+  if (!dshBound) blockers.push('DSH agents/sessions are not available in this host scope');
+  if (!apiKeyPresent) blockers.push('DEEPSEEK_API_KEY is not present; text/image model calls are unavailable');
+
+  const composition: EducationRuntimeComposition = {
+    status: dshBound && apiKeyPresent ? 'ready' : 'degraded',
+    blockers,
+    clock,
+    ids,
+    storage,
+    learner,
+    knowledge,
+    content: knowledge,
+    knowledgePort: knowledge,
+    eventStore: storage,
+    grade,
+    tutorGateway,
+    tutor,
+    tools,
+    host,
+    pages,
+    i18n,
+    dto,
+    packKey,
+    services: {
+      clock,
+      ids,
+      eventStore: storage,
+      contentQuery: knowledge,
+      knowledge,
+      grade,
+      imports,
+      learnerStore: learner,
+      host,
+      tutor: tutorGateway,
+    },
+    async liveSelftest() {
+      const now = clock.now();
+      const session = selftestSession({ learnerId, packKey, conceptId: firstConcept, now });
+      const request: RequestContext = {
+        requestId: ids.next('selftest'),
+        learnerId,
+        now,
+      };
+      const started = await tutorGateway.startSession(request, { session });
+      if (!started.ok) return started;
+      const prompt =
+        `璇疯皟鐢ㄦ暀鑲插伐鍏?edu_get_concept 璇诲彇姒傚康 ${firstConcept}锛宍 +
+        `鍐嶅瀹冪殑绗竴涓?sourceRef 璋冪敤 edu_resolve_source锛宍 +
+        '鐒跺悗鐢ㄤ腑鏂囧洖绛旓細姒傚康鏍囬锛屼互鍙婃潵婧愮殑 PDF 椤典笌鍗板埛椤点€備笉瑕佺紪閫犻〉鐮併€?;
+      const turn = await tutorGateway.sendTurn(request, {
+        sessionId: session.id,
+        revision: started.data.revision,
+        message: prompt,
+        activityId: null,
+        stream: false,
+      });
+      await tutorGateway.endSession(request, { sessionId: session.id, reason: 'completed' });
+      if (!turn.ok) return turn;
+      return okResult({ text: turn.data.text, sessionId: session.id }, turn.data.revision);
+    },
+    close() {
+      storage.close();
+    },
+  };
+  return okResult(composition, storage.lastSeq);
+}
+
+export type { TutorCapabilities, Id };
+

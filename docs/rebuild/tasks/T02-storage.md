@@ -1,0 +1,50 @@
+# T02 实现本地事件日志与恢复
+
+> 主智能体内部工作包。当前为待实施规格；用户只需发总控提示词，主智能体自动派发本卡，不要求用户另开对话。执行前先读[总控调度](../08-execution.md)和[子智能体模板](../SUBAGENT-PROMPT.md)。
+
+## 目标、前置与读取
+
+目标：实现本地事件日志与恢复。需求：R15、R17。验收：A25、A26、A33，这些是对最终AC的贡献，不是本阶段全部退出门；最终等级以[验收矩阵](../07-acceptance.md)为准。
+
+前置主阶段：T01；实际解锁以index.json的readinessDependencies/phaseGates为准，不要求前置的所有最终AC已完成。
+
+必要输入：冻结事件和存储port；匿名learner由host绑定。
+
+必读：[交接入口](../00-START.md)、[产品契约](../01-product-contract.md)、[数据契约](../05-data-contracts.md)、[执行协议](../08-execution.md)；本卡补充：[05-data-contracts](../05-data-contracts.md)、[06-system-design](../06-system-design.md)。不依赖先前聊天。
+
+## 独占写入范围
+
+- 计划路径：`education/packages/storage/`
+
+另外仅可写自己的交回报告与变更请求：`docs/rebuild/reports/T02.md`、`docs/rebuild/requests/T02.md`。其他公共契约、配置、锁文件、宿主注册、旧工程、原DSH安装均只读。主控PROGRESS只由主控写。需要跨域改动先请求，禁止擅自越界。以上新代码路径为未来计划，当前不存在也不能声称已实现。
+
+## 阶段退出门与最终验收延期
+
+存储包和port在隔离目录通过有序/幂等/崩溃/快照/双实例/导出删除tests，先存原答后评估的两阶段语义可消费。
+
+可提供门：implementationAccepted。主控记录implementation/contract readiness和globalAcStatus两个维度；只按依赖指定的门解锁后继，最终AC必须后续补齐。
+
+延期补验责任：A33真实UI→T08/T13；A26迁移与最终保护→T17。
+
+附加允许写入：`education/.local/evidence/T02/`、`education/.local/cache/T02/`及自己包内已忽略的构建/test临时产物；禁止写其他任务local目录或旧数据。
+
+## 必须完成的步骤
+
+1. 实现单写者有序JSONL、requestId去重、append确认、journal权威和可重建快照。
+2. attempt.submitted先保存原答并pending；assessment.committed再原子记证据+进度/复习effects；失败/取消只改批改阶段。
+3. 实现双实例拒写、半尾行隔离、中间坏行只读降级、坏快照重放、磁盘满/权限失败可见，备份恢复不破坏原档。
+4. 实现按范围导出/删除与确认接口，旧数据迁移仅显式启动、备份及receipt，旧mastered不升级新supported；提供factory交主控注册。
+
+## 验证与交回
+
+T01建立命令后，运行自己范围的typecheck:task T02 / test:task T02及公共契约检查；全量typecheck/test/build须主控检查屏障。T01自身需先提供可执行命令，不得以echo成功凑数。
+
+真实模型/图像/打包等依本卡AC级别补验；mock/历史通过/目录声明不能替代。预算或原材料缺失时交可复核离线结果及精确BLOCKED，主控继续独立工作。测试失败先分析归属，在范围内自主修，不能删测试/降标准/重跑取最好一次。
+
+使用[报告模板](../09-report-template.md)交回../reports/T02.md（执行时创建），包括改动、命令/退出码、AC逐项、证据与hash、失败/未测、契约影响和后继输入。报告中的文件路径必须能解析；原文/图/真实对话local证据不提交Git。主控复核接受后才释放后继。
+
+## 特别约束
+
+不读用户现有真实学习数据做测试；隔离临时目录。删除要校验真实绝对目标。
+
+用户派发总控提示词后，本卡范围内可逆实现与必要依赖申请不需逐项重复请示；本轮编交接文档不实施。公开发布、push、付费/注册、删旧数据、改安装版均需另行明确授权。

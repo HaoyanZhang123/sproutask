@@ -1,88 +1,112 @@
-# 芽问 SproutAsk
+<p align="center">
+  <img src="docs/images/cover.png" alt="SproutAsk cover: an abstract leaf mark next to the SproutAsk and 芽问 wordmarks on a dark background" width="100%">
+</p>
 
-> 装在学生电脑上的**初中生物学习伙伴**：不给答案，用提问带学生自己把知识想明白；
-> 所有解释锚定教材原文与课程标准。同时是一份教育研习课题（见 `docs/研习设计.md`）。
-> 面向北京市三帆中学初中生物教育实习。
+<h1 align="center">SproutAsk</h1>
+<p align="center">A local-first biology study agent for lower-secondary students, built on the DeepSeek Harness kernel.</p>
+<p align="center"><a href="README.zh.md">中文</a></p>
 
-**📌 想知道"做到哪了、上次干了啥、下一步做什么"——只看 `docs/PROGRESS.md`（唯一进度来源）。**
-**🧑‍🎓 想从零学会怎么打开使用——看 `docs/tutorials/README.md`（零基础使用指南）。**
+<p align="center">
+  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img src="https://img.shields.io/badge/DSH-0.2.1--rc.3-3B5BDB?style=flat-square" alt="DSH 0.2.1-rc.3"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="TypeScript"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-%E2%89%A524-5FA04E?style=flat-square&amp;logo=nodedotjs&amp;logoColor=white" alt="Node.js 24 or newer"></a>
+  <a href="https://learn.microsoft.com/windows/"><img src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4?style=flat-square" alt="Windows 10 or 11, x64"></a>
+  <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-11.21.0-F69220?style=flat-square&amp;logo=pnpm&amp;logoColor=white" alt="pnpm 11.21.0"></a>
+</p>
 
-## 快速开始
+## Overview
+
+SproutAsk (芽问) turns one textbook volume into a guided study loop: read a section in the library, follow the concept map, work through a concept in the workspace, answer, and get feedback that points back to the exact page it came from. It is built for students studying *Biology, Grade 7, Volume 1* (People's Education Press, 2024 edition) on their own Windows computer.
+
+Learning records live on the student's machine. The single cloud dependency is the DeepSeek API for inference; without a key the application still opens and works as a local reader for the library, the map and past records.
+
+v0.3.0 is the **DSH education rebuild line**: the application now runs on the real DeepSeek Harness kernel as a local background service plus an application window, and no longer ships an Electron shell. The earlier Electron 0.2.x line is not the product of this line.
+
+## Features
+
+- **One full volume, curated and published.** 1 volume / 2 units / 7 chapters / 22 sections / 43 concepts / 88 activities / 43 rubrics / 44 relations, with 193 distinct textbook source anchors (281 reference entries). The content pack is `status=published` after a human curator pass.
+- **Answers carry page anchors.** Feedback references the textbook location as both PDF page and printed page, so a student can find the sentence on paper.
+- **Three-axis learning state.** Concept-level state moves through the study flow, and review is recorded with `finish-review` rather than inferred from page visits.
+- **Misconceptions are handled explicitly.** A missed concept surfaces the specific misconception, its correction, and the source it rests on.
+- **Hints are labelled honestly.** After a hint, an answer is marked as `assisted` and is not counted as independent evidence.
+- **Photo answers are gated before inference.** Blurred, rotated and blank images are rejected with a clarification request before any model call; accepted images score idempotently.
+- **Records stay local and survive a crash.** Learning data is written as JSONL under the local data directory, with a journal that self-heals from a stale lock and degrades safely on half-written lines.
+- **The API key never leaves the machine.** It is entered in the app, encrypted with Windows DPAPI, never echoed back to the client, and applied after a restart.
+- **No administrator rights, no Electron.** Installed per user, started as a local service with an application window.
+
+## Installation
+
+**Requirements:** Windows 10 or 11, x64.
+
+v0.3.0 is distributed as two Windows artifacts. They are build outputs and are not stored in this Git repository; obtain them from the maintainer or from the Releases page, and verify the hash before running.
+
+| Artifact | Size | SHA-256 |
+|---|---:|---|
+| `SproutAsk-Setup-0.3.0-x64.exe` (one-click installer) | 56.7 MB | `0fc5df1828265d0ed74e20f89cc7ddc0d3c55f5ac83e6de3df39a2e042d9c014` |
+| `SproutAsk-0.3.0-x64-portable.zip` (portable) | 117.4 MB | `6a0852cd186e27db861d1fc80cdc9c19800e76ce186fbf750397ec9df9bfaa7b` |
+
+1. Run the installer. It installs per user into `%LOCALAPPDATA%\SproutAsk\current` and does not need administrator rights.
+2. The binaries are **not code-signed**, so Windows SmartScreen will show an "unknown publisher" prompt. No signing certificate has been purchased.
+3. Verify before running:
 
 ```powershell
-cd D:\dsh\ai4edu
+Get-FileHash .\SproutAsk-Setup-0.3.0-x64.exe -Algorithm SHA256
+# expect 0FC5DF1828265D0ED74E20F89CC7DDC0D3C55F5AC83E6DE3DF39A2E042D9C014
+```
+
+**From source (development):** Node.js 24 or newer and pnpm 11.21.0.
+
+```powershell
+cd education
 pnpm install
-cp .env.example .env      # 打开 .env，把 DEEPSEEK_API_KEY 填成你自己的 Key
-pnpm dev                  # 打开桌面窗口
+pnpm typecheck
+pnpm test
+pnpm dev          # builds, prints a loopback URL, stays in the foreground
 ```
 
-**怎么判断程序是正常的**：
+`pnpm dev` runs against an isolated profile under `education/.local/`; it does not touch an existing harness installation. The development runtime reads its API key from `education/.local/secrets/deepseek.key`, a local-only file that is not in this repository.
 
-```powershell
-$env:SPROUTASK_SELFTEST = "1"; pnpm dev
-```
+## Usage
 
-看到 `[selftest] 结果：通过`（44 项断言（无 Key）/ 36 项（有 Key），含界面渲染、点击、样式、降级）就算正常，
-同时会生成一张截图 `selftest-ui.png` 供你肉眼看。
+1. Start **SproutAsk** from the Start menu. On first launch the local data directory `%LOCALAPPDATA%\SproutAsk\data` is created.
+2. Open `/account`, paste a DeepSeek API key, save. The key is encrypted locally and is not displayed again. **Restart the application** for it to take effect.
+3. Choose a section in `/library`, or open `/map` to move by concept instead of by page order.
+4. In `/workspace`, answer a concept. Feedback names the misconception when the answer misses, and shows the textbook page.
+5. Use `/records` to revisit what has been studied and to finish a review.
+6. Without a key the app stays in local mode: the library, the map and past records work, cloud inference does not.
 
-## 常用命令
+## Configuration
 
-| 命令 | 作用 | 需要 Key 吗 |
+| Setting | Where | Notes |
 |---|---|---|
-| `pnpm dev` | 打开桌面应用（推荐日常使用） | 对话需要 |
-| `pnpm chat` | 在终端里和小芽对话（更轻量，适合调试） | 需要 |
-| `pnpm test` | 单元测试（176 例，**不需要联网**） | 不需要 |
-| `pnpm typecheck` | 类型检查（主进程 + 界面两端） | 不需要 |
-| `$env:SPROUTASK_SELFTEST="1"; pnpm dev` | 界面自检（无头 DOM 断言 + 截图） | 不需要 |
-| `pnpm eval` | 教学行为评测跑批（**会真实调用模型，产生费用**） | 需要 |
-| `pnpm build` | 只做构建（产出 `out/`），不打包安装包 | 不需要 |
-| `pnpm build:win` / `build:mac` | 打包：Windows 产出**便携版 + 安装版**两个 exe；macOS dmg **从未实测** | 不需要 |
+| DeepSeek API key | In-app `/account` page | Encrypted with Windows DPAPI, stored on the local machine, never echoed to the client. Requires an application restart. |
+| Learning data | `%LOCALAPPDATA%\SproutAsk\data` | JSONL records plus review and journal state. Created on first launch. |
+| Installation | `%LOCALAPPDATA%\SproutAsk\current` | Per-user; uninstall keeps learning data unless you choose to delete it. |
+| Data root override | Environment variable `SPROUTASK_DATA_ROOT` | Advanced: relocates the data root, used for isolated test profiles. |
+| Development key | `education/.local/secrets/deepseek.key` | Development runtime only. Local file, never committed. |
 
-## 目录结构
+## Releases
 
-```
-├─ src/
-│  ├─ main/       # Electron 主进程：窗口、IPC、配置注入（可用 node:*）
-│  ├─ preload/    # contextBridge 桥接（只转发，无业务逻辑）
-│  ├─ renderer/   # Vue3 界面（无 Node 权限）
-│  ├─ shared/     # ⭐ 零依赖纯代码，三层可共享（正文区块解析、搜索高亮）
-│  └─ core/       # ⭐ 纯领域逻辑：契约、Agent、提示词、LLM、存储与内容接口
-├─ content/       # units/（结构，进 git）；textbook/ 与 curriculum/（原文，不进 git）
-├─ tools/         # Python 开发期工具（不进 exe）
-├─ evals/cases/   # 教学行为评测用例（YAML，可读可改）
-├─ tests/         # 单元测试
-├─ scripts/       # 终端对话、评测跑批
-├─ docs/          # PROGRESS（进度）、ARCHITECTURE、CONVENTIONS、ROADMAP、specs、adr、tutorials
-├─ notes/         # 调研与个人记录（不进 git）
-└─ publish/       # 开源发布工具（不上传）
-```
+The current release is **v0.3.0 — DSH education rebuild**. Release notes: [docs/releases/v0.3.0.md](docs/releases/v0.3.0.md).
 
-## 环境相关的两个坑（已解决，重装时可参考）
+### Known limitations in v0.3.0
 
-1. **pnpm 默认拦截依赖的构建脚本**：放行名单写在 `pnpm-workspace.yaml` 的 `allowBuilds`。
-   缺了会报 `ERR_PNPM_IGNORED_BUILDS`，Electron 二进制不会被下载。
+These are stated because they are real and unresolved, not as a formality:
 
-2. **Electron 二进制下载失败**（国内网络常见）：`.npmrc` 里配的镜像键 pnpm 不识别，
-   手动用环境变量补下载：
+1. **Not code-signed.** SmartScreen warns about an unknown publisher.
+2. **Figure meaning was only sampled.** Visual verification of figure captions covers **8 of 73** figures (7 consistent, 1 undecidable); the remaining 65 were not checked. That judgement came from a vision model in-session, not from a human sign-off.
+3. **Edition, printing, price and trim size were not verified.** The OCR pass did not read the copyright-page fine print. Known facts are the ISBN-13 `978-7-107-38263-5` and the publisher, People's Education Press.
+4. **No clean-machine validation.** A close approximation (no development PATH, isolated data root) passed, but there is no second Windows machine.
+5. **No UI visual walkthrough.** Interface behaviour has offline assertions, but no real browser or device screenshots exist.
+6. **Photo capture was not tested on a real phone.** JPEG from a phone, canvas compression, and the retry-after-clarification path are unverified.
+7. **No learning-outcome experiment.** This release does not claim improved understanding or improved grades.
+8. **The harness has no turn-cancellation interface.** On budget overrun the app stops waiting, but the abandoned model turn keeps running in the background.
+9. **Gate status, stated plainly:** G1 = PARTIAL, G2 = FAIL/PARTIAL, G3 = PARTIAL, and the top-level `finalAccepted` gate is **not reachable**.
 
-   ```powershell
-   $env:ELECTRON_MIRROR = "https://npmmirror.com/mirrors/electron/"
-   cd node_modules/electron; node install.js
-   ```
+### Not included in this release
 
-   验证：`node_modules\electron\dist\electron.exe` 存在（约 180 MB）。
+Teacher-facing features, class aggregation, multi-device sync, auto-update, telemetry, public network exposure, and any promise of equal quality for other textbooks.
 
-> 更多坑（共 13 条）见 `docs/PROGRESS.md` 第 6 节与 `CODEBASE_NOTES.md`。
+## License
 
-## 文档分工
-
-| 你想知道 | 看哪份 |
-|---|---|
-| **进度 / 上次做了什么 / 下一步** | `docs/PROGRESS.md` |
-| **怎么装、怎么打开、怎么用** | `docs/tutorials/README.md` |
-| 架构、目录边界、分层铁律 | `docs/ARCHITECTURE.md` |
-| 编码规范、测试、Git 流程、合规红线 | `docs/CONVENTIONS.md` |
-| 里程碑与需求编号（F-0XX） | `docs/ROADMAP.md` |
-| 某条需求做了什么、怎么验收 | `docs/specs/` |
-| 为什么这样设计 | `docs/adr/` |
-| 研习课题本身（题目/方法/报告） | `docs/研习设计.md` |
+**No license specified.** This repository has no `LICENSE` file at its root and declares `"license": "UNLICENSED"` in `package.json`. The MIT text under `publish/public/LICENSE` is an unfilled export template (`{{YEAR}} {{HOLDER}}` placeholders) used by the publication pipeline; it is not a grant for this repository. A license choice is pending a maintainer decision.

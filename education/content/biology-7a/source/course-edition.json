@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "note": "T05 版本绑定实体：CourseEdition 与 BookInstance（domain/@edu/domain v1.0.0 结构）。status=unverified 是因为版次/印次未读清；书名/学科/年级册次/出版社已由封面与版权页核实。",
+  "courseEdition": {
+    "schemaVersion": 1,
+    "id": "course.biology-7a",
+    "subject": "biology",
+    "grade": 7,
+    "term": 1,
+    "publisher": "人民教育出版社",
+    "editionLabel": "义务教育教科书 生物学 七年级上册（版次/印次未核实）",
+    "sourceIdentity": {
+      "verifiedFrom": "copyright_page",
+      "notes": "封面 PDF1 与版权页 PDF2-3 可读：书名、七年级上册、人民教育出版社；版次/印次/ISBN 未读清（null）。文件指纹 33eed60c…e59f，146 页，扫描无文本层。核实者为 AI（T03 OCR + 版权页页图裁切），非人类专家。",
+      "sha256": "33eed60ce56aa402ae683b9c3a573f2fd780b766d635b04580d604928a23e59f"
+    },
+    "status": "unverified"
+  },
+  "bookInstance": {
+    "schemaVersion": 1,
+    "id": "book.bio7a.33eed60c",
+    "courseEditionId": "course.biology-7a",
+    "originalSha256": "33eed60ce56aa402ae683b9c3a573f2fd780b766d635b04580d604928a23e59f",
+    "pageCount": 146,
+    "managedAssetId": "asset:book.bio7a.33eed60ce56aa402",
+    "confirmedMetadata": {
+      "title": "义务教育教科书 生物学 七年级上册",
+      "publisher": "人民教育出版社",
+      "editionLabel": null,
+      "confirmedAt": "2026-10-29T11:10:37Z"
+    },
+    "createdAt": "2026-10-29T11:10:37Z"
+  }
+}

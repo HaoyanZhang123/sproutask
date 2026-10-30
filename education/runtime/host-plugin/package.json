@@ -1,0 +1,14 @@
+{
+  "name": "@edu/education-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Education host plugin for the fixed DSH runtime: real TutorGateway, rule GradePort, HostPort, education tools and host routes.",
+  "license": "UNLICENSED",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": ["lib"]
+}

@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "contract": {
+    "version": "1.0.0",
+    "dataSchemaVersion": 1,
+    "serviceApiVersion": 1,
+    "featureApiVersion": 1,
+    "taskRoutesVersion": 1,
+    "contentPackSchemaVersion": 1,
+    "reviewPolicyVersion": "review-policy-v1"
+  },
+  "commands": [
+    {
+      "script": "install",
+      "entry": "pnpm --dir education install --frozen-lockfile",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true,
+      "note": "pnpm builtin; lockfile is committed"
+    },
+    {
+      "script": "typecheck",
+      "entry": "node scripts/typecheck-all.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "typecheck:task",
+      "entry": "node scripts/typecheck-task.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "test",
+      "entry": "node scripts/test-all.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "test:task",
+      "entry": "node scripts/test-task.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "test:contracts",
+      "entry": "node scripts/test-contracts.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "test:integration",
+      "entry": "node scripts/test-integration.mjs",
+      "stage": "implemented",
+      "owner": "T13",
+      "implemented": true
+    },
+    {
+      "script": "test:e2e",
+      "entry": "node scripts/not-implemented.mjs test:e2e",
+      "stage": "not_implemented",
+      "owner": "T13",
+      "implemented": false
+    },
+    {
+      "script": "content:validate",
+      "entry": "node scripts/content-validate.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true,
+      "note": "wired by the config owner to the frozen @edu/knowledge CLI (packages/knowledge/bin/validate-pack.mjs); validates every education/content/*/pack.json"
+    },
+    {
+      "script": "eval:offline",
+      "entry": "node scripts/not-implemented.mjs eval:offline",
+      "stage": "not_implemented",
+      "owner": "T15",
+      "implemented": false
+    },
+    {
+      "script": "eval:live",
+      "entry": "node scripts/not-implemented.mjs eval:live",
+      "stage": "not_implemented",
+      "owner": "T15",
+      "implemented": false
+    },
+    {
+      "script": "build",
+      "entry": "node scripts/build-education.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true,
+      "note": "esbuild bundles the DSH host plugin and the loader-protocol client root"
+    },
+    {
+      "script": "dev",
+      "entry": "node scripts/dev-education.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true,
+      "note": "isolated DSH_HOME, random loopback port, prints the actual URL"
+    },
+    {
+      "script": "runtime:setup",
+      "entry": "node runtime/scripts/setup-education-home.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "runtime:start",
+      "entry": "node runtime/scripts/start-education-web.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "runtime:stop",
+      "entry": "node runtime/scripts/stop-education-web.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "build:win",
+      "entry": "node scripts/not-implemented.mjs build:win",
+      "stage": "not_implemented",
+      "owner": "T16",
+      "implemented": false
+    },
+    {
+      "script": "smoke:packaged",
+      "entry": "node scripts/not-implemented.mjs smoke:packaged",
+      "stage": "not_implemented",
+      "owner": "T16",
+      "implemented": false
+    },
+    {
+      "script": "contract:lock:generate",
+      "entry": "node scripts/generate-contract-lock.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "contract:lock:verify",
+      "entry": "node scripts/verify-contract-lock.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    },
+    {
+      "script": "fixtures:build",
+      "entry": "node scripts/build-fixtures.mjs",
+      "stage": "implemented",
+      "owner": "T01",
+      "implemented": true
+    }
+  ]
+}

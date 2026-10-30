@@ -1,0 +1,12 @@
+{
+  "name": "@edu/probe-host",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "T00 probe host plugin: fixed mock LLM route + one constrained education tool. Not a product package.",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  }
+}

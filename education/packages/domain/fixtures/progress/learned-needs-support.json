@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "learnerId": "learner.local.default",
+  "courseEditionId": "course.biology-7a",
+  "packVersion": "1.0.0",
+  "conceptId": "concept.cell",
+  "learning": {
+    "state": "completed",
+    "startedAt": "2026-10-29T08:00:00Z",
+    "lastCompletedAt": "2026-10-29T08:10:00Z"
+  },
+  "understanding": {
+    "state": "needs_support",
+    "assessmentId": "assessment.cell.needs-support",
+    "updatedAt": "2026-10-29T08:20:00Z",
+    "validity": "current"
+  },
+  "review": {
+    "lastCompletedAt": "2026-10-27T09:00:00Z",
+    "dueAt": "2026-10-28T09:00:00Z",
+    "activeSessionId": null,
+    "latestOutcome": "developing",
+    "policyVersion": "review-policy-v1"
+  },
+  "lastPosition": {
+    "sessionId": "session.cell.1",
+    "activityId": "activity.cell-recall",
+    "cursor": "step-1",
+    "updatedAt": "2026-10-29T08:00:00Z"
+  },
+  "revision": 3
+}

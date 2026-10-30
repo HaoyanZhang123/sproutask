@@ -1,0 +1,906 @@
+{
+  "schemaVersion": 1,
+  "kind": "static-work-packages-not-progress",
+  "date": "2026-10-29",
+  "dispatch": "one-main-agent-auto-subagents",
+  "progressSource": "../../PROGRESS.md",
+  "tasks": [
+    {
+      "id": "T00",
+      "title": "固定DSH来源与隔离运行准入",
+      "card": "T00-runtime.md",
+      "dependsOn": [],
+      "writeScopes": [
+        "education/probes/runtime/",
+        "docs/rebuild/runtime-lock.json",
+        "education/.local/evidence/T00/",
+        "education/.local/cache/T00/"
+      ],
+      "report": "../reports/T00.md",
+      "request": "../requests/T00.md",
+      "requirements": [
+        "R01",
+        "R14",
+        "R18"
+      ],
+      "acceptanceIds": [
+        "A01",
+        "A02",
+        "A03",
+        "A24"
+      ],
+      "exitCriteria": "固定来源/license清单和隔离真实DSH启动、root/最小工具校验分别交sourceReady/runtimeReady；无凭据时账户/模型live明确未验。无来源不产生runtimeReady，但不阻塞T01.domainReady。",
+      "deferredGlobalAcceptance": "A01→T13/T15，A02→T16/T17，A03→T08/T13/T16，A24→T13；runtime probe只覆盖各AC前置子项。",
+      "readinessDependencies": [],
+      "providesGates": [
+        "sourceReady",
+        "runtimeReady",
+        "accountVerified"
+      ]
+    },
+    {
+      "id": "T01",
+      "title": "建立隔离教育工作区并冻结公共契约",
+      "card": "T01-foundation.md",
+      "dependsOn": [],
+      "writeScopes": [
+        "education/package.json",
+        "education/pnpm-lock.yaml",
+        "education/pnpm-workspace.yaml",
+        "education/tsconfig*.json",
+        "education/packages/domain/",
+        "education/runtime/",
+        "education/scripts/",
+        "education/config/",
+        "education/client/package.json",
+        "education/client/tsconfig*.json",
+        "education/.gitignore",
+        "docs/rebuild/contract-lock.json",
+        "education/.local/evidence/T01/",
+        "education/.local/cache/T01/"
+      ],
+      "report": "../reports/T01.md",
+      "request": "../requests/T01.md",
+      "requirements": [
+        "R01",
+        "R09",
+        "R15",
+        "R16",
+        "R18"
+      ],
+      "acceptanceIds": [
+        "A02",
+        "A27",
+        "A28"
+      ],
+      "exitCriteria": "阶段A domainReady：纯domain校验器、fixtures、独立工具链、按任务检查和mock port实际通过；不绑定DSH具体API。阶段B runtimeReady：T00.runtimeReady后实现实际adapter/root/build并更新contract-lock；无运行时不能伪造该门。",
+      "deferredGlobalAcceptance": "A02/A27→T16，真实模块组合→T13；domainReady不能冒充runtimeReady。",
+      "readinessDependencies": [],
+      "providesGates": [
+        "domainReady",
+        "runtimeReady"
+      ],
+      "phaseGates": [
+        {
+          "gate": "domainReady",
+          "requires": []
+        },
+        {
+          "gate": "runtimeReady",
+          "requires": [
+            {
+              "task": "T00",
+              "gate": "runtimeReady"
+            },
+            {
+              "task": "T01",
+              "gate": "domainReady"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T02",
+      "title": "实现本地事件日志与恢复",
+      "card": "T02-storage.md",
+      "dependsOn": [
+        "T01"
+      ],
+      "writeScopes": [
+        "education/packages/storage/",
+        "education/.local/evidence/T02/",
+        "education/.local/cache/T02/"
+      ],
+      "report": "../reports/T02.md",
+      "request": "../requests/T02.md",
+      "requirements": [
+        "R15",
+        "R17"
+      ],
+      "acceptanceIds": [
+        "A25",
+        "A26",
+        "A33"
+      ],
+      "exitCriteria": "存储包和port在隔离目录通过有序/幂等/崩溃/快照/双实例/导出删除tests，先存原答后评估的两阶段语义可消费。",
+      "deferredGlobalAcceptance": "A33真实UI→T08/T13；A26迁移与最终保护→T17。",
+      "readinessDependencies": [
+        {
+          "task": "T01",
+          "gate": "domainReady"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T03",
+      "title": "实现PDF图文解析和可恢复导入",
+      "card": "T03-importer.md",
+      "dependsOn": [
+        "T01"
+      ],
+      "writeScopes": [
+        "education/packages/importer/",
+        "education/.local/evidence/T03/",
+        "education/.local/cache/T03/"
+      ],
+      "report": "../reports/T03.md",
+      "request": "../requests/T03.md",
+      "requirements": [
+        "R02",
+        "R03",
+        "R17"
+      ],
+      "acceptanceIds": [
+        "A04",
+        "A05",
+        "A06",
+        "A07",
+        "A29"
+      ],
+      "exitCriteria": "自有文本/扫描/混排/损坏fixture的提取、OCR、页码、cancel/resume/重试测试通过，引擎分发物料齐；L5待T16。",
+      "deferredGlobalAcceptance": "A05无开发PATH产物→T16；A06/A07/A29真实UI→T09/T13。",
+      "readinessDependencies": [
+        {
+          "task": "T01",
+          "gate": "domainReady"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T04",
+      "title": "实现目录、概念图与内容发布服务",
+      "card": "T04-knowledge.md",
+      "dependsOn": [
+        "T01"
+      ],
+      "writeScopes": [
+        "education/packages/knowledge/",
+        "education/.local/evidence/T04/",
+        "education/.local/cache/T04/"
+      ],
+      "report": "../reports/T04.md",
+      "request": "../requests/T04.md",
+      "requirements": [
+        "R03",
+        "R04",
+        "R05",
+        "R16"
+      ],
+      "acceptanceIds": [
+        "A07",
+        "A08",
+        "A11",
+        "A28"
+      ],
+      "exitCriteria": "自有fixture下树图/引用/发布范围/候选与版本映射校验通过，公开查询和source port可用；真实页面联动后补。",
+      "deferredGlobalAcceptance": "A07/A08真实材料与UI→T05/T09/T13/T14；A11全册关系→T14/T15。",
+      "readinessDependencies": [
+        {
+          "task": "T01",
+          "gate": "domainReady"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T05",
+      "title": "制作首节真实生物内容包",
+      "card": "T05-first-section.md",
+      "dependsOn": [
+        "T03",
+        "T04"
+      ],
+      "writeScopes": [
+        "education/content/biology-7a/",
+        "education/.local/evidence/T05/",
+        "education/.local/cache/T05/"
+      ],
+      "report": "../reports/T05.md",
+      "request": "../requests/T05.md",
+      "requirements": [
+        "R03",
+        "R04",
+        "R06",
+        "R07"
+      ],
+      "acceptanceIds": [
+        "A08",
+        "A10"
+      ],
+      "exitCriteria": "真实PDF版本和来源核实；首节scope内概念、两类活动、rubric、来源对照清零，published partial可被G1消费；不是全册完成。",
+      "deferredGlobalAcceptance": "A08真实UI→T13；全册A09/A10→T14/T15。",
+      "readinessDependencies": [
+        {
+          "task": "T03",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T04",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "contentReady"
+      ]
+    },
+    {
+      "id": "T06",
+      "title": "实现证据、三轴进度与复习策略",
+      "card": "T06-learner.md",
+      "dependsOn": [
+        "T02"
+      ],
+      "writeScopes": [
+        "education/packages/learner/",
+        "education/.local/evidence/T06/",
+        "education/.local/cache/T06/"
+      ],
+      "report": "../reports/T06.md",
+      "request": "../requests/T06.md",
+      "requirements": [
+        "R07",
+        "R08",
+        "R09",
+        "R15"
+      ],
+      "acceptanceIds": [
+        "A14",
+        "A15",
+        "A16",
+        "A17",
+        "A18",
+        "A25"
+      ],
+      "exitCriteria": "纯规则+T02真实日志测试通过，三轴/自评/assisted/反证/时效/候选/版本与日程行为可被后继消费。",
+      "deferredGlobalAcceptance": "A14真实教学→T13/T15；A17/A18真实UI→T08/T10/T13。",
+      "readinessDependencies": [
+        {
+          "task": "T02",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T07",
+      "title": "实现DSH教学工具与生物Skill",
+      "card": "T07-tutor.md",
+      "dependsOn": [
+        "T04",
+        "T06"
+      ],
+      "writeScopes": [
+        "education/packages/tutor/",
+        "education/skills/biology/",
+        "education/.local/evidence/T07/",
+        "education/.local/cache/T07/"
+      ],
+      "report": "../reports/T07.md",
+      "request": "../requests/T07.md",
+      "requirements": [
+        "R01",
+        "R06",
+        "R07",
+        "R14",
+        "R16",
+        "R17"
+      ],
+      "acceptanceIds": [
+        "A01",
+        "A13",
+        "A14",
+        "A24",
+        "A27",
+        "A29"
+      ],
+      "exitCriteria": "教学Skill、工具factory与公开ports完成，mock gateway下12类行为回放及权限负例可测试；DSH实际绑定与真实模型语义评价待runtimeReady后由T13/T15补。",
+      "deferredGlobalAcceptance": "A01/A13/A14/A24/A29真实DSH语义→T13/T15；A27实际产物→T16。",
+      "readinessDependencies": [
+        {
+          "task": "T04",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T06",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T08",
+      "title": "实现教育界面壳、账户与首页记录",
+      "card": "T08-ui-shell.md",
+      "dependsOn": [
+        "T01"
+      ],
+      "writeScopes": [
+        "education/client/shell/",
+        "education/.local/evidence/T08/",
+        "education/.local/cache/T08/"
+      ],
+      "report": "../reports/T08.md",
+      "request": "../requests/T08.md",
+      "requirements": [
+        "R12",
+        "R13",
+        "R14",
+        "R15"
+      ],
+      "acceptanceIds": [
+        "A03",
+        "A17",
+        "A22",
+        "A23",
+        "A24",
+        "A33"
+      ],
+      "exitCriteria": "教育shell/页面registry/身份状态/首页记录组件，在冻结API fixture上运行UI测试及键盘空错态通过；真实账户与重启产物后补。",
+      "deferredGlobalAcceptance": "A03账户→T13/T16；A22产物重启→T16；各页面真实集成→T13。",
+      "readinessDependencies": [
+        {
+          "task": "T01",
+          "gate": "domainReady"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T09",
+      "title": "实现教材导入、任务进度与来源阅读界面",
+      "card": "T09-ui-library.md",
+      "dependsOn": [
+        "T03",
+        "T08",
+        "T04"
+      ],
+      "writeScopes": [
+        "education/client/library/",
+        "education/.local/evidence/T09/",
+        "education/.local/cache/T09/"
+      ],
+      "report": "../reports/T09.md",
+      "request": "../requests/T09.md",
+      "requirements": [
+        "R02",
+        "R03",
+        "R13",
+        "R17"
+      ],
+      "acceptanceIds": [
+        "A06",
+        "A07",
+        "A08",
+        "A23",
+        "A29"
+      ],
+      "exitCriteria": "在T03/T04服务或明确受控测试适配器下，导入进度/候选/阅读返回组件测试通过；production API factory已交，T13接真实宿主。",
+      "deferredGlobalAcceptance": "A08真实模型回答出处与全册→T13/T15；其余真实宿主→T13。",
+      "readinessDependencies": [
+        {
+          "task": "T03",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T08",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T04",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T10",
+      "title": "实现教材树与局部概念地图",
+      "card": "T10-ui-map.md",
+      "dependsOn": [
+        "T04",
+        "T06",
+        "T08"
+      ],
+      "writeScopes": [
+        "education/client/map/",
+        "education/.local/evidence/T10/",
+        "education/.local/cache/T10/"
+      ],
+      "report": "../reports/T10.md",
+      "request": "../requests/T10.md",
+      "requirements": [
+        "R05",
+        "R08",
+        "R09",
+        "R13"
+      ],
+      "acceptanceIds": [
+        "A11",
+        "A12",
+        "A18",
+        "A23"
+      ],
+      "exitCriteria": "自有500概念fixture及真实知识/进度port测试通过，树图/状态/键盘/布局与性能记录齐；真实教材互动后补。",
+      "deferredGlobalAcceptance": "A11全册→T14/T15；A18最终实时更新→T13；A23集成视觉→T15。",
+      "readinessDependencies": [
+        {
+          "task": "T04",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T06",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T08",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T11",
+      "title": "实现受控图示和多形式批改",
+      "card": "T11-visuals-grading.md",
+      "dependsOn": [
+        "T03",
+        "T04",
+        "T06"
+      ],
+      "writeScopes": [
+        "education/packages/visuals/",
+        "education/client/visuals/",
+        "education/.local/evidence/T11/",
+        "education/.local/cache/T11/"
+      ],
+      "report": "../reports/T11.md",
+      "request": "../requests/T11.md",
+      "requirements": [
+        "R10",
+        "R11",
+        "R14",
+        "R17"
+      ],
+      "acceptanceIds": [
+        "A19",
+        "A20",
+        "A21",
+        "A24",
+        "A29"
+      ],
+      "exitCriteria": "受控DiagramSpec、规则批改、图片确认和能力降级的本地/模拟测试通过，提交GradeResult和证据port；真实识图L4未验须保留global AC未通过。",
+      "deferredGlobalAcceptance": "A19/A20真实科学/图片评价→T13/T15；A21真实工作区→T12/T13。",
+      "readinessDependencies": [
+        {
+          "task": "T03",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T04",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T06",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T12",
+      "title": "实现学习复习工作区与活动恢复",
+      "card": "T12-ui-study.md",
+      "dependsOn": [
+        "T07",
+        "T08",
+        "T09",
+        "T10",
+        "T11"
+      ],
+      "writeScopes": [
+        "education/client/study/",
+        "education/.local/evidence/T12/",
+        "education/.local/cache/T12/"
+      ],
+      "report": "../reports/T12.md",
+      "request": "../requests/T12.md",
+      "requirements": [
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R12",
+        "R13",
+        "R17"
+      ],
+      "acceptanceIds": [
+        "A13",
+        "A14",
+        "A18",
+        "A21",
+        "A22",
+        "A23",
+        "A29"
+      ],
+      "exitCriteria": "学习复习UI消费前置公开port，mock/本地服务下主旅程、草稿/取消/版本/图示组件和接口测试通过；真实DSH闭环由T13补。",
+      "deferredGlobalAcceptance": "A13/A14/A21真实模型→T13/T15；A22实际exe→T16。",
+      "readinessDependencies": [
+        {
+          "task": "T07",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T08",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T09",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T10",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T11",
+          "gate": "implementationAccepted"
+        }
+      ],
+      "providesGates": [
+        "implementationAccepted"
+      ]
+    },
+    {
+      "id": "T13",
+      "title": "集成首节真实端到端闭环",
+      "card": "T13-vertical-integration.md",
+      "dependsOn": [
+        "T05",
+        "T12",
+        "T00",
+        "T01"
+      ],
+      "writeScopes": [
+        "education/runtime/",
+        "education/package.json",
+        "education/pnpm-lock.yaml",
+        "education/config/",
+        "education/scripts/",
+        "education/tests/integration/",
+        "education/tests/e2e/",
+        "education/.local/evidence/T13/",
+        "education/.local/cache/T13/"
+      ],
+      "report": "../reports/T13.md",
+      "request": "../requests/T13.md",
+      "requirements": [
+        "R01",
+        "R03",
+        "R06",
+        "R07",
+        "R11",
+        "R12",
+        "R15",
+        "R17",
+        "R18"
+      ],
+      "acceptanceIds": [
+        "A01",
+        "A08",
+        "A13",
+        "A14",
+        "A20",
+        "A21",
+        "A22",
+        "A24",
+        "A25",
+        "A29",
+        "A30",
+        "A35"
+      ],
+      "exitCriteria": "G1：在T00/T01 runtimeReady及真实首节下，真实DSH/正当模型和预算内完成首节端到端及失败恢复，当前AC中可本阶段验证项达到L4；L5后补。",
+      "deferredGlobalAcceptance": "所有L5→T16/T17；A09/A10全册→T14/T15；最终语义稳定性→T15。",
+      "readinessDependencies": [
+        {
+          "task": "T05",
+          "gate": "contentReady"
+        },
+        {
+          "task": "T12",
+          "gate": "implementationAccepted"
+        },
+        {
+          "task": "T00",
+          "gate": "runtimeReady"
+        },
+        {
+          "task": "T01",
+          "gate": "runtimeReady"
+        }
+      ],
+      "providesGates": [
+        "G1"
+      ]
+    },
+    {
+      "id": "T14",
+      "title": "完成七上全册概念内容与来源审校",
+      "card": "T14-full-volume.md",
+      "dependsOn": [
+        "T05"
+      ],
+      "writeScopes": [
+        "education/content/biology-7a/",
+        "education/.local/evidence/T14/",
+        "education/.local/cache/T14/"
+      ],
+      "report": "../reports/T14.md",
+      "request": "../requests/T14.md",
+      "requirements": [
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R10"
+      ],
+      "acceptanceIds": [
+        "A08",
+        "A09",
+        "A10",
+        "A11",
+        "A19"
+      ],
+      "exitCriteria": "contentReadyFull：真实全册冻结inventory/coverage、概念/来源/图义/活动/rubric/关系审校完整，无阻断缺口；发布full_volume+complete，交G2独立复核。",
+      "deferredGlobalAcceptance": "A08真实UI、A09/A10独立全册检查、A19实际图示→T15；实际产物→T16。",
+      "readinessDependencies": [
+        {
+          "task": "T05",
+          "gate": "contentReady"
+        }
+      ],
+      "providesGates": [
+        "contentReadyFull"
+      ]
+    },
+    {
+      "id": "T15",
+      "title": "验证教学质量与全册集成",
+      "card": "T15-quality.md",
+      "dependsOn": [
+        "T13",
+        "T14"
+      ],
+      "writeScopes": [
+        "education/tests/education/",
+        "education/tests/e2e/",
+        "education/scripts/",
+        "education/package.json",
+        "education/pnpm-lock.yaml",
+        "education/.local/evidence/T15/",
+        "education/.local/cache/T15/",
+        "education/docs/"
+      ],
+      "report": "../reports/T15.md",
+      "request": "../requests/T15.md",
+      "requirements": [
+        "R03",
+        "R04",
+        "R06",
+        "R07",
+        "R08",
+        "R10",
+        "R11",
+        "R18"
+      ],
+      "acceptanceIds": [
+        "A08",
+        "A09",
+        "A10",
+        "A13",
+        "A14",
+        "A19",
+        "A20",
+        "A30",
+        "A34",
+        "A35"
+      ],
+      "exitCriteria": "G2：全册覆盖独立审查、两轮固定真实教学场景、每章抽样、真图像反馈及全部软件回归通过；L5产物检查仍归T16。",
+      "deferredGlobalAcceptance": "A31/A32及其他L5→T16；最终全矩阵→T17。",
+      "readinessDependencies": [
+        {
+          "task": "T13",
+          "gate": "G1"
+        },
+        {
+          "task": "T14",
+          "gate": "contentReadyFull"
+        }
+      ],
+      "providesGates": [
+        "G2"
+      ]
+    },
+    {
+      "id": "T16",
+      "title": "构建并验证Windows桌面交付物",
+      "card": "T16-desktop.md",
+      "dependsOn": [
+        "T15"
+      ],
+      "writeScopes": [
+        "education/desktop/",
+        "education/runtime/launcher/",
+        "education/package.json",
+        "education/pnpm-lock.yaml",
+        "education/scripts/packaging/",
+        "education/licenses/",
+        "education/.local/evidence/T16/",
+        "education/.local/cache/T16/",
+        "education/dist/"
+      ],
+      "report": "../reports/T16.md",
+      "request": "../requests/T16.md",
+      "requirements": [
+        "R01",
+        "R02",
+        "R14",
+        "R15",
+        "R18"
+      ],
+      "acceptanceIds": [
+        "A02",
+        "A05",
+        "A22",
+        "A27",
+        "A31",
+        "A32"
+      ],
+      "exitCriteria": "G3：实际便携和安装exe分别运行且达到A31/A32等L5，固定hash；账户/来源/预算受阻则该门BLOCKED。",
+      "deferredGlobalAcceptance": "独立最终复核所有AC→T17；发现问题必须返原owner。",
+      "readinessDependencies": [
+        {
+          "task": "T15",
+          "gate": "G2"
+        }
+      ],
+      "providesGates": [
+        "G3"
+      ]
+    },
+    {
+      "id": "T17",
+      "title": "独立最终审计并交回主对话",
+      "card": "T17-final-audit.md",
+      "dependsOn": [
+        "T16"
+      ],
+      "writeScopes": [
+        "docs/rebuild/reports/T17.md",
+        "docs/rebuild/FINAL-REPORT.md",
+        "education/.local/evidence/T17/",
+        "education/.local/cache/T17/"
+      ],
+      "report": "../reports/T17.md",
+      "request": "../requests/T17.md",
+      "requirements": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12",
+        "R13",
+        "R14",
+        "R15",
+        "R16",
+        "R17",
+        "R18"
+      ],
+      "acceptanceIds": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A07",
+        "A08",
+        "A09",
+        "A10",
+        "A11",
+        "A12",
+        "A13",
+        "A14",
+        "A15",
+        "A16",
+        "A17",
+        "A18",
+        "A19",
+        "A20",
+        "A21",
+        "A22",
+        "A23",
+        "A24",
+        "A25",
+        "A26",
+        "A27",
+        "A28",
+        "A29",
+        "A30",
+        "A31",
+        "A32",
+        "A33",
+        "A34",
+        "A35",
+        "A36"
+      ],
+      "exitCriteria": "独立按07全量AC的最终级别逐项验证，通过才给finalAccepted；不能用阶段门或接口可消费代替最终PASS。",
+      "deferredGlobalAcceptance": "无延期，未达到最终证据等级一律FAIL/BLOCKED/NOT_RUN，不能finalAccepted。",
+      "readinessDependencies": [
+        {
+          "task": "T16",
+          "gate": "G3"
+        }
+      ],
+      "providesGates": [
+        "finalAccepted"
+      ]
+    }
+  ],
+  "pathBases": {
+    "card": "relative-to-this-index",
+    "report": "relative-to-this-index",
+    "request": "relative-to-this-index",
+    "progressSource": "relative-to-this-index",
+    "writeScopes": "workspace-root"
+  },
+  "dependencySemantics": "dependsOn仅规定主实现阶段顺序，具体解锁按readinessDependencies和phaseGates；阶段接受不等于global AC PASS。T01.domainReady独立于T00，T01.runtimeReady等待T00.runtimeReady。"
+}

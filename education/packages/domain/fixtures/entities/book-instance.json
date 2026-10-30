@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "book.biology-7a.local",
+  "courseEditionId": "course.biology-7a",
+  "originalSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "pageCount": 200,
+  "managedAssetId": "asset.book.biology7a",
+  "confirmedMetadata": {
+    "title": "fixture biology book",
+    "publisher": "fixture publisher",
+    "editionLabel": "2024 grade 7 volume 1 fixture",
+    "confirmedAt": "2026-10-01T00:00:00Z"
+  },
+  "createdAt": "2026-10-01T00:00:00Z"
+}

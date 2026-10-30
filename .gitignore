@@ -34,3 +34,7 @@ selftest-result.json
 .idea/
 .DS_Store
 Thumbs.db
+
+# rebuild (2026-10-29): textbook originals, secrets, local evidence never enter git
+/*.pdf
+/education/.local/

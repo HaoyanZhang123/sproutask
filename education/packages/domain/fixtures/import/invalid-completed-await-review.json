@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "import.job.1",
+  "requestId": "request.import.1",
+  "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "stage": "await_review",
+  "status": "completed",
+  "checkpoint": {
+    "stage": "await_review",
+    "lastCompletedUnit": 42,
+    "parserCacheKey": "pdf-parser-v1|sha256:c"
+  },
+  "completedUnits": 42,
+  "totalUnits": 42,
+  "error": null,
+  "retryable": true,
+  "parserVersion": "pdf-parser-v1",
+  "modelVersion": "fixture-model-v0",
+  "costUsage": {
+    "calls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "estimatedCostUsd": 0
+  },
+  "createdAt": "2026-10-01T00:00:00Z",
+  "updatedAt": "2026-10-29T09:00:00Z"
+}

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "kind": "t05-figure-usage-ledger",
+  "note": "第一节（PDF 11–15 / 印刷页 2–6）插图的逐项使用或排除理由。教材页图与裁切图一律不进入 Git、不随内容包分发（assetShipped=false）；结构用自写 DiagramSpec 或文字表达。",
+  "checkedAt": "2026-10-29T11:10:37Z",
+  "reviewState": "machine_checked",
+  "reviewerKind": "ai_static_reviewer",
+  "scope": "PDF 11–15 可辨认的插图与图表；T03 figures.json 未覆盖本节短标签图注，故由 AI 读 OCR 文本手工登记。",
+  "figures": [
+    {
+      "id": "fig.bio7a.p11.chapter-opener",
+      "label": "章首页插图（柳枝上的蝉）",
+      "pdfPage": 11,
+      "printedPage": "2",
+      "captionBlockIds": ["block:148f4308e23d4ecbb8ba58ad"],
+      "sourceRefIds": ["source.bio7a.chapter.opener.context"],
+      "usage": "excluded_from_assets",
+      "usedInConcepts": ["concept.bio7a.observation.meaning"],
+      "reason": "章级情境图，用来引出“从身边的生物开始观察”；版权边界内不分发页图，本包只用自写文字表达情境，不把该图作为活动素材。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p11.leek-wheat",
+      "label": "幼苗期的韭菜与小麦（议一议配图）",
+      "pdfPage": 11,
+      "printedPage": "2",
+      "captionBlockIds": ["block:522404835e82813993d2cac4"],
+      "sourceRefIds": ["source.bio7a.c2.leek-question"],
+      "usage": "used_as_activity_anchor",
+      "usedInConcepts": ["concept.bio7a.observation.comparison", "concept.bio7a.observation.purpose-object"],
+      "usedInActivities": ["activity.bio7a.c8.choice-leek", "activity.bio7a.c2.transfer-plan"],
+      "reason": "用于“区分相似生物要选可比较特征”的自写活动；图注 OCR 为乱码，未使用图注文字；活动以文字描述对象，学生不需要看原图也能作答（视觉版可留给 T11）。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p12.poplar-willow",
+      "label": "毛白杨的花、垂柳的花（比较观察用图）",
+      "pdfPage": 12,
+      "printedPage": "3",
+      "captionBlockIds": ["block:47a0c2aa123cfa0b651c327a", "block:da03dd30bee36a3789a7f047"],
+      "sourceRefIds": ["source.bio7a.c8.flowers"],
+      "usage": "used_as_concept_anchor",
+      "usedInConcepts": ["concept.bio7a.observation.comparison", "concept.bio7a.observation.purpose-object"],
+      "usedInActivities": ["activity.bio7a.c8.transfer-compare", "activity.bio7a.c2.transfer-plan"],
+      "reason": "作为“树干、枝条、叶、花、生活环境都可比较”的教材实例登记；活动要求文字列举，不依赖原图。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p12.bougainvillea",
+      "label": "光叶子花（叶与花的形状、颜色）",
+      "pdfPage": 12,
+      "printedPage": "3",
+      "captionBlockIds": ["block:8cfdd6258282b709c1e3b8d9"],
+      "sourceRefIds": ["source.bio7a.c8.bougainvillea"],
+      "usage": "excluded_from_activities",
+      "usedInConcepts": ["concept.bio7a.observation.comparison"],
+      "reason": "教材配图提出“紫红色结构是花瓣吗”，回答需要看图与花的解剖知识，超出本节文字活动能力；本包不复制图，也不出无依据的图题。建议 T11 用受控图片与视觉模型补一条图示活动。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p13.white-eye-bulbul",
+      "label": "白头鹎（观察鸟类的示例）",
+      "pdfPage": 13,
+      "printedPage": "4",
+      "captionBlockIds": ["block:d1ccaebf2eea2def4b7fae7c"],
+      "sourceRefIds": ["source.bio7a.c5.bird-tools"],
+      "usage": "used_as_concept_anchor",
+      "usedInConcepts": ["concept.bio7a.observation.tools", "concept.bio7a.observation.safety-ethics"],
+      "usedInActivities": ["activity.bio7a.c5.choice-bird", "activity.bio7a.c6.choice-park"],
+      "reason": "作为“观察鸟要用望远镜/照相机且不惊扰”的教材实例登记；活动用文字情境，不需要原图。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p13.record-table",
+      "label": "观察记录表",
+      "pdfPage": 13,
+      "printedPage": "4",
+      "captionBlockIds": ["block:75200df3596361b51fbeef8b"],
+      "sourceRefIds": ["source.bio7a.c3.record-table"],
+      "usage": "structure_reproduced_as_text",
+      "usedInConcepts": ["concept.bio7a.observation.order-record"],
+      "usedInActivities": ["activity.bio7a.c3.choice-record"],
+      "reason": "记录表栏目（班级、观察人、天气、时间、地点、生物名称、特征、生活环境）作为 rubric 与活动的记录要素依据；本包没有把表格当结构图，结构标注题改为自写观察流程图。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p14.cat-rabbit",
+      "label": "猫的头部、兔的头部",
+      "pdfPage": 14,
+      "printedPage": "5",
+      "captionBlockIds": ["block:cabf08ecf6c38de510a015c1", "block:60f0f8d1f770dce21dee21e1"],
+      "sourceRefIds": ["source.bio7a.c7.cat-rabbit"],
+      "usage": "used_as_question_anchor",
+      "usedInConcepts": ["concept.bio7a.observation.to-question"],
+      "usedInActivities": ["activity.bio7a.c7.explain-origin"],
+      "reason": "作为“从观察现象提出问题”的教材例子登记；活动只要求说明问题如何从观察产生，不要求学生看到原图。",
+      "assetShipped": false
+    },
+    {
+      "id": "fig.bio7a.p15.leaf-arrangement",
+      "label": "植物叶的排列方式（拓展应用配图）",
+      "pdfPage": 15,
+      "printedPage": "6",
+      "captionBlockIds": ["block:8c3461f74e497f18491887b4"],
+      "sourceRefIds": ["source.bio7a.ex.leaf-arrangement"],
+      "usage": "excluded_from_activities",
+      "usedInConcepts": [],
+      "reason": "原题要求观察图中的叶排列方式；本包不复制页图，也不在缺少图的情况下出题。保留为 T11/T14 的图示或视觉活动候选，并登记在覆盖排除项中。",
+      "assetShipped": false
+    }
+  ]
+}

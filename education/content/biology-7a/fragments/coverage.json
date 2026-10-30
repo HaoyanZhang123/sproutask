@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "note": "T14 全册覆盖目标：22 个真实目录节（2 单元 / 7 章 / 22 节）。sections 由 tools/build-pack.mjs 依据概念 placements 自动生成，避免手写重复或漏计。非概念材料在 exclusions 中逐项说明理由；“与人类生活的关系”已按节设立独立概念（藻类/单细胞/鱼/两栖爬行/鸟兽/细菌/真菌/病毒），不再作为排除项。",
+  "targetTocNodeIds": [
+    "toc.bio7a.u1.ch1.s1",
+    "toc.bio7a.u1.ch1.s2",
+    "toc.bio7a.u1.ch2.s1",
+    "toc.bio7a.u1.ch2.s2",
+    "toc.bio7a.u1.ch2.s3",
+    "toc.bio7a.u1.ch2.s4",
+    "toc.bio7a.u1.ch3.s1",
+    "toc.bio7a.u1.ch3.s2",
+    "toc.bio7a.u1.ch3.s3",
+    "toc.bio7a.u1.ch3.s4",
+    "toc.bio7a.u2.ch1.s1",
+    "toc.bio7a.u2.ch1.s2",
+    "toc.bio7a.u2.ch2.s1",
+    "toc.bio7a.u2.ch2.s2",
+    "toc.bio7a.u2.ch2.s3",
+    "toc.bio7a.u2.ch2.s4",
+    "toc.bio7a.u2.ch3.s1",
+    "toc.bio7a.u2.ch3.s2",
+    "toc.bio7a.u2.ch3.s3",
+    "toc.bio7a.u2.ch3.s4",
+    "toc.bio7a.u2.ch4.s1",
+    "toc.bio7a.u2.ch4.s2"
+  ],
+  "exclusions": [
+    {
+      "item": "综合实践项目 制作细胞模型（PDF 60–61）",
+      "reason": "项目式动手材料，不含需要独立成概念的生物学命题；产出是模型与评价表，登记为项目材料，不纳入概念分母。",
+      "sourceRefs": [
+        "source.bio7a.project.u1.title"
+      ]
+    },
+    {
+      "item": "综合实践项目 利用细菌或真菌制作发酵食品（PDF 129–130）",
+      "reason": "同上，属项目式应用活动；发酵原理已并入真菌概念，项目流程本身不作为独立概念。",
+      "sourceRefs": [
+        "source.bio7a.project.u2.title"
+      ]
+    },
+    {
+      "item": "单元小结与复习与提高（PDF 62–64、142–144）",
+      "reason": "总结与习题材料，不是新概念；题目原题不复制，考查方向用于自编活动与 rubric 对照。",
+      "sourceRefs": []
+    },
+    {
+      "item": "教材插图与整页页图（全册）",
+      "reason": "版权边界：页图与裁切图不进入 Git、不随内容包分发；图注候选逐条登记在 source/figure-usage-full.json（65 条），首节短标签插图另见 source/figure-usage.json（8 条）；图示用自写受控 DiagramSpec 或文字表达。图义的视觉核对未做，列为待 T11/T15 复核项。",
+      "sourceRefs": [
+        "source.bio7a.c8.bougainvillea",
+        "source.bio7a.c6.no-flash"
+      ]
+    },
+    {
+      "item": "练习与应用/复习与提高原题（全册）",
+      "reason": "不复制原题文字；只登记题目所在页与考查方向，活动为自写中文，避免把教材题目当自有内容分发。",
+      "sourceRefs": [
+        "source.bio7a.ex.observation-choice",
+        "source.bio7a.ex.leaf-arrangement"
+      ]
+    },
+    {
+      "item": "科学·技术·社会、生物学与文学、科学家的故事、小资料、古话今议、想象空间等栏目",
+      "reason": "拓展阅读与非概念性材料；其中的事实线索用于概念解释时已按概念登记出处，栏目本身不单独立概念。",
+      "sourceRefs": []
+    },
+    {
+      "item": "实验·探究/调查/课外实践的操作步骤与记录表（全册）",
+      "reason": "方法性、程序性材料，不是本期概念教学的分母；其结论与操作要点已并入相关概念的解释与活动（如显微镜使用、临时装片、种子观察）。",
+      "sourceRefs": [
+        "source.bio7a.c3.record-table",
+        "source.bio7a.c5.tools"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+packages:
+  - 'packages/*'
+  - 'client/*'
+
+# Same supply chain policy as the legacy root workspace: only explicitly
+# reviewed install scripts may run. esbuild ships the vitest runtime.
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - '@types/node@26.6.6'

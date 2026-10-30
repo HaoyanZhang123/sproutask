@@ -1,5 +1,7 @@
 # 架构（ARCHITECTURE）
 
+> **适用范围更新（2026-10-29）**：下文保留旧SproutAsk架构历史。DSH教育重构遵循[新交接入口](rebuild/00-START.md)、[公共契约](rebuild/05-data-contracts.md)和[新系统设计](rebuild/06-system-design.md)。旧Vue/Agent循环/四模式/永不给答案等不再约束新线；秘密、材料许可和非破坏原则继续有效。文档已准备不代表重构已实现。
+
 > 芽问：**本地优先的桌面 Agent**。Agent 的目标 / 状态 / 工具 / 策略全在本地，
 > DeepSeek API 只作推理外脑；**全册教材与课程标准结构化入库、按学生当前位置装载**；
 > 学情与日志仅存本地，**不做教师端**。

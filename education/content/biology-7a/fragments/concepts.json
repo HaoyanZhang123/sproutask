@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "note": "Concepts for 第一单元 第一章 第一节 观察周边环境中的生物. Explanations are self-written Chinese paraphrases of the textbook method, not copied passages. sourceRefs point at source/source-refs.json ids.",
+  "concepts": [
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.meaning",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察的含义与地位",
+      "aliases": [
+        "什么是观察",
+        "观察的含义"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能用“有目的、有计划地仔细察看”说明什么是观察，并把它与随意看看区分开",
+        "能说出观察是学习生物学的基本方法之一，也是科学探究获取事实的重要途径"
+      ],
+      "explanation": "观察是带着明确目的、按事先想好的安排去仔细察看事物的活动；它不同于随意浏览，也不同于路过时看一眼。观察既可以直接用眼睛，也能用放大镜、显微镜、望远镜等工具把细小结构看清楚，并常常需要边看边记录、边想问题。观察是学习生物学最基本的方法之一，也是科学探究中获取事实的重要途径。",
+      "misconceptions": [
+        {
+          "statement": "看过就等于观察过",
+          "correction": "观察需要明确目的和计划，并伴随记录与思考；路过时随便看一眼不构成一次观察。",
+          "sourceRefs": [
+            "source.bio7a.c1.not-casual",
+            "source.bio7a.c1.purpose-plan"
+          ]
+        },
+        {
+          "statement": "观察只能用眼睛，不能用工具",
+          "correction": "借助放大镜、显微镜或望远镜等工具，可以扩大观察范围或看清更小的结构；有时还要配合测量，工具不会改变观察的基本要求。",
+          "sourceRefs": [
+            "source.bio7a.c5.tools",
+            "source.bio7a.c5.devices"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.section.heading",
+        "source.bio7a.c1.basic-method",
+        "source.bio7a.c1.not-casual",
+        "source.bio7a.c1.purpose-plan",
+        "source.bio7a.c1.science-basic",
+        "source.bio7a.chapter.opener.context"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.meaning"
+      ],
+      "activityIds": [
+        "activity.bio7a.c1.choice-basics",
+        "activity.bio7a.c1.transfer-claim"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.purpose-object",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察的目的与对象",
+      "aliases": [
+        "观察目的",
+        "观察对象"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能针对一个具体的观察任务写出观察目的",
+        "能明确观察对象并列出至少两项可观察的具体内容"
+      ],
+      "explanation": "观察前要先想清楚两件事：为什么观察（目的）和观察谁（对象）。目的可以是了解某种生物的形态结构、生活环境或生活习性，也可以是比较不同生物的异同；目的不同，需要看的内容也不同。对象明确后，还要把它拆成看得见、比得出的具体项目：观察植物多关注植株高度、形态和生长环境，观察动物多关注形态特点、运动方式和栖息环境。",
+      "misconceptions": [
+        {
+          "statement": "观察目的写得越大越好",
+          "correction": "目的要具体到能指导看什么，例如“比较两棵树的叶形和树皮”比“了解树”更能指导观察。",
+          "sourceRefs": [
+            "source.bio7a.c2.purpose-examples"
+          ]
+        },
+        {
+          "statement": "观察对象是“生物”，不用再具体",
+          "correction": "对象要具体到某种生物及其可观察的项目，否则容易漏看或看得随意。",
+          "sourceRefs": [
+            "source.bio7a.c2.object",
+            "source.bio7a.c2.plant-focus"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c2.purpose",
+        "source.bio7a.c2.purpose-examples",
+        "source.bio7a.c2.object",
+        "source.bio7a.c2.plant-focus",
+        "source.bio7a.c2.animal-focus",
+        "source.bio7a.c2.leek-question"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.purpose-object"
+      ],
+      "activityIds": [
+        "activity.bio7a.c2.choice-purpose",
+        "activity.bio7a.c2.transfer-plan"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.order-record",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察的顺序与记录",
+      "aliases": [
+        "观察过程",
+        "观察记录表"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能按合理顺序描述一次观察活动的过程",
+        "能说出观察记录应包含的要素，并说明记录要真实、及时"
+      ],
+      "explanation": "一次完整的观察通常按这样的顺序展开：先确定目的，再明确对象，然后按一定次序察看并及时记录，最后与同学交流观察结果。记录要真实、客观，看到什么写什么，不能凭回忆补写，也不能只挑符合预想的写；记录表一般要写清时间、地点、天气、观察人、生物名称、特征和生活环境。观察耗时较长时，还要有计划和耐心。",
+      "misconceptions": [
+        {
+          "statement": "记录可以等观察结束再凭记忆补",
+          "correction": "记录应及时、真实客观；事后补记容易遗漏，也容易混入想象。",
+          "sourceRefs": [
+            "source.bio7a.c3.truthful"
+          ]
+        },
+        {
+          "statement": "记录只要写结论就行",
+          "correction": "记录要写清看到的现象和特征（时间、地点、对象、特征、环境等），结论应建立在记录之上。",
+          "sourceRefs": [
+            "source.bio7a.c3.record-table",
+            "source.bio7a.c3.record"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c3.campus",
+        "source.bio7a.c3.order",
+        "source.bio7a.c3.record",
+        "source.bio7a.c3.truthful",
+        "source.bio7a.c3.record-table",
+        "source.bio7a.c3.communicate"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.order-record"
+      ],
+      "activityIds": [
+        "activity.bio7a.c3.diagram-flow",
+        "activity.bio7a.c3.choice-record",
+        "activity.bio7a.c3.transfer-plan"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.variation",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察结果的差异与影响因素",
+      "aliases": [
+        "观察差异",
+        "影响观察结果的因素"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能解释不同同学对同一对象的观察结果可能不同的原因（至少两项）",
+        "能提出减少观察差异或进一步观察的具体做法"
+      ],
+      "explanation": "同一种生物，不同同学观察后画出的图、写下的记录可能不一样，这很正常。差异可能来自观察的位置和角度、时间和天气、使用的工具、观察者的经验和注意力，也可能来自记录方式是否统一。要减少不必要的差异，可以事先约定观察的时间、地点和项目，必要时借助工具或测量，多观察几次，并与同伴核对记录；差异本身也可以成为进一步观察和提问的起点。",
+      "misconceptions": [
+        {
+          "statement": "结果不一样，说明一定有人观察错了",
+          "correction": "观察结果受位置、时间、工具、经验、注意力等因素影响；不同不一定是错，需要核对条件。",
+          "sourceRefs": [
+            "source.bio7a.c4.different",
+            "source.bio7a.c4.factors"
+          ]
+        },
+        {
+          "statement": "再看一眼就能消除所有差异",
+          "correction": "减少差异需要统一条件、必要时使用工具或测量、多次观察并交流核对。",
+          "sourceRefs": [
+            "source.bio7a.c4.further"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c4.different",
+        "source.bio7a.c4.factors",
+        "source.bio7a.c4.compare",
+        "source.bio7a.c4.further"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.variation"
+      ],
+      "activityIds": [
+        "activity.bio7a.c4.relation-factors",
+        "activity.bio7a.c4.explain-difference",
+        "activity.bio7a.c4.transfer-explain"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.tools",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察的工具与测量",
+      "aliases": [
+        "观察工具",
+        "观察手段"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能根据观察对象和目的选择合适的观察工具或手段",
+        "能说明工具和测量在观察中的作用与限制"
+      ],
+      "explanation": "选择合适的观察手段，要看对象和目的：看远处的鸟可以用望远镜，看叶片的细微结构可以用放大镜或显微镜，需要留下证据时可以用照相机、摄像机或录音设备，需要比较大小、距离时还要测量。工具能帮我们看得更清、记得更准，但不能代替明确的目的、认真的思考和真实的记录。",
+      "misconceptions": [
+        {
+          "statement": "工具越高级越好",
+          "correction": "工具要匹配对象和目的；用显微镜看远处的鸟既不方便，也看不到整体。",
+          "sourceRefs": [
+            "source.bio7a.c5.tools",
+            "source.bio7a.c5.bird-tools"
+          ]
+        },
+        {
+          "statement": "拍了照就等于完成了观察",
+          "correction": "拍照只是记录手段，仍需要明确目的、观察特征并思考。",
+          "sourceRefs": [
+            "source.bio7a.c5.devices"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c5.tools",
+        "source.bio7a.c5.devices",
+        "source.bio7a.c5.measure",
+        "source.bio7a.c5.bird-tools",
+        "source.bio7a.c1.science-basic"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.tools"
+      ],
+      "activityIds": [
+        "activity.bio7a.c5.choice-bird",
+        "activity.bio7a.c5.transfer-tool"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.safety-ethics",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察中的安全与生物保护",
+      "aliases": [
+        "观察安全",
+        "不打扰生物"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能说出观察时保护生物的具体做法（至少三条）",
+        "能说出野外观察的安全要求（至少两条）"
+      ],
+      "explanation": "到校园、公园或野外观察，要把安全和保护生物放在前面：分组行动、听从老师安排，注意地形、天气和不明生物；观察植物时不采摘、不折断，观察动物时不追赶、不惊扰，保持安静、衣着颜色不要太鲜亮，拍鸟时尽量不用闪光灯。观察的目的是认识生物，而不是打扰它们。",
+      "misconceptions": [
+        {
+          "statement": "只要不把生物弄死，就不算伤害",
+          "correction": "采摘、折断、追赶、惊扰、用闪光灯等都会影响生物，应当避免。",
+          "sourceRefs": [
+            "source.bio7a.c6.protect-plant",
+            "source.bio7a.c6.protect-bird",
+            "source.bio7a.c6.no-flash"
+          ]
+        },
+        {
+          "statement": "安全只是老师要操心的事",
+          "correction": "观察者自己也要遵守分组、听从安排、注意环境等安全要求。",
+          "sourceRefs": [
+            "source.bio7a.c6.safety-group",
+            "source.bio7a.c6.field-safety"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c6.protect-plant",
+        "source.bio7a.c6.protect-bird",
+        "source.bio7a.c6.safety-group",
+        "source.bio7a.c6.clothing",
+        "source.bio7a.c6.quiet",
+        "source.bio7a.c6.no-flash",
+        "source.bio7a.c6.field-safety"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.safety-ethics"
+      ],
+      "activityIds": [
+        "activity.bio7a.c6.choice-park",
+        "activity.bio7a.c6.transfer-rules"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.to-question",
+      "courseEditionId": "course.biology-7a",
+      "title": "从观察到提出问题",
+      "aliases": [
+        "观察与提问",
+        "发现问题"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能说明问题可以从观察到的现象中产生",
+        "能提出与观察现象相关、可进一步探究的问题并说明理由"
+      ],
+      "explanation": "观察不只是把看到的东西记下来，还要边看边想：这个现象说明什么？为什么会这样？把看到的现象变成可以研究的问题，就是提出问题。好的问题通常与观察到的现象直接相关，能够通过进一步观察、实验或查资料来寻找答案；问题越具体、越可检验，越值得探究。",
+      "misconceptions": [
+        {
+          "statement": "问题是凭空想出来的，和观察无关",
+          "correction": "可探究的问题通常来自观察到的现象，并能通过进一步观察或实验检验。",
+          "sourceRefs": [
+            "source.bio7a.c7.raise",
+            "source.bio7a.c7.value"
+          ]
+        },
+        {
+          "statement": "问题越奇怪越有价值",
+          "correction": "值得探究的问题要与现象相关、具体且可检验，而不是只追求新奇。",
+          "sourceRefs": [
+            "source.bio7a.c7.value"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c7.think",
+        "source.bio7a.c7.raise",
+        "source.bio7a.c7.cat-rabbit",
+        "source.bio7a.c7.value"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.to-question"
+      ],
+      "activityIds": [
+        "activity.bio7a.c7.explain-origin",
+        "activity.bio7a.c7.transfer-questions"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.bio7a.observation.comparison",
+      "courseEditionId": "course.biology-7a",
+      "title": "观察中的比较",
+      "aliases": [
+        "比较观察",
+        "区分相似生物"
+      ],
+      "placements": [
+        "toc.bio7a.u1.ch1.s1"
+      ],
+      "learningObjectives": [
+        "能为相似生物选择可比较的特征（至少两项）",
+        "能说明比较时要用共同标准、逐项对照，必要时借助工具或多次观察"
+      ],
+      "explanation": "比较是观察的延伸。要区分长得很像的生物，先要选对可比的特征，例如叶的形状和气味、树干和枝条的样子、花的结构、生活的环境等；比较时要用同一套标准，逐项对照，必要时借助工具、多次观察或追踪它们的生长过程。只凭“看起来像”或单一特征下结论，容易把不同的生物混为一谈。",
+      "misconceptions": [
+        {
+          "statement": "长得像就是同一种生物",
+          "correction": "相似生物需要用多个可比较特征逐项对照，必要时借助工具或追踪生长过程。",
+          "sourceRefs": [
+            "source.bio7a.c8.poplar-willow",
+            "source.bio7a.c8.features"
+          ]
+        },
+        {
+          "statement": "比较就是看看哪个更好看",
+          "correction": "比较要有共同标准和明确的比较项目，而不是凭主观好恶。",
+          "sourceRefs": [
+            "source.bio7a.c8.compare-purpose"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.bio7a.c8.compare-purpose",
+        "source.bio7a.c8.poplar-willow",
+        "source.bio7a.c8.features",
+        "source.bio7a.c8.flowers",
+        "source.bio7a.c8.habitat",
+        "source.bio7a.c8.bougainvillea",
+        "source.bio7a.c2.leek-question"
+      ],
+      "rubricIds": [
+        "rubric.bio7a.observation.comparison"
+      ],
+      "activityIds": [
+        "activity.bio7a.c8.choice-leek",
+        "activity.bio7a.c8.transfer-compare"
+      ],
+      "reviewState": "machine_checked"
+    }
+  ]
+}

@@ -1,0 +1,690 @@
+{
+  "schemaVersion": 1,
+  "note": "16 个首节活动：每概念 2 个（基础理解 + 变式/迁移），含 1 个结构标注题与 1 个关系题，供 T11 受控图示与 T09/T12 使用。题干与选项为自写中文；练习册原题不复制，只登记出处用于对照。",
+  "activities": [
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c1.choice-basics",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.meaning"
+      ],
+      "type": "choice",
+      "stem": "下列关于“观察”的说法，哪一项最符合本节的观点？",
+      "sourceRefs": [
+        "source.bio7a.c1.not-casual",
+        "source.bio7a.c1.basic-method"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "只要睁开眼睛看见，就是观察"
+          },
+          {
+            "id": "option.b",
+            "label": "观察是有目的、有计划地仔细察看，常伴随记录和思考"
+          },
+          {
+            "id": "option.c",
+            "label": "观察就是用仪器测量出数据"
+          },
+          {
+            "id": "option.d",
+            "label": "观察就是把自己已经知道的内容写下来"
+          }
+        ],
+        "correctOptionIds": [
+          "option.b"
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.meaning",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c1.transfer-claim",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.meaning"
+      ],
+      "type": "transfer",
+      "stem": "有同学说：“我每天上学都从这片草地经过，早就观察过这些植物了。”请判断这种说法是否合适，并用本节的观点说明理由。",
+      "sourceRefs": [
+        "source.bio7a.c1.not-casual",
+        "source.bio7a.c1.purpose-plan"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 600
+      },
+      "rubricId": "rubric.bio7a.observation.meaning",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c2.choice-purpose",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.purpose-object"
+      ],
+      "type": "choice",
+      "stem": "准备观察校园里的两种树，第一步最合适的做法是？",
+      "sourceRefs": [
+        "source.bio7a.c2.purpose",
+        "source.bio7a.c2.object"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "先明确观察目的，再确定观察对象"
+          },
+          {
+            "id": "option.b",
+            "label": "先多拍照片，回去再想为什么"
+          },
+          {
+            "id": "option.c",
+            "label": "先跟随同学，别人看什么就看什么"
+          },
+          {
+            "id": "option.d",
+            "label": "先凭印象写结论，再补观察记录"
+          }
+        ],
+        "correctOptionIds": [
+          "option.a"
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.purpose-object",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c2.transfer-plan",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.purpose-object"
+      ],
+      "type": "transfer",
+      "stem": "要比较校园里两棵树的异同，请写出你的观察目的（1 条），并列出至少 2 项具体的观察内容。",
+      "sourceRefs": [
+        "source.bio7a.c2.purpose-examples",
+        "source.bio7a.c2.plant-focus",
+        "source.bio7a.c8.poplar-willow"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 800
+      },
+      "rubricId": "rubric.bio7a.observation.purpose-object",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c3.diagram-flow",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.order-record"
+      ],
+      "type": "diagram_label",
+      "stem": "把“确定观察目的、明确观察对象、做好观察记录、交流观察结果”填到观察流程图的对应位置（也可用键盘列表作答）。",
+      "sourceRefs": [
+        "source.bio7a.c2.purpose",
+        "source.bio7a.c2.object",
+        "source.bio7a.c3.record",
+        "source.bio7a.c3.communicate"
+      ],
+      "renderSpec": {
+        "schemaVersion": 1,
+        "nodes": [
+          {
+            "id": "node.purpose",
+            "label": "环节①",
+            "kind": "process"
+          },
+          {
+            "id": "node.object",
+            "label": "环节②",
+            "kind": "process"
+          },
+          {
+            "id": "node.record",
+            "label": "环节③",
+            "kind": "process"
+          },
+          {
+            "id": "node.share",
+            "label": "环节④",
+            "kind": "process"
+          }
+        ],
+        "edges": [
+          {
+            "id": "edge.purpose-object",
+            "from": "node.purpose",
+            "to": "node.object",
+            "label": "接着",
+            "directed": true
+          },
+          {
+            "id": "edge.object-record",
+            "from": "node.object",
+            "to": "node.record",
+            "label": "接着",
+            "directed": true
+          },
+          {
+            "id": "edge.record-share",
+            "from": "node.record",
+            "to": "node.share",
+            "label": "接着",
+            "directed": true
+          }
+        ],
+        "labels": [],
+        "regions": [],
+        "altText": "观察活动流程示意图：四个先后相接的环节，环节名称留空待填。",
+        "sourceRefs": [
+          "source.bio7a.c3.order",
+          "source.bio7a.c3.record",
+          "source.bio7a.c3.communicate"
+        ]
+      },
+      "answerSchema": {
+        "kind": "diagram_label",
+        "targets": [
+          {
+            "id": "node.purpose",
+            "label": "确定观察目的"
+          },
+          {
+            "id": "node.object",
+            "label": "明确观察对象"
+          },
+          {
+            "id": "node.record",
+            "label": "做好观察记录"
+          },
+          {
+            "id": "node.share",
+            "label": "交流观察结果"
+          }
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.order-record",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c3.choice-record",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.order-record"
+      ],
+      "type": "choice",
+      "stem": "下列关于观察记录的做法，哪一项符合本节要求？",
+      "sourceRefs": [
+        "source.bio7a.c3.truthful",
+        "source.bio7a.c3.record-table",
+        "source.bio7a.ex.observation-choice"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "观察结束后凭回忆补写记录"
+          },
+          {
+            "id": "option.b",
+            "label": "只记录与预期一致的现象"
+          },
+          {
+            "id": "option.c",
+            "label": "及时、真实客观地记录，并写清要素"
+          },
+          {
+            "id": "option.d",
+            "label": "只写结论，不写看到的特征"
+          }
+        ],
+        "correctOptionIds": [
+          "option.c"
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.order-record",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c4.relation-factors",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.variation"
+      ],
+      "type": "relation",
+      "stem": "把左侧的观察条件与右侧可能造成的差异配对（也可用键盘列表选择配对）。",
+      "sourceRefs": [
+        "source.bio7a.c4.different",
+        "source.bio7a.c4.factors"
+      ],
+      "renderSpec": {
+        "schemaVersion": 1,
+        "nodes": [
+          {
+            "id": "factor.position",
+            "label": "观察位置：只站在树下抬头看",
+            "kind": "region"
+          },
+          {
+            "id": "factor.time",
+            "label": "观察时间：清晨与傍晚各一次",
+            "kind": "region"
+          },
+          {
+            "id": "factor.tool",
+            "label": "观察工具：肉眼与放大镜",
+            "kind": "region"
+          },
+          {
+            "id": "effect.part",
+            "label": "看到的结构部位不同",
+            "kind": "concept"
+          },
+          {
+            "id": "effect.behavior",
+            "label": "看到的行为不同",
+            "kind": "concept"
+          },
+          {
+            "id": "effect.detail",
+            "label": "能看清的细节不同",
+            "kind": "concept"
+          }
+        ],
+        "edges": [],
+        "labels": [],
+        "regions": [],
+        "altText": "左右两列配对图：左列为观察位置、时间、工具，右列为可能看到的结构部位、行为、细节差异。",
+        "sourceRefs": [
+          "source.bio7a.c4.factors"
+        ]
+      },
+      "answerSchema": {
+        "kind": "relation",
+        "pairs": [
+          {
+            "fromId": "factor.position",
+            "toId": "effect.part"
+          },
+          {
+            "fromId": "factor.time",
+            "toId": "effect.behavior"
+          },
+          {
+            "fromId": "factor.tool",
+            "toId": "effect.detail"
+          }
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.variation",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c4.explain-difference",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.variation"
+      ],
+      "type": "explain",
+      "stem": "同一棵树，两位同学画出的叶形不一样。请写出两种可能的原因，并给出一种减少这种差异的做法。",
+      "sourceRefs": [
+        "source.bio7a.c4.different",
+        "source.bio7a.c4.factors",
+        "source.bio7a.c4.further"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 800
+      },
+      "rubricId": "rubric.bio7a.observation.variation",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c5.choice-bird",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.tools"
+      ],
+      "type": "choice",
+      "stem": "要观察远处树枝上的鸟，最合适的做法是？",
+      "sourceRefs": [
+        "source.bio7a.c5.tools",
+        "source.bio7a.c5.bird-tools"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "走到树下并大声招呼同伴一起看"
+          },
+          {
+            "id": "option.b",
+            "label": "用望远镜观察，同时保持安静"
+          },
+          {
+            "id": "option.c",
+            "label": "用闪光灯连续拍照"
+          },
+          {
+            "id": "option.d",
+            "label": "只看一眼，回家后凭记忆描述"
+          }
+        ],
+        "correctOptionIds": [
+          "option.b"
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.tools",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c5.transfer-tool",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.tools"
+      ],
+      "type": "transfer",
+      "stem": "要观察一片叶表面的细微结构，你会选择什么工具或方法？为什么？观察时还需要注意什么？",
+      "sourceRefs": [
+        "source.bio7a.c5.tools",
+        "source.bio7a.c5.devices",
+        "source.bio7a.c5.measure"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 800
+      },
+      "rubricId": "rubric.bio7a.observation.tools",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c6.choice-park",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.safety-ethics"
+      ],
+      "type": "choice",
+      "stem": "在公园观察鸟类时，下列做法正确的是？",
+      "sourceRefs": [
+        "source.bio7a.c6.protect-bird",
+        "source.bio7a.c6.clothing",
+        "source.bio7a.c6.quiet",
+        "source.bio7a.c6.no-flash"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "穿鲜艳衣服尽量靠近鸟群"
+          },
+          {
+            "id": "option.b",
+            "label": "大声讨论，让同伴也过来看"
+          },
+          {
+            "id": "option.c",
+            "label": "保持安静、不惊扰，远距离观察"
+          },
+          {
+            "id": "option.d",
+            "label": "用闪光灯给鸟连续拍照"
+          }
+        ],
+        "correctOptionIds": [
+          "option.c"
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.safety-ethics",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c6.transfer-rules",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.safety-ethics"
+      ],
+      "type": "transfer",
+      "stem": "小组要到校园绿地观察植物和昆虫。请写出三条注意事项，并说明每条是在保护生物还是在保护自己。",
+      "sourceRefs": [
+        "source.bio7a.c6.protect-plant",
+        "source.bio7a.c6.safety-group",
+        "source.bio7a.c6.field-safety"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 900
+      },
+      "rubricId": "rubric.bio7a.observation.safety-ethics",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c7.explain-origin",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.to-question"
+      ],
+      "type": "explain",
+      "stem": "观察猫和兔的头部后，有同学问：“为什么猫的眼睛长在头部前方，兔的眼睛长在两侧？”请说明这个问题可能是怎样从观察中产生的。",
+      "sourceRefs": [
+        "source.bio7a.c7.cat-rabbit",
+        "source.bio7a.c7.think",
+        "source.bio7a.c7.raise"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 800
+      },
+      "rubricId": "rubric.bio7a.observation.to-question",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c7.transfer-questions",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.to-question"
+      ],
+      "type": "transfer",
+      "stem": "雨后校园墙角出现许多蜗牛。请从观察出发提出两个可以研究的问题，并说明哪一个更值得探究、为什么。",
+      "sourceRefs": [
+        "source.bio7a.c7.raise",
+        "source.bio7a.c7.value"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 900
+      },
+      "rubricId": "rubric.bio7a.observation.to-question",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c8.choice-leek",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.comparison"
+      ],
+      "type": "choice",
+      "stem": "要区分幼苗期的韭菜和小麦，比较时更应该关注什么？",
+      "sourceRefs": [
+        "source.bio7a.c2.leek-question",
+        "source.bio7a.c8.features"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "叶的形状、气味等可观察、可比较的特征"
+          },
+          {
+            "id": "option.b",
+            "label": "哪一种幼苗长得更高、更茂盛"
+          },
+          {
+            "id": "option.c",
+            "label": "哪一种幼苗的叶片摸起来更柔软"
+          },
+          {
+            "id": "option.d",
+            "label": "哪一种幼苗的浇水次数更多"
+          }
+        ],
+        "correctOptionIds": [
+          "option.a"
+        ]
+      },
+      "rubricId": "rubric.bio7a.observation.comparison",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c8.transfer-compare",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.comparison"
+      ],
+      "type": "transfer",
+      "stem": "比较杨树和柳树时，除了叶，还可以比较哪些方面？请写出两项，并说明比较时要注意什么。",
+      "sourceRefs": [
+        "source.bio7a.c8.compare-purpose",
+        "source.bio7a.c8.features",
+        "source.bio7a.c8.flowers",
+        "source.bio7a.c8.habitat"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 900
+      },
+      "rubricId": "rubric.bio7a.observation.comparison",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c3.transfer-plan",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.order-record"
+      ],
+      "type": "transfer",
+      "stem": "请你为“观察校园里的一棵树”设计一张记录表：写出至少 5 个字段，并说明为什么记录要及时、真实。",
+      "sourceRefs": [
+        "source.bio7a.c3.campus",
+        "source.bio7a.c3.order",
+        "source.bio7a.c3.record",
+        "source.bio7a.c3.truthful",
+        "source.bio7a.c3.record-table",
+        "source.bio7a.c3.communicate"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 600
+      },
+      "rubricId": "rubric.bio7a.observation.order-record",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.bio7a.c4.transfer-explain",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.bio7a.observation.variation"
+      ],
+      "type": "transfer",
+      "stem": "两位同学同时观察同一株植物，画出的叶形不同。请写出两个可能的影响因素，并设计一种减少差异的做法。",
+      "sourceRefs": [
+        "source.bio7a.c4.different",
+        "source.bio7a.c4.factors",
+        "source.bio7a.c4.compare",
+        "source.bio7a.c4.further"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 600
+      },
+      "rubricId": "rubric.bio7a.observation.variation",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    }
+  ]
+}

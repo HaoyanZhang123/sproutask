@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "task": "T00",
+  "generatedAt": "2026-10-29T18:20:00+08:00",
+  "workspace": "E:\\DSH\\workspaces\\ai4edu",
+  "status": "runtime probe accepted locally; account PKCE route NOT_ALLOWED by user decision; API-key text route PASS (live, 4 calls); image accepted by route but effect acceptance pending T11; redistribution not yet cleared",
+  "source": {
+    "route": "official-npm-registry-exact-version",
+    "reason": "github.com source checkout is not reachable from this environment (api.github.com returns 403), and the installed desktop app.asar must not be used as a build input; the public npm registry serves the same fixed version the desktop bundles (0.2.1-rc.3).",
+    "registry": "https://registry.npmjs.org",
+    "package": "@deepseek-ai/dsh",
+    "version": "0.2.1-rc.3",
+    "distTagAtProbeTime": {
+      "latest": "0.2.1-rc.2",
+      "next": "0.2.1-rc.4",
+      "note": "pinned by exact version, never by dist-tag"
+    },
+    "tarball": "https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.2.1-rc.3.tgz",
+    "tarballSha256": "9a8f9493bfab8218215a8ca38ab8821e76dff63dc4fcb65841ef87c0aa277141",
+    "tarballBytes": 25130,
+    "integrity": "sha512-H+E9HLnHf7fJqzen84Z9Bq8ggb5xbrcbyhZjXTJLE9NabHr3zteGvTRvdvGkxPl4ov80is4WLglFmSo+/olJjg==",
+    "bin": "lib/bin.js",
+    "lockfile": "education/probes/runtime/pnpm-lock.yaml",
+    "lockfileSha256": "eb75512df677975dd55d5b973d4cef852e99b98b1f5ce67d03ee84e2f9f2c3ca",
+    "lockfileBytes": 614198,
+    "resolvedPackages": 558,
+    "dependencyPolicy": "exact versions only; bundles resolve from the dsh install directory, out-of-tree probe plugins are local `link:` packages in the probe home profiles",
+    "pinnedKeyPackages": {
+      "@deepseek-ai/dsh-tools": {
+        "version": "0.2.1-rc.3",
+        "integrity": "sha512-fHmhIFaztPt9+uvOlk3p4wXMU62F+TRe0ozVPasV3seIsFcxpca74QGSK5dFHICDhKIY1T9MUh0F3itMTdMi3A=="
+      },
+      "@deepseek-ai/dsh-base": {
+        "version": "0.2.1-rc.3",
+        "integrity": "sha512-REEO+IG35kH/JsjsIPiSqKinNKJBPIrErB+0+T++0Jlzv1+07FKQP/BtfARK0nb1ysRiukKJUkZXnNey+w98yg=="
+      },
+      "@deepseek-ai/dsh-web-app": {
+        "version": "0.2.1-rc.3",
+        "integrity": "sha512-Rhgq5CUumgdLr3esCGIecX92cjiz7Avrpj8p5usLE4/bLyMZ7JE3+AHzUroidBIc4GlMskYASsr2FpmE1ze5gw=="
+      },
+      "@deepseek-ai/dsh-headless": {
+        "version": "0.2.1-rc.3",
+        "integrity": "sha512-fVNs4BkUuxLqaNCRshiDxqU+9+QiA+56rqIjKvseDAkw0r53AO525JrZQ0wdMKuFCbyx6PLYhYPqm/EuIEjO7g=="
+      },
+      "@deepseek-ai/dsh-web-frontend": {
+        "version": "0.2.1-rc.3",
+        "integrity": "sha512-F2lGJudVqmJJ4GySnLYdvw1796YzIyEK+drY+jW7er+TVZMwKmwFWIrdkJXfniSP3I1+A2eVOgiTGVZ9PTi6vw==",
+        "note": "ships the built browser shell dist that dsh web serves"
+      },
+      "@deepseek-ai/dsh-deepseek-account-platform": {
+        "version": "0.2.1-rc.3",
+        "license": "MIT",
+        "note": "PKCE account route implementation; platform authorization for derivative products is NOT established"
+      }
+    },
+    "referenceInstalledDesktop": {
+      "path": "E:\\DSH-desktop\\resources\\app.asar",
+      "sha256": "04b32e3a872826ba15cfb2081c6a929a8d4ecaa65e09a2543e5a6b30e2eff1f0",
+      "bytes": 182434783,
+      "appName": "@deepseek-ai/dsh-desktop",
+      "appVersion": "0.2.1-rc.3",
+      "dshBuildCommit": "be72761ee1a6736ebcdf4f3739363b083ae53c98",
+      "use": "static fingerprint only; never copied, edited, packaged or used as a build input"
+    },
+    "sourceCommit": {
+      "value": "be72761ee1a6736ebcdf4f3739363b083ae53c98",
+      "provenance": "declared as dshBuildCommit by the installed desktop app package.json; not independently verified because github.com source access is unavailable",
+      "verified": false
+    }
+  },
+  "toolchain": {
+    "node": {
+      "tested": "v24.22.1",
+      "declaredByDesktopRuntimeManifest": "24.21.0"
+    },
+    "pnpm": {
+      "tested": "11.21.0",
+      "declaredByDesktopRuntimeManifest": "11.28.5",
+      "note": "probe install succeeded on 11.21.0; profile plugin installs use pnpm with nodeLinker=hoisted"
+    },
+    "hostProtocolVersion": 4
+  },
+  "pluginApi": {
+    "hostPlugin": {
+      "form": "ESM module exporting `apply(ctx)` (optional `inject` service names)",
+      "example": "education/probes/runtime/plugin/host/index.js",
+      "servicesUsed": ["ctx.tools.register", "ctx.llm.registerAdapter", "ctx.effect"]
+    },
+    "tool": {
+      "registration": "ctx.tools.register(definition)",
+      "definitionShape": "defineTool() output: { name, description, parameters (JSON Schema), output: { schema, render }, execute }",
+      "note": "defineTool emits plain data, so a plugin that avoids importing dsh-tools stays compatible across module instances"
+    },
+    "llm": {
+      "registration": "ctx.llm.registerAdapter([provider], adapter)",
+      "adapterMinimum": "providerInfo(provider) + async *stream(options); resolveModel must return { provider, id, name, context: { contextWindow } }",
+      "testedWith": "scripted in-process adapter `edu-mock` / model `echo-1`, no network, no credential"
+    },
+    "agentPreset": {
+      "row": "@deepseek-ai/dsh-agent-preset",
+      "config": "id + order + plugins[] (each child row id/name/config)",
+      "registry": "@deepseek-ai/dsh-agent-preset-registry config.default selects the preset"
+    },
+    "session": {
+      "persistence": "JSONL under $DSH_HOME/sessions (isolated; 3 files written by the probe run)"
+    }
+  },
+  "client": {
+    "framework": "React 18 + Cordis client loader; the shell is served as a built dist by @deepseek-ai/dsh-web-frontend",
+    "pluginDeclaration": {
+      "field": "package.json dsh.client",
+      "required": ["platform: 'web'"],
+      "optional": ["inject: [package ids]", "external: [extra module requests]"],
+      "entry": "package export './client' -> built lib/client.js"
+    },
+    "bundleProtocol": {
+      "format": "window.__ModuleLoader__.load({ id, factory: (require) => module.exports })",
+      "moduleTable": "frozen platform table supplied by the shell; React, react-dom, cordis, ui-slots, ui-primitives share one browser identity",
+      "externalRule": "dynamic bundles may require only frozen-table names plus declared dsh.client.external requests"
+    },
+    "rootReplacement": {
+      "mechanism": "dsh-client-ui-renderer performs the single renderSlot('root'); a root occupant owns product layout and document metadata",
+      "registration": "ctx.slots.register({ name: 'root', locale }, Component)",
+      "verified": "yes - probe root rendered and default layout root disabled",
+      "constraint": "any client row that injects the default `layout`/`uiWorkspace`/`uiConversation`/`sidebarRight` services stays pending when ui-layout is removed; a standalone education root must also remove those rows or provide equivalent services",
+      "observedPendingWithoutLayout": 23,
+      "negativeControl": "with ui-layout re-enabled, the shell reports '@deepseek-ai/dsh-client-ui-layout: failed' and does not render two roots"
+    },
+    "buildToolchain": {
+      "productionRecipe": "monorepo `pnpm run build` (tsdown) produces lib/client.js for each plugin package",
+      "publishedRecipe": "not published; the probe proves a hand-authored loader-protocol bundle works for a static root, but real education client plugins still need a T01-owned build recipe",
+      "gap": "client build pipeline for education plugins is NOT fixed yet"
+    }
+  },
+  "host": {
+    "webRoute": {
+      "command": "node <probe>/node_modules/@deepseek-ai/dsh/lib/bin.js --profile edu-web --no-open --port 0",
+      "bind": "127.0.0.1 only; wildcard addresses rejected by the host",
+      "auth": "print-token URL -> 303 + signed HttpOnly SameSite=Strict cookie; requests without the cookie return 401; Host/Origin fence applies",
+      "frontend": "@deepseek-ai/dsh-web-frontend dist, served on the same loopback origin"
+    },
+    "desktopRoute": {
+      "status": "not reproducible from npm",
+      "reason": "@deepseek-ai/dsh-desktop is not published on the registry; the Electron shell (main/preload/IPC, installer, updater) exists only in the installed bundle and the (unreachable) source repo",
+      "owner": "T16",
+      "note": "T00 fixes the web/headless runtime; the Windows desktop wrapper remains an open T16 dependency"
+    },
+    "headlessRoute": {
+      "command": "node <probe>/node_modules/@deepseek-ai/dsh/lib/bin.js --profile edu-headless \"task\"",
+      "use": "agent-loop, tool allowlist and model routing verification without HTTP"
+    }
+  },
+  "isolation": {
+    "dshHome": "education/.local/cache/T00/probe-home (never E:\\DSH\\.dsh)",
+    "workdir": "education/.local/cache/T00/probe-work (no repository .env is discovered)",
+    "env": "inherited DEEPSEEK_*, DSH_*, ANTHROPIC_*, OPENAI_* variables are deleted before launch; DSH_HOME is set explicitly",
+    "network": "scripted mock provider only; no real model call and no credential read",
+    "cleanup": "stop-web.ps1 kills the probe PID tree and verifies the port is closed; no probe node process remained; current GUI on 127.0.0.1:29962 still answers 401"
+  },
+  "redistributableMaterials": {
+    "inventoryScope": "the fixed npm closure installed in education/probes/runtime (558 packages)",
+    "officialPackages": 306,
+    "thirdPartyPackages": 252,
+    "licensesPresent": {
+      "official": ["MIT", "MPL-2.0", "BSD-3-Clause"],
+      "thirdParty": ["MIT", "Apache-2.0", "Apache-2.0 AND LGPL-3.0-or-later", "BSD-2-Clause", "BSD-3-Clause", "ISC", "0BSD", "Python-2.0", "Unlicense", "MIT OR CC0-1.0"]
+    },
+    "requiredNotices": [
+      "every package LICENSE/NOTICE text must ship with the product (T16 collects the files; the probe inventory records per-package LICENSE/NOTICE names and SHA-256)",
+      "@deepseek-ai/libreoffice-kit (MPL-2.0) and @deepseek-ai/libreoffice-kit-win32-x64 (MPL-2.0, bundles LibreOffice program/license.txt and program/NOTICE)",
+      "@deepseek-ai/node-addon-system (BSD-3-Clause)",
+      "@img/sharp-win32-x64 (Apache-2.0 AND LGPL-3.0-or-later; ships libvips DLLs) - LGPL obligations apply to the shipped binaries",
+      "font assets: @deepseek-ai/dsh-client-ui-theme, @deepseek-ai/dsh-web-frontend (KaTeX fonts and shell fonts) - per-font license text needed",
+      "Electron/Chromium notices (LICENSE.electron.txt, LICENSES.chromium.html, 7zip notices) exist only beside the installed desktop binary, not in the npm closure"
+    ],
+    "binaryAssets": [
+      "@deepseek-ai/libreoffice-kit-win32-x64 (bin/libreoffice-kit.exe)",
+      "@img/sharp-win32-x64 (libvips DLLs + sharp .node)",
+      "@koromix/koffi-win32-x64 (koffi.node)",
+      "@vscode/ripgrep-win32-x64 (bin/rg.exe)",
+      "node-addon-require-builtin-win32-x64-msvc (.node)",
+      "node-pty (prebuilt pty.node per platform)",
+      "sherpa-onnx-win-x64 (onnxruntime DLLs)"
+    ],
+    "gaps": [
+      "18 packages declare a license field but ship no LICENSE file in the tarball (e.g. @earendil-works/pi-ai, @xterm/headless, fontkit, sherpa-onnx-node); the license text must be collected from upstream before distribution",
+      "DeepSeek brand/trademark and model service terms are NOT granted by the MIT code license; derivative-product branding/product-name use still needs permission",
+      "desktop shell (Electron/Chromium) materials are not in the npm closure and were not cleared by this task",
+      "no redistribution decision can be made from this lock alone; T16 must build the NOTICE bundle and have it reviewed"
+    ],
+    "evidence": {
+      "inventory": "education/.local/evidence/T00/run-01/40-licenses/license-inventory.json",
+      "inventorySha256": "8a096371fb93089e3f577b120084051a04fdc9a7ea7de7579f50bd8343f88f2d",
+      "summary": "education/.local/evidence/T00/run-01/40-licenses/license-summary.json",
+      "summarySha256": "5bd66de8c63f26b597ac3bc9d678ac01064c18e548fca240cf8bff5bcfa00756"
+    }
+  },
+  "authentication": {
+    "layers": {
+      "modelConsumptionIdentity": {
+        "accountPkceRoute": {
+          "status": "NOT_ALLOWED",
+          "decidedBy": "user decision 2026-10-29 (relayed by the Team Lead)",
+          "why": "the user explicitly does not permit the DSH-specific PKCE account route for this derivative product. This is a product decision, not a technical gap: the flow exists in @deepseek-ai/dsh-deepseek-account-platform but must not be used, demonstrated, registered or bypassed. No credential was read or captured.",
+          "consequence": "A03 account login/cancel/error/logout can never be satisfied for this product line unless the user changes the product goal; API-key success must not be reported as account authorization."
+        },
+        "apiKeyRoute": {
+          "status": "PASS",
+          "verifiedAt": "2026-10-29T18:20-18:25+08:00",
+          "scope": "direct api.deepseek.com and DSH's own @deepseek-ai/dsh-llm-deepseek-api-key adapter inside the isolated probe",
+          "credentialHandling": "key read by the probe process from education/.local/secrets/deepseek.key (git-ignored), injected through the child environment only; never written to a repository file, report, log, screenshot or command line. A scan of 122 evidence/cache files found 0 occurrences.",
+          "evidence": [
+            "education/.local/evidence/T00/run-02-apikey/apikey-summary.json",
+            "education/.local/evidence/T00/run-03-dsh-apikey/stdout.log",
+            "education/.local/evidence/T00/run-03-dsh-apikey-json/stdout.log"
+          ]
+        }
+      },
+      "hostConnectionAuth": {
+        "status": "PASS",
+        "evidence": "401 without cookie; token URL returns 303 + HttpOnly/SameSite=Strict signed cookie; authenticated GET returns 200; host binds loopback only"
+      },
+      "learningIdentity": {
+        "status": "NOT_APPLICABLE_YET",
+        "note": "local learnerId belongs to T01/T02 contracts; a model account id must never replace it"
+      }
+    },
+    "minimalExternalInputsToUnblock": [
+      "account route: nothing left to unblock technically - the user decision is NOT_ALLOWED; only a product-goal change could reopen it",
+      "API-key route: a live key is present for the probe; production packaging still needs an explicit user-facing key storage/entry policy (T01/T16) and a per-release budget",
+      "image EFFECT acceptance (A20/T11) still needs a live budget and representative learner images; the capability/error-matrix result here is not visual-quality evidence"
+    ]
+  },
+  "modelRoute": {
+    "provider": "deepseek-official",
+    "adapter": "@deepseek-ai/dsh-llm-deepseek-api-key (x-api-key header; account token path explicitly not used)",
+    "endpoint": "https://api.deepseek.com",
+    "catalog": {
+      "source": "GET https://api.deepseek.com/models",
+      "status": 200,
+      "models": ["deepseek-flash", "deepseek-v4-pro"],
+      "observedAt": "2026-10-29T18:20:51+08:00"
+    },
+    "text": {
+      "status": "PASS",
+      "model": "deepseek-flash",
+      "directProbe": {
+        "httpStatus": 200,
+        "durationMs": 792,
+        "usage": { "prompt_tokens": 37, "completion_tokens": 8, "total_tokens": 45 },
+        "note": "max_tokens=8 was consumed by reasoning tokens (finish_reason=length); this is a reasoning model, so live prompts need a larger output budget"
+      },
+      "dshProbe": {
+        "httpStatus": "adapter stream settled",
+        "exitCode": 0,
+        "durationMs": 4188,
+        "answer": "APIKEY-ROUTE-OK (exact match)",
+        "usage": {
+          "inputTokens": 256,
+          "outputTokens": 31,
+          "cacheReadTokens": 256,
+          "cacheWriteTokens": 0,
+          "totalTokens": 543
+        }
+      }
+    },
+    "image": {
+      "status": "SUPPORTED_BY_ROUTE",
+      "model": "deepseek-flash",
+      "httpStatus": 200,
+      "usage": { "prompt_tokens": 223, "completion_tokens": 8, "total_tokens": 231 },
+      "meaning": "the API accepted an image_url content block on this model. This is a capability/error-matrix fact only; visual recognition quality, handwriting/chart accuracy and prompt-injection resistance are NOT assessed here and remain T11/A20."
+    },
+    "errorClassification": {
+      "observed": "no error path was triggered (all probe calls returned HTTP 200)",
+      "mappingForConsumers": {
+        "AUTH": "HTTP 401/403 or adapter INVALID_CREDENTIAL / MISSING_CREDENTIAL",
+        "QUOTA": "adapter QUOTA / ACCOUNT_QUOTA or HTTP 402/429 with provider retry-after",
+        "UNSUPPORTED": "HTTP 400/404 for an unknown model, unsupported modality or IMAGE_OFFLOAD_REQUIRED",
+        "NETWORK": "fetch/transport failures and adapter NO_ADAPTER for an unregistered provider",
+        "CANCELLED": "AbortSignal cancellation -> terminal aborted finish chunk"
+      },
+      "source": "@deepseek-ai/dsh-llm README failure taxonomy plus the API-key adapter error surface; mapping is contractual, not exercised in this probe",
+      "notExercised": ["AUTH", "QUOTA", "UNSUPPORTED", "NETWORK", "CANCELLED"]
+    },
+    "budget": {
+      "projectCap": { "liveCalls": 150, "estimatedCostCny": 10 },
+      "thisAddendumCap": { "liveCalls": 6, "estimatedCostCny": 0.5 },
+      "liveModelCallsUsed": 4,
+      "cacheFreeCatalogRequests": 2,
+      "estimate": {
+        "assumption": "upper bound: CNY 2 per 1M input tokens, CNY 8 per 1M output tokens (published DeepSeek order of magnitude; no invoice available)",
+        "textDirectCny": 0.00014,
+        "imageDirectCny": 0.00051,
+        "dshRun1Cny": 0.0043,
+        "dshRun2Cny": 0.00127,
+        "totalCny": 0.0062,
+        "totalTokensBilled": 1362
+      }
+    }
+  },
+  "gates": {
+    "sourceReady": {
+      "status": "PASS",
+      "scope": "official npm package pinned by exact version, integrity and SHA-256 recorded, lockfile committed, installed-desktop fingerprint used as reference only",
+      "evidence": [
+        "education/.local/evidence/T00/run-01/01-registry/dsh-0.2.1-rc.3.json",
+        "education/.local/evidence/T00/run-01/01-registry/asar-vs-npm.txt",
+        "education/.local/evidence/T00/run-01/02-install-pnpm.log",
+        "education/probes/runtime/pnpm-lock.yaml"
+      ],
+      "limits": "source commit not independently verified (github.com unreachable); desktop shell not available from npm"
+    },
+    "runtimeReady": {
+      "status": "PASS",
+      "scope": "isolated fixed-version boot, minimal host-plugin tool allowlist, scripted model route, real agent session, root replacement in the built shell, duplicate-root refusal, HTTP auth, cleanup",
+      "evidence": [
+        "education/.local/evidence/T00/run-01/11-cli/stdout.log",
+        "education/.local/evidence/T00/run-01/20-headless/llm.jsonl",
+        "education/.local/evidence/T00/run-01/20-headless/stdout.log",
+        "education/.local/evidence/T00/run-01/30-web/render/page-meta.json",
+        "education/.local/evidence/T00/run-01/30-web/render/page.png",
+        "education/.local/evidence/T00/run-01/31-web-duplicate/render/page-meta.json"
+      ],
+      "unlocks": "T01 phase B (runtime binding) may bind the fixed web/headless runtime; product UI still needs the education client build recipe",
+      "limits": "probe root is static; education client bundles and Electron desktop wrapper remain open (T01/T16)"
+    },
+    "accountVerified": {
+      "status": "PARTIAL",
+      "splitAccounting": {
+        "accountPkceRoute": {
+          "status": "NOT_ALLOWED",
+          "decidedBy": "user decision 2026-10-29",
+          "consequence": "A03 account route = FAIL for this product line; not BLOCKED, nothing to retry"
+        },
+        "apiKeyRoute": {
+          "status": "PASS",
+          "evidence": [
+            "education/.local/evidence/T00/run-02-apikey/apikey-summary.json",
+            "education/.local/evidence/T00/run-03-dsh-apikey/stdout.log",
+            "education/.local/evidence/T00/run-03-dsh-apikey-json/stdout.log"
+          ],
+          "consequence": "A text model route is usable through the user-provided key; this does NOT satisfy A03 account authorization"
+        }
+      },
+      "unlocks": "text-model live integration may proceed on the API-key route (A01/A13 text paths); A03 remains FAIL and image quality acceptance remains T11/T15",
+      "limits": "no production key-storage policy yet; image acceptance not assessed"
+    }
+  },
+  "startStopCommands": {
+    "setupHome": "node education/probes/runtime/scripts/setup-home.mjs --home <abs probe-home> [--write-evidence <dir>]",
+    "installRuntime": "pnpm install --ignore-workspace   # inside education/probes/runtime",
+    "installProfilePlugins": "pnpm install --force   # inside each $DSH_HOME/profiles/<name>",
+    "headless": "node education/probes/runtime/scripts/run-dsh.mjs --home <home> --work <work> --out <evidence> -- --profile edu-headless \"task\"",
+    "web": "powershell -File education/probes/runtime/scripts/run-web.ps1 -DshHome <home> -Work <work> -Out <evidence>",
+    "stop": "powershell -File education/probes/runtime/scripts/stop-web.ps1 -Out <evidence>",
+    "render": "node education/probes/runtime/scripts/render-page.mjs --url <token url> --out <evidence>"
+  },
+  "risks": [
+    "the fixed version is a release candidate; a version bump must be re-pinned, re-probed and re-inventoried, not floated",
+    "the probe's pnpm 11.21.0 is older than the desktop manifest's 11.28.5; T16 must pin its own installer toolchain",
+    "the installed desktop app.asar was only fingerprinted; its internal file line numbers quoted by docs/rebuild/03-evidence.md remain version-specific to 0.2.1-rc.3",
+    "api.github.com is blocked in this environment: any source-level verification (commit tags, full repo license audit, client build recipe) must wait for network access or an offline source bundle",
+    "the API key used for the addendum is a live credential stored outside the repository; it must never be copied into a build artifact, log, screenshot or model context, and production key handling still needs a T01/T16 policy",
+    "deepseek-flash is a reasoning model: a small max_tokens can be consumed entirely by reasoning tokens (observed finish_reason=length), so product prompts must budget output tokens accordingly"
+  ],
+  "evidenceRoot": "education/.local/evidence/T00",
+  "addendumEvidence": {
+    "directApi": "education/.local/evidence/T00/run-02-apikey",
+    "dshApiKeyRun": "education/.local/evidence/T00/run-03-dsh-apikey",
+    "dshApiKeyJsonRun": "education/.local/evidence/T00/run-03-dsh-apikey-json",
+    "runtimeProbe": "education/.local/evidence/T00/run-01"
+  },
+  "updatedAt": "2026-10-29T18:30:00+08:00",
+  "report": "docs/rebuild/reports/T00.md"
+}
