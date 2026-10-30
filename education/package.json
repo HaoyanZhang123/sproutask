@@ -4,7 +4,7 @@
   "private": true,
   "description": "Isolated education workspace (DSH education agent rebuild). Root old app is not affected.",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "packageManager": "pnpm@11.21.0",
   "engines": {
     "node": ">=24.0.0",

@@ -109,4 +109,6 @@ pnpm dev          # 构建、打印本机回环地址、前台常驻
 
 ## 许可证
 
-**尚未声明许可证（No license specified）。** 本仓库根目录没有 `LICENSE` 文件，`package.json` 标注 `"license": "UNLICENSED"`。`publish/public/LICENSE` 下那份 MIT 文本是发布导出流程使用的模板（占位符 `{{YEAR}} {{HOLDER}}` 未填写），不构成对本仓库的授权声明。许可证如何选择待维护者决定。
+**MIT。** 芽问以 MIT 许可证发布，全文见仓库根目录的 [`LICENSE`](LICENSE)：MIT License, Copyright (c) 2026 HaoyanZhang123。`education/package.json` 标注 `"license": "MIT"`。
+
+第三方依赖各自保留其许可证，随包附带的许可证原文在 `education/licenses/texts/` 下。

@@ -109,4 +109,6 @@ Teacher-facing features, class aggregation, multi-device sync, auto-update, tele
 
 ## License
 
-**No license specified.** This repository has no `LICENSE` file at its root and declares `"license": "UNLICENSED"` in `package.json`. The MIT text under `publish/public/LICENSE` is an unfilled export template (`{{YEAR}} {{HOLDER}}` placeholders) used by the publication pipeline; it is not a grant for this repository. A license choice is pending a maintainer decision.
+**MIT.** SproutAsk is released under the MIT License. The full text is in [`LICENSE`](LICENSE) at the repository root: MIT License, Copyright (c) 2026 HaoyanZhang123. `education/package.json` declares `"license": "MIT"`.
+
+Third-party dependencies keep their own licenses; the license texts bundled with the app are under `education/licenses/texts/`.
