@@ -1,0 +1,124 @@
+{
+  "assessment": {
+    "schemaVersion": 1,
+    "id": "assessment.cell.supported",
+    "attemptId": "attempt.cell.explain",
+    "conceptId": "concept.cell",
+    "learnerId": "learner.local.default",
+    "courseEditionId": "course.biology-7a",
+    "packVersion": "1.0.0",
+    "state": "supported",
+    "rationale": "fixture rationale: explanation plus transfer evidence",
+    "evidenceIds": [
+      "evidence.cell.explain",
+      "evidence.cell.transfer"
+    ],
+    "rubricVersion": "1",
+    "evaluatorVersion": "rule-v1",
+    "assessedAt": "2026-10-29T08:20:00Z",
+    "validity": "current",
+    "revision": 1
+  },
+  "evidences": [
+    {
+      "schemaVersion": 1,
+      "id": "evidence.cell.explain",
+      "attemptId": "attempt.cell.explain",
+      "learnerId": "learner.local.default",
+      "courseEditionId": "course.biology-7a",
+      "packVersion": "1.0.0",
+      "conceptId": "concept.cell",
+      "kind": "explain",
+      "observation": "fixture observation: explained the cell as the basic unit",
+      "criterionResults": [
+        {
+          "criterionId": "criterion.cell.identify",
+          "result": "met",
+          "note": null
+        }
+      ],
+      "assistance": "unassisted",
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "assessmentOrigin": "rule",
+      "modelRunId": null,
+      "uncertainty": null,
+      "validity": "current",
+      "createdAt": "2026-10-29T08:10:00Z"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "evidence.cell.transfer",
+      "attemptId": "attempt.cell.transfer",
+      "learnerId": "learner.local.default",
+      "courseEditionId": "course.biology-7a",
+      "packVersion": "1.0.0",
+      "conceptId": "concept.cell",
+      "kind": "transfer",
+      "observation": "fixture observation: transferred the idea to different cell shapes",
+      "criterionResults": [
+        {
+          "criterionId": "criterion.cell.identify",
+          "result": "not_met",
+          "note": null
+        }
+      ],
+      "assistance": "unassisted",
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "assessmentOrigin": "rule",
+      "modelRunId": null,
+      "uncertainty": null,
+      "validity": "current",
+      "createdAt": "2026-10-29T08:10:00Z"
+    }
+  ],
+  "attempts": [
+    {
+      "schemaVersion": 1,
+      "id": "attempt.cell.explain",
+      "requestId": "request.attempt.explain",
+      "learnerId": "learner.local.default",
+      "sessionId": "session.cell.1",
+      "courseEditionId": "course.biology-7a",
+      "packVersion": "1.0.0",
+      "activityId": "activity.cell-explain",
+      "activityVersion": "1",
+      "conceptIds": [
+        "concept.cell"
+      ],
+      "inputType": "text",
+      "answerAssetId": null,
+      "answerText": "fixture answer: 细胞是生物体结构和功能的基本单位，所以是基本单位。",
+      "submittedAt": "2026-10-29T08:10:00Z",
+      "helpUsed": [],
+      "evidenceIds": [
+        "evidence.cell.explain"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "attempt.cell.transfer",
+      "requestId": "request.attempt.transfer",
+      "learnerId": "learner.local.default",
+      "sessionId": "session.cell.1",
+      "courseEditionId": "course.biology-7a",
+      "packVersion": "1.0.0",
+      "activityId": "activity.cell-transfer",
+      "activityVersion": "1",
+      "conceptIds": [
+        "concept.cell"
+      ],
+      "inputType": "text",
+      "answerAssetId": null,
+      "answerText": "fixture answer: 例如神经细胞和红细胞形态不同。",
+      "submittedAt": "2026-10-29T08:10:00Z",
+      "helpUsed": [],
+      "evidenceIds": [
+        "evidence.cell.transfer"
+      ]
+    }
+  ]
+}

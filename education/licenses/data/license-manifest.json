@@ -1,0 +1,445 @@
+{
+  "generatedAt": "2026-10-29T18:28:45.741Z",
+  "inventory": {
+    "path": ".local/evidence/T00/run-01/40-licenses/license-inventory.json",
+    "sha256": "8a096371fb93089e3f577b120084051a04fdc9a7ea7de7579f50bd8343f88f2d",
+    "packages": 558
+  },
+  "packageCount": 558,
+  "officialPackages": 306,
+  "thirdPartyPackages": 252,
+  "uniqueLicenseTexts": 168,
+  "missingLicenseTextCount": 18,
+  "supplementedCount": 1,
+  "upstreamAbsentCount": 17,
+  "trimRoots": [
+    "@deepseek-ai/libreoffice-kit",
+    "@deepseek-ai/libreoffice-kit-win32-x64",
+    "sharp",
+    "@img/sharp-win32-x64",
+    "sherpa-onnx-node",
+    "sherpa-onnx-win-x64",
+    "node-pty"
+  ],
+  "trimmedApproxClosure": 22,
+  "node": {
+    "source": "E:/DSH-desktop/resources/runtime/primary-runtime/dependencies/node/LICENSE",
+    "file": "licenses/texts/nodejs-LICENSE.txt",
+    "localFile": "texts/nodejs-LICENSE.txt",
+    "sha256": "ed34dd8e3f0a78dbaf00d0444ce8e285b015b765379c2e17880455f70370f8e9",
+    "bytes": 160555,
+    "exe": {
+      "path": "E:/DSH-desktop/resources/runtime/primary-runtime/dependencies/node/bin/node.exe",
+      "bytes": 93580104,
+      "sha256": "ba4e6d110e8c1592a1ecd390f6b05f3da124b13871a5be62b341a07a853c6c32"
+    }
+  },
+  "katex": {
+    "version": "0.19.1",
+    "sha256": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3",
+    "file": "licenses/texts/766ccc1f306c885a.txt"
+  },
+  "fonts": [
+    {
+      "package": "@deepseek-ai/dsh-client-ui-theme",
+      "path": "lib/styles/montserrat-light.woff2",
+      "bytes": 61548,
+      "sha256": "da25f1327eb1dcc70c193897b5d7e00d31821d9518c0a49e073ff50d97a3f10a",
+      "family": "Montserrat"
+    },
+    {
+      "package": "@deepseek-ai/dsh-client-ui-theme",
+      "path": "lib/styles/montserrat-medium.woff2",
+      "bytes": 62148,
+      "sha256": "8a81ca6f05cb6831d5487e4b287ce5a625a718c39226b736f155900adc394166",
+      "family": "Montserrat"
+    },
+    {
+      "package": "@deepseek-ai/dsh-client-ui-theme",
+      "path": "lib/styles/montserrat-regular.woff2",
+      "bytes": 62008,
+      "sha256": "0f4a15e29a9535af580a64db967929a8d6b202fad9a467be390619a591d2c4c5",
+      "family": "Montserrat"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_AMS-Regular-BQhdFMY1.woff2",
+      "bytes": 28076,
+      "sha256": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2",
+      "bytes": 6912,
+      "sha256": "de7701e42cf1f4cf0b766c03fb27977207eee2f4fd5d76fa82188406da43ea4c",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2",
+      "bytes": 6908,
+      "sha256": "5d53e70ad607c2352162dec9e0923fb54ecdafaccbf604cd8dcf7d00facb989b",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Fraktur-Bold-CL6g_b3V.woff2",
+      "bytes": 11348,
+      "sha256": "74444efd593c005e3f4573b44524704c0af0a937fe911cca9e94068d0d140d3f",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Fraktur-Regular-CTYiF6lA.woff2",
+      "bytes": 11316,
+      "sha256": "51814d270d06ff0255dba0799994fa4d8c84d11f09951d47595f4abb1f3602dc",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Main-Bold-Cx986IdX.woff2",
+      "bytes": 25324,
+      "sha256": "0f60d1b897938ec918c8ce073092411baf9438f6739465693ff18b0f9d20b021",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2",
+      "bytes": 16780,
+      "sha256": "99cd42a3c072d918f2f44984a807cf7aa16e13545fd0875fc07c6c65f99e715b",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Main-Italic-NWA7e6Wa.woff2",
+      "bytes": 16988,
+      "sha256": "97479ca6cce906abc961ecac96faa5f9ca2e61b8e7670d475826bcdee9a7c267",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Main-Regular-B22Nviop.woff2",
+      "bytes": 26272,
+      "sha256": "c2342cd8b869e01752a9321dc17213fc40d4d04c79688c1d43f2cf316abd7866",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2",
+      "bytes": 16400,
+      "sha256": "dc47344dbb6cb5b655c8460d561f4df5f501b90c804ad3c6cec65fe322351ab1",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Math-Italic-t53AETM-.woff2",
+      "bytes": 16440,
+      "sha256": "7af58c5ec8f132a2ddde9027c6d7814decce4d3b822a11192a42a20e2e973264",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_SansSerif-Bold-D1sUS0GD.woff2",
+      "bytes": 12216,
+      "sha256": "e99ae51144bf1232efcc1bfe5add36262c6866b0faab24fa75740e1b98577a62",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_SansSerif-Italic-C3H0VqGB.woff2",
+      "bytes": 12028,
+      "sha256": "00b26ac825e2095056396e0553b8ac26d3f8ad158c3826e28b4c45b385c4714a",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2",
+      "bytes": 10344,
+      "sha256": "68e8c73ef42afd3ccec58bf0fba302cce448938e7fc020a5e31f8a952eee1342",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Script-Regular-D3wIWfF6.woff2",
+      "bytes": 9644,
+      "sha256": "036d4e95149b69ff9bcc0cd55771efeb25ffa3947293e69acd78d5ac328c684b",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Size1-Regular-mCD8mA8B.woff2",
+      "bytes": 5468,
+      "sha256": "6b47c40166b6dbe21a5dfca7718413f2147fd2399be1ba605d8ad39cedf25dfe",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Size2-Regular-Dy4dx90m.woff2",
+      "bytes": 5208,
+      "sha256": "d04c54219f9eaec6d4d4fd42dfb28785975a4794d6b2fc71e566b9cd6db842dd",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Size4-Regular-Dl5lxZxV.woff2",
+      "bytes": 4928,
+      "sha256": "a4af7d414440a1c1790825cfb700cf9cf43b0f2c4b04f0ebc523011ad9853ec0",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/KaTeX_Typewriter-Regular-CO6r4hn1.woff2",
+      "bytes": 13568,
+      "sha256": "71d517d67827787cfabdf186914cc3358eda539e37931941f2b2fd4a21f68c0b",
+      "family": "KaTeX"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/montserrat-light-Cvd2VjE_.woff2",
+      "bytes": 61548,
+      "sha256": "da25f1327eb1dcc70c193897b5d7e00d31821d9518c0a49e073ff50d97a3f10a",
+      "family": "Montserrat"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/montserrat-medium-B4OyO9CN.woff2",
+      "bytes": 62148,
+      "sha256": "8a81ca6f05cb6831d5487e4b287ce5a625a718c39226b736f155900adc394166",
+      "family": "Montserrat"
+    },
+    {
+      "package": "@deepseek-ai/dsh-web-frontend",
+      "path": "dist/assets/fonts/montserrat-regular-DYep38cA.woff2",
+      "bytes": 62008,
+      "sha256": "0f4a15e29a9535af580a64db967929a8d6b202fad9a467be390619a591d2c4c5",
+      "family": "Montserrat"
+    }
+  ],
+  "binaries": [
+    {
+      "name": "@deepseek-ai/libreoffice-kit-win32-x64",
+      "version": "0.1.5",
+      "license": "MPL-2.0",
+      "ships": "no (5A trim)",
+      "files": [
+        {
+          "path": "bin/libreoffice-kit.exe",
+          "present": true,
+          "bytes": 178548224,
+          "sha256": "4b60b337f493421cd3b8690c9706494df620d6ba265b99c0cc6ab22b88cb6fd7"
+        }
+      ]
+    },
+    {
+      "name": "@img/sharp-win32-x64",
+      "version": "0.35.5",
+      "license": "Apache-2.0 AND LGPL-3.0-or-later",
+      "ships": "no (5A trim)",
+      "files": [
+        {
+          "path": "lib/libvips-42.dll",
+          "present": true,
+          "bytes": 19018240,
+          "sha256": "06dab07cc386748513337a31672b1d5269fbc770a14ff403080575665bf0813f"
+        },
+        {
+          "path": "lib/libvips-cpp-8.18.7.dll",
+          "present": true,
+          "bytes": 333312,
+          "sha256": "25001dbd05305a0a29119ab49933622c70b4a20ea12ef1d5d20ca40181db53bf"
+        },
+        {
+          "path": "lib/sharp-win32-x64-0.35.5.node",
+          "present": true,
+          "bytes": 443904,
+          "sha256": "971048779f9c8598df14641dfc03c625885c93f473a788e65ca2deb50d0b083e"
+        }
+      ]
+    },
+    {
+      "name": "@koromix/koffi-win32-x64",
+      "version": "3.1.1",
+      "license": "MIT",
+      "ships": "yes",
+      "files": [
+        {
+          "path": "win32_x64/koffi.node",
+          "present": true,
+          "bytes": 1042944,
+          "sha256": "eb0587c804bb76262968bf83028528da4dc2d4322f558845cce205c709e2ba20"
+        }
+      ]
+    },
+    {
+      "name": "@vscode/ripgrep-win32-x64",
+      "version": "1.18.0",
+      "license": "MIT",
+      "ships": "yes",
+      "files": [
+        {
+          "path": "bin/rg.exe",
+          "present": true,
+          "bytes": 5429760,
+          "sha256": "f9dde63498b3193f098355dbec97af99dc4f6b8fa0df5ed04114a03012c042cb"
+        }
+      ]
+    },
+    {
+      "name": "node-addon-require-builtin-win32-x64-msvc",
+      "version": "0.1.9",
+      "license": "MIT",
+      "ships": "yes",
+      "files": [
+        {
+          "path": "prebuilt/win32-x64-msvc-napi-v9.node",
+          "present": true,
+          "bytes": 343552,
+          "sha256": "ead441d11202126827a789a7eb88e79abe8f7f374b16e7273c4244225c8d6c2b"
+        }
+      ]
+    },
+    {
+      "name": "node-pty",
+      "version": "1.2.0-beta.15",
+      "license": "MIT",
+      "ships": "no (5A trim)",
+      "files": [
+        {
+          "path": "prebuilds/darwin-arm64/pty.node",
+          "present": true,
+          "bytes": 86904,
+          "sha256": "0aae85518beb134a666f8e415f78bf528b2e9d40b47498af97433dc459661366"
+        },
+        {
+          "path": "prebuilds/darwin-x64/pty.node",
+          "present": true,
+          "bytes": 58576,
+          "sha256": "811f4a357e260fc0e520c250a3de5990483761d82afd635effbdf4b793b8a0e9"
+        },
+        {
+          "path": "prebuilds/linux-arm64/pty.node",
+          "present": true,
+          "bytes": 69112,
+          "sha256": "5a3b8930d62535edabec2eac79fe8eca70a178d93fbb76b1ae875dd60ee8f825"
+        },
+        {
+          "path": "prebuilds/linux-x64/pty.node",
+          "present": true,
+          "bytes": 75976,
+          "sha256": "123792d8f22f36d519b21dfb6f4b716f9b18b9e579085ea2840d0773d88d35fd"
+        },
+        {
+          "path": "prebuilds/win32-arm64/conpty/conpty.dll",
+          "present": true,
+          "bytes": 106528,
+          "sha256": "b3a9f975c51d5b9b96d290bf784e990e3f85203b063c21614457353f566266ff"
+        },
+        {
+          "path": "prebuilds/win32-arm64/conpty/OpenConsole.exe",
+          "present": true,
+          "bytes": 1110560,
+          "sha256": "7fa560be0c9b6c81db5d1b855a4a6e0f3ee5a2ea75d36eebb3ae44443b8d4866"
+        },
+        {
+          "path": "prebuilds/win32-arm64/conpty.node",
+          "present": true,
+          "bytes": 279040,
+          "sha256": "6da15dc84b864bb4630d95faef97da5f323a078b53d73f395b5efd6f7952c3e0"
+        },
+        {
+          "path": "prebuilds/win32-arm64/conpty_console_list.node",
+          "present": true,
+          "bytes": 122368,
+          "sha256": "327cf47db8b524a75813c98871037bc60f0a08660e75635897aed957a059b690"
+        },
+        {
+          "path": "prebuilds/win32-x64/conpty/conpty.dll",
+          "present": true,
+          "bytes": 110152,
+          "sha256": "3319b484b80bb53d1f4d0a9eb0ea60fd0f61da69db7280ca43b84215f19245ff"
+        },
+        {
+          "path": "prebuilds/win32-x64/conpty/OpenConsole.exe",
+          "present": true,
+          "bytes": 1062472,
+          "sha256": "7f68c840226505004215c0b82d4e502c24b5bc3f4b93c4baaaa19bd679c0def8"
+        },
+        {
+          "path": "prebuilds/win32-x64/conpty.node",
+          "present": true,
+          "bytes": 291328,
+          "sha256": "ec2fd8545c30e051ee3fa17d26127f7e615919814879c7f746cf4c80845226e0"
+        },
+        {
+          "path": "prebuilds/win32-x64/conpty_console_list.node",
+          "present": true,
+          "bytes": 134656,
+          "sha256": "d46800643f90fc56b9fd67398f04a04a871521de0e825211c8382d187859d3ed"
+        },
+        {
+          "path": "third_party/conpty/1.25.260303002/win10-arm64/conpty.dll",
+          "present": true,
+          "bytes": 106528,
+          "sha256": "b3a9f975c51d5b9b96d290bf784e990e3f85203b063c21614457353f566266ff"
+        },
+        {
+          "path": "third_party/conpty/1.25.260303002/win10-arm64/OpenConsole.exe",
+          "present": true,
+          "bytes": 1110560,
+          "sha256": "7fa560be0c9b6c81db5d1b855a4a6e0f3ee5a2ea75d36eebb3ae44443b8d4866"
+        },
+        {
+          "path": "third_party/conpty/1.25.260303002/win10-x64/conpty.dll",
+          "present": true,
+          "bytes": 110152,
+          "sha256": "3319b484b80bb53d1f4d0a9eb0ea60fd0f61da69db7280ca43b84215f19245ff"
+        },
+        {
+          "path": "third_party/conpty/1.25.260303002/win10-x64/OpenConsole.exe",
+          "present": true,
+          "bytes": 1062472,
+          "sha256": "7f68c840226505004215c0b82d4e502c24b5bc3f4b93c4baaaa19bd679c0def8"
+        }
+      ]
+    },
+    {
+      "name": "sherpa-onnx-win-x64",
+      "version": "1.13.8",
+      "license": "Apache-2.0",
+      "ships": "no (5A trim)",
+      "files": [
+        {
+          "path": "onnxruntime.dll",
+          "present": true,
+          "bytes": 17799168,
+          "sha256": "7f66f939a881baf4f46a2216496798edf4a1429878b646d12674aa62f27d8a25"
+        },
+        {
+          "path": "onnxruntime_providers_shared.dll",
+          "present": true,
+          "bytes": 104960,
+          "sha256": "551d0e1fe4c227d8542314ba718d52f4379e0c7bfe729a37c59833a884e27b4d"
+        },
+        {
+          "path": "sherpa-onnx-c-api.dll",
+          "present": true,
+          "bytes": 4605952,
+          "sha256": "b0801cd8eeead83213c60b92cc004de6f3ac4cd4a9ac7c388c16b97c590f1e99"
+        },
+        {
+          "path": "sherpa-onnx-cxx-api.dll",
+          "present": true,
+          "bytes": 259584,
+          "sha256": "e709c46a63e4b84f3862aa0c843a804040b42ea054a398b420142f6c8e58ec77"
+        },
+        {
+          "path": "sherpa-onnx.node",
+          "present": true,
+          "bytes": 681984,
+          "sha256": "f5fd562bdc4bea167eee8ac981c6acd88c05cc8d2792b67d8951566818e293ca"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3752 @@
+{
+  "schemaVersion": 1,
+  "kind": "t05-review-ledger",
+  "packId": "pack.biology-7a.observation",
+  "packVersion": "2.0.0",
+  "baseline": {
+    "runId": "run-20261029T185619+0800",
+    "jobId": "import:2b97e28b318c"
+  },
+  "review": {
+    "title": "全册首次 AI 静态检查（非教师专家审核）",
+    "actorKind": "ai_static_reviewer",
+    "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+    "method": [
+      "逐页读取 T03 全册 OCR 基线（146/146 页），用正文标题块 + 目录页重建 2 单元 / 7 章 / 22 节的目录树，并以正文章节标题与学习目标块锚定每节起止页。",
+      "每节抽取“通过本节学习，你将知道”目标块与正文定义块作为 SourceRef；概念只纳入可由目标/小标题支撑的核心概念，其余材料在覆盖台账中逐类排除并写理由。",
+      "用 @edu/domain v1.0.0 与 @edu/knowledge 的 loadPack/validatePublication/checkCoverageManifest 校验结构、引用、覆盖与发布规则；validate-pack CLI 与 selfcheck 双重执行。",
+      "用 createSourceCatalog 在内存中把 OCR 块重绑到本包 SourceRef，逐条 resolve + pageImage，核对 pdfPage/printedPage/bbox/blockId 与文本 SHA-256。",
+      "逐概念检查目标、解释、易错点、基础活动、变式/迁移活动、rubric、出处与学习入口；逐关系检查类型、basis、rationale 与先修无环。",
+      "对自写解释/题干/选项/rubric 与 OCR 原文做去空白后的 18 字连续片段重叠检查。"
+    ],
+    "scope": "全册 2 单元 / 7 章 / 22 节；34 概念（T05 首节 8 + T14 新增 26）、68 活动（每概念 2 类）、34 rubric、36 关系（T05 9 + T14 27）、22/22 目标节 covered；来源定位 269 条。",
+    "findings": [
+      {
+        "id": "T14-F1",
+        "severity": "major",
+        "finding": "目录页 PDF 8 的 OCR 重建把第二单元第四章误读为“第四章 生物分类的方法 / 第一节 生物分类的方法 / 第二节 尝试对生物进行分类 / 第三节 从种到界”；正文标题块显示第四章为“生物分类的方法”，第一节为“尝试对生物进行分类”，第二节为“从种到界”（共 2 节）。",
+        "impact": "若沿用目录候选会多出一节、节名错位，覆盖分母随之错误。",
+        "resolution": "以正文标题块为准冻结第二单元第四章（2 节），并在 source-verification.json 的目录候选与 T14 报告中记录差异。"
+      },
+      {
+        "id": "T14-F2",
+        "severity": "info",
+        "finding": "各节起始页不一定有页脚印刷页标签；正文页脚与 PDF 页并非固定偏移（85 页 -9，4 页离群，56 页无标签）。",
+        "impact": "用偏移推算会给出错误印刷页。",
+        "resolution": "SourceRef 逐页采用页脚识别值；无标签为 null；目录页、章首页等不推算。"
+      },
+      {
+        "id": "T14-F3",
+        "severity": "info",
+        "finding": "全册 22 节的教学目标多为 1–3 条，若把每条细节都拆成独立概念会产生大量低价值节点。",
+        "impact": "概念粒度过细会稀释覆盖口径、增加活动与审校成本。",
+        "resolution": "按“每节核心概念（可合并同节目标）+ 明确排除材料”建立 inventory；实验步骤、STS、练习原题、项目、栏目等逐类排除并写理由（见 coverage-manifest exclusions）。"
+      },
+      {
+        "id": "T14-F4",
+        "severity": "info",
+        "finding": "若按目录/正文顺序串联先修边，会把章节顺序冒充依赖证据。",
+        "impact": "违反 01 §4.2 与 A11。",
+        "resolution": "只保留 27 条 T14 关系：教材文字直接支持的标 explicit_source；顺序推断标 pedagogical_inference 并写 rationale；同节并列概念用 related；全量先修 DAG 无环。"
+      },
+      {
+        "id": "T14-F5",
+        "severity": "minor",
+        "finding": "全册插图/图注只做到图注级登记与“不随包分发”的版权边界；未做逐图视觉核对（T03 figures.json 仅识别“图X-X”式图号，短标签图注未覆盖）。",
+        "impact": "图义（图中结构与教材文字的一致性）没有视觉证据，属待复核缺口。",
+        "resolution": "在覆盖台账中把插图列为排除项并写明理由；章节概念以自写文字与受控 DiagramSpec 表达；图义视觉核对列入 contentReadyFull 的待 T11/T15 复核项。"
+      },
+      {
+        "id": "T14-F6",
+        "severity": "minor",
+        "finding": "版权页未读到版次/印次/ISBN/定价；全册目录第二单元的章号与个别节名仍属 medium 置信。",
+        "impact": "版本标识不完整，不能对外声称具体印次或“2024 版”。",
+        "resolution": "保持 null + unverified；报告与 source-verification.json 列为待人工核对；不放宽版本结论。"
+      },
+      {
+        "id": "T14-F7",
+        "severity": "info",
+        "finding": "T05 首节内容（8 概念）在 T14 中保持 id 与出处稳定，未因全册扩展而重写。",
+        "impact": "避免已有审校结论失效与消费者绑定断裂。",
+        "resolution": "全册包 v2.0.0 继承 T05 首节概念/活动/rubric，新增其余 21 节；contentHash 随内容变化重算。"
+      },
+      {
+        "id": "T14-F8",
+        "severity": "info",
+        "finding": "自写文本与 OCR 原文未发现 18 字以上连续片段重合；原文与页图仍在 .local。",
+        "impact": "若直接搬运原文会违反版权边界。",
+        "resolution": "selfcheck 固化重叠检查；Git 只保留定位、短标题与文本指纹。"
+      },
+      {
+        "id": "T14-F9",
+        "severity": "major",
+        "finding": "T15 独立审查发现 12 条相邻节先修边以教材编排顺序为据却标 explicit_source；同类问题另有 6 条（01/03/06/11/13/15）。",
+        "impact": "违反“不得从章节先后硬推先修”的验收要求，basis 标注不诚实。",
+        "resolution": "18 条统一改判为 pedagogical_inference，并重写 rationale 明示“按编排顺序推断、教材未声明依赖”；DAG 重跑无环、无自环。"
+      },
+      {
+        "id": "T14-F10",
+        "severity": "major",
+        "finding": "无脊椎动物概念漏正文 p85 的软体动物、棘皮动物；rubric 只要求 3 类。",
+        "impact": "概念与 rubric 覆盖不全，A09 完整性不足。",
+        "resolution": "解释、目标、出处补入软体/棘皮（新增 p85 两条 SourceRef），rubric 要求至少五类且必须含软体与棘皮，并新增识别特征标准。"
+      },
+      {
+        "id": "T14-F11",
+        "severity": "major",
+        "finding": "分类等级概念缺正文 p139 的双名法。",
+        "impact": "教材显式知识点遗漏。",
+        "resolution": "解释、目标、rubric 补入双名法（属名+种加词、大小写），新增 p139 SourceRef。"
+      },
+      {
+        "id": "T14-F12",
+        "severity": "major",
+        "finding": "8 节“与人类生活的关系”显式目标仅靠排除项处理，且与藻类一节单独立概念不一致。",
+        "impact": "口径不一致、内容缺失（AUD-05/06/07）。",
+        "resolution": "为单细胞/鱼/两栖爬行/鸟兽/细菌/真菌/病毒各立 1 个概念、2 个活动、1 个 rubric（含出处）；删除“与人类生活关系”排除项；真菌概念目标去掉该条、由独立概念承载。"
+      },
+      {
+        "id": "T14-F13",
+        "severity": "moderate",
+        "finding": "3 处 19–23 字教材原句混入自写文本；selfcheck 只按单块 shingle 检查 explanations/activities/rubrics，漏 misconceptions 与跨块句。",
+        "impact": "原创性声明与事实不符（AUD-04）。",
+        "resolution": "3 处改写；selfcheck 改为按节拼接块文本、纳入 misconceptions/活动选项/rubric 全字段、按字符 n-gram 比对并报告命中字段。"
+      },
+      {
+        "id": "T14-F14",
+        "severity": "moderate",
+        "finding": "7 道选择题可猜（荒谬干扰项或正确项显著更长），2 个概念缺变式活动，植物组织 rubric 缺机械/薄壁组织。",
+        "impact": "活动质量与 rubric 覆盖不足（AUD-08/09/13）。",
+        "resolution": "7 道题重写干扰项为常见误解并平衡长度；补 2 个变式活动；rubric 增机械/薄壁组织标准；selfcheck 增干扰项规则。"
+      },
+      {
+        "id": "T14-F15",
+        "severity": "moderate",
+        "finding": "第二次独立复核发现 4 条 T05 首节显式先修仍以编排顺序为据；无脊椎动物“与人类生活”目标无概念；7 个新概念为孤立节点；ledger 两条 scope 仍写 84 活动。",
+        "impact": "A11 依据与 A09 完整性的残留问题（AUD2-01/02/03/04）。",
+        "resolution": "4 条改判 pedagogical_inference 并重写 rationale；新增 invertebrate-human 概念（2 活动+rubric+出处）；为 8 个人类关系概念各加 1 条 related（有本节出处）；ledger scope 改为实际 86→88 活动等计数；另统一报告旧数字、改写 10 处 15–17 字常见定义短语、补临时装片目标与 rubric。"
+      }
+    ],
+    "revisions": [
+      {
+        "id": "R1",
+        "change": "第二单元第四章按正文冻结为 2 节（尝试对生物进行分类 / 从种到界）",
+        "reason": "T14-F1",
+        "evidence": "fragments/toc.json"
+      },
+      {
+        "id": "R2",
+        "change": "全册目录改为正文章节标题块 + 学习目标块锚定，逐节记录 PDF 页范围",
+        "reason": "T14-F2",
+        "evidence": "coverage/coverage-manifest.json"
+      },
+      {
+        "id": "R3",
+        "change": "概念 inventory 采用“每节核心概念 + 明确排除材料”口径，排除项逐条写理由",
+        "reason": "T14-F3",
+        "evidence": "fragments/coverage.json"
+      },
+      {
+        "id": "R4",
+        "change": "27 条跨节关系区分 explicit_source / pedagogical_inference，related 端点排序",
+        "reason": "T14-F4",
+        "evidence": "fragments/relations-full.json"
+      },
+      {
+        "id": "R5",
+        "change": "插图登记为排除项并说明版权边界；图义视觉核对列为待复核",
+        "reason": "T14-F5",
+        "evidence": "fragments/coverage.json"
+      },
+      {
+        "id": "R6",
+        "change": "版次/印次/ISBN 保持 null + unverified",
+        "reason": "T14-F6",
+        "evidence": "source/source-verification.json"
+      },
+      {
+        "id": "R7",
+        "change": "18 条先修边 basis 改判 pedagogical_inference 并重写 rationale",
+        "reason": "T14-F9 / AUD-01",
+        "evidence": "fragments/relations-full.json"
+      },
+      {
+        "id": "R8",
+        "change": "新增 7 个“与人类生活”概念、14 个活动、7 个 rubric；删除对应排除项；真菌目标对齐",
+        "reason": "T14-F12 / AUD-05~07",
+        "evidence": "fragments/specs/u1ch3.json, u2ch2.json, u2ch3.json, fragments/coverage.json"
+      },
+      {
+        "id": "R9",
+        "change": "补软体/棘皮与双名法（解释/目标/rubric/出处）；植物组织 rubric 补机械/薄壁组织",
+        "reason": "T14-F10/F11/F14 / AUD-02/03/13",
+        "evidence": "fragments/specs/u2ch2.json, u2ch4.json, u1ch3.json"
+      },
+      {
+        "id": "R10",
+        "change": "改写 3 处原文混入、7 道选择题干扰项、新增 2 个变式活动；selfcheck 原创性与干扰项规则升级",
+        "reason": "T14-F13/F14 / AUD-04/08/09",
+        "evidence": "fragments/concepts.json, fragments/activities.json, fragments/specs, tools/selfcheck.mjs"
+      },
+      {
+        "id": "R11",
+        "change": "第二次复核返工：4 条 basis 改判、+1 人类关系概念、+8 related、+3 出处、临时装片目标、10 处短语改写、ledger/报告数字对齐",
+        "reason": "T14-F15 / AUD2-01..07",
+        "evidence": "fragments/relations.json, relations-full.json, specs/u2ch2.json, specs/u1ch2.json, review-notes.json"
+      }
+    ],
+    "openItems": [
+      {
+        "item": "全册插图/图注的视觉核对与图义一致性",
+        "owner": "T11/T15",
+        "blocking": true,
+        "note": "未做逐图视觉核对；当前只有图注级出处与版权边界说明。"
+      },
+      {
+        "item": "教师/专家审校与真实学生学习实验",
+        "owner": "T15/T17（如用户安排）",
+        "blocking": true,
+        "note": "本包只完成 AI 静态检查。"
+      },
+      {
+        "item": "版次/印次/ISBN/定价与全书印刷页总数",
+        "owner": "T14/人工核对印本",
+        "blocking": false
+      },
+      {
+        "item": "第二单元章号与个别节名的高置信核对",
+        "owner": "T15",
+        "blocking": false
+      }
+    ],
+    "humanReviewRequired": [
+      "full_volume+complete 的 formal 发布（published）需 human_curator 决策与审阅记录；本包保持 candidate。",
+      "全册图义与版次事实需人工/视觉复核后再宣称基准可用。",
+      "逐图视觉核对（65 条图注 + 首节 8 条插图）仍未做；本返工不产生视觉证据。"
+    ]
+  },
+  "entries": [
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t14.pack.static-check",
+      "entityKind": "content_pack",
+      "entityId": "pack.biology-7a.observation",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "全册 22 节 / 43 概念 / 88 活动 / 43 rubric / 44 关系（31 先修 / 13 related）/ 281 条来源定位 / 22 个 covered target section",
+      "notes": "全册 AI 静态检查（非教师专家审核），含 2026-10-29 T15-content-audit P0/P1 返工：关系依据改判、无脊椎动物两类群、双名法、8 节“与人类生活关系”概念化、真菌目标对齐、2 个变式活动、7 道可猜题改写。发现、修订与待人工复核见 coverage/review-report.md 与 review/review-ledger.json；未做专家审校、学习实验与逐图视觉核对。",
+      "evidenceRefs": [
+        "evidence.t14.selfcheck",
+        "evidence.t14.validate-pack"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t14.rework.t15-audit",
+      "entityKind": "content_pack",
+      "entityId": "pack.biology-7a.observation",
+      "from": "machine_checked",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 返工：T15-content-audit P0/P1 处置（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "AUD-01..AUD-13 与 AUD2-01..07 处置；43 概念 / 88 活动 / 43 rubric / 44 关系 / 281 refs",
+      "notes": "依据 docs/rebuild/reports/T15-content-audit.md 与 requests/T15.md 修复内容层问题；未提升为 published，仍需 human_curator 与图义视觉核对。",
+      "evidenceRefs": [
+        "evidence.t14.rework.selfcheck",
+        "evidence.t14.rework.validate-pack"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.01",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.meaning",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.02",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.purpose-object",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.03",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.order-record",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.04",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.variation",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.05",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.tools",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.06",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.safety-ethics",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.07",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.to-question",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.08",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.observation.comparison",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.09",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch1s2.bio-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.10",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch2s1.microscope-use",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.11",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch2s2.slide-types",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.12",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch2s2.plant-cell-structure",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.13",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch2s3.animal-cell-difference",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.14",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch2s4.cell-matter-energy",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.15",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch2s4.cell-nucleus",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.16",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch3s1.cell-division-chromosome",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.17",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch3s2.differentiation-tissue",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.18",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch3s2.organ-system",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.19",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch3s3.plant-tissues-organs",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.20",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch3s4.unicellular-life",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.21",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u1ch3s4.unicellular-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.22",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch1s1.algae-moss-fern",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.23",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch1s1.plant-groups-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.24",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch1s2.seed-structure",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.25",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch1s2.gymnosperm-angiosperm",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.26",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s1.invertebrate-groups",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.27",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s2.fish-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.28",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s3.amphibian-reptile",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.29",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s4.bird-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.30",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s4.mammal-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.31",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s2.fish-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.32",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s3.amphibian-reptile-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.33",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s4.bird-mammal-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.34",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch2s1.invertebrate-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.35",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s1.microbe-groups",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.36",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s2.bacteria",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.37",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s3.fungi",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.38",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s4.virus",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.39",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s2.bacteria-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.40",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s3.fungi-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.41",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch3s4.virus-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.42",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch4s1.classification-method",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.concept.43",
+      "entityKind": "concept",
+      "entityId": "concept.bio7a.u2ch4s2.classification-ranks-species",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "概念标题/目标/解释/易错点/出处/活动入口与 rubric 绑定",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.01",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.meaning",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.02",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.purpose-object",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.03",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.order-record",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.04",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.variation",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.05",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.tools",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.06",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.safety-ethics",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.07",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.to-question",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.08",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.observation.comparison",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.09",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch1s2.bio-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.10",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch2s1.microscope-use",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.11",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch2s2.slide-types",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.12",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch2s2.plant-cell-structure",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.13",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch2s3.animal-cell-difference",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.14",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch2s4.cell-matter-energy",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.15",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch2s4.cell-nucleus",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.16",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch3s1.cell-division-chromosome",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.17",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch3s2.differentiation-tissue",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.18",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch3s2.organ-system",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.19",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch3s3.plant-tissues-organs",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.20",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch3s4.unicellular-life",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.21",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u1ch3s4.unicellular-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.22",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch1s1.algae-moss-fern",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.23",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch1s1.plant-groups-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.24",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch1s2.seed-structure",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.25",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch1s2.gymnosperm-angiosperm",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.26",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s1.invertebrate-groups",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.27",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s2.fish-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.28",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s3.amphibian-reptile",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.29",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s4.bird-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.30",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s4.mammal-features",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.31",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s2.fish-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.32",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s3.amphibian-reptile-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.33",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s4.bird-mammal-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.34",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch2s1.invertebrate-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.35",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s1.microbe-groups",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.36",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s2.bacteria",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.37",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s3.fungi",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.38",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s4.virus",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.39",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s2.bacteria-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.40",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s3.fungi-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.41",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch3s4.virus-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.42",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch4s1.classification-method",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.rubric.43",
+      "entityKind": "rubric",
+      "entityId": "rubric.bio7a.u2ch4s2.classification-ranks-species",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关键标准/可接受表达/常见误概念/反例/迁移题/反馈出处",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.01",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.meaning-purpose",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.02",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.purpose-order",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.03",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.order-variation",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.04",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.meaning-tools",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.05",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.meaning-question",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.06",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.purpose-comparison",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.07",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.prereq.purpose-safety",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.08",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.order-tools",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.09",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.question-variation",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.10",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.01",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.11",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.02",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.12",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.03",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.13",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.04",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.14",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.05",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.15",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.06",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.16",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.07",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.17",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.08",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.18",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.09",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.19",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.10",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.20",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.11",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.21",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.12",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.22",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.13",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.23",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.14",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.24",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.15",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.25",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.16",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.26",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.17",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.27",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.18",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.28",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.19",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.29",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.20",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.30",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.21",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.31",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.22",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.32",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.23",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.33",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.24",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.34",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.25",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.35",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.26",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.36",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.full.27",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.37",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.invertebrate-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.38",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.bacteria-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.39",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.fungi-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.40",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.virus-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.41",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.fish-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.42",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.amphibian-reptile-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.43",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.bird-mammal-human",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.relation.44",
+      "entityKind": "relation",
+      "entityId": "relation.bio7a.related.unicellular-life",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "关系类型/basis/rationale/出处/先修无环",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.01",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c1.choice-basics",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.02",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c1.transfer-claim",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.03",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c2.choice-purpose",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.04",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c2.transfer-plan",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.05",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c3.diagram-flow",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.06",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c3.choice-record",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.07",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c4.relation-factors",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.08",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c4.explain-difference",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.09",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c5.choice-bird",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.10",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c5.transfer-tool",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.11",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c6.choice-park",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.12",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c6.transfer-rules",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.13",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c7.explain-origin",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.14",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c7.transfer-questions",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.15",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c8.choice-leek",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.16",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c8.transfer-compare",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.17",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c3.transfer-plan",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.18",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.c4.transfer-explain",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.19",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch1s2.bio-features.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.20",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch1s2.bio-features.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.21",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s1.microscope-use.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.22",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s1.microscope-use.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.23",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s2.slide-types.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.24",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s2.slide-types.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.25",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s2.plant-cell-structure.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.26",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s2.plant-cell-structure.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.27",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s3.animal-cell-difference.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.28",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s3.animal-cell-difference.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.29",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s4.cell-matter-energy.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.30",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s4.cell-matter-energy.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.31",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s4.cell-nucleus.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.32",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch2s4.cell-nucleus.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.33",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s1.cell-division-chromosome.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.34",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s1.cell-division-chromosome.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.35",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s2.differentiation-tissue.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.36",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s2.differentiation-tissue.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.37",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s2.organ-system.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.38",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s2.organ-system.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.39",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s3.plant-tissues-organs.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.40",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s3.plant-tissues-organs.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.41",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s4.unicellular-life.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.42",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s4.unicellular-life.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.43",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s4.unicellular-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.44",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u1ch3s4.unicellular-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.45",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s1.algae-moss-fern.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.46",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s1.algae-moss-fern.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.47",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s1.plant-groups-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.48",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s1.plant-groups-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.49",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s2.seed-structure.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.50",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s2.seed-structure.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.51",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s2.gymnosperm-angiosperm.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.52",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch1s2.gymnosperm-angiosperm.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.53",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s1.invertebrate-groups.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.54",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s1.invertebrate-groups.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.55",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s2.fish-features.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.56",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s2.fish-features.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.57",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s3.amphibian-reptile.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.58",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s3.amphibian-reptile.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.59",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s4.bird-features.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.60",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s4.bird-features.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.61",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s4.mammal-features.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.62",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s4.mammal-features.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.63",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s2.fish-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.64",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s2.fish-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.65",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s3.amphibian-reptile-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.66",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s3.amphibian-reptile-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.67",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s4.bird-mammal-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.68",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s4.bird-mammal-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.69",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s1.invertebrate-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.70",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch2s1.invertebrate-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.71",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s1.microbe-groups.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.72",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s1.microbe-groups.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.73",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s2.bacteria.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.74",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s2.bacteria.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.75",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s3.fungi.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.76",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s3.fungi.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.77",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s4.virus.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.78",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s4.virus.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.79",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s2.bacteria-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.80",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s2.bacteria-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.81",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s3.fungi-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.82",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s3.fungi-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.83",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s4.virus-human.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.84",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch3s4.virus-human.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.85",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch4s1.classification-method.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.86",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch4s1.classification-method.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.87",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch4s2.classification-ranks-species.basic",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.t05.activity.88",
+      "entityKind": "activity",
+      "entityId": "activity.bio7a.u2ch4s2.classification-ranks-species.variant",
+      "from": "candidate",
+      "to": "machine_checked",
+      "actorKind": "ai_static_reviewer",
+      "actorLabel": "T14 AI 静态检查（DeepSeek Agent；非教师、非专家）",
+      "checkedAt": "2026-10-29T12:55:00Z",
+      "scope": "题干/作答 schema/rubric 绑定/出处/答案披露策略/图示静态结构",
+      "notes": "首次 AI 静态检查（非教师专家审核）；发现与修订记录见 coverage/review-report.md。",
+      "evidenceRefs": [
+        "evidence.t05.selfcheck"
+      ]
+    }
+  ]
+}

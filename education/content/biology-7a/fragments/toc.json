@@ -1,0 +1,405 @@
+{
+  "schemaVersion": 1,
+  "note": "T14 全册目录：2 单元 / 7 章 / 23 节；单元与章标题由正文标题块锚定，章节页范围见 coverage/coverage-manifest.json。综合实践项目不是 section 类型，登记在覆盖排除项而非 toc。",
+  "toc": [
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.volume",
+      "courseEditionId": "course.biology-7a",
+      "parentId": null,
+      "type": "volume",
+      "title": "义务教育教科书 生物学 七年级上册",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.cover.series",
+        "source.bio7a.cover.grade",
+        "source.bio7a.cover.subject",
+        "source.bio7a.cover.volume",
+        "source.bio7a.copyright.title",
+        "source.bio7a.copyright.publisher"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.volume",
+      "type": "unit",
+      "title": "第一单元 生物和细胞",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.toc.unit1.title",
+        "source.bio7a.toc.unit1.name"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1",
+      "type": "chapter",
+      "title": "第一章 认识生物",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.toc.ch1.title",
+        "source.bio7a.toc.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch1.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch1",
+      "type": "section",
+      "title": "第一节 观察周边环境中的生物",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.toc.ch1.s1.title",
+        "source.bio7a.section.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch1.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch1",
+      "type": "section",
+      "title": "第二节 生物的特征",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.toc.ch1.s2.title",
+        "source.bio7a.sec.u1ch1s2.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1",
+      "type": "chapter",
+      "title": "第二章 认识细胞",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.ch.u1ch2.heading",
+        "source.bio7a.ch.u1ch2.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch2.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch2",
+      "type": "section",
+      "title": "第一节 学习使用显微镜",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s1.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch2.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch2",
+      "type": "section",
+      "title": "第二节 植物细胞",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s2.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch2.s3",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch2",
+      "type": "section",
+      "title": "第三节 动物细胞",
+      "order": 2,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s3.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch2.s4",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch2",
+      "type": "section",
+      "title": "第四节 细胞的生活",
+      "order": 3,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s4.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch3",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1",
+      "type": "chapter",
+      "title": "第三章 从细胞到生物体",
+      "order": 2,
+      "sourceRefs": [
+        "source.bio7a.ch.u1ch3.heading",
+        "source.bio7a.ch.u1ch3.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch3.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch3",
+      "type": "section",
+      "title": "第一节 细胞通过分裂产生新细胞",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s1.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch3.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch3",
+      "type": "section",
+      "title": "第二节 动物体的结构层次",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s2.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch3.s3",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch3",
+      "type": "section",
+      "title": "第三节 植物体的结构层次",
+      "order": 2,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s3.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u1.ch3.s4",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u1.ch3",
+      "type": "section",
+      "title": "第四节 单细胞生物",
+      "order": 3,
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s4.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.volume",
+      "type": "unit",
+      "title": "第二单元 多种多样的生物",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.unit.u2.heading",
+        "source.bio7a.unit.u2.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2",
+      "type": "chapter",
+      "title": "第一章 藻类与植物的类群",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.ch.u2ch1.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch1.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch1",
+      "type": "section",
+      "title": "第一节 藻类、苔藓植物和蕨类植物",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch1s1.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch1.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch1",
+      "type": "section",
+      "title": "第二节 种子植物",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch1s2.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2",
+      "type": "chapter",
+      "title": "第二章 动物的类群",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.ch.u2ch2.heading",
+        "source.bio7a.ch.u2ch2.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch2.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch2",
+      "type": "section",
+      "title": "第一节 无脊椎动物",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s1.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch2.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch2",
+      "type": "section",
+      "title": "第二节 脊椎动物",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s2.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch2.s3",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch2",
+      "type": "section",
+      "title": "第三节 两栖动物和爬行动物",
+      "order": 2,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s3.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch2.s4",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch2",
+      "type": "section",
+      "title": "第四节 鸟和哺乳动物",
+      "order": 3,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s4.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch3",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2",
+      "type": "chapter",
+      "title": "第三章 微生物",
+      "order": 2,
+      "sourceRefs": [
+        "source.bio7a.ch.u2ch3.heading",
+        "source.bio7a.ch.u2ch3.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch3.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch3",
+      "type": "section",
+      "title": "第一节 微生物的分布",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s1.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch3.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch3",
+      "type": "section",
+      "title": "第二节 细菌",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s2.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch3.s3",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch3",
+      "type": "section",
+      "title": "第三节 真菌",
+      "order": 2,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s3.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch3.s4",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch3",
+      "type": "section",
+      "title": "第四节 病毒",
+      "order": 3,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s4.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch4",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2",
+      "type": "chapter",
+      "title": "第四章 生物分类的方法",
+      "order": 3,
+      "sourceRefs": [
+        "source.bio7a.ch.u2ch4.heading",
+        "source.bio7a.ch.u2ch4.title"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch4.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch4",
+      "type": "section",
+      "title": "第一节 尝试对生物进行分类",
+      "order": 0,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch4s1.heading"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.bio7a.u2.ch4.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.bio7a.u2.ch4",
+      "type": "section",
+      "title": "第二节 从种到界",
+      "order": 1,
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch4s2.heading"
+      ]
+    }
+  ]
+}

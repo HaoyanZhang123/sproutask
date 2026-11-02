@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "attempt.cell.explain",
+  "requestId": "request.attempt.explain",
+  "learnerId": "learner.local.default",
+  "sessionId": "session.cell.1",
+  "courseEditionId": "course.biology-7a",
+  "packVersion": "1.0.0",
+  "activityId": "activity.cell-explain",
+  "activityVersion": "1",
+  "conceptIds": [
+    "concept.cell"
+  ],
+  "inputType": "text",
+  "answerAssetId": null,
+  "answerText": null,
+  "submittedAt": "2026-10-29T08:10:00Z",
+  "helpUsed": [],
+  "evidenceIds": [
+    "evidence.cell.explain"
+  ]
+}

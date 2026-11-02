@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "t14-page-ranges",
+  "note": "全册页范围（PDF 页），由 T14 逐节核对正文标题页与“练习与应用/栏目页”得出；不是按偏移推算。印刷页范围由 source/page-labels.json 的页脚标签算出，边界页无标签时为 null，另给该范围内已识别标签的 min/max 作为参考。",
+  "units": [
+    { "tocNodeId": "toc.bio7a.u1", "pdfPageStart": 10, "pdfPageEnd": 64, "note": "含单元开篇 10、综合实践项目 60–61、单元小结/复习 62–64" },
+    { "tocNodeId": "toc.bio7a.u2", "pdfPageStart": 65, "pdfPageEnd": 144, "note": "含单元开篇 65–66、综合实践项目 129–130、单元小结/复习 142–144；后记 145 不计" }
+  ],
+  "chapters": [
+    { "tocNodeId": "toc.bio7a.u1.ch1", "pdfPageStart": 11, "pdfPageEnd": 20 },
+    { "tocNodeId": "toc.bio7a.u1.ch2", "pdfPageStart": 21, "pdfPageEnd": 41 },
+    { "tocNodeId": "toc.bio7a.u1.ch3", "pdfPageStart": 42, "pdfPageEnd": 59 },
+    { "tocNodeId": "toc.bio7a.u2.ch1", "pdfPageStart": 67, "pdfPageEnd": 80 },
+    { "tocNodeId": "toc.bio7a.u2.ch2", "pdfPageStart": 82, "pdfPageEnd": 105 },
+    { "tocNodeId": "toc.bio7a.u2.ch3", "pdfPageStart": 107, "pdfPageEnd": 127 },
+    { "tocNodeId": "toc.bio7a.u2.ch4", "pdfPageStart": 131, "pdfPageEnd": 141 }
+  ],
+  "sections": [
+    { "tocNodeId": "toc.bio7a.u1.ch1.s1", "pdfPageStart": 11, "pdfPageEnd": 15 },
+    { "tocNodeId": "toc.bio7a.u1.ch1.s2", "pdfPageStart": 16, "pdfPageEnd": 20 },
+    { "tocNodeId": "toc.bio7a.u1.ch2.s1", "pdfPageStart": 21, "pdfPageEnd": 26 },
+    { "tocNodeId": "toc.bio7a.u1.ch2.s2", "pdfPageStart": 27, "pdfPageEnd": 31 },
+    { "tocNodeId": "toc.bio7a.u1.ch2.s3", "pdfPageStart": 32, "pdfPageEnd": 36 },
+    { "tocNodeId": "toc.bio7a.u1.ch2.s4", "pdfPageStart": 37, "pdfPageEnd": 41 },
+    { "tocNodeId": "toc.bio7a.u1.ch3.s1", "pdfPageStart": 42, "pdfPageEnd": 46 },
+    { "tocNodeId": "toc.bio7a.u1.ch3.s2", "pdfPageStart": 47, "pdfPageEnd": 51 },
+    { "tocNodeId": "toc.bio7a.u1.ch3.s3", "pdfPageStart": 52, "pdfPageEnd": 54 },
+    { "tocNodeId": "toc.bio7a.u1.ch3.s4", "pdfPageStart": 55, "pdfPageEnd": 59 },
+    { "tocNodeId": "toc.bio7a.u2.ch1.s1", "pdfPageStart": 67, "pdfPageEnd": 73 },
+    { "tocNodeId": "toc.bio7a.u2.ch1.s2", "pdfPageStart": 74, "pdfPageEnd": 80 },
+    { "tocNodeId": "toc.bio7a.u2.ch2.s1", "pdfPageStart": 82, "pdfPageEnd": 87 },
+    { "tocNodeId": "toc.bio7a.u2.ch2.s2", "pdfPageStart": 88, "pdfPageEnd": 93 },
+    { "tocNodeId": "toc.bio7a.u2.ch2.s3", "pdfPageStart": 94, "pdfPageEnd": 98 },
+    { "tocNodeId": "toc.bio7a.u2.ch2.s4", "pdfPageStart": 99, "pdfPageEnd": 105 },
+    { "tocNodeId": "toc.bio7a.u2.ch3.s1", "pdfPageStart": 107, "pdfPageEnd": 111 },
+    { "tocNodeId": "toc.bio7a.u2.ch3.s2", "pdfPageStart": 112, "pdfPageEnd": 116 },
+    { "tocNodeId": "toc.bio7a.u2.ch3.s3", "pdfPageStart": 118, "pdfPageEnd": 122 },
+    { "tocNodeId": "toc.bio7a.u2.ch3.s4", "pdfPageStart": 123, "pdfPageEnd": 127 },
+    { "tocNodeId": "toc.bio7a.u2.ch4.s1", "pdfPageStart": 131, "pdfPageEnd": 135 },
+    { "tocNodeId": "toc.bio7a.u2.ch4.s2", "pdfPageStart": 136, "pdfPageEnd": 141 }
+  ],
+  "nonSectionPages": [
+    { "pdfPageStart": 60, "pdfPageEnd": 61, "item": "综合实践项目 制作细胞模型" },
+    { "pdfPageStart": 62, "pdfPageEnd": 64, "item": "第一单元 单元小结/复习与提高" },
+    { "pdfPageStart": 81, "pdfPageEnd": 81, "item": "生物学与文学（第一章栏目页）" },
+    { "pdfPageStart": 106, "pdfPageEnd": 106, "item": "生物学与文学（第二章栏目页）" },
+    { "pdfPageStart": 117, "pdfPageEnd": 117, "item": "科学·技术·社会（超级细菌）" },
+    { "pdfPageStart": 128, "pdfPageEnd": 128, "item": "科学·技术·社会（病毒跨物种传播）" },
+    { "pdfPageStart": 129, "pdfPageEnd": 130, "item": "综合实践项目 利用细菌或真菌制作发酵食品" },
+    { "pdfPageStart": 142, "pdfPageEnd": 144, "item": "第二单元 单元小结/复习与提高" },
+    { "pdfPageStart": 145, "pdfPageEnd": 145, "item": "后记" }
+  ]
+}

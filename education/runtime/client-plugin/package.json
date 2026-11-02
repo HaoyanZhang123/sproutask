@@ -1,0 +1,21 @@
+{
+  "name": "@edu/client-root",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Education client root occupant for the fixed DSH web shell (loader-protocol bundle).",
+  "license": "UNLICENSED",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": ["@deepseek-ai/dsh-client-ui-renderer"]
+    }
+  },
+  "files": ["lib"]
+}

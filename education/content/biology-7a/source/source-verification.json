@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "task": "T05",
+  "kind": "textbook-source-verification",
+  "generatedAt": "2026-10-29T11:10:37Z",
+  "verificationMethod": {
+    "primary": "AI 读取 T03 全册 OCR 基线（Windows.Media.Ocr zh-Hans-CN）的逐页文本与页脚印刷页标签",
+    "secondary": "AI 读取版权页（PDF 3）局部页图裁切与放大图，用于核对 OCR 漏行（无外部模型 API 调用；裁切脚本与图在本机 .local 缓存）",
+    "reviewerKind": "ai_static_reviewer",
+    "humanExpertReviewed": false,
+    "notClaimed": "这不是教师/专家审校，也不是人工逐字核对；页面上读不清的信息保持 null 并列入未知项。",
+    "limitations": [
+      "教材为扫描版，无文本层；所有正文文字来自本机 OCR，OCR 存在空格、页眉噪声与个别错字。",
+      "目录为多栏排版，OCR 只还原了部分条目；目录条目的 PDF 页由版式定位，印刷页在目录页上未被可靠识别。",
+      "版权页下半部为空白页图，未印出（或未能辨认）版次、印次、ISBN、印张、字数、定价等字样。",
+      "本次核实覆盖版本标识与全册目录（正文标题块逐节核对）；未做插图科学含义的视觉核对与全部目录页码的人工核对。"
+    ]
+  },
+  "sourceFile": {
+    "localPath": "E:\\DSH\\workspaces\\ai4edu\\义务教育教科书·生物学·七年级·上册.pdf",
+    "fileName": "义务教育教科书·生物学·七年级·上册.pdf",
+    "sha256": "33eed60ce56aa402ae683b9c3a573f2fd780b766d635b04580d604928a23e59f",
+    "bytes": 40259982,
+    "pdfVersion": "1.4",
+    "pageCount": 146,
+    "textLayerPageCount": 0,
+    "ocrPageCount": 146,
+    "emptyOcrPageCount": 0,
+    "note": "文件名只作本机定位线索，不作为版本依据。文件指纹与页数来自 T03 本地实测。"
+  },
+  "baselineEvidence": {
+    "runId": "run-20261029T185619+0800",
+    "rootLocalPath": "E:\\DSH\\workspaces\\ai4edu\\education\\.local\\evidence\\T03\\run-20261029T185619+0800",
+    "parserVersion": "pdf-importer-v1",
+    "jobId": "import:2b97e28b318c",
+    "artifacts": [
+      { "file": "baseline-summary.json", "sha256": "40a467536da9d1d1a6c904c6532e32a35a386fd119b03f0f0f51d143573d9cc9" },
+      { "file": "baseline-pages.tsv", "sha256": "76eada10cd0040aba5168f0d26bc9efbcb87f1308d94e05102267f1c182f9b45" },
+      { "file": "jobs/import-2b97e28b318c-5062933f/artifacts/blocks.jsonl", "sha256": "daf7aee21f609d57714c35f7bf9fa8ea7a7a556017a5ffddd8934eb3db6221c5" },
+      { "file": "jobs/import-2b97e28b318c-5062933f/artifacts/page-map.json", "sha256": "f2592fd0eaf8984d0a6b3dbad5d46eea0329d1b19ffa20c887c1fc6c4f3cce29" },
+      { "file": "jobs/import-2b97e28b318c-5062933f/artifacts/figures.json", "sha256": "40c33f486347c6a4f659130412020685a62058ff296e4de6de835caa7c8c6e87" },
+      { "file": "jobs/import-2b97e28b318c-5062933f/artifacts/toc-candidates.json", "sha256": "3240943a7fe39d0921ad7cbb540bdd03ad0e77619a20c281b204dccad66cae21" }
+    ],
+    "note": "原文、页图与逐页 OCR 文本只保存在本机 .local 证据目录，不进入 Git；本包只登记定位信息与短标题级出处。"
+  },
+  "book": {
+    "title": "义务教育教科书 生物学",
+    "subject": "biology",
+    "subjectLabel": "生物学",
+    "grade": 7,
+    "gradeLabel": "七年级",
+    "term": 1,
+    "volumeLabel": "上册",
+    "publisher": "人民教育出版社",
+    "publisherNote": "版权页：人民教育出版社 课程教材研究所 编著；出版：人民教育出版社；地址：北京市海淀区中关村南大街17号院1号楼，邮编100081。",
+    "editionLabel": null,
+    "editionLabelStatus": "unverified",
+    "printingLabel": null,
+    "printingLabelStatus": "unverified",
+    "isbn": null,
+    "isbnStatus": "unverified",
+    "totalPrintedPages": null,
+    "totalPrintedPagesStatus": "unverified",
+    "coverPdfPage": 1,
+    "coverPrintedPage": null,
+    "copyrightPdfPages": [2, 3],
+    "copyrightPrintedPages": [null, null],
+    "tocPdfPages": [7, 8],
+    "tocPrintedPages": [null, null],
+    "frontMatterPdfPages": [4, 5, 6],
+    "unit1OpeningPdfPage": 10,
+    "printedPageMapping": {
+      "dominantOffset": -9,
+      "evidence": "T03 page-map：正文 85 页页脚标签与 PDF 页一致呈 -9 偏移；前辅文（PDF 4–5）与个别页（18/24/62）为离群，不能套用偏移。",
+      "ruleUsed": "每个 SourceRef 单独采用该校页页脚识别值，不按偏移推算；无页脚标签的页 printedPage=null。"
+    }
+  },
+  "verifiedFacts": [
+    {
+      "fact": "封面显示“义务教育教科书 / 七年级 / 生物学 / 上册”",
+      "pdfPage": 1,
+      "blockIds": ["block:fa15e797ee1ee29eda3e8383", "block:5ccce87523b65886c40afa7d", "block:e68966e0206551f641144a15", "block:c06026f494cf7d39e5952b71"],
+      "method": "AI 读 OCR"
+    },
+    {
+      "fact": "版权页显示“义务教育教科书 / 生物学 / 七年级 / 上册”与“人民教育出版社 课程教材研究所 编著”",
+      "pdfPage": 3,
+      "blockIds": ["block:e82b1d6f71e80ca7d6c2a435", "block:358217bd9ed087468c102fc0", "block:4b4204d9a000b92bc48908da", "block:29f386c424e374de81962abb"],
+      "method": "AI 读 OCR + 页图裁切核对"
+    },
+    {
+      "fact": "扉页/书名页显示“义务教育教科书 / 生物学 / 七年级 / 上册 / 人民教育出版社课程教材研究所 编著 / ·北京·”",
+      "pdfPage": 2,
+      "blockIds": ["block:8b2ac06b2495277806ab992e", "block:343f55c38678e14c17c6bf8a", "block:e13cc9abcfa2a0fe0aff6eb3", "block:8586e7ad26249578768fa88e", "block:35eb6fb724f7fe4bc39e828b"],
+      "method": "AI 读 OCR"
+    },
+    {
+      "fact": "版权页出版信息（出版者、地址、邮编 100081、网址 www.pep.com.cn、版权所有·侵权必究）",
+      "pdfPage": 3,
+      "blockIds": ["block:271a96767a019e473f62f68d", "block:e0d32840fd8d6634c0789c85", "block:3aa746e6c9e470eb22b855e5"],
+      "method": "AI 读版权页页图裁切（OCR 把邮编识别为 1m081，页图为 100081）"
+    },
+    {
+      "fact": "目录页标题“目录”，含“第一单元 / 生物和细胞 / 第一章 认识生物 / 第一节 观察周边环境中的生物 / 第二节 生物的特征 …”等条目",
+      "pdfPage": [7, 8],
+      "blockIds": ["block:ec06de0c4d53bd404e9edd00", "block:b03851129a3c0877d962484a", "block:4f2dffcf98c5a3fb9b99cab5", "block:6ad7b69c705debfb12693f0c", "block:93c3d3128d7cbbab219eab0e", "block:7edecb00c4ffd15519df2991"],
+      "method": "AI 读 OCR + 版式定位"
+    },
+    {
+      "fact": "PDF 共 146 页，扫描版无文本层，146/146 页 OCR 成功、0 空页",
+      "pdfPage": null,
+      "blockIds": [],
+      "method": "T03 基线实测（baseline-summary.json）"
+    },
+    {
+      "fact": "正文页脚印刷页标签存在且与 PDF 页不一致：PDF 11→印刷2、12→3、13→4、14→5、15→6（首节范围内逐页核对）",
+      "pdfPage": [11, 12, 13, 14, 15],
+      "blockIds": [],
+      "method": "T03 page-map 逐页标签；与页脚 OCR 文本核对"
+    }
+  ],
+  "toc": {
+    "status": "machine_verified_full_toc",
+    "verifiedScope": "T14 用正文标题块逐节核对：2 单元 / 7 章 / 22 节。目录页（PDF 7–8）OCR 只作线索；第二单元第四章以正文为准（2 节），见下方 correctionsFromTocCandidates。",
+    "volumeStructure": { "units": 2, "chapters": 7, "sections": 22, "projects": 2, "pageRangesFile": "fragments/section-pages.json" },
+    "entries": [
+      { "path": ["第一单元", "生物和细胞"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第一章", "认识生物"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第一章", "第一节", "观察周边环境中的生物"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第一章", "第二节", "生物的特征"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第二章", "认识细胞"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第二章", "第一节", "学习使用显微镜"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第二章", "第二节", "植物细胞"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第二章", "第三节", "动物细胞"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第二章", "第四节", "细胞的生活"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第三章", "从细胞到生物体"], "pdfPage": 7, "confidence": "medium" },
+      { "path": ["第一单元", "第三章", "第一节", "细胞通过分裂产生新细胞"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第三章", "第二节", "动物体的结构层次"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第三章", "第三节", "植物体的结构层次"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "第三章", "第四节", "单细胞生物"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第一单元", "综合实践项目", "制作细胞模型"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第二单元", "多种多样的生物"], "pdfPage": 7, "confidence": "high" },
+      { "path": ["第二单元", "第一章", "藻类与植物的类群"], "pdfPage": 7, "confidence": "medium" },
+      { "path": ["第二单元", "第一章", "第一节", "藻类、苔藓植物和蕨类植物"], "pdfPage": 7, "confidence": "medium" },
+      { "path": ["第二单元", "第一章", "第二节", "种子植物"], "pdfPage": 7, "confidence": "medium" },
+      { "path": ["第二单元", "第二章", "动物的类群"], "pdfPage": 7, "confidence": "medium" },
+      { "path": ["第二单元", "第二章", "第一节", "无脊椎动物"], "pdfPage": 7, "confidence": "medium" },
+      { "path": ["第二单元", "第二章", "第二节", "脊椎动物"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第二章", "第三节", "两栖动物和爬行动物"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第二章", "第四节", "鸟和哺乳动物"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第三章", "微生物"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第三章", "第一节", "微生物的分布"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第三章", "第二节", "细菌"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第三章", "第三节", "真菌"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第三章", "第四节", "病毒"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "综合实践项目", "利用细菌或真菌制作发酵食品"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第四章", "生物的分类"], "pdfPage": 8, "confidence": "medium" },
+      { "path": ["第二单元", "第四章", "生物分类的方法"], "pdfPage": 131, "confidence": "high", "note": "正文标题块；目录页 OCR 只给出章名片段" },
+      { "path": ["第二单元", "第四章", "第一节", "尝试对生物进行分类"], "pdfPage": 131, "confidence": "high" },
+      { "path": ["第二单元", "第四章", "第二节", "从种到界"], "pdfPage": 136, "confidence": "high" }
+    ],
+    "notes": [
+      "目录页为多栏排版，OCR 未还原完整行；上表按可读块 + 版式顺序重建，第一单元第一章为高置信。",
+      "第二单元的章号、部分节名与“综合实践项目”行的具体归属存在 OCR 缺口，仅登记为候选，不作为本包覆盖分母。",
+      "未从目录页读到任何页码数字，因此目录条目的 printedPage 保持 null。",
+      "T14 更正：目录页 OCR 曾把第四章误读为 3 节；正文显示第四章“生物分类的方法”只有 2 节（尝试对生物进行分类 / 从种到界）。"
+    ]
+  },
+  "firstSection": {
+    "selectionRule": "按真实目录冻结：第一单元 第一章 认识生物 第一节 观察周边环境中的生物（不是旧文档假设的“细胞的生活”）。",
+    "tocPath": ["第一单元", "生物和细胞", "第一章", "认识生物", "第一节", "观察周边环境中的生物"],
+    "title": "观察周边环境中的生物",
+    "pdfPageStart": 11,
+    "pdfPageEnd": 15,
+    "printedPageStart": "2",
+    "printedPageEnd": "6",
+    "headingBlockId": "block:75eb0a4c64145dcd54f8dcb9",
+    "boundaryEvidence": [
+      { "fact": "PDF 11 含“第一节 观察周边环境中的生物”标题与章首情境，页脚印刷页 2", "pdfPage": 11, "printedPage": "2" },
+      { "fact": "PDF 15 为“练习与应用”（概念检测/拓展应用），页脚印刷页 6", "pdfPage": 15, "printedPage": "6" },
+      { "fact": "PDF 16 出现“第二节 生物的特征”标题，故第一节止于 PDF 15", "pdfPage": 16, "printedPage": null }
+    ],
+    "sectionTocEntries": ["观察周边环境中的生物"],
+    "learningObjectivesFromTextbook": ["怎样进行观察？", "怎样观察生物？"],
+    "notes": [
+      "PDF 11 同时是第一章“认识生物”的章首页：上半部为章导语与章图，下半部进入第一节；章导语按“章级材料”登记，不作为首节概念。",
+      "PDF 16（第二节起始页）页脚标签 OCR 为 null，不能据 -9 偏移推算印刷页；第二节实际范围留给 T14 核实。"
+    ]
+  },
+  "differencesFromOldDocuments": [
+    {
+      "oldClaim": "旧交接卡与旧样例把“细胞的生活”当作首节/优先内容（content/units/u-cell-basic-unit 描述一个小节）。",
+      "actual": "真实目录中“细胞的生活”是 第一单元 第二章 认识细胞 第四节（正文 PDF 37–41，印刷页 28–32）；本册第一节是 第一章第一节 观察周边环境中的生物（PDF 11–15，印刷页 2–6）。",
+      "decision": "T05 按真实目录冻结“观察周边环境中的生物”；旧样例只作历史结构参考，不作为本册首节、版本或覆盖证据。",
+      "evidence": [
+        { "pdfPage": 7, "blockIds": ["block:93c3d3128d7cbbab219eab0e", "block:3a30b421a8f60142fbf8519a"] },
+        { "pdfPage": 11, "blockIds": ["block:75eb0a4c64145dcd54f8dcb9"] },
+        { "pdfPage": 37, "blockIds": ["block:a882850028fbb62ca4767dde"] }
+      ]
+    }
+  ],
+  "unknowns": [
+    { "item": "版次/修订版次", "reason": "版权页页图下半部空白，OCR 无版次行；未用文件名或常识补填。", "owner": "T14/人工核对印本" },
+    { "item": "印次", "reason": "同上；版权页未读到印次字样。", "owner": "T14/人工核对印本" },
+    { "item": "ISBN", "reason": "版权页未读到 ISBN 行（OCR 与页图均无）。", "owner": "T14/人工核对印本" },
+    { "item": "定价、印张、字数、开本", "reason": "版权页未读到对应文字。", "owner": "T14/人工核对印本" },
+    { "item": "全书印刷页总数", "reason": "页脚标签只覆盖部分页，且前辅文使用另一套页码；不能由 PDF 146 页推算。", "owner": "T14" },
+    { "item": "第二单元目录的章号与个别节名", "reason": "目录多栏 OCR 缺口，仅部分可读；不影响首节。", "owner": "T14" },
+    { "item": "版权页编委会名单的完整姓名", "reason": "OCR 缺行/错字（如“问：朱作言”“编：赵占良”），本包不使用名单。", "owner": "T14/人工核对" },
+    { "item": "首节内插图（韭菜/小麦、杨树/柳树、光叶子花、白头鹎、猫/兔头部等）的科学图注与图示细节", "reason": "T03 图注候选只识别“图X-X”式图号；本节插图说明为短标签，未进入 figures.json；本包不复制页图。", "owner": "T11/T14" }
+  ],
+  "declaredScope": {
+    "packScope": "partial",
+    "coverageStatus": "partial",
+    "section": "第一单元 第一章 第一节 观察周边环境中的生物",
+    "notFullVolume": true,
+    "notExpertReviewed": true
+  }
+}

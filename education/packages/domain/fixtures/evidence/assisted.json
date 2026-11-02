@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "evidence.cell.transfer",
+  "attemptId": "attempt.cell.transfer",
+  "learnerId": "learner.local.default",
+  "courseEditionId": "course.biology-7a",
+  "packVersion": "1.0.0",
+  "conceptId": "concept.cell",
+  "kind": "transfer",
+  "observation": "fixture observation: transferred the idea to different cell shapes",
+  "criterionResults": [
+    {
+      "criterionId": "criterion.cell.identify",
+      "result": "met",
+      "note": null
+    }
+  ],
+  "assistance": "assisted",
+  "sourceRefs": [
+    "source.p18"
+  ],
+  "assessmentOrigin": "rule",
+  "modelRunId": null,
+  "uncertainty": null,
+  "validity": "current",
+  "createdAt": "2026-10-29T08:10:00Z"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@edu/visuals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Controlled DiagramSpec validation/rendering, rule-based grading (diagram label, choice, relation, text), evidence-candidate gate and image-answer pipeline (T11). Zero third-party runtime dependencies.",
+  "license": "UNLICENSED",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": ["src", "bin"],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

@@ -1,0 +1,521 @@
+{
+  "schemaVersion": 1,
+  "note": "T14 跨节关系：按教材文字依据（explicit_source）或明确标注的教学推断（pedagogical_inference）建立；related 端点排序；不从目录顺序批量生成。",
+  "relations": [
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.01",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch1s2.bio-features",
+      "toConceptId": "concept.bio7a.u1ch2s2.plant-cell-structure",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先讲生物的共同特征、后进入细胞结构，但未以文字声明二者存在先修依赖；把“细胞是结构单位”作为学习细胞结构的前置属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s2.obj3",
+        "source.bio7a.sec.u1ch1s2.body1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.02",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s1.microscope-use",
+      "toConceptId": "concept.bio7a.u1ch2s2.slide-types",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先介绍显微镜使用、再讲玻片标本，但未声明“会使用显微镜”是学习玻片类型的先修条件；该依赖按教学顺序推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s1.obj3",
+        "source.bio7a.sec.u1ch2s2.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.03",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s2.slide-types",
+      "toConceptId": "concept.bio7a.u1ch2s2.plant-cell-structure",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "临时装片制作与观察是认识植物细胞结构常用路径，教材未把它写成先修关系；制片先于认结构属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s2.obj1",
+        "source.bio7a.sec.u1ch2s2.body4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.04",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s2.plant-cell-structure",
+      "toConceptId": "concept.bio7a.u1ch2s3.animal-cell-difference",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先安排植物细胞、再安排动物细胞以便比较，但未声明先修依赖；把植物细胞作为动物细胞比较的先行内容属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s3.heading",
+        "source.bio7a.sec.u1ch2s3.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.05",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s2.plant-cell-structure",
+      "toConceptId": "concept.bio7a.u1ch2s4.cell-matter-energy",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "先认识细胞结构，再谈各结构在物质与能量中的作用；教材顺序支持但未明说先修，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s4.body1",
+        "source.bio7a.sec.u1ch2s4.body3"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.06",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s4.cell-matter-energy",
+      "toConceptId": "concept.bio7a.u1ch2s4.cell-nucleus",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先讲细胞的物质与能量、后讲细胞核，但未声明前者是后者的先修；该顺序依赖属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s4.obj3",
+        "source.bio7a.sec.u1ch2s4.body4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.07",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s4.cell-nucleus",
+      "toConceptId": "concept.bio7a.u1ch3s1.cell-division-chromosome",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "细胞核与染色体、细胞分裂在教材中相邻编排，教材未声明“先懂细胞核才能学分裂”；该先修属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s1.body2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.08",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch3s1.cell-division-chromosome",
+      "toConceptId": "concept.bio7a.u1ch3s2.differentiation-tissue",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材按“分裂增加数量、分化形成组织”的顺序编排，但未声明先修；把分裂作为分化的前置属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s1.obj1",
+        "source.bio7a.sec.u1ch3s2.body2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.09",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch3s2.differentiation-tissue",
+      "toConceptId": "concept.bio7a.u1ch3s2.organ-system",
+      "type": "prerequisite",
+      "basis": "explicit_source",
+      "rationale": "组织进一步形成器官、器官构成系统，人体结构层次建立在组织概念之上。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s2.body3",
+        "source.bio7a.sec.u1ch3s2.body4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.10",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch2s2.plant-cell-structure",
+      "toConceptId": "concept.bio7a.u2ch1s1.algae-moss-fern",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "植物类群的特征以其细胞与结构为基础；教材顺序为由细胞到植物体再到类群，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch2s2.body4",
+        "source.bio7a.sec.u2ch1s1.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.11",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch3s3.plant-tissues-organs",
+      "toConceptId": "concept.bio7a.u2ch1s2.seed-structure",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先讲植物体的组织与器官、后讲种子结构，但未声明先修；把六大器官作为种子结构的前置属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s3.obj1",
+        "source.bio7a.sec.u2ch1s2.body2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.12",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch3s1.cell-division-chromosome",
+      "toConceptId": "concept.bio7a.u1ch3s4.unicellular-life",
+      "type": "related",
+      "basis": "explicit_source",
+      "rationale": "单细胞生物以分裂方式繁殖，一个细胞完成全部生命活动，与细胞分裂知识相互关联。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s4.body1",
+        "source.bio7a.sec.u1ch3s1.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.13",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch1s1.algae-moss-fern",
+      "toConceptId": "concept.bio7a.u2ch1s1.plant-groups-human",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先讲三类孢子植物的特征、再讨论与人类生活的关系，但未声明先修；该顺序依赖属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch1s1.obj3",
+        "source.bio7a.sec.u2ch1s1.body2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.14",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch1s1.algae-moss-fern",
+      "toConceptId": "concept.bio7a.u2ch1s2.seed-structure",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材由孢子植物过渡到种子植物，但未声明“三类植物特征”是种子结构的先修；属教学编排推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch1s2.body2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.15",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch1s2.seed-structure",
+      "toConceptId": "concept.bio7a.u2ch1s2.gymnosperm-angiosperm",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先讲种子结构、再按有无果皮包被区分裸子/被子植物，但未声明先修；该顺序依赖属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch1s2.obj4",
+        "source.bio7a.sec.u2ch1s2.body4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.16",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch1s2.bio-features",
+      "toConceptId": "concept.bio7a.u2ch2s1.invertebrate-groups",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "先掌握生物共同特征，再进入动物类群的特征比较；教材顺序支持，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch1s2.obj2",
+        "source.bio7a.sec.u2ch2s1.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.17",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch2s1.invertebrate-groups",
+      "toConceptId": "concept.bio7a.u2ch2s2.fish-features",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先总述无脊椎动物、再讲脊椎动物中的鱼，但未声明先修；把类群区分作为鱼的学习前提属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s1.body3",
+        "source.bio7a.sec.u2ch2s2.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.18",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch2s2.fish-features",
+      "toConceptId": "concept.bio7a.u2ch2s3.amphibian-reptile",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "脊椎动物类群按鱼、两栖、爬行、鸟、哺乳顺序编排，教材未声明先修；把鱼的特征作为后续类群比较基础属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s2.body3",
+        "source.bio7a.sec.u2ch2s3.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.19",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch2s3.amphibian-reptile",
+      "toConceptId": "concept.bio7a.u2ch2s4.bird-features",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材按两栖动物、爬行动物、鸟和哺乳动物顺序编排，未声明先修；该顺序依赖属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s3.obj1",
+        "source.bio7a.sec.u2ch2s4.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.20",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch2s4.bird-features",
+      "toConceptId": "concept.bio7a.u2ch2s4.mammal-features",
+      "type": "related",
+      "basis": "explicit_source",
+      "rationale": "鸟和哺乳动物同属恒温脊椎动物，教材在同一节对比两者特征，属相关而非先后依赖。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s4.obj1",
+        "source.bio7a.sec.u2ch2s4.obj2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.21",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch3s1.microbe-groups",
+      "toConceptId": "concept.bio7a.u2ch3s2.bacteria",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先总述微生物类群与分布、再分述细菌/真菌/病毒，未声明先修；该顺序依赖属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s1.obj1",
+        "source.bio7a.sec.u2ch3s2.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.22",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch3s2.bacteria",
+      "toConceptId": "concept.bio7a.u2ch3s3.fungi",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "细菌与真菌相邻编排以便对比，教材未声明“先学细菌再学真菌”的先修依赖；属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s2.body2",
+        "source.bio7a.sec.u2ch3s3.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.23",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch3s3.fungi",
+      "toConceptId": "concept.bio7a.u2ch3s4.virus",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "微生物三类按细菌、真菌、病毒顺序编排，教材未声明先修；把前两类作为病毒对比基础属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s3.obj1",
+        "source.bio7a.sec.u2ch3s4.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.24",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u1ch3s4.unicellular-life",
+      "toConceptId": "concept.bio7a.u2ch3s1.microbe-groups",
+      "type": "related",
+      "basis": "explicit_source",
+      "rationale": "单细胞生物（草履虫、酵母菌等）与微生物类群互相参照，但分属不同章节，不作先修。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s4.obj1",
+        "source.bio7a.sec.u2ch3s1.body1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.25",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch1s2.gymnosperm-angiosperm",
+      "toConceptId": "concept.bio7a.u2ch4s1.classification-method",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "分类方法需要以植物、动物、微生物类群知识为素材；教材把分类放在类群之后，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch4s1.obj1",
+        "source.bio7a.sec.u2ch1s2.body2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.26",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch3s1.microbe-groups",
+      "toConceptId": "concept.bio7a.u2ch4s1.classification-method",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "分类活动会用到植物、动物、细菌、真菌等类群特征，先有类群知识再学分类方法，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch4s1.body1",
+        "source.bio7a.sec.u2ch3s1.body1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.full.27",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.u2ch4s1.classification-method",
+      "toConceptId": "concept.bio7a.u2ch4s2.classification-ranks-species",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "教材先讲分类依据与方法、再讲分类等级与物种，未声明先修；该顺序依赖属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch4s1.obj1",
+        "source.bio7a.sec.u2ch4s2.obj1"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.invertebrate-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch2s1.invertebrate-groups",
+      "toConceptId": "concept.bio7a.u2ch2s1.invertebrate-human",
+      "basis": "explicit_source",
+      "rationale": "无脊椎动物的类群知识与其与人类生活的关系在同一节呈现；关系概念是应用，不构成先修依赖。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s1.obj3"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.bacteria-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch3s2.bacteria",
+      "toConceptId": "concept.bio7a.u2ch3s2.bacteria-human",
+      "basis": "explicit_source",
+      "rationale": "细菌的结构与繁殖知识支撑对“细菌与人类关系”的理解，但教材同节并列呈现，不作先修。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s2.obj4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.fungi-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch3s3.fungi",
+      "toConceptId": "concept.bio7a.u2ch3s3.fungi-human",
+      "basis": "explicit_source",
+      "rationale": "真菌的结构与繁殖知识支撑对“真菌与人类关系”的理解，教材同节并列呈现，不作先修。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s3.obj4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.virus-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch3s4.virus",
+      "toConceptId": "concept.bio7a.u2ch3s4.virus-human",
+      "basis": "explicit_source",
+      "rationale": "病毒的结构与增殖知识支撑对“病毒与人类关系”的理解，教材同节并列呈现，不作先修。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch3s4.obj3"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.fish-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch2s2.fish-features",
+      "toConceptId": "concept.bio7a.u2ch2s2.fish-human",
+      "basis": "explicit_source",
+      "rationale": "鱼的主要特征与“鱼与人类生活”在同一节呈现，二者互相参照，不作先修。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s2.obj2"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.amphibian-reptile-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch2s3.amphibian-reptile",
+      "toConceptId": "concept.bio7a.u2ch2s3.amphibian-reptile-human",
+      "basis": "explicit_source",
+      "rationale": "两栖动物、爬行动物的特征与人类生活关系在同一节呈现，属并列的应用关系。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s3.obj3"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.bird-mammal-human",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u2ch2s4.bird-features",
+      "toConceptId": "concept.bio7a.u2ch2s4.bird-mammal-human",
+      "basis": "explicit_source",
+      "rationale": "鸟与哺乳动物的特征同“与人类生活的关系”在同一节呈现，属并列的应用关系。",
+      "sourceRefs": [
+        "source.bio7a.sec.u2ch2s4.obj4"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.unicellular-life",
+      "courseEditionId": "course.biology-7a",
+      "type": "related",
+      "fromConceptId": "concept.bio7a.u1ch3s4.unicellular-human",
+      "toConceptId": "concept.bio7a.u1ch3s4.unicellular-life",
+      "basis": "explicit_source",
+      "rationale": "单细胞生物的结构生活与“与人类生活”同节呈现；二者互相参照，不作先后依赖。",
+      "sourceRefs": [
+        "source.bio7a.sec.u1ch3s4.obj3"
+      ],
+      "reviewState": "machine_checked"
+    }
+  ]
+}

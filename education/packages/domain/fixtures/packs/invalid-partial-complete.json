@@ -1,0 +1,575 @@
+{
+  "schemaVersion": 1,
+  "id": "pack.biology-7a",
+  "version": "1.0.0",
+  "courseEditionId": "course.biology-7a",
+  "scope": "partial",
+  "coverageStatus": "complete",
+  "status": "published",
+  "contentHash": "3ad214f6333e325074a34daa3154048795aa90ac5bbe1d586a49ec6500d0aa8f",
+  "toc": [
+    {
+      "schemaVersion": 1,
+      "id": "toc.volume",
+      "courseEditionId": "course.biology-7a",
+      "parentId": null,
+      "type": "volume",
+      "title": "fixture volume",
+      "order": 0,
+      "sourceRefs": [
+        "source.p18"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.ch1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.volume",
+      "type": "chapter",
+      "title": "fixture chapter 1",
+      "order": 0,
+      "sourceRefs": [
+        "source.p18"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.ch2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.volume",
+      "type": "chapter",
+      "title": "fixture chapter 2",
+      "order": 1,
+      "sourceRefs": [
+        "source.p26"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.ch1.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.ch1",
+      "type": "section",
+      "title": "fixture section 1.1",
+      "order": 0,
+      "sourceRefs": [
+        "source.p18"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.ch1.s2",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.ch1",
+      "type": "section",
+      "title": "fixture section 1.2",
+      "order": 1,
+      "sourceRefs": [
+        "source.p19"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "toc.ch2.s1",
+      "courseEditionId": "course.biology-7a",
+      "parentId": "toc.ch2",
+      "type": "section",
+      "title": "fixture section 2.1",
+      "order": 0,
+      "sourceRefs": [
+        "source.p26"
+      ]
+    }
+  ],
+  "concepts": [
+    {
+      "schemaVersion": 1,
+      "id": "concept.cell",
+      "courseEditionId": "course.biology-7a",
+      "title": "细胞",
+      "aliases": [
+        "cell"
+      ],
+      "placements": [
+        "toc.ch1.s1",
+        "toc.ch2.s1"
+      ],
+      "learningObjectives": [
+        "能说明细胞是生物体结构和功能的基本单位"
+      ],
+      "explanation": "fixture explanation: 细胞是生物体结构和功能的基本单位。",
+      "misconceptions": [
+        {
+          "statement": "所有细胞都一样大",
+          "correction": "不同细胞形态大小不同",
+          "sourceRefs": [
+            "source.p18"
+          ]
+        }
+      ],
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "rubricIds": [
+        "rubric.cell"
+      ],
+      "activityIds": [
+        "activity.cell-recall",
+        "activity.cell-explain",
+        "activity.cell-label"
+      ],
+      "reviewState": "published"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.cell-structure",
+      "courseEditionId": "course.biology-7a",
+      "title": "细胞结构",
+      "aliases": [],
+      "placements": [
+        "toc.ch2.s1"
+      ],
+      "learningObjectives": [
+        "能指出细胞核等结构的位置"
+      ],
+      "explanation": "fixture explanation: 细胞由细胞膜、细胞质、细胞核等结构组成。",
+      "misconceptions": [],
+      "sourceRefs": [
+        "source.p26"
+      ],
+      "rubricIds": [
+        "rubric.cell"
+      ],
+      "activityIds": [
+        "activity.cell-label"
+      ],
+      "reviewState": "published"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "concept.cell-division",
+      "courseEditionId": "course.biology-7a",
+      "title": "细胞分裂",
+      "aliases": [],
+      "placements": [
+        "toc.ch1.s2"
+      ],
+      "learningObjectives": [
+        "能描述细胞分裂使细胞数目增多"
+      ],
+      "explanation": "fixture explanation: 细胞分裂使细胞数目增多。",
+      "misconceptions": [],
+      "sourceRefs": [
+        "source.p19",
+        "source.p20"
+      ],
+      "rubricIds": [
+        "rubric.cell"
+      ],
+      "activityIds": [
+        "activity.cell-relation"
+      ],
+      "reviewState": "published"
+    }
+  ],
+  "relations": [
+    {
+      "schemaVersion": 1,
+      "id": "relation.prereq.cell-structure",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.cell",
+      "toConceptId": "concept.cell-structure",
+      "type": "prerequisite",
+      "basis": "explicit_source",
+      "rationale": "理解细胞结构前先认识细胞（fixture）",
+      "sourceRefs": [
+        "source.p19"
+      ],
+      "reviewState": "published"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.prereq.division",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.cell-structure",
+      "toConceptId": "concept.cell-division",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "fixture pedagogical inference, not a textbook dependency claim",
+      "sourceRefs": [],
+      "reviewState": "published"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.related.cell-division",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.cell",
+      "toConceptId": "concept.cell-division",
+      "type": "related",
+      "basis": "explicit_source",
+      "rationale": "fixture related association",
+      "sourceRefs": [
+        "source.p20"
+      ],
+      "reviewState": "published"
+    }
+  ],
+  "activities": [
+    {
+      "schemaVersion": 1,
+      "id": "activity.cell-recall",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell"
+      ],
+      "type": "recall",
+      "stem": "fixture recall: 细胞是什么？",
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 500
+      },
+      "rubricId": "rubric.cell",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.cell-explain",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell"
+      ],
+      "type": "explain",
+      "stem": "fixture explain: 用自己的话说明细胞为什么是基本单位。",
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 2000
+      },
+      "rubricId": "rubric.cell",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.cell-label",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell",
+        "concept.cell-structure"
+      ],
+      "type": "diagram_label",
+      "stem": "fixture diagram: 在图中标出细胞核。",
+      "sourceRefs": [
+        "source.p26"
+      ],
+      "renderSpec": {
+        "schemaVersion": 1,
+        "nodes": [
+          {
+            "id": "node.cell",
+            "label": "细胞",
+            "kind": "structure"
+          },
+          {
+            "id": "node.nucleus",
+            "label": "细胞核",
+            "kind": "structure"
+          }
+        ],
+        "edges": [],
+        "labels": [],
+        "regions": [
+          {
+            "id": "region.nucleus",
+            "assetId": "asset.figure.cell",
+            "bbox": {
+              "x": 0.2,
+              "y": 0.2,
+              "width": 0.3,
+              "height": 0.3
+            },
+            "altText": "细胞核所在的区域"
+          }
+        ],
+        "altText": "fixture cell structure diagram with a highlighted nucleus region",
+        "sourceRefs": [
+          "source.p26"
+        ]
+      },
+      "answerSchema": {
+        "kind": "diagram_label",
+        "targets": [
+          {
+            "id": "target.nucleus",
+            "label": "细胞核"
+          }
+        ]
+      },
+      "rubricId": "rubric.cell",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.cell-transfer",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell"
+      ],
+      "type": "transfer",
+      "stem": "fixture transfer: 举例说明不同细胞形态不同。",
+      "sourceRefs": [
+        "source.p20"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "text",
+        "maxLength": 2000
+      },
+      "rubricId": "rubric.cell",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.cell-relation",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell-division"
+      ],
+      "type": "relation",
+      "stem": "fixture relation: 连接细胞、细胞结构与细胞分裂。",
+      "sourceRefs": [
+        "source.p19"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "relation",
+        "pairs": [
+          {
+            "fromId": "concept.cell",
+            "toId": "concept.cell-structure"
+          },
+          {
+            "fromId": "concept.cell-structure",
+            "toId": "concept.cell-division"
+          }
+        ]
+      },
+      "rubricId": "rubric.cell",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "activity.cell-choice",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell"
+      ],
+      "type": "choice",
+      "stem": "fixture choice: 下列哪一项是细胞的基本结构？",
+      "sourceRefs": [
+        "source.p18"
+      ],
+      "renderSpec": null,
+      "answerSchema": {
+        "kind": "choice",
+        "selection": "single",
+        "options": [
+          {
+            "id": "option.a",
+            "label": "细胞核"
+          },
+          {
+            "id": "option.b",
+            "label": "书本"
+          }
+        ],
+        "correctOptionIds": null
+      },
+      "rubricId": "rubric.cell",
+      "rubricVersion": "1",
+      "answerDisclosurePolicy": "after_independent_attempt"
+    }
+  ],
+  "rubrics": [
+    {
+      "schemaVersion": 1,
+      "id": "rubric.cell",
+      "version": "1",
+      "courseEditionId": "course.biology-7a",
+      "conceptIds": [
+        "concept.cell",
+        "concept.cell-structure",
+        "concept.cell-division"
+      ],
+      "criteria": [
+        {
+          "criterionId": "criterion.cell.identify",
+          "description": "能说明细胞是生物体结构和功能的基本单位",
+          "acceptableEvidence": [
+            "用自己的话解释细胞的作用"
+          ],
+          "commonMisconceptions": [
+            "把所有细胞都当成同样大小"
+          ],
+          "counterExamples": [
+            "认为细胞不是生物体的组成部分"
+          ],
+          "transferItems": [
+            "举例说明不同细胞形态不同"
+          ],
+          "feedbackSourceRefs": [
+            "source.p18"
+          ]
+        }
+      ],
+      "reviewState": "published"
+    }
+  ],
+  "coverageManifest": {
+    "schemaVersion": 1,
+    "courseEditionId": "course.biology-7a",
+    "generatedAt": "2026-10-01T00:00:00Z",
+    "targetTocNodeIds": [
+      "toc.ch1.s1",
+      "toc.ch1.s2",
+      "toc.ch2.s1"
+    ],
+    "sections": [
+      {
+        "tocNodeId": "toc.ch1.s1",
+        "sourceRefs": [
+          "source.p18"
+        ],
+        "conceptIds": [
+          "concept.cell"
+        ],
+        "status": "covered",
+        "notes": null
+      },
+      {
+        "tocNodeId": "toc.ch1.s2",
+        "sourceRefs": [
+          "source.p19"
+        ],
+        "conceptIds": [
+          "concept.cell-division"
+        ],
+        "status": "covered",
+        "notes": null
+      },
+      {
+        "tocNodeId": "toc.ch2.s1",
+        "sourceRefs": [
+          "source.p26"
+        ],
+        "conceptIds": [
+          "concept.cell",
+          "concept.cell-structure"
+        ],
+        "status": "covered",
+        "notes": null
+      }
+    ],
+    "exclusions": [
+      {
+        "item": "fixture textbook images",
+        "reason": "fixtures never include real textbook images or text",
+        "sourceRefs": []
+      }
+    ],
+    "totals": {
+      "targetSections": 3,
+      "coveredSections": 3,
+      "conceptCount": 3
+    }
+  },
+  "reviewLedger": [
+    {
+      "schemaVersion": 1,
+      "id": "ledger.pack",
+      "entityKind": "content_pack",
+      "entityId": "pack.biology-7a",
+      "from": "curator_checked",
+      "to": "published",
+      "actorKind": "human_curator",
+      "actorLabel": "fixture reviewer (not a real expert)",
+      "checkedAt": "2026-10-02T09:00:00Z",
+      "scope": "fixture scope review",
+      "notes": null,
+      "evidenceRefs": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.concept.cell",
+      "entityKind": "concept",
+      "entityId": "concept.cell",
+      "from": "machine_checked",
+      "to": "published",
+      "actorKind": "human_curator",
+      "actorLabel": "fixture reviewer (not a real expert)",
+      "checkedAt": "2026-10-02T09:00:00Z",
+      "scope": "fixture concept review",
+      "notes": null,
+      "evidenceRefs": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.concept.structure",
+      "entityKind": "concept",
+      "entityId": "concept.cell-structure",
+      "from": "machine_checked",
+      "to": "published",
+      "actorKind": "human_curator",
+      "actorLabel": "fixture reviewer (not a real expert)",
+      "checkedAt": "2026-10-02T09:00:00Z",
+      "scope": "fixture concept review",
+      "notes": null,
+      "evidenceRefs": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.concept.division",
+      "entityKind": "concept",
+      "entityId": "concept.cell-division",
+      "from": "machine_checked",
+      "to": "published",
+      "actorKind": "human_curator",
+      "actorLabel": "fixture reviewer (not a real expert)",
+      "checkedAt": "2026-10-02T09:00:00Z",
+      "scope": "fixture concept review",
+      "notes": null,
+      "evidenceRefs": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "ledger.rubric.cell",
+      "entityKind": "rubric",
+      "entityId": "rubric.cell",
+      "from": "machine_checked",
+      "to": "published",
+      "actorKind": "human_curator",
+      "actorLabel": "fixture reviewer (not a real expert)",
+      "checkedAt": "2026-10-02T09:00:00Z",
+      "scope": "fixture rubric review",
+      "notes": null,
+      "evidenceRefs": []
+    }
+  ]
+}

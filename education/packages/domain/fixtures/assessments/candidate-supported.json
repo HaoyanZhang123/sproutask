@@ -1,0 +1,40 @@
+{
+  "assessment": {
+    "schemaVersion": 1,
+    "id": "assessment.cell.supported",
+    "attemptId": "attempt.cell.explain",
+    "conceptId": "concept.cell",
+    "learnerId": "learner.local.default",
+    "courseEditionId": "course.biology-7a",
+    "packVersion": "1.0.0",
+    "state": "supported",
+    "rationale": "fixture rationale: explanation plus transfer evidence",
+    "evidenceIds": [
+      "evidence.cell.explain",
+      "evidence.cell.transfer"
+    ],
+    "rubricVersion": "1",
+    "evaluatorVersion": "rule-v1",
+    "assessedAt": "2026-10-29T08:20:00Z",
+    "validity": "current",
+    "revision": 1
+  },
+  "session": {
+    "schemaVersion": 1,
+    "id": "session.cell.1",
+    "learnerId": "learner.local.default",
+    "courseEditionId": "course.biology-7a",
+    "packVersion": "1.0.0",
+    "trustMode": "candidate",
+    "conceptId": "concept.cell",
+    "mode": "learn",
+    "status": "active",
+    "startedAt": "2026-10-29T08:00:00Z",
+    "endedAt": null,
+    "resumeCursor": {
+      "activityId": "activity.cell-recall",
+      "cursor": "step-1"
+    },
+    "dshSessionId": null
+  }
+}

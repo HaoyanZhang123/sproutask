@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "course.biology-7a",
+  "subject": "biology",
+  "grade": 7,
+  "term": 1,
+  "publisher": "fixture publisher (not a verified real edition)",
+  "editionLabel": "2024 grade 7 volume 1 fixture",
+  "sourceIdentity": {
+    "verifiedFrom": "cover",
+    "notes": "synthetic fixture; real textbook evidence required by T05/T14",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "status": "verified"
+}

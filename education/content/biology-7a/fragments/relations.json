@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "note": "关系不按目录顺序批量生成。只有教材文字直接支持的方法依赖标 explicit_source；方法教学上的先后推断标 pedagogical_inference 并写 rationale；associative 连接用 related。先修无环，related 端点已排序。",
+  "relations": [
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.meaning-purpose",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.meaning",
+      "toConceptId": "concept.bio7a.observation.purpose-object",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "理解观察的含义有助于设计有目的的观察，但教材并未把“含义”写成“目的与对象”的先修条件；此依赖为教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c1.not-casual",
+        "source.bio7a.c1.purpose-plan",
+        "source.bio7a.c2.purpose"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.purpose-order",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.purpose-object",
+      "toConceptId": "concept.bio7a.observation.order-record",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "先明确目的和对象能让记录更有针对性，这是教学上的合理顺序；教材没有声明目的与对象是记录的先修条件，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c2.object",
+        "source.bio7a.c3.order",
+        "source.bio7a.c3.record"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.order-variation",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.order-record",
+      "toConceptId": "concept.bio7a.observation.variation",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "讨论“不同同学结果为何不同”需要先有可对照的记录与观察顺序；教材未明说这条依赖，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c3.record",
+        "source.bio7a.c4.different"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.meaning-tools",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.meaning",
+      "toConceptId": "concept.bio7a.observation.tools",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "选择什么工具取决于对观察任务与目的的理解；教材把工具列在“科学方法”中，没有声明先修关系，此边为方法教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c5.tools"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.meaning-question",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.meaning",
+      "toConceptId": "concept.bio7a.observation.to-question",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "提出问题通常产生于观察活动之中；教材把“积极思考、发现问题”作为观察要求提出，但未声明“先懂含义再能提问”的先修关系，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c7.think",
+        "source.bio7a.c7.raise"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.purpose-comparison",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.purpose-object",
+      "toConceptId": "concept.bio7a.observation.comparison",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "比较需要先明确对象与比较内容，这是方法上的合理顺序；教材未声明先修依赖，属教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c2.purpose-examples",
+        "source.bio7a.c8.compare-purpose"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.prereq.purpose-safety",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.purpose-object",
+      "toConceptId": "concept.bio7a.observation.safety-ethics",
+      "type": "prerequisite",
+      "basis": "pedagogical_inference",
+      "rationale": "先明确观察对象与方式，才谈得上如何不破坏植物、不惊扰动物；教材把安全与保护写在观察方法内部，未声明先修，此为教学推断。",
+      "sourceRefs": [
+        "source.bio7a.c6.protect-plant",
+        "source.bio7a.c6.protect-bird"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.order-tools",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.order-record",
+      "toConceptId": "concept.bio7a.observation.tools",
+      "type": "related",
+      "basis": "explicit_source",
+      "rationale": "工具与记录同属观察方法要点：教材在同一条方法要求中把“借助工具/设备”“测量”与“按顺序、做好记录”并列，使用工具常改变记录方式。",
+      "sourceRefs": [
+        "source.bio7a.c5.tools",
+        "source.bio7a.c3.record"
+      ],
+      "reviewState": "machine_checked"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "relation.bio7a.related.question-variation",
+      "courseEditionId": "course.biology-7a",
+      "fromConceptId": "concept.bio7a.observation.to-question",
+      "toConceptId": "concept.bio7a.observation.variation",
+      "type": "related",
+      "basis": "explicit_source",
+      "rationale": "教材同一页的讨论题既问“不同同学的观察结果为何不同”，也要求“进一步观察如何进行”，差异常直接引出新问题，两者互相关联而非先后依赖。",
+      "sourceRefs": [
+        "source.bio7a.c4.different",
+        "source.bio7a.c7.raise"
+      ],
+      "reviewState": "machine_checked"
+    }
+  ]
+}
