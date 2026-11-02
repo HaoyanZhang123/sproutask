@@ -721,3 +721,28 @@ W0：T00 与 T01 并行 → 主控复核 T01.domainReady 并接受后，派 T02/
 | **v6 冒烟（F-03 闭合）** | 安装 v6（34,495 文件）→ 经 launcher.cmd 启动 **1.70 s** → token 303 / status **200** → ixtureData=false、pack 2.0.0、43 概念、uth=unavailable（无 Key）；证据 education/.local/evidence/T16/v6-smoke/v6-smoke.json |
 
 > **阅读提示（2026-10-30 07:4x）**：本文件 §9–§11 为早期调度记录，部分结论已被后续证据推翻；**以 §12（用户拍板后执行，含 v6 冒烟）与 §13/§14（审计修正）为准**。冲突点：A20 声明、L5 近似、v5 冒烟、安装包 hash 均以 §14 为准。
+
+---
+
+## 15. 收尾（2026-11-02）
+
+### 15.1 已发布
+- **v0.3.0 已发布到 GitHub（原仓库）**：`main` = `6ad2257`（合并了 DSH 教育线）、分支 `education-v0.3.0` = `52ba6ab`（单提交快照）、tag `v0.3.0`、Release：https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.0（exe `0fc5df18…`、zip `6a0852cd…`）。
+- 公开面内容：双语 `README.md`/`README.zh.md`（用户提供封面 + "设计示意图，非产品截图"）、`LICENSE`(MIT)、`docs/releases/v0.3.0.md`（中英两段）。
+- 安全性：推送前经真实 Key 精确匹配 0 命中、禁止路径 0 命中；历史级扫描无个人邮箱/本机路径（旧引用已删除重建）。
+- **未上传**：研习材料、问卷 docx、`education/.local/**`、教材 PDF 原文、旧 Electron `src/`（保留在内部仓库）。
+
+### 15.2 工作区清理（本次）
+- 删除可重建/临时产物 **416.4 MB**：`education/dist/student`（389.6 MB 打包中间层）、`.local/publish/{clean,merge-main,note7}` 临时克隆（26.8 MB）、`nsis-test`。
+- 保留：`education/dist/release-0.3.0/`（发布资产 174.1 MB）、`education/dist/SproutAsk-Setup-x64.exe`、`.local/publish/v0.3.0`（发布快照导出源）、`.local/evidence/**`（全部证据）、`.local/secrets/`（本机密钥，已 gitignore）。
+
+### 15.3 最终状态（不得改写为"全部通过"）
+- 门：**G1=PARTIAL · G2=FAIL/PARTIAL · G3=PARTIAL**；`finalAccepted` 不可达。
+- 已知缺口（均在 README/发布说明中公开）：未签名；图义视觉仅抽样 8/73（余 65 未核）；版次/印次/定价未核；无干净机 L5；图片真机未验；DSH 无回合取消接口；**学习效果实验未做**。
+- 真实模型调用累计 **193/194**（≈¥0.6 / ¥10 上限），后续不再发起，除非用户新增预算。
+
+### 15.4 恢复入口
+- 安装包：`education/dist/release-0.3.0/SproutAsk-Setup-0.3.0-x64.exe`
+- 证据与报告：`docs/rebuild/reports/`（T17-v2、FINAL-UPDATE-3、RELEASE-v0.3.0-FINAL 等）
+- 内容包：`education/content/biology-7a/`（published，43 概念）
+- 下一步优先级建议：① 图义余 65 条人眼核对；② 干净机 5 分钟自检；③ 图片真机（JPEG/拍照）；④ 代码签名（用户已决定不买）。

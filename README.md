@@ -1,114 +1,84 @@
 <p align="center">
-  <img src="docs/images/cover.png" alt="SproutAsk cover: an abstract leaf mark next to the SproutAsk and 芽问 wordmarks on a dark background" width="100%">
+  <img src="docs/images/cover.png" alt="SproutAsk cover: dark banner with the 芽问 / SproutAsk wordmarks and a stylized 观察 → 推理 → 理解 panel" width="100%">
 </p>
+<p align="center"><sub>Design illustration — not a product screenshot.</sub></p>
 
-<h1 align="center">SproutAsk</h1>
-<p align="center">A local-first biology study agent for lower-secondary students, built on the DeepSeek Harness kernel.</p>
+<h1 align="center">SproutAsk · 芽问</h1>
+<p align="center">A local-first biology learning agent built on the DSH runtime.</p>
 <p align="center"><a href="README.zh.md">中文</a></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img src="https://img.shields.io/badge/DSH-0.2.1--rc.3-3B5BDB?style=flat-square" alt="DSH 0.2.1-rc.3"></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="TypeScript"></a>
-  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-%E2%89%A524-5FA04E?style=flat-square&amp;logo=nodedotjs&amp;logoColor=white" alt="Node.js 24 or newer"></a>
-  <a href="https://learn.microsoft.com/windows/"><img src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4?style=flat-square" alt="Windows 10 or 11, x64"></a>
-  <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-11.21.0-F69220?style=flat-square&amp;logo=pnpm&amp;logoColor=white" alt="pnpm 11.21.0"></a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness"><img alt="DSH" src="https://img.shields.io/badge/runtime-DSH%200.2.1--rc.3-1f6feb"></a>
+  <a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-3178c6"></a>
+  <a href="https://nodejs.org/"><img alt="Node.js" src="https://img.shields.io/badge/Node.js-24-3c873a"></a>
+  <a href="https://pnpm.io/"><img alt="pnpm" src="https://img.shields.io/badge/pnpm-11-f69220"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-2ea44f"></a>
 </p>
 
 ## Overview
 
-SproutAsk (芽问) turns one textbook volume into a guided study loop: read a section in the library, follow the concept map, work through a concept in the workspace, answer, and get feedback that points back to the exact page it came from. It is built for students studying *Biology, Grade 7, Volume 1* (People's Education Press, 2024 edition) on their own Windows computer.
+SproutAsk is a study workspace for one student on one Windows PC. It pairs a real DSH agent session with a verified content pack for 人教版 2024 七年级上册生物学 (PEP Grade 7, Volume 1): the learner reads a concept, answers, receives explanation or correction with textbook citations, and keeps a local record of what was understood.
 
-Learning records live on the student's machine. The single cloud dependency is the DeepSeek API for inference; without a key the application still opens and works as a local reader for the library, the map and past records.
-
-v0.3.0 is the **DSH education rebuild line**: the application now runs on the real DeepSeek Harness kernel as a local background service plus an application window, and no longer ships an Electron shell. The earlier Electron 0.2.x line is not the product of this line.
+Two things matter more than feature count here — **the tutor runs on a real DSH runtime rather than a look-alike chat**, and **learning judgements rest on recorded evidence rather than on message counts**. Every explanation is bound to a source page in the textbook the student imported.
 
 ## Features
 
-- **One full volume, curated and published.** 1 volume / 2 units / 7 chapters / 22 sections / 43 concepts / 88 activities / 43 rubrics / 44 relations, with 193 distinct textbook source anchors (281 reference entries). The content pack is `status=published` after a human curator pass.
-- **Answers carry page anchors.** Feedback references the textbook location as both PDF page and printed page, so a student can find the sentence on paper.
-- **Three-axis learning state.** Concept-level state moves through the study flow, and review is recorded with `finish-review` rather than inferred from page visits.
-- **Misconceptions are handled explicitly.** A missed concept surfaces the specific misconception, its correction, and the source it rests on.
-- **Hints are labelled honestly.** After a hint, an answer is marked as `assisted` and is not counted as independent evidence.
-- **Photo answers are gated before inference.** Blurred, rotated and blank images are rejected with a clarification request before any model call; accepted images score idempotently.
-- **Records stay local and survive a crash.** Learning data is written as JSONL under the local data directory, with a journal that self-heals from a stale lock and degrades safely on half-written lines.
-- **The API key never leaves the machine.** It is entered in the app, encrypted with Windows DPAPI, never echoed back to the client, and applied after a restart.
-- **No administrator rights, no Electron.** Installed per user, started as a local service with an application window.
+- **Concept map separated from the table of contents.** The directory tree and the prerequisite/related graph are different views; prerequisite edges carry a basis and are never derived from chapter order.
+- **Three independent axes.** Learning progress, understanding evidence and review activity are stored and shown separately; self-report is kept apart and never written into a judgement.
+- **Guided first, explicit when needed.** The tutor asks, hints and demonstrates, but may also explain, show a worked example, or state the answer — and marks answers it disclosed, so evidence stays honest.
+- **Answers with citations.** Explanatory turns carry source id plus PDF page and printed page; the textbook text itself stays on the local machine.
+- **Image answers behind a pre-model quality gate.** Blurry, tilted or blank photos are sent back for clarification before any model call; a graded image is persisted once, and repeated submissions do not re-grade.
+- **Recoverable local journal.** Append-only event log with snapshots, crash recovery, stale-lock self-healing, export and confirmed deletion.
 
 ## Installation
 
-**Requirements:** Windows 10 or 11, x64.
+Download from [Releases](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.0):
 
-v0.3.0 is distributed as two Windows artifacts. They are build outputs and are not stored in this Git repository; obtain them from the maintainer or from the Releases page, and verify the hash before running.
+- `SproutAsk-Setup-0.3.0-x64.exe` — per-user installer, **no administrator rights**, installs to `%LOCALAPPDATA%\SproutAsk\current`
+- `SproutAsk-0.3.0-x64-portable.zip` — unpack anywhere and run `launcher.cmd`
 
-| Artifact | Size | SHA-256 |
-|---|---:|---|
-| `SproutAsk-Setup-0.3.0-x64.exe` (one-click installer) | 56.7 MB | `0fc5df1828265d0ed74e20f89cc7ddc0d3c55f5ac83e6de3df39a2e042d9c014` |
-| `SproutAsk-0.3.0-x64-portable.zip` (portable) | 117.4 MB | `6a0852cd186e27db861d1fc80cdc9c19800e76ce186fbf750397ec9df9bfaa7b` |
-
-1. Run the installer. It installs per user into `%LOCALAPPDATA%\SproutAsk\current` and does not need administrator rights.
-2. The binaries are **not code-signed**, so Windows SmartScreen will show an "unknown publisher" prompt. No signing certificate has been purchased.
-3. Verify before running:
-
-```powershell
-Get-FileHash .\SproutAsk-Setup-0.3.0-x64.exe -Algorithm SHA256
-# expect 0FC5DF1828265D0ED74E20F89CC7DDC0D3C55F5AC83E6DE3DF39A2E042D9C014
-```
-
-**From source (development):** Node.js 24 or newer and pnpm 11.21.0.
-
-```powershell
-cd education
-pnpm install
-pnpm typecheck
-pnpm test
-pnpm dev          # builds, prints a loopback URL, stays in the foreground
-```
-
-`pnpm dev` runs against an isolated profile under `education/.local/`; it does not touch an existing harness installation. The development runtime reads its API key from `education/.local/secrets/deepseek.key`, a local-only file that is not in this repository.
+The installer is **not code-signed**, so Windows shows an "unknown publisher" prompt. `SHA256SUMS.txt` is included for verification.
 
 ## Usage
 
-1. Start **SproutAsk** from the Start menu. On first launch the local data directory `%LOCALAPPDATA%\SproutAsk\data` is created.
-2. Open `/account`, paste a DeepSeek API key, save. The key is encrypted locally and is not displayed again. **Restart the application** for it to take effect.
-3. Choose a section in `/library`, or open `/map` to move by concept instead of by page order.
-4. In `/workspace`, answer a concept. Feedback names the misconception when the answer misses, and shows the textbook page.
-5. Use `/records` to revisit what has been studied and to finish a review.
-6. Without a key the app stays in local mode: the library, the map and past records work, cloud inference does not.
+1. Start **SproutAsk** from the Start menu or the desktop shortcut.
+2. Open `/account` and paste a DeepSeek API key. It is encrypted locally and never shown again. **Restart the app** — the key is loaded at process start by design.
+3. Import your own copy of the textbook PDF, then pick a concept from the library or the map and start learning.
+4. Without a key the app stays in local mode: materials, map and records are readable, cloud reasoning is explicitly unavailable.
 
 ## Configuration
 
-| Setting | Where | Notes |
-|---|---|---|
-| DeepSeek API key | In-app `/account` page | Encrypted with Windows DPAPI, stored on the local machine, never echoed to the client. Requires an application restart. |
-| Learning data | `%LOCALAPPDATA%\SproutAsk\data` | JSONL records plus review and journal state. Created on first launch. |
-| Installation | `%LOCALAPPDATA%\SproutAsk\current` | Per-user; uninstall keeps learning data unless you choose to delete it. |
-| Data root override | Environment variable `SPROUTASK_DATA_ROOT` | Advanced: relocates the data root, used for isolated test profiles. |
-| Development key | `education/.local/secrets/deepseek.key` | Development runtime only. Local file, never committed. |
+| Item | Value |
+|---|---|
+| Model | DeepSeek official API, `deepseek-flash`; API key only (account sign-in is not offered) |
+| Key storage | `%LOCALAPPDATA%\SproutAsk\data\secrets\model-key.dat`, DPAPI-encrypted, host side only |
+| Learning data | `%LOCALAPPDATA%\SproutAsk\data` (journal, snapshots, imported materials) |
+| Network | loopback only; the local service never binds a public interface |
+
+## Project Structure
+
+```
+education/packages/   domain, storage, importer, knowledge, learner, tutor, visuals
+education/client/     framework-free DOM UI: shell, library, map, study, visuals
+education/runtime/    DSH host/client plugins, adapters, composition, launchers
+education/content/    biology-7a pack: concepts, activities, rubrics, relations, sources
+education/licenses/   third-party notices, incl. libvips LGPL-3.0 obligations
+```
 
 ## Releases
 
-The current release is **v0.3.0 — DSH education rebuild**. Release notes: [docs/releases/v0.3.0.md](docs/releases/v0.3.0.md).
+See [v0.3.0 release notes](docs/releases/v0.3.0.md). `main` still carries the earlier Electron 0.2.x line; this DSH rebuild ships on branch `education-v0.3.0`.
 
-### Known limitations in v0.3.0
+## Current status and limits
 
-These are stated because they are real and unresolved, not as a formality:
+This is a **frozen engineering build with known gaps**, not a finished student product.
 
-1. **Not code-signed.** SmartScreen warns about an unknown publisher.
-2. **Figure meaning was only sampled.** Visual verification of figure captions covers **8 of 73** figures (7 consistent, 1 undecidable); the remaining 65 were not checked. That judgement came from a vision model in-session, not from a human sign-off.
-3. **Edition, printing, price and trim size were not verified.** The OCR pass did not read the copyright-page fine print. Known facts are the ISBN-13 `978-7-107-38263-5` and the publisher, People's Education Press.
-4. **No clean-machine validation.** A close approximation (no development PATH, isolated data root) passed, but there is no second Windows machine.
-5. **No UI visual walkthrough.** Interface behaviour has offline assertions, but no real browser or device screenshots exist.
-6. **Photo capture was not tested on a real phone.** JPEG from a phone, canvas compression, and the retry-after-clarification path are unverified.
-7. **No learning-outcome experiment.** This release does not claim improved understanding or improved grades.
-8. **The harness has no turn-cancellation interface.** On budget overrun the app stops waiting, but the abandoned model turn keeps running in the background.
-9. **Gate status, stated plainly:** G1 = PARTIAL, G2 = FAIL/PARTIAL, G3 = PARTIAL, and the top-level `finalAccepted` gate is **not reachable**.
-
-### Not included in this release
-
-Teacher-facing features, class aggregation, multi-device sync, auto-update, telemetry, public network exposure, and any promise of equal quality for other textbooks.
+- Gate status: G1 (first-section loop) PARTIAL · G2 (full volume and teaching) FAIL/PARTIAL · G3 (Windows artifact) PARTIAL · final acceptance **not reached**.
+- Figure captions were visually checked only by sampling **8 of 73** (7 consistent, 1 undecidable); the remaining 65 await human review.
+- Edition, printing run, price and ISBN-line fields are `unverified` in the content pack; ISBN-13 `978-7-107-38263-5` was read from the back cover.
+- No clean-machine verification, no code signature, no learning-effect study — no claim of improved understanding or grades is made.
+- The UI has DOM-level assertions but no browser visual review; image answers were not tested with real phone photos.
 
 ## License
 
-**MIT.** SproutAsk is released under the MIT License. The full text is in [`LICENSE`](LICENSE) at the repository root: MIT License, Copyright (c) 2026 HaoyanZhang123. `education/package.json` declares `"license": "MIT"`.
-
-Third-party dependencies keep their own licenses; the license texts bundled with the app are under `education/licenses/texts/`.
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 HaoyanZhang123.
