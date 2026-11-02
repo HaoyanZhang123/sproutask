@@ -812,3 +812,35 @@ W0：T00 与 T01 并行 → 主控复核 T01.domainReady 并接受后，派 T02/
 - **验证**：`typecheck` 0、`test` 全绿；截图 `.../screens-final4/`、`.../screens-final5/`。
 - **交付**：[手动实测指南](optimize/04-manual-test.md)（启动命令、9 步走查清单、免费/花钱边界、已知问题）。
 - **待用户实测**：通过后打包 v0.3.1。
+
+---
+
+## 17. v0.3.1 已发布（2026-11-03 01:00）
+
+### 17.1 发布事实
+
+| 项 | 值 |
+|---|---|
+| Tag | `v0.3.1`（annotated，指向快照提交 `f5d0f9d`） |
+| 分支 | `education-v0.3.1`（单提交快照，698 文件） |
+| Release | https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.1（Latest） |
+| 安装包 | `SproutAsk-Setup-0.3.1-x64.exe` 59,419,876 B，SHA-256 `61f3abbb75aacebca41b005532da9e2288a90521ceb802f659af9f52afcc5ee1` |
+| 便携包 | `SproutAsk-0.3.1-x64-portable.zip` 123,121,516 B，SHA-256 `6f651b479e5638bea5303d69487b194a99b9847815e1abefe78cabbbc7c73782` |
+| 校验文件 | `SHA256SUMS-v0.3.1.txt`（Release 附件，195 B） |
+| 发布说明 | `docs/releases/v0.3.1.md`（中英两段，随分支上公开） |
+
+远端资产 digest 与本地 sha256 **逐字节一致**（`gh api releases/tags/v0.3.1` 核对）。
+
+### 17.2 打包与验证
+
+- payload：`version.txt` = `version=0.3.1`、`dsh=0.2.1-rc.3`、`content=biology-7a@2.0.0`、`sharpIncluded=true (--keep-sharp)`；构建时工作树干净（commit `7b58041`）。
+- **产物冒烟（不是源码）**：用 `SPROUTASK_DATA_ROOT` 指向临时目录运行打包后的 `launcher.cmd`——首次建 profile 成功、token 交换 303、`/edu/api/status` **200**、`fixtureData=false`、`trustMode=published`、43 概念、6 个教育工具、DSH 已绑定；无 Key 时 `auth=unavailable`、图像能力关闭（预期）。证据：`education/.local/evidence/v031-smoke-launch.log`。
+- 质量门（发布前）：`typecheck` 0、`test` 全部包 0。
+- 导出白名单：698 文件；无 `.env` / PDF / docx / node_modules / `.local`；无密钥命中、无本机路径命中（导出树扫描）。
+
+### 17.3 未做/待决
+
+- **安装包静默安装冒烟本轮未重跑**（v0.3.0 时做过；本轮只验证了 payload 启动）。要完全对齐旧口径，可在干净目录跑一次安装→启动→卸载。
+- **`main` 未合并**：公开仓库默认分支仍停在 v0.3.0 的快照内容；v0.3.1 在 `education-v0.3.1` 分支。合并/替换 main 属于改写默认分支历史，需要另行授权。
+- 未签名（用户已决定不买证书）。
+- 本机残留：`education/dist/student`（payload 中间层）、`education/dist/SproutAsk-Setup-x64.exe`（未改名的同版本产物）可后续清理；`.local/evidence/v031-smoke*` 为本次冒烟数据（均已 gitignore）。
