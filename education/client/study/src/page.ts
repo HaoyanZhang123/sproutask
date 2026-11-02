@@ -48,7 +48,7 @@ export function createStudyPage(controller: StudyController): EducationPage {
           h(
             'p',
             { class: 'edu-page__lead' },
-            '材料在左，当前活动在中，学习助手与反馈在右；顶部保留教材、内容包、概念、模式、保存状态与返回位置。',
+            '先读左边的材料，再自己作答；卡住了可以看右边的提示。',
           ),
         ),
         grid,

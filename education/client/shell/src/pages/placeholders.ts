@@ -3,7 +3,6 @@
 import type { EducationPage, EducationPageContext } from '../contracts.js';
 import { h } from '../dom.js';
 import { button } from '../components/button.js';
-import { renderContextBar } from '../components/context-bar.js';
 import { emptyState } from '../components/states.js';
 import { statusChip } from '../components/status-chip.js';
 import { courseEditionLabel } from '../labels.js';
@@ -18,22 +17,9 @@ export function createLibraryFallbackPage(): EducationPage {
     fallback: true,
     mount(container, context: EducationPageContext) {
       const api = context.services.shell;
-      const state = context.services.getState();
-      const snapshot = state.snapshot;
-      container.append(pageHeading('教材库', '选择匹配教材，查看版本、材料可用性、出处与审校状态。'));
+      const snapshot = context.services.getState().snapshot;
+      container.append(pageHeading('教材库', '确认你用的是哪本教材、哪一版，再看材料从哪里来。'));
       if (snapshot !== null) {
-        container.append(
-          renderContextBar({
-            courseEdition: courseEditionLabel(snapshot.courseEdition),
-            packVersion: snapshot.pack.version,
-            concept: null,
-            mode: null,
-            saveState: state.saveState,
-            fixture: snapshot.fixture,
-            backTarget: state.backTarget?.label ?? null,
-            onBack: state.backTarget === null ? undefined : () => void api.back(),
-          }),
-        );
         container.append(
           h(
             'section',
@@ -87,23 +73,7 @@ export function createMapFallbackPage(): EducationPage {
     fallback: true,
     mount(container, context: EducationPageContext) {
       const api = context.services.shell;
-      const state = context.services.getState();
-      const snapshot = state.snapshot;
-      container.append(pageHeading('地图', '按真实教材目录定位概念，查看局部关系与当前证据。'));
-      if (snapshot !== null) {
-        container.append(
-          renderContextBar({
-            courseEdition: courseEditionLabel(snapshot.courseEdition),
-            packVersion: snapshot.pack.version,
-            concept: null,
-            mode: null,
-            saveState: state.saveState,
-            fixture: snapshot.fixture,
-            backTarget: state.backTarget?.label ?? null,
-            onBack: state.backTarget === null ? undefined : () => void api.back(),
-          }),
-        );
-      }
+      container.append(pageHeading('地图', '按课本目录找概念，点开看它和相关内容的关系。'));
       container.append(
         emptyState({
           title: '还没有可显示的概念地图',

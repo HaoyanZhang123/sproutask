@@ -48,6 +48,8 @@ const stop = async () => {
 };
 process.on('SIGINT', () => void stop());
 process.on('SIGTERM', () => void stop());
-await new Promise(() => {
-  /* keep the foreground process alive; the DSH child is detached */
-});
+// Hold the event loop open explicitly. `await new Promise(() => {})` does NOT
+// keep Node alive (the DSH child is detached), which made the foreground shell
+// exit with code 13 and print "Command failed" even though the server was up.
+const keepAlive = setInterval(() => {}, 1 << 30);
+process.on('exit', () => clearInterval(keepAlive));

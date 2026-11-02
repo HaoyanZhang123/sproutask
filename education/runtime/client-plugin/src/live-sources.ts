@@ -208,6 +208,29 @@ export function createLiveMapDataSource(): any {
       const relations = (data.relations as any[]).filter(
         (relation) => relation.fromConceptId === conceptId || relation.toConceptId === conceptId,
       );
+      const tocNodes = Array.isArray(data.toc) ? (data.toc as any[]) : [];
+      const tocById = new Map(tocNodes.map((node) => [node.id as string, node] as const));
+      // The map payload carries the whole source catalogue; the detail only shows
+      // the refs this concept actually declares.
+      const catalogue = Array.isArray(data.sources) ? (data.sources as any[]) : [];
+      const conceptRefs = new Set<string>(Array.isArray(concept.sourceRefs) ? concept.sourceRefs : []);
+      const placementOf = (tocNodeId: string): { tocNodeId: string; title: string; type: string; path: string[] } => {
+        const path: string[] = [];
+        const seen = new Set<string>();
+        let cursor = tocById.get(tocNodeId);
+        while (cursor !== undefined && !seen.has(cursor.id)) {
+          seen.add(cursor.id);
+          path.unshift(String(cursor.title ?? cursor.id));
+          cursor = cursor.parentId === null || cursor.parentId === undefined ? undefined : tocById.get(String(cursor.parentId));
+        }
+        const node = tocById.get(tocNodeId);
+        return {
+          tocNodeId,
+          title: String(node?.title ?? '教材目录'),
+          type: String(node?.type ?? 'section'),
+          path: path.length > 0 ? path : [String(node?.title ?? '教材目录')],
+        };
+      };
       return {
         ok: true,
         revision: 1,
@@ -218,13 +241,8 @@ export function createLiveMapDataSource(): any {
           relations,
           prerequisites: relations.filter((relation) => relation.type === 'prerequisite' && relation.toConceptId === conceptId),
           evidence: (data.evidence as any[]).filter((entry) => entry.conceptId === conceptId),
-          sources: [],
-          placements: (concept.placements as string[]).map((tocNodeId) => ({
-            tocNodeId,
-            title: tocNodeId,
-            type: 'section',
-            path: [tocNodeId],
-          })),
+          sources: catalogue.filter((entry) => conceptRefs.has(String(entry.sourceRefId))),
+          placements: (concept.placements as string[]).map((tocNodeId) => placementOf(tocNodeId)),
         },
       };
     },

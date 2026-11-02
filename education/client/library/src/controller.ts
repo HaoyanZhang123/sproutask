@@ -493,13 +493,13 @@ export class LibraryController {
     const section = h(
       'section',
       { class: 'edu-section', 'data-testid': 'library-sources' },
-      h('h2', { class: 'edu-section__title' }, '来源阅读'),
+      h('h2', { class: 'edu-section__title' }, '课本原文页码'),
       h(
         'p',
         { class: 'edu-section__lead' },
         book === null
           ? '选择一本教材后查看来源。'
-          : `${book.title} · PDF 页序与印刷页码分开显示；查看来源不会提交作答。`,
+          : '想看原句时点开一条来源就能对照；这里只列页码，不会提交作答。',
       ),
     );
     if (this.state.sourcesLoading) {
@@ -532,7 +532,14 @@ export class LibraryController {
     for (const item of this.state.sources) {
       list.append(sourceListItem(item, (selected, trigger) => this.openSource(selected, trigger)));
     }
-    section.append(list);
+    section.append(
+      h(
+        'details',
+        { class: 'edu-lib-source-fold', 'data-testid': 'library-sources-fold' },
+        h('summary', {}, `查看 ${this.state.sources.length} 条来源（PDF 页 / 课本页）`),
+        list,
+      ),
+    );
     return section;
   }
 

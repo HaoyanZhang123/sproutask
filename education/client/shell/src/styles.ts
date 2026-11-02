@@ -184,6 +184,9 @@ export const educationStyles = `
 .edu-page { min-width: 0; }
 .edu-page__header { margin-bottom: var(--edu-space-lg); }
 .edu-page__title { margin: 0 0 var(--edu-space-xs); font-size: var(--edu-font-xxl); line-height: ${T.lineHeights.tight}; overflow-wrap: anywhere; }
+/* The page title receives programmatic focus for screen readers; keep it ring-free. */
+.edu-shell .edu-page__title:focus,
+.edu-shell .edu-page__title:focus-visible { outline: none; }
 .edu-page__lead { margin: 0; color: var(--edu-color-ink-muted); max-width: 62rem; }
 .edu-section { margin-top: var(--edu-space-xl); min-width: 0; }
 .edu-section__title { margin: 0 0 var(--edu-space-sm); font-size: var(--edu-font-xl); }

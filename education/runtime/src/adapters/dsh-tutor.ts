@@ -21,6 +21,7 @@ import type {
   TutorTurnResult,
 } from '@edu/domain';
 import { errResult, okResult } from '@edu/domain';
+import { neutralizeUnsupportedPages } from './page-claims.js';
 
 export interface DshMessageLike {
   readonly id?: string;
@@ -182,7 +183,10 @@ export interface DshTurnBudget {
 
 export const DEFAULT_TURN_BUDGET = {
   turnTimeoutMs: 45_000,
-  maxToolCalls: 10,
+  // 10 killed real turns that legitimately called 11–13 tools (2026-11-02:
+  // "生物分类"/"无脊椎动物" probes); 14 keeps the wall-clock bound while letting
+  // the model finish, and the per-call cost stays inside the turn budget.
+  maxToolCalls: 14,
   pollIntervalMs: 500,
 } as const;
 
@@ -639,7 +643,21 @@ export function createDshTutorGateway(options: DshTutorGatewayOptions): TutorGat
       // The v11 S5 failure: the last assistant message held only a `reasoning`
       // block, so the old "take the last assistant message or fail" rule threw
       // away the text of earlier steps. Prefer the last step that wrote text.
-      const text = assistantTexts.length === 0 ? '' : assistantTexts[assistantTexts.length - 1]!;
+      const lastText = assistantTexts.length === 0 ? '' : assistantTexts[assistantTexts.length - 1]!;
+      // Pages the model may cite are exactly the ones the tools returned in this
+      // turn; anything else is rewritten before the student sees it.
+      const pageCheck = neutralizeUnsupportedPages(lastText, evidence);
+      if (pageCheck.replaced.length > 0) {
+        options.onDebug?.({
+          event: 'dsh.page-claims.replaced',
+          sessionId: request.sessionId,
+          turnId,
+          replaced: pageCheck.replaced,
+          pdfPages: evidence.pdfPages,
+          printedPages: evidence.printedPages,
+        });
+      }
+      const text = pageCheck.text;
       const elapsedMs = Date.now() - startedAt;
       const reasoningChars = turn
         .filter((message) => message.role === 'assistant')

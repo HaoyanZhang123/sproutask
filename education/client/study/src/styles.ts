@@ -40,6 +40,30 @@ export const studyStyles = `
 .edu-study-status[data-state="saved"] { color: var(--edu-color-success); }
 .edu-study-activity-head { display: flex; flex-wrap: wrap; gap: ${T.spacing.xs}; align-items: center; justify-content: space-between; }
 .edu-study-stem { margin: ${T.spacing.sm} 0; font-size: var(--edu-font-lg); font-weight: 600; overflow-wrap: anywhere; }
+/* Answer forms (T11 visuals) are mounted inside the study workspace; they carry
+   their own layout so options never collapse into one run-on paragraph. */
+.edu-visual-form { display: grid; gap: ${T.spacing.sm}; margin-top: ${T.spacing.sm}; min-width: 0; }
+.edu-visual-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: ${T.spacing.xs}; min-width: 0; }
+.edu-visual-form legend { padding: 0; margin-bottom: ${T.spacing.xxs}; font-size: var(--edu-font-sm); color: var(--edu-color-ink-muted); }
+.edu-visual-option {
+  display: flex;
+  align-items: flex-start;
+  gap: ${T.spacing.xs};
+  padding: ${T.spacing.xs} ${T.spacing.sm};
+  border: 1px solid var(--edu-color-line);
+  border-radius: var(--edu-radius-md);
+  background: var(--edu-color-surface);
+  cursor: pointer;
+}
+.edu-visual-option:hover { border-color: var(--edu-color-line-strong); }
+.edu-visual-option:has(input:checked) { border-color: var(--edu-color-accent); background: var(--edu-color-accent-soft); }
+.edu-visual-option input { flex: none; margin-top: 0.25rem; }
+.edu-visual-option ol,
+.edu-visual-option ul { margin: 0; padding-left: ${T.spacing.lg}; }
+.edu-visual-counter { margin: 0; font-size: var(--edu-font-sm); color: var(--edu-color-ink-muted); }
+.edu-visual-pairs { display: grid; gap: ${T.spacing.xs}; }
+.edu-visual-pair { display: flex; flex-wrap: wrap; gap: ${T.spacing.xs}; align-items: center; }
+.edu-visual-actions { display: flex; flex-wrap: wrap; gap: ${T.spacing.xs}; }
 .edu-study-pending { border: 1px dashed var(--edu-color-line-strong); border-radius: var(--edu-radius-md); padding: ${T.spacing.md}; margin: ${T.spacing.sm} 0; }
 .edu-study-message { border-left: 0.25rem solid var(--edu-color-line); padding: ${T.spacing.xs} ${T.spacing.sm}; margin: ${T.spacing.xs} 0; min-width: 0; }
 .edu-study-message--student { border-left-color: ${T.colors.info}; background: ${T.colors.infoSoft}; }
@@ -47,6 +71,8 @@ export const studyStyles = `
 .edu-study-message--system { border-left-color: ${T.colors.warning}; background: ${T.colors.warningSoft}; }
 .edu-study-message p { margin: ${T.spacing.xxs} 0 0; overflow-wrap: anywhere; }
 .edu-study-help-actions { display: flex; flex-wrap: wrap; gap: ${T.spacing.xs}; margin: ${T.spacing.sm} 0; }
+/* The hidden attribute must win over the flex display above. */
+.edu-study-help-actions[hidden] { display: none; }
 .edu-study-chat-input { display: grid; gap: ${T.spacing.xs}; margin-top: ${T.spacing.sm}; }
 .edu-study-chat-input textarea { width: 100%; min-height: 4.5rem; }
 .edu-study-low-difficulty { margin-top: ${T.spacing.sm}; padding: ${T.spacing.sm}; border: 1px dashed var(--edu-color-line-strong); border-radius: var(--edu-radius-md); }

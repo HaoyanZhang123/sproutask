@@ -11,6 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_TUTOR_SIGNALS,
+  composeStudentMessage,
   decidePedagogy,
   detectAnswerDisclosure,
   parseTutorEnvelope,
@@ -112,6 +113,24 @@ describe('disclosure signals (F6)', () => {
     const decision = decidePedagogy(pedagogyInput({}));
     expect(decision.disclosure).toBe(false);
     expect(decision.action).toBe('hint');
+  });
+
+  it('never puts a probing prefix in front of a reply that already gave the answer', () => {
+    const decision = decidePedagogy(pedagogyInput({ answerDisclosed: true }));
+    expect(decision.action).toBe('layered_explanation');
+    expect(decision.disclosure).toBe(true);
+    const message = composeStudentMessage(decision, EXPLANATION, {
+      conceptTitle: '细胞分裂',
+      activityStem: null,
+      referenceAnswer: null,
+      prerequisiteTitle: null,
+      conflictNote: null,
+      sourceRefs: [],
+      sourceMissing: false,
+      evidenceNote: null,
+    });
+    expect(message).not.toContain('先用一句话说说你的理解');
+    expect(message.startsWith('可以，我先分层讲清楚')).toBe(true);
   });
 
   it('the teaching service records the disclosure on decision and session state', async () => {

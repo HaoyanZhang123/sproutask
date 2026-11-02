@@ -4,8 +4,17 @@ import type { Activity, AttemptInputType } from '@edu/domain';
 import type { AnswerFormValue } from '../../visuals/src/index.js';
 import type { StudyActivityPhase, StudyDecision } from './types.js';
 
-export const PHASE_LABELS: Record<StudyActivityPhase, string> = {
-  draft: '草稿',
+/** Student-facing activity type names; version numbers stay out of the page. */
+export const ACTIVITY_TYPE_LABELS: Record<string, string> = {
+  recall: '回忆题',
+  explain: '解释题',
+  choice: '选择题',
+  relation: '关系题',
+  diagram_label: '图示标注题',
+  transfer: '迁移题',
+};
+
+export const PHASE_LABELS: Record<StudyActivityPhase, string> = {  draft: '草稿',
   submitted: '已提交，正在保存',
   grading: '正在等待反馈',
   feedback: '有反馈',

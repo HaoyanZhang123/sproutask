@@ -28,6 +28,7 @@ import type {
   TutorPrompt,
   TutorSessionState,
 } from './types.js';
+import { buildTutorSystemInstruction } from './coverage.js';
 import { BIOLOGY_DISCLOSURE_POLICY } from './skill.js';
 
 export interface TutorContextDependencies {
@@ -203,7 +204,12 @@ export async function buildTutorContext(
     ok: true,
     data: {
       prompt: {
-        systemInstruction: request.skill.instruction,
+        // The Skill text alone cannot tell the model what the pack contains; the
+        // coverage briefing is appended so "is this in the pack?" is answerable
+        // without guessing or extra tool calls.
+        systemInstruction: buildTutorSystemInstruction(request.skill.instruction, pack, {
+          currentConceptId: request.conceptId,
+        }),
         blocks,
         toolNames: request.toolNames,
         disclosurePolicy: BIOLOGY_DISCLOSURE_POLICY,

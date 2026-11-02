@@ -712,13 +712,25 @@ export function renderDetail(
     const otherId =
       relation.fromConceptId === detail.concept.id ? relation.toConceptId : relation.fromConceptId;
     const other = payload.concepts.find((entry) => entry.id === otherId);
+    // The rationale is long and academic; keep it one click away instead of
+    // filling the panel with it.
     relations.append(
       h(
-        'p',
+        'div',
         { class: 'edu-map-detail__relation', 'data-relation-id': relation.id },
-        `${RELATION_TYPE_LABELS[relation.type]} · ${RELATION_BASIS_LABELS[relation.basis]} · ${
-          relation.fromConceptId === detail.concept.id ? '指向' : '来自'
-        } ${other?.title ?? otherId} · 理由：${relation.rationale}`,
+        h(
+          'p',
+          { class: 'edu-map-detail__relation-head' },
+          `${RELATION_TYPE_LABELS[relation.type]} · ${RELATION_BASIS_LABELS[relation.basis]} · ${
+            relation.fromConceptId === detail.concept.id ? '指向' : '来自'
+          } ${other?.title ?? otherId}`,
+        ),
+        h(
+          'details',
+          { class: 'edu-map-detail__why' },
+          h('summary', {}, '为什么这样连'),
+          h('p', { class: 'edu-map-detail__meta' }, relation.rationale),
+        ),
       ),
     );
   }
@@ -732,7 +744,12 @@ export function renderDetail(
   if (detail.sources.length === 0) {
     sources.append(h('p', {}, '该概念还没有登记出处。'));
   }
+  // Several source refs can resolve to the same textbook page; list each page once.
+  const seenSourcePages = new Set<string>();
   for (const source of detail.sources) {
+    const pageKey = `${source.pdfPage}|${source.printedPage ?? ''}`;
+    if (seenSourcePages.has(pageKey)) continue;
+    seenSourcePages.add(pageKey);
     sources.append(
       h(
         'p',

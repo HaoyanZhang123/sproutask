@@ -334,6 +334,30 @@ export class G1Service {
       packVersion: this.composition.packKey.packVersion,
     });
     const replay = this.composition.storage.replay('learner.local.default');
+    // The map detail shows "出处与材料"; before this it always said "还没有登记
+    // 出处" because the payload carried an empty source catalogue while every
+    // concept already had resolvable sourceRefs.
+    const catalogueRefs = [
+      ...new Set([
+        ...pack.data.concepts.flatMap((concept) => concept.sourceRefs),
+        ...pack.data.toc.flatMap((node) => node.sourceRefs),
+      ]),
+    ];
+    const sources: Record<string, unknown>[] = [];
+    for (const sourceRefId of catalogueRefs) {
+      const resolved = await this.composition.content.resolveSource(ctx, sourceRefId);
+      if (!resolved.ok) continue;
+      const ref = resolved.data.sourceRef;
+      const printed = resolved.data.printedPage === null ? '' : String(resolved.data.printedPage).trim();
+      sources.push({
+        sourceRefId,
+        pdfPage: resolved.data.pdfPage,
+        printedPage: resolved.data.printedPage,
+        label: printed.length > 0 ? `课本第 ${printed} 页` : `PDF 第 ${String(resolved.data.pdfPage)} 页`,
+        bookAvailable: true,
+        verification: ref.verification.state,
+      });
+    }
     return okResult(
       {
         courseEditionId: pack.data.courseEditionId,
@@ -349,7 +373,7 @@ export class G1Service {
         progress: progress.ok ? progress.data : [],
         selfReports: replay.selfReports,
         evidence: replay.evidence,
-        sources: [],
+        sources,
         initialTocNodeId: pack.data.toc.find((node) => node.type === 'section')?.id ?? null,
         initialConceptId: pack.data.concepts[0]?.id ?? null,
         fixture: false,
@@ -742,7 +766,14 @@ export class G1Service {
     let real: ServiceResult<unknown>;
     try {
       real = await this.composition.tutor.submitTurn(this.ctx(requestId), input as never);
-    } catch {
+    } catch (error) {
+      this.composition.audit?.({
+        kind: 'tutor.turn.threw',
+        requestId,
+        sessionId: typeof input['sessionId'] === 'string' ? input['sessionId'] : null,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? (error.stack ?? null) : null,
+      });
       return this.localRuleTurn(requestId, input);
     }
     if (real.ok) return real;
@@ -765,6 +796,16 @@ export class G1Service {
     if (
       ['UNAVAILABLE', 'NETWORK', 'TIMEOUT', 'TRANSPORT', 'SERVER', 'INVALID_INPUT'].includes(real.error.code)
     ) {
+      // The local fallback is silent to the student; keep the *reason* in the audit
+      // log so "model transport unavailable" is diagnosable after the fact.
+      this.composition.audit?.({
+        kind: 'tutor.turn.local-fallback',
+        requestId,
+        sessionId: typeof input['sessionId'] === 'string' ? input['sessionId'] : null,
+        code: real.error.code,
+        message: real.error.message,
+        detailsRef: real.error.detailsRef ?? null,
+      });
       return this.localRuleTurn(requestId, input);
     }
     return real;

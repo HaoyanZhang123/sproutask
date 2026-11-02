@@ -110,7 +110,10 @@ export function courseEditionLabel(input: {
   readonly subject: string;
   readonly editionLabel: string;
 }): string {
-  return `${input.grade}年级${termName(input.term)} · ${subjectLabel(input.subject)} · ${input.editionLabel}`;
+  // Student-facing short form: the full edition string (plus its verification
+  // note) belongs on the library card, not in every page header.
+  void input.editionLabel;
+  return `${input.grade}年级${termName(input.term)} · ${subjectLabel(input.subject)}`;
 }
 
 export function termName(term: number): string {

@@ -3,7 +3,6 @@
 import type { EducationPage, EducationPageContext } from '../contracts.js';
 import type { EducationShellApi } from '../shell-state.js';
 import { h } from '../dom.js';
-import { renderContextBar } from '../components/context-bar.js';
 import { renderErrorBanner } from '../errors.js';
 import { button } from '../components/button.js';
 import { emptyState, fixtureBadge, notice, offlineNotice } from '../components/states.js';
@@ -13,9 +12,7 @@ import {
   REVIEW_REASON_LABELS,
   SESSION_MODE_LABELS,
   UNDERSTANDING_LABELS,
-  courseEditionLabel,
   formatDateTime,
-  positionLabel,
 } from '../labels.js';
 import { conceptTitle, definePage, pageHeading } from './common.js';
 
@@ -69,19 +66,6 @@ export function createHomePage(): EducationPage {
         container.append(offlineNotice(() => void api.refresh()));
       }
 
-      const courseLabel = courseEditionLabel(snapshot.courseEdition);
-      container.append(
-        renderContextBar({
-          courseEdition: courseLabel,
-          packVersion: snapshot.pack.version,
-          concept: home.activeSession === null ? null : conceptTitle(snapshot.concepts, home.activeSession.conceptId),
-          mode: home.activeSession === null ? null : SESSION_MODE_LABELS[home.activeSession.mode],
-          saveState: state.saveState,
-          fixture: snapshot.fixture,
-          backTarget: null,
-        }),
-      );
-
       if (home.compatibility !== null) {
         container.append(
           notice({
@@ -121,15 +105,13 @@ export function createHomePage(): EducationPage {
 
       if (active !== null) {
         const title = conceptTitle(snapshot.concepts, active.conceptId);
-        const cursorText = positionLabel(active.resumeCursor.activityId, active.resumeCursor.cursor);
         entries.append(
           entryCard({
             eyebrow: '继续上次',
             title,
             body: [
-              `${courseLabel} · 内容包 ${active.packVersion}`,
-              `模式：${SESSION_MODE_LABELS[active.mode]} · 上次位置：${cursorText}`,
-              active.resumeCursor.cursor === null ? '没有待恢复草稿' : '已保存草稿，可原位恢复',
+              `模式：${SESSION_MODE_LABELS[active.mode]}`,
+              active.resumeCursor.cursor === null ? '本轮还没有填写草稿' : '已保存草稿，可以原样接着做',
             ],
             primary: true,
             testId: 'home-continue',
@@ -147,7 +129,6 @@ export function createHomePage(): EducationPage {
             eyebrow: '上次学习已完成',
             title,
             body: [
-              `${courseLabel} · 内容包 ${completed.packVersion}`,
               `模式：${SESSION_MODE_LABELS[completed.mode]} · 结束于 ${formatDateTime(completed.endedAt)}`,
               '已完成的活动可以打开收尾记录，也可以开始新一轮，不会覆盖旧证据。',
             ],
@@ -275,9 +256,9 @@ export function createHomePage(): EducationPage {
           ),
           statusCard(
             '平台账户',
-            '不可用',
+            '不需要',
             'neutral',
-            '本产品线不使用平台账户授权；学习身份与模型账号分开。',
+            '当前版本只用模型 Key，不用平台账号。',
           ),
         ),
       );

@@ -23,7 +23,7 @@ export function createMapPage(controller: MapController): EducationPage {
           h(
             'p',
             { class: 'edu-page__lead' },
-            '按真实目录定位概念；默认只看当前章的局部关系，跨章概念需要显式展开。先修只是建议，不锁住进入。',
+            '按课本目录找概念；线表示内容之间的关系，点一下就能看详情。',
           ),
         ),
         h('div', {

@@ -3,7 +3,6 @@
 import type { EducationPage, EducationPageContext } from '../contracts.js';
 import { h } from '../dom.js';
 import { button } from '../components/button.js';
-import { renderContextBar } from '../components/context-bar.js';
 import { notice, offlineNotice } from '../components/states.js';
 import { statusChip } from '../components/status-chip.js';
 import { renderErrorBanner } from '../errors.js';
@@ -45,18 +44,6 @@ export function createFirstRunPage(): EducationPage {
       }
 
       const courseLabel = courseEditionLabel(snapshot.courseEdition);
-      container.append(
-        renderContextBar({
-          courseEdition: courseLabel,
-          packVersion: snapshot.pack.version,
-          concept: null,
-          mode: null,
-          saveState: state.saveState,
-          fixture: snapshot.fixture,
-          backTarget: state.backTarget?.label ?? null,
-          onBack: state.backTarget === null ? undefined : () => void api.back(),
-        }),
-      );
 
       if (state.offline) container.append(offlineNotice(() => void api.refresh()));
 

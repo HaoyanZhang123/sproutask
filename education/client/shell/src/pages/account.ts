@@ -4,10 +4,9 @@ import type { EducationPage, EducationPageContext } from '../contracts.js';
 import { h } from '../dom.js';
 import { button } from '../components/button.js';
 import { ConfirmDialog } from '../components/confirm-dialog.js';
-import { renderContextBar } from '../components/context-bar.js';
 import { notice } from '../components/states.js';
 import { statusChip } from '../components/status-chip.js';
-import { courseEditionLabel, formatDateTime } from '../labels.js';
+import { formatDateTime } from '../labels.js';
 import {
   maskedKeySuffix,
   validateApiKey,
@@ -30,7 +29,7 @@ export function createAccountPage(): EducationPage {
       container.append(
         pageHeading(
           '账户与模型服务',
-          '学习身份、模型账户与 API Key 是三层不同的状态。界面只显示后端返回的可用性，不接收或展示任何凭据内容。',
+          '这里是这台电脑上的学习档案和模型服务设置；学习记录只存在本机。',
         ),
       );
       if (snapshot === null) {
@@ -46,19 +45,6 @@ export function createAccountPage(): EducationPage {
       }
 
       container.append(
-        renderContextBar({
-          courseEdition: courseEditionLabel(snapshot.courseEdition),
-          packVersion: snapshot.pack.version,
-          concept: null,
-          mode: null,
-          saveState: state.saveState,
-          fixture: snapshot.fixture,
-          backTarget: state.backTarget?.label ?? null,
-          onBack: state.backTarget === null ? undefined : () => void api.back(),
-        }),
-      );
-
-      container.append(
         h(
           'section',
           { class: 'edu-section', 'data-testid': 'account-identity' },
@@ -66,12 +52,12 @@ export function createAccountPage(): EducationPage {
           h(
             'div',
             { class: 'edu-card' },
-            statusChip('本地匿名档案', 'positive'),
-            h('p', { class: 'edu-card__title' }, snapshot.learner.id),
+            statusChip('本机档案', 'positive'),
+            h('p', { class: 'edu-card__title' }, '只属于这台电脑'),
             h(
               'p',
               { class: 'edu-card__meta' },
-              `创建于 ${formatDateTime(snapshot.learner.createdAt)}。学习记录只属于这个本机身份；模型账号不是学习身份。`,
+              `创建于 ${formatDateTime(snapshot.learner.createdAt)}。学习记录只属于这台电脑；模型账号不是学习身份。`,
             ),
           ),
         ),
@@ -83,7 +69,7 @@ export function createAccountPage(): EducationPage {
         h(
           'section',
           { class: 'edu-section', 'data-testid': 'account-model-account' },
-          h('h2', { class: 'edu-section__title' }, '模型账户（平台授权）'),
+          h('h2', { class: 'edu-section__title' }, '模型账号'),
           h(
             'div',
             { class: 'edu-card' },
@@ -92,13 +78,8 @@ export function createAccountPage(): EducationPage {
               'p',
               { class: 'edu-card__meta' },
               accountUnavailable
-                ? '本产品线不使用平台账户授权（用户已明确该路线不允许）。因此这里不提供登录、退出或授权入口，也不把 API Key 显示成账户授权成功。'
-                : `账户授权可用；最后检查：${formatDateTime(account.lastCheckedAt)}。`,
-            ),
-            h(
-              'p',
-              { class: 'edu-muted', 'data-testid': 'account-route-note' },
-              '账户登录、取消、失败与退出状态由后端返回；客户端不自行裁剪权限，也不用隐藏按钮代替后端拒绝。',
+                ? '当前版本不需要平台账号：填好下面的模型 Key 就能使用智能反馈。'
+                : `账号可用；最后检查：${formatDateTime(account.lastCheckedAt)}。`,
             ),
           ),
         ),

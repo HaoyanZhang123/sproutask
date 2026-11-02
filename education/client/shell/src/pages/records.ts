@@ -6,7 +6,6 @@ import type { RecordsPayload } from '../data/types.js';
 import type { EducationShellApi } from '../shell-state.js';
 import { h, clear } from '../dom.js';
 import { button } from '../components/button.js';
-import { renderContextBar } from '../components/context-bar.js';
 import { ConfirmDialog, copyTextFallback } from '../components/confirm-dialog.js';
 import { renderEvidenceDetail } from '../components/evidence-card.js';
 import { Modal } from '../components/modal.js';
@@ -156,18 +155,6 @@ export function createRecordsPage(): EducationPage {
           );
           return;
         }
-
-        container.append(
-          renderContextBar({
-            courseEdition: `${snapshot.courseEdition.grade}年级 · ${snapshot.courseEdition.editionLabel}`,
-            packVersion: snapshot.pack.version,
-            concept: null,
-            mode: null,
-            saveState: state.saveState,
-            fixture: snapshot.fixture,
-            backTarget: null,
-          }),
-        );
 
         if (state.offline) container.append(offlineNotice(() => void api.refresh()));
         if (state.saveState === 'failed' || records.saveState === 'failed') {

@@ -132,13 +132,31 @@ export function readTutorSignals(value: unknown): TutorSignals {
 const DISCLOSURE_TEXT_PATTERNS: readonly RegExp[] = [
   /完整答案|参考答案|标准答案|答案如下|答案是|答案为|正确答案是/,
   /完整讲解|完整解释|详细讲解|完整步骤|分步示范|完整示范|逐步示范/,
-  /已标记为看过答案|直接披露|标记\s*disclosure|disclosure\s*（/i,
+  /已标记为看过答案|直接披露|标记(?:为|成)?\s*\*{0,2}\s*disclosure|disclosure\s*[:：（]/i,
+  /披露/,
+  /直接给(你)?(答案|完整|术语|结论)|直接告诉你(答案|结论)/,
   /第[一二三四五1-5]步[:：]/,
 ];
 
 export function detectAnswerDisclosure(text: string): boolean {
   if (typeof text !== 'string' || text.trim().length === 0) return false;
   return DISCLOSURE_TEXT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+const SOURCE_ID_RUN = /source\.[a-z0-9][a-z0-9._-]*(?:\s*[、,，]\s*source\.[a-z0-9][a-z0-9._-]*)*/gi;
+const ACTIVITY_ID = /activity\.[a-z0-9][a-z0-9._-]*/gi;
+
+/**
+ * Student-visible text must not contain internal source/activity ids. The model
+ * keeps echoing them from tool results even when instructed not to, so the ids
+ * are replaced deterministically at the boundary instead of hoping for prompt
+ * compliance. Page numbers and readable references are untouched.
+ */
+export function sanitizeStudentText(text: string): string {
+  if (typeof text !== 'string' || text.length === 0) return text;
+  return text
+    .replace(SOURCE_ID_RUN, '本节的出处')
+    .replace(ACTIVITY_ID, '本项活动');
 }
 
 /** Merges the model-flag and the text detector; the flag is never downgraded. */
@@ -227,10 +245,21 @@ function stageAfterReviewDecision(
  */
 export function decidePedagogy(input: PedagogyInput): PedagogicalDecision {
   const decision = decideCore(input);
-  if (decision.disclosure || !input.signals.answerDisclosed) return decision;
+  const answered = input.signals.answerDisclosed;
+  if (!answered) return decision;
+  // A probing prefix must never precede a full answer: when the reply already
+  // disclosed the answer/steps while the decision was still "probe", the student
+  // would see "先用一句话说说你的理解：" followed by the complete answer.
+  const action =
+    decision.action === 'probe_question' || decision.action === 'hint'
+      ? 'layered_explanation'
+      : decision.action;
   return {
     ...decision,
+    action,
     disclosure: true,
+    factualClaims: decision.factualClaims || action === 'layered_explanation',
+    sourceRefs: action === 'layered_explanation' ? uniqueIds([...decision.sourceRefs, ...input.conceptSourceRefs]) : decision.sourceRefs,
     rationale: `${decision.rationale}; the model reply actually disclosed the answer or complete steps (answerDisclosed)`,
   };
 }
@@ -572,7 +601,9 @@ export function composeStudentMessage(
 
   if (decision.factualClaims) {
     if (params.sourceRefs.length > 0) {
-      lines.push(`参考：${params.sourceRefs.join('、')}（教材页码以来源记录为准，不在此复述原文）。`);
+      // Readable reference only: internal sourceRef ids belong to the evidence
+      // layer, not to what the student reads.
+      lines.push('参考：本节的出处（可在“查看出处”里查看页码与原文）。');
     } else if (params.sourceMissing) {
       lines.push('参考：本概念目前没有可解析的来源记录，因此这里不给出事实性结论或页码。');
     }

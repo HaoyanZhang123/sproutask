@@ -35,7 +35,6 @@ describe('study workspace layout and material', () => {
     expect(container.querySelector('[data-testid="edu-context-bar"]')).not.toBeNull();
     const context = textOf(container.querySelector('[data-testid="edu-context-bar"]') as HTMLElement);
     expect(context).toContain('教材');
-    expect(context).toContain('内容包');
     expect(context).toContain('当前概念');
     expect(context).toContain('模式');
     expect(context).toContain('本地保存');

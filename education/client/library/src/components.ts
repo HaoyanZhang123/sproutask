@@ -86,8 +86,6 @@ export function bookCard(book: LibraryBook, handlers: BookCardHandlers): HTMLEle
       { class: 'edu-kv' },
       h('dt', {}, '页数'),
       h('dd', {}, book.pageCount > 0 ? `${book.pageCount} 页` : '—'),
-      h('dt', {}, '文件指纹'),
-      h('dd', { class: 'edu-lib-inline-code' }, formatFingerprint(book.sha256)),
       h('dt', {}, '内容范围'),
       h('dd', {}, `${SCOPE_LABELS[book.scope]} · ${COVERAGE_LABELS[book.coverageStatus]}`),
       h('dt', {}, '材料状态'),

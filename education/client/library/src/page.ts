@@ -23,7 +23,7 @@ export function createLibraryPage(controller: LibraryController): EducationPage 
           h(
             'p',
             { class: 'edu-page__lead' },
-            '区分本期匹配基准、待核实候选与不可用材料；查看导入进度与来源，候选标识始终可见。',
+            '确认你用的是哪本教材、哪一版，再看材料从哪里来。',
           ),
         ),
         h('div', { 'data-edu-slot': 'library:content', 'data-testid': 'library-content-slot' }),

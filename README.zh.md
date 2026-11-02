@@ -32,10 +32,10 @@
 
 ## 安装
 
-从 [Releases](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.0) 下载：
+从 [Releases](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.1) 下载：
 
-- `SproutAsk-Setup-0.3.0-x64.exe` —— **免管理员**的每用户安装包，装到 `%LOCALAPPDATA%\SproutAsk\current`
-- `SproutAsk-0.3.0-x64-portable.zip` —— 解压后运行 `launcher.cmd`
+- `SproutAsk-Setup-0.3.1-x64.exe` —— **免管理员**的每用户安装包，装到 `%LOCALAPPDATA%\SproutAsk\current`
+- `SproutAsk-0.3.1-x64-portable.zip` —— 解压后运行 `launcher.cmd`
 
 安装包**未做代码签名**，Windows 会提示"未知发布者"；包内附 `SHA256SUMS.txt` 供校验。
 
@@ -67,7 +67,7 @@ education/licenses/   第三方许可清单（含 libvips LGPL-3.0 义务）
 
 ## 发布
 
-见 [v0.3.0 发布说明](docs/releases/v0.3.0.md)。`main` 仍是旧的 Electron 0.2.x 线；本次 DSH 重构线发布在分支 `education-v0.3.0`。
+见 [v0.3.1 发布说明](docs/releases/v0.3.1.md)。`main` 仍是旧的 Electron 0.2.x 线；本次 DSH 重构线发布在分支 `education-v0.3.1`。
 
 ## 当前状态与已知限制
 

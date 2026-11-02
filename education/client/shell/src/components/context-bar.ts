@@ -37,7 +37,6 @@ export function renderContextBar(input: ContextBarInput): HTMLElement {
 
   bar.append(
     item('教材', input.courseEdition ?? '尚未选择教材', 'course-edition'),
-    item('内容包', input.packVersion === null ? '—' : `版本 ${input.packVersion}`, 'pack-version'),
     item('当前概念', input.concept ?? '尚未选择概念', 'concept'),
     item('模式', input.mode ?? '未开始', 'mode'),
     h(

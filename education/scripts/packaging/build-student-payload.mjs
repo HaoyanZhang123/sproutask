@@ -220,7 +220,7 @@ const gitHash = gitValue(['rev-parse', '--short', 'HEAD'], 'nogit');
 // The artifact must not claim to be exactly HEAD when the working tree carries
 // uncommitted changes (e.g. a runtime fix that was built before the commit).
 const gitDirty = gitValue(['status', '--porcelain'], '').trim().length > 0 ? '+dirty' : '';
-const version = '0.3.0';
+const version = '0.3.1';
 // The ledger must describe what this build actually contains: with
 // --keep-sharp the sharp/@img binaries ARE shipped (libvips is LGPL-3.0 and its
 // licence text is under licenses/), so they must not be listed as cropped.

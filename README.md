@@ -32,10 +32,10 @@ Two things matter more than feature count here — **the tutor runs on a real DS
 
 ## Installation
 
-Download from [Releases](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.0):
+Download from [Releases](https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.3.1):
 
-- `SproutAsk-Setup-0.3.0-x64.exe` — per-user installer, **no administrator rights**, installs to `%LOCALAPPDATA%\SproutAsk\current`
-- `SproutAsk-0.3.0-x64-portable.zip` — unpack anywhere and run `launcher.cmd`
+- `SproutAsk-Setup-0.3.1-x64.exe` — per-user installer, **no administrator rights**, installs to `%LOCALAPPDATA%\SproutAsk\current`
+- `SproutAsk-0.3.1-x64-portable.zip` — unpack anywhere and run `launcher.cmd`
 
 The installer is **not code-signed**, so Windows shows an "unknown publisher" prompt. `SHA256SUMS.txt` is included for verification.
 
@@ -67,7 +67,7 @@ education/licenses/   third-party notices, incl. libvips LGPL-3.0 obligations
 
 ## Releases
 
-See [v0.3.0 release notes](docs/releases/v0.3.0.md). `main` still carries the earlier Electron 0.2.x line; this DSH rebuild ships on branch `education-v0.3.0`.
+See [v0.3.1 release notes](docs/releases/v0.3.1.md). `main` still carries the earlier Electron 0.2.x line; this DSH rebuild ships on branch `education-v0.3.1`.
 
 ## Current status and limits
 

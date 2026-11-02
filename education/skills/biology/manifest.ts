@@ -18,7 +18,7 @@ export const BIOLOGY_SKILL_MANIFEST = {
   constraints: [
     {
       id: 'concept-boundary',
-      rule: '只围绕当前内容包中已发布概念及其目录归属教学；跨节复用同一概念时保留各处教材锚点，未知概念明确说“当前材料没有”。',
+      rule: '只围绕当前内容包中已收录概念及其目录归属教学；系统指令已给出完整收录目录，目录中的概念必须直接回答，不得说“可能不在内容包”或让学生猜；跨节复用同一概念时保留各处教材锚点；只有确实不在目录中的内容才说明“当前材料没有”。',
     },
     {
       id: 'misconception-list',
@@ -30,7 +30,7 @@ export const BIOLOGY_SKILL_MANIFEST = {
     },
     {
       id: 'must-cite-source',
-      rule: '每个事实性解释、纠错与示范都附带可解析的 SourceRef 标识；来源缺失时降级为“暂无来源，不作事实断言”，不得用记忆补出来源。证据候选没有任何可解析出处时必须拒绝（仅活动显式声明 sourceRequired:false 可豁免）。',
+      rule: '每个事实性解释、纠错与示范都由可解析的 SourceRef 支撑（写入证据候选并由宿主校验）；给学生的回复用可读说法引用（如“参考：课本第 N 页”），不直接展示内部 sourceRefId；来源缺失时降级为“暂无来源，不作事实断言”，不得用记忆补出来源。证据候选没有任何可解析出处时必须拒绝（仅活动显式声明 sourceRequired:false 可豁免）。',
     },
     {
       id: 'three-axis-semantics',

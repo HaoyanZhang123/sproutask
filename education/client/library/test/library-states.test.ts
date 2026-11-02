@@ -25,7 +25,7 @@ describe('library book states', () => {
     expect(text).toContain('不可用材料');
     expect(text).toContain('部分内容（未达全册）');
     expect(text).toContain('页数');
-    expect(text).toContain('文件指纹');
+    expect(text).toContain('内容范围');
     expect(text).toContain('候选 · 未核实 · 不可作为基准或强掌握结论');
     expect(text).toContain('PDF 交叉引用损坏');
     expect(text).not.toMatch(/掌握率|\d+(?:\.\d+)?\s*%/);

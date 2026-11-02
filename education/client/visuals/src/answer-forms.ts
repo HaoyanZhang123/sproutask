@@ -47,9 +47,9 @@ export function mountAnswerForm(
   const root = document.createElement('section');
   root.className = 'edu-visual-form';
   root.dataset['eduVisual'] = schema.kind;
-  const heading = document.createElement('h3');
-  heading.textContent = options.activity.stem;
-  root.append(heading);
+  // The study workspace already renders the stem above this form; keep it as the
+  // accessible name instead of printing it a second time.
+  root.setAttribute('aria-label', options.activity.stem);
 
   const inputs: HTMLInputElement[] = [];
   let textarea: HTMLTextAreaElement | null = null;
@@ -143,12 +143,14 @@ export function mountAnswerForm(
   actions.className = 'edu-visual-actions';
   const submit = document.createElement('button');
   submit.type = 'button';
+  submit.className = 'edu-button edu-button--primary';
   submit.textContent = '提交作答';
   submit.addEventListener('click', () => options.onSubmit(collect()));
   actions.append(submit);
   if (options.onCancel !== undefined) {
     const cancel = document.createElement('button');
     cancel.type = 'button';
+    cancel.className = 'edu-button';
     cancel.textContent = '取消';
     cancel.addEventListener('click', () => options.onCancel?.());
     actions.append(cancel);

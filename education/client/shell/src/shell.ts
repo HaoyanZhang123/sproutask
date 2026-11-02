@@ -93,6 +93,7 @@ export interface EducationShellController {
 }
 
 const NAV_ITEMS = [
+  { path: '/home', label: '首页' },
   { path: '/library', label: '教材库' },
   { path: '/map', label: '地图' },
   { path: '/workspace', label: '工作区' },
@@ -279,8 +280,7 @@ export class EducationShell {
     const footer = h(
       'footer',
       { class: 'edu-footer' },
-      h('p', {}, '学习记录保存在这台电脑；云端智能反馈需要已配置的模型服务。'),
-      h('p', {}, '学生权限只包含学习相关能力；系统级文件与命令能力不由客户端授予。'),
+      h('p', {}, '学习记录只保存在这台电脑；智能反馈需要先配置模型服务。'),
     );
     this.root.append(skip, header, layout, footer);
     this.renderNav();

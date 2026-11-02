@@ -71,7 +71,7 @@ const versionText = existsSync(versionFile) ? readFileSync(versionFile, 'utf8') 
 /** version.txt is `key=value`; accept `key: value` too for older payloads. */
 const ledger = (key) =>
   (versionText.match(new RegExp(`^\\s*${key}\\s*[:=]\\s*(.+)$`, 'im'))?.[1] ?? '').trim();
-const version = ledger('version') || '0.3.0';
+const version = ledger('version') || '0.3.1';
 // A payload that carries no explicit build id still has a git hash and a build
 // time: report those instead of the useless "unversioned" placeholder.
 const buildId = (

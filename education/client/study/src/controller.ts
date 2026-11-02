@@ -43,6 +43,7 @@ import type { EducationPageContext } from '../../shell/src/index.js';
 import { ActivityStateMachine } from './machine.js';
 import { openSourcePopover } from './source-view.js';
 import {
+  ACTIVITY_TYPE_LABELS,
   ASSISTANCE_NOTE,
   DRAFT_SAVED,
   DRAFT_UNSAVED,
@@ -1154,12 +1155,10 @@ export class StudyController {
       return;
     }
     const workspace = this.workspace;
-    const summary = this.summary();
     container.append(
       h(
         'div',
         { class: 'edu-study-material', 'data-testid': 'study-material' },
-        h('p', { class: 'edu-muted', 'data-testid': 'study-focus' }, `${workspace.courseEditionLabel} · 内容包 ${workspace.packVersion} · ${this.intent.mode === 'review' ? '复习' : '学习'}`),
         h('h2', { class: 'edu-card__title' }, workspace.concept.title),
         h('p', { class: 'edu-card__meta' }, `${workspace.scope === 'partial' ? '部分内容（未达全册）' : '全册范围'} · ${workspace.trustMode === 'candidate' ? '候选内容（未核实）' : '正式内容'}`),
         h('h3', { class: 'edu-card__title' }, '学习目标'),
@@ -1175,7 +1174,7 @@ export class StudyController {
             )
           : null,
         h('h3', { class: 'edu-card__title' }, '出处'),
-        ...workspace.sources.map((source) => {
+        ...uniqueSources(workspace.sources).map((source) => {
           const sourceButton = button('查看出处', () => this.openSource(source, sourceButton), {
             small: true,
             dataAction: 'study-source',
@@ -1184,11 +1183,10 @@ export class StudyController {
             'div',
             { class: 'edu-study-source-row' },
             sourceButton,
-            h('span', { class: 'edu-muted' }, source.label),
+            h('span', { class: 'edu-muted' }, sourceLabel(source)),
           );
         }),
         h('p', { class: 'edu-study-status', 'data-testid': 'study-draft-status' }, this.draftStatus === 'saved' ? DRAFT_SAVED : this.draftStatus === 'saving' ? '正在保存草稿…' : this.draftStatus === 'failed' ? DRAFT_UNSAVED : ''),
-        h('div', { class: 'edu-inline-actions' }, ...this.axisChips(summary)),
         workspace.compatibility !== null
           ? notice({
               tone: 'warning',
@@ -1222,16 +1220,36 @@ export class StudyController {
       );
     }
     const actions = h('div', { class: 'edu-study-help-actions', 'data-testid': 'study-help-actions' });
-    for (const action of HELP_ACTIONS) {
-      actions.append(
-        button(action.label, () => void this.sendHelp(action.kind), {
-          small: true,
-          dataAction: `help-${action.kind}`,
-          title: action.note,
-        }),
+    // Two everyday help actions stay visible; the rest sit behind "更多帮助" so a
+    // first-time student is not faced with five competing buttons.
+    const moreHost = h('div', {
+      class: 'edu-study-help-actions edu-study-help-actions--more',
+      'data-testid': 'study-help-more',
+      hidden: true,
+    });
+    const helpButton = (action: (typeof HELP_ACTIONS)[number]): HTMLElement =>
+      button(action.label, () => void this.sendHelp(action.kind), {
+        small: true,
+        dataAction: `help-${action.kind}`,
+        title: action.note,
+      });
+    for (const action of HELP_ACTIONS.slice(0, 2)) actions.append(helpButton(action));
+    for (const action of HELP_ACTIONS.slice(2)) moreHost.append(helpButton(action));
+    if (HELP_ACTIONS.length > 2) {
+      const toggle = button(
+        '更多帮助',
+        () => {
+          const opening = moreHost.hasAttribute('hidden');
+          if (opening) moreHost.removeAttribute('hidden');
+          else moreHost.setAttribute('hidden', '');
+          toggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
+        },
+        { small: true, dataAction: 'help-more' },
       );
+      toggle.setAttribute('aria-expanded', 'false');
+      actions.append(toggle);
     }
-    root.append(actions);
+    root.append(actions, moreHost);
     if (this.helpNotice.length > 0) {
       root.append(h('p', { class: 'edu-notice edu-notice--warning', role: 'status', 'data-testid': 'study-help-notice' }, this.helpNotice));
     }
@@ -1266,7 +1284,7 @@ export class StudyController {
           disabled: this.session === null,
         }),
       ),
-      h('p', { class: 'edu-muted' }, '多行文字换行不会自动提交；使用“发送”按钮。提示、解释、示范和看答案都可随时请求。'),
+      h('p', { class: 'edu-muted' }, '想好了就点发送；卡住了，就用上面的按钮要一点帮助。'),
     );
     if (this.tutorState !== null && this.tutorState.consecutiveFailures >= 2) {
       root.append(
@@ -1316,7 +1334,7 @@ export class StudyController {
         h('h2', { class: 'edu-card__title' }, '当前活动'),
         statusChip(PHASE_LABELS[this.phase], PHASE_TONES[this.phase]),
       ),
-      h('p', { class: 'edu-card__meta' }, `${this.activity.type === 'recall' ? '回忆' : this.activity.type === 'explain' ? '解释' : this.activity.type === 'choice' ? '选择' : this.activity.type === 'relation' ? '关系' : this.activity.type === 'diagram_label' ? '图示标注' : '迁移'} · 版本 ${this.activity.version}`),
+      h('p', { class: 'edu-card__meta' }, `${ACTIVITY_TYPE_LABELS[this.activity.type] ?? '活动'}`),
       h('p', { class: 'edu-study-stem' }, this.activity.stem),
       draftStatus,
     );
@@ -1401,7 +1419,7 @@ export class StudyController {
     }
     const actions = h('div', { class: 'edu-inline-actions' },
       button('跳过本题', () => void this.skip(), { small: true, dataAction: 'skip-question' }),
-      button('结束本轮', () => void this.finishRound(), { small: true, tone: 'primary', dataAction: 'finish-round' }),
+      button('结束本轮', () => void this.finishRound(), { small: true, dataAction: 'finish-round' }),
       button('暂不完成，返回地图', () => this.leaveUnfinished(), { small: true }),
     );
     if (this.workspace?.imageFlow !== null && this.workspace !== null) {
@@ -1875,4 +1893,26 @@ function assistant(text: string, disclosure = false): ChatMessage {
 
 function system(text: string): ChatMessage {
   return { role: 'system', text, disclosure: false };
+}
+
+/**
+ * One row per textbook page: several source refs can resolve to the same page
+ * (a heading, a body block and a chapter opener), which used to print the same
+ * line five times.
+ */
+function uniqueSources(sources: readonly StudySource[]): readonly StudySource[] {
+  const seen = new Set<string>();
+  const result: StudySource[] = [];
+  for (const source of sources) {
+    const key = `${source.pdfPage}|${source.printedPage ?? ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(source);
+  }
+  return result;
+}
+
+function sourceLabel(source: StudySource): string {
+  const printed = source.printedPage?.trim() ?? '';
+  return printed.length > 0 ? `课本第 ${printed} 页` : `PDF 第 ${source.pdfPage} 页`;
 }

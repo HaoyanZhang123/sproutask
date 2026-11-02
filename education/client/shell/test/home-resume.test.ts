@@ -11,8 +11,8 @@ describe('home continue / map / review', () => {
     const cardText = textOf(card as HTMLElement);
     expect(cardText).toContain('细胞');
     expect(cardText).toContain('学习');
-    expect(cardText).toContain('activity.cell-recall');
-    expect(cardText).toContain('step-1');
+    // The saved cursor is resumed, not printed: raw activity ids and step ids stay out.
+    expect(cardText).not.toMatch(/activity\.|step-\d/);
     expect(cardText).toContain('已保存草稿');
 
     buttonByAction(pageRoot(container), 'resume-last').click();

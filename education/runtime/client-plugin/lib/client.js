@@ -32,7 +32,7 @@ window.__ModuleLoader__.load({
     ));
     var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
     
-    // education/runtime/client-plugin/src/index.ts
+    // runtime/client-plugin/src/index.ts
     var index_exports = {};
     __export(index_exports, {
       EDUCATION_ROOT_TITLE: () => EDUCATION_ROOT_TITLE,
@@ -43,7 +43,7 @@ window.__ModuleLoader__.load({
     module.exports = __toCommonJS(index_exports);
     var React = __toESM(require("react"), 1);
     
-    // education/client/shell/src/tokens.ts
+    // client/shell/src/tokens.ts
     var DESIGN_TOKENS = {
       /** 20px at a 16px root font. Deliberately larger than the browser default. */
       baseFontSize: "1.25rem",
@@ -123,7 +123,7 @@ window.__ModuleLoader__.load({
       danger: { fg: DESIGN_TOKENS.colors.danger, bg: DESIGN_TOKENS.colors.dangerSoft }
     };
     
-    // education/client/shell/src/layout.ts
+    // client/shell/src/layout.ts
     function remToPx(rem, baseFontPx) {
       return rem * baseFontPx;
     }
@@ -168,7 +168,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/shell/src/styles.ts
+    // client/shell/src/styles.ts
     var EDUCATION_STYLE_ATTRIBUTE = "data-edu-shell-style";
     var educationStyles = `
     .edu-shell {
@@ -343,6 +343,9 @@ window.__ModuleLoader__.load({
     .edu-page { min-width: 0; }
     .edu-page__header { margin-bottom: var(--edu-space-lg); }
     .edu-page__title { margin: 0 0 var(--edu-space-xs); font-size: var(--edu-font-xxl); line-height: ${DESIGN_TOKENS.lineHeights.tight}; overflow-wrap: anywhere; }
+    /* The page title receives programmatic focus for screen readers; keep it ring-free. */
+    .edu-shell .edu-page__title:focus,
+    .edu-shell .edu-page__title:focus-visible { outline: none; }
     .edu-page__lead { margin: 0; color: var(--edu-color-ink-muted); max-width: 62rem; }
     .edu-section { margin-top: var(--edu-space-xl); min-width: 0; }
     .edu-section__title { margin: 0 0 var(--edu-space-sm); font-size: var(--edu-font-xl); }
@@ -530,7 +533,7 @@ window.__ModuleLoader__.load({
       return style;
     }
     
-    // education/client/shell/src/dom.ts
+    // client/shell/src/dom.ts
     function appendChildren(parent, children) {
       const doc = parent.ownerDocument ?? globalThis.document;
       for (const child of children) {
@@ -599,7 +602,7 @@ window.__ModuleLoader__.load({
       });
     }
     
-    // education/client/shell/src/labels.ts
+    // client/shell/src/labels.ts
     var LEARNING_LABELS = {
       not_started: "\u672A\u5F00\u59CB",
       in_progress: "\u8FDB\u884C\u4E2D",
@@ -666,7 +669,8 @@ window.__ModuleLoader__.load({
       return SUBJECT_LABELS[subject] ?? subject;
     }
     function courseEditionLabel(input) {
-      return `${input.grade}\u5E74\u7EA7${termName(input.term)} \xB7 ${subjectLabel(input.subject)} \xB7 ${input.editionLabel}`;
+      void input.editionLabel;
+      return `${input.grade}\u5E74\u7EA7${termName(input.term)} \xB7 ${subjectLabel(input.subject)}`;
     }
     function termName(term) {
       if (term === 1) return "\u4E0A\u518C";
@@ -701,7 +705,7 @@ window.__ModuleLoader__.load({
       return "UNKNOWN";
     }
     
-    // education/client/shell/src/errors.ts
+    // client/shell/src/errors.ts
     var SERVICE_ERROR_COPY = {
       INVALID_INPUT: {
         title: "\u8F93\u5165\u9700\u8981\u4FEE\u6539",
@@ -839,7 +843,7 @@ window.__ModuleLoader__.load({
       return banner;
     }
     
-    // education/client/shell/src/contracts.ts
+    // client/shell/src/contracts.ts
     var SHELL_SLOT_NAMES = [
       "library:content",
       "library:import",
@@ -850,7 +854,7 @@ window.__ModuleLoader__.load({
       "study:visuals"
     ];
     
-    // education/client/shell/src/key-port.ts
+    // client/shell/src/key-port.ts
     var MIN_KEY_LENGTH = 12;
     var MAX_KEY_LENGTH = 200;
     var KEY_PATTERN = /^sk-[A-Za-z0-9_-]+$/;
@@ -1022,7 +1026,7 @@ window.__ModuleLoader__.load({
       );
     }
     
-    // education/client/shell/src/components/button.ts
+    // client/shell/src/components/button.ts
     var TONE_CLASS = {
       default: "",
       primary: "edu-button--primary",
@@ -1050,7 +1054,7 @@ window.__ModuleLoader__.load({
       );
     }
     
-    // education/client/shell/src/components/context-bar.ts
+    // client/shell/src/components/context-bar.ts
     var SAVE_LABELS = {
       saved: "\u5DF2\u4FDD\u5B58",
       saving: "\u6B63\u5728\u4FDD\u5B58",
@@ -1071,7 +1075,6 @@ window.__ModuleLoader__.load({
       );
       bar.append(
         item("\u6559\u6750", input.courseEdition ?? "\u5C1A\u672A\u9009\u62E9\u6559\u6750", "course-edition"),
-        item("\u5185\u5BB9\u5305", input.packVersion === null ? "\u2014" : `\u7248\u672C ${input.packVersion}`, "pack-version"),
         item("\u5F53\u524D\u6982\u5FF5", input.concept ?? "\u5C1A\u672A\u9009\u62E9\u6982\u5FF5", "concept"),
         item("\u6A21\u5F0F", input.mode ?? "\u672A\u5F00\u59CB", "mode"),
         h(
@@ -1100,7 +1103,7 @@ window.__ModuleLoader__.load({
       return bar;
     }
     
-    // education/client/shell/src/components/states.ts
+    // client/shell/src/components/states.ts
     function emptyState(options) {
       const element = h(
         "div",
@@ -1197,7 +1200,7 @@ window.__ModuleLoader__.load({
       );
     }
     
-    // education/client/shell/src/components/status-chip.ts
+    // client/shell/src/components/status-chip.ts
     function statusChip(label, tone = "neutral", options = {}) {
       return h(
         "span",
@@ -1213,7 +1216,7 @@ window.__ModuleLoader__.load({
       );
     }
     
-    // education/client/shell/src/pages/registry.ts
+    // client/shell/src/pages/registry.ts
     var PageRegistryError = class extends Error {
       constructor(message) {
         super(message);
@@ -1271,7 +1274,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/shell/src/components/confirm-dialog.ts
+    // client/shell/src/components/confirm-dialog.ts
     var dialogCounter = 0;
     var ConfirmDialog = class {
       element;
@@ -1403,7 +1406,7 @@ window.__ModuleLoader__.load({
       return "manual";
     }
     
-    // education/client/shell/src/pages/common.ts
+    // client/shell/src/pages/common.ts
     function definePage(input) {
       let active = false;
       return {
@@ -1448,7 +1451,7 @@ window.__ModuleLoader__.load({
       return "neutral";
     }
     
-    // education/client/shell/src/pages/account.ts
+    // client/shell/src/pages/account.ts
     function createAccountPage() {
       return definePage({
         id: "shell.account",
@@ -1463,7 +1466,7 @@ window.__ModuleLoader__.load({
           container.append(
             pageHeading(
               "\u8D26\u6237\u4E0E\u6A21\u578B\u670D\u52A1",
-              "\u5B66\u4E60\u8EAB\u4EFD\u3001\u6A21\u578B\u8D26\u6237\u4E0E API Key \u662F\u4E09\u5C42\u4E0D\u540C\u7684\u72B6\u6001\u3002\u754C\u9762\u53EA\u663E\u793A\u540E\u7AEF\u8FD4\u56DE\u7684\u53EF\u7528\u6027\uFF0C\u4E0D\u63A5\u6536\u6216\u5C55\u793A\u4EFB\u4F55\u51ED\u636E\u5185\u5BB9\u3002"
+              "\u8FD9\u91CC\u662F\u8FD9\u53F0\u7535\u8111\u4E0A\u7684\u5B66\u4E60\u6863\u6848\u548C\u6A21\u578B\u670D\u52A1\u8BBE\u7F6E\uFF1B\u5B66\u4E60\u8BB0\u5F55\u53EA\u5B58\u5728\u672C\u673A\u3002"
             )
           );
           if (snapshot === null) {
@@ -1478,18 +1481,6 @@ window.__ModuleLoader__.load({
             return;
           }
           container.append(
-            renderContextBar({
-              courseEdition: courseEditionLabel(snapshot.courseEdition),
-              packVersion: snapshot.pack.version,
-              concept: null,
-              mode: null,
-              saveState: state.saveState,
-              fixture: snapshot.fixture,
-              backTarget: state.backTarget?.label ?? null,
-              onBack: state.backTarget === null ? void 0 : () => void api2.back()
-            })
-          );
-          container.append(
             h(
               "section",
               { class: "edu-section", "data-testid": "account-identity" },
@@ -1497,12 +1488,12 @@ window.__ModuleLoader__.load({
               h(
                 "div",
                 { class: "edu-card" },
-                statusChip("\u672C\u5730\u533F\u540D\u6863\u6848", "positive"),
-                h("p", { class: "edu-card__title" }, snapshot.learner.id),
+                statusChip("\u672C\u673A\u6863\u6848", "positive"),
+                h("p", { class: "edu-card__title" }, "\u53EA\u5C5E\u4E8E\u8FD9\u53F0\u7535\u8111"),
                 h(
                   "p",
                   { class: "edu-card__meta" },
-                  `\u521B\u5EFA\u4E8E ${formatDateTime(snapshot.learner.createdAt)}\u3002\u5B66\u4E60\u8BB0\u5F55\u53EA\u5C5E\u4E8E\u8FD9\u4E2A\u672C\u673A\u8EAB\u4EFD\uFF1B\u6A21\u578B\u8D26\u53F7\u4E0D\u662F\u5B66\u4E60\u8EAB\u4EFD\u3002`
+                  `\u521B\u5EFA\u4E8E ${formatDateTime(snapshot.learner.createdAt)}\u3002\u5B66\u4E60\u8BB0\u5F55\u53EA\u5C5E\u4E8E\u8FD9\u53F0\u7535\u8111\uFF1B\u6A21\u578B\u8D26\u53F7\u4E0D\u662F\u5B66\u4E60\u8EAB\u4EFD\u3002`
                 )
               )
             )
@@ -1513,7 +1504,7 @@ window.__ModuleLoader__.load({
             h(
               "section",
               { class: "edu-section", "data-testid": "account-model-account" },
-              h("h2", { class: "edu-section__title" }, "\u6A21\u578B\u8D26\u6237\uFF08\u5E73\u53F0\u6388\u6743\uFF09"),
+              h("h2", { class: "edu-section__title" }, "\u6A21\u578B\u8D26\u53F7"),
               h(
                 "div",
                 { class: "edu-card" },
@@ -1521,12 +1512,7 @@ window.__ModuleLoader__.load({
                 h(
                   "p",
                   { class: "edu-card__meta" },
-                  accountUnavailable ? "\u672C\u4EA7\u54C1\u7EBF\u4E0D\u4F7F\u7528\u5E73\u53F0\u8D26\u6237\u6388\u6743\uFF08\u7528\u6237\u5DF2\u660E\u786E\u8BE5\u8DEF\u7EBF\u4E0D\u5141\u8BB8\uFF09\u3002\u56E0\u6B64\u8FD9\u91CC\u4E0D\u63D0\u4F9B\u767B\u5F55\u3001\u9000\u51FA\u6216\u6388\u6743\u5165\u53E3\uFF0C\u4E5F\u4E0D\u628A API Key \u663E\u793A\u6210\u8D26\u6237\u6388\u6743\u6210\u529F\u3002" : `\u8D26\u6237\u6388\u6743\u53EF\u7528\uFF1B\u6700\u540E\u68C0\u67E5\uFF1A${formatDateTime(account.lastCheckedAt)}\u3002`
-                ),
-                h(
-                  "p",
-                  { class: "edu-muted", "data-testid": "account-route-note" },
-                  "\u8D26\u6237\u767B\u5F55\u3001\u53D6\u6D88\u3001\u5931\u8D25\u4E0E\u9000\u51FA\u72B6\u6001\u7531\u540E\u7AEF\u8FD4\u56DE\uFF1B\u5BA2\u6237\u7AEF\u4E0D\u81EA\u884C\u88C1\u526A\u6743\u9650\uFF0C\u4E5F\u4E0D\u7528\u9690\u85CF\u6309\u94AE\u4EE3\u66FF\u540E\u7AEF\u62D2\u7EDD\u3002"
+                  accountUnavailable ? "\u5F53\u524D\u7248\u672C\u4E0D\u9700\u8981\u5E73\u53F0\u8D26\u53F7\uFF1A\u586B\u597D\u4E0B\u9762\u7684\u6A21\u578B Key \u5C31\u80FD\u4F7F\u7528\u667A\u80FD\u53CD\u9988\u3002" : `\u8D26\u53F7\u53EF\u7528\uFF1B\u6700\u540E\u68C0\u67E5\uFF1A${formatDateTime(account.lastCheckedAt)}\u3002`
                 )
               )
             )
@@ -1813,7 +1799,7 @@ window.__ModuleLoader__.load({
       }
     }
     
-    // education/client/shell/src/pages/first-run.ts
+    // client/shell/src/pages/first-run.ts
     function createFirstRunPage() {
       return definePage({
         id: "shell.first-run",
@@ -1843,18 +1829,6 @@ window.__ModuleLoader__.load({
             return;
           }
           const courseLabel = courseEditionLabel(snapshot.courseEdition);
-          container.append(
-            renderContextBar({
-              courseEdition: courseLabel,
-              packVersion: snapshot.pack.version,
-              concept: null,
-              mode: null,
-              saveState: state.saveState,
-              fixture: snapshot.fixture,
-              backTarget: state.backTarget?.label ?? null,
-              onBack: state.backTarget === null ? void 0 : () => void api2.back()
-            })
-          );
           if (state.offline) container.append(offlineNotice(() => void api2.refresh()));
           container.append(
             notice({
@@ -2102,7 +2076,7 @@ window.__ModuleLoader__.load({
       return h("label", { class: "edu-choice", for: id }, input, h("span", {}, label));
     }
     
-    // education/client/shell/src/components/progress.ts
+    // client/shell/src/components/progress.ts
     function progressSummary(input) {
       const total = Math.max(0, Math.floor(input.total));
       const current = Math.max(0, Math.min(Math.floor(input.current), total));
@@ -2125,7 +2099,7 @@ window.__ModuleLoader__.load({
       );
     }
     
-    // education/client/shell/src/pages/home.ts
+    // client/shell/src/pages/home.ts
     function entryCard(input) {
       return h(
         "article",
@@ -2165,18 +2139,6 @@ window.__ModuleLoader__.load({
           if (state.offline) {
             container.append(offlineNotice(() => void api2.refresh()));
           }
-          const courseLabel = courseEditionLabel(snapshot.courseEdition);
-          container.append(
-            renderContextBar({
-              courseEdition: courseLabel,
-              packVersion: snapshot.pack.version,
-              concept: home.activeSession === null ? null : conceptTitle(snapshot.concepts, home.activeSession.conceptId),
-              mode: home.activeSession === null ? null : SESSION_MODE_LABELS[home.activeSession.mode],
-              saveState: state.saveState,
-              fixture: snapshot.fixture,
-              backTarget: null
-            })
-          );
           if (home.compatibility !== null) {
             container.append(
               notice({
@@ -2212,15 +2174,13 @@ window.__ModuleLoader__.load({
           const active = home.activeSession;
           if (active !== null) {
             const title = conceptTitle(snapshot.concepts, active.conceptId);
-            const cursorText = positionLabel(active.resumeCursor.activityId, active.resumeCursor.cursor);
             entries.append(
               entryCard({
                 eyebrow: "\u7EE7\u7EED\u4E0A\u6B21",
                 title,
                 body: [
-                  `${courseLabel} \xB7 \u5185\u5BB9\u5305 ${active.packVersion}`,
-                  `\u6A21\u5F0F\uFF1A${SESSION_MODE_LABELS[active.mode]} \xB7 \u4E0A\u6B21\u4F4D\u7F6E\uFF1A${cursorText}`,
-                  active.resumeCursor.cursor === null ? "\u6CA1\u6709\u5F85\u6062\u590D\u8349\u7A3F" : "\u5DF2\u4FDD\u5B58\u8349\u7A3F\uFF0C\u53EF\u539F\u4F4D\u6062\u590D"
+                  `\u6A21\u5F0F\uFF1A${SESSION_MODE_LABELS[active.mode]}`,
+                  active.resumeCursor.cursor === null ? "\u672C\u8F6E\u8FD8\u6CA1\u6709\u586B\u5199\u8349\u7A3F" : "\u5DF2\u4FDD\u5B58\u8349\u7A3F\uFF0C\u53EF\u4EE5\u539F\u6837\u63A5\u7740\u505A"
                 ],
                 primary: true,
                 testId: "home-continue",
@@ -2238,7 +2198,6 @@ window.__ModuleLoader__.load({
                 eyebrow: "\u4E0A\u6B21\u5B66\u4E60\u5DF2\u5B8C\u6210",
                 title,
                 body: [
-                  `${courseLabel} \xB7 \u5185\u5BB9\u5305 ${completed.packVersion}`,
                   `\u6A21\u5F0F\uFF1A${SESSION_MODE_LABELS[completed.mode]} \xB7 \u7ED3\u675F\u4E8E ${formatDateTime(completed.endedAt)}`,
                   "\u5DF2\u5B8C\u6210\u7684\u6D3B\u52A8\u53EF\u4EE5\u6253\u5F00\u6536\u5C3E\u8BB0\u5F55\uFF0C\u4E5F\u53EF\u4EE5\u5F00\u59CB\u65B0\u4E00\u8F6E\uFF0C\u4E0D\u4F1A\u8986\u76D6\u65E7\u8BC1\u636E\u3002"
                 ],
@@ -2356,9 +2315,9 @@ window.__ModuleLoader__.load({
               ),
               statusCard(
                 "\u5E73\u53F0\u8D26\u6237",
-                "\u4E0D\u53EF\u7528",
+                "\u4E0D\u9700\u8981",
                 "neutral",
-                "\u672C\u4EA7\u54C1\u7EBF\u4E0D\u4F7F\u7528\u5E73\u53F0\u8D26\u6237\u6388\u6743\uFF1B\u5B66\u4E60\u8EAB\u4EFD\u4E0E\u6A21\u578B\u8D26\u53F7\u5206\u5F00\u3002"
+                "\u5F53\u524D\u7248\u672C\u53EA\u7528\u6A21\u578B Key\uFF0C\u4E0D\u7528\u5E73\u53F0\u8D26\u53F7\u3002"
               )
             )
           );
@@ -2437,7 +2396,7 @@ window.__ModuleLoader__.load({
       return section;
     }
     
-    // education/client/shell/src/pages/placeholders.ts
+    // client/shell/src/pages/placeholders.ts
     function createLibraryFallbackPage() {
       return definePage({
         id: "shell.library-fallback",
@@ -2447,22 +2406,9 @@ window.__ModuleLoader__.load({
         fallback: true,
         mount(container, context) {
           const api2 = context.services.shell;
-          const state = context.services.getState();
-          const snapshot = state.snapshot;
-          container.append(pageHeading("\u6559\u6750\u5E93", "\u9009\u62E9\u5339\u914D\u6559\u6750\uFF0C\u67E5\u770B\u7248\u672C\u3001\u6750\u6599\u53EF\u7528\u6027\u3001\u51FA\u5904\u4E0E\u5BA1\u6821\u72B6\u6001\u3002"));
+          const snapshot = context.services.getState().snapshot;
+          container.append(pageHeading("\u6559\u6750\u5E93", "\u786E\u8BA4\u4F60\u7528\u7684\u662F\u54EA\u672C\u6559\u6750\u3001\u54EA\u4E00\u7248\uFF0C\u518D\u770B\u6750\u6599\u4ECE\u54EA\u91CC\u6765\u3002"));
           if (snapshot !== null) {
-            container.append(
-              renderContextBar({
-                courseEdition: courseEditionLabel(snapshot.courseEdition),
-                packVersion: snapshot.pack.version,
-                concept: null,
-                mode: null,
-                saveState: state.saveState,
-                fixture: snapshot.fixture,
-                backTarget: state.backTarget?.label ?? null,
-                onBack: state.backTarget === null ? void 0 : () => void api2.back()
-              })
-            );
             container.append(
               h(
                 "section",
@@ -2515,23 +2461,7 @@ window.__ModuleLoader__.load({
         fallback: true,
         mount(container, context) {
           const api2 = context.services.shell;
-          const state = context.services.getState();
-          const snapshot = state.snapshot;
-          container.append(pageHeading("\u5730\u56FE", "\u6309\u771F\u5B9E\u6559\u6750\u76EE\u5F55\u5B9A\u4F4D\u6982\u5FF5\uFF0C\u67E5\u770B\u5C40\u90E8\u5173\u7CFB\u4E0E\u5F53\u524D\u8BC1\u636E\u3002"));
-          if (snapshot !== null) {
-            container.append(
-              renderContextBar({
-                courseEdition: courseEditionLabel(snapshot.courseEdition),
-                packVersion: snapshot.pack.version,
-                concept: null,
-                mode: null,
-                saveState: state.saveState,
-                fixture: snapshot.fixture,
-                backTarget: state.backTarget?.label ?? null,
-                onBack: state.backTarget === null ? void 0 : () => void api2.back()
-              })
-            );
-          }
+          container.append(pageHeading("\u5730\u56FE", "\u6309\u8BFE\u672C\u76EE\u5F55\u627E\u6982\u5FF5\uFF0C\u70B9\u5F00\u770B\u5B83\u548C\u76F8\u5173\u5185\u5BB9\u7684\u5173\u7CFB\u3002"));
           container.append(
             emptyState({
               title: "\u8FD8\u6CA1\u6709\u53EF\u663E\u793A\u7684\u6982\u5FF5\u5730\u56FE",
@@ -2575,7 +2505,7 @@ window.__ModuleLoader__.load({
       });
     }
     
-    // education/client/shell/src/components/evidence-card.ts
+    // client/shell/src/components/evidence-card.ts
     function renderEvidenceCard(evidence2, options = {}) {
       const card = h("article", {
         class: "edu-evidence",
@@ -2662,7 +2592,7 @@ window.__ModuleLoader__.load({
       return "progress";
     }
     
-    // education/client/shell/src/components/modal.ts
+    // client/shell/src/components/modal.ts
     var modalCounter = 0;
     var Modal = class {
       element;
@@ -2729,7 +2659,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/shell/src/pages/records.ts
+    // client/shell/src/pages/records.ts
     var RANGE_SCOPE_LABELS = {
       selected: "\u5B66\u751F\u81EA\u9009\u7684\u5DF2\u5B66\u8303\u56F4",
       all_unlearned: "\u5168\u672A\u5B66",
@@ -2834,17 +2764,6 @@ window.__ModuleLoader__.load({
               );
               return;
             }
-            container.append(
-              renderContextBar({
-                courseEdition: `${snapshot.courseEdition.grade}\u5E74\u7EA7 \xB7 ${snapshot.courseEdition.editionLabel}`,
-                packVersion: snapshot.pack.version,
-                concept: null,
-                mode: null,
-                saveState: state.saveState,
-                fixture: snapshot.fixture,
-                backTarget: null
-              })
-            );
             if (state.offline) container.append(offlineNotice(() => void api2.refresh()));
             if (state.saveState === "failed" || records.saveState === "failed") {
               container.append(
@@ -3277,7 +3196,7 @@ window.__ModuleLoader__.load({
       return section;
     }
     
-    // education/client/shell/src/pages/workspace.ts
+    // client/shell/src/pages/workspace.ts
     function queryOf(path) {
       const index = path.indexOf("?");
       return new URLSearchParams(index >= 0 ? path.slice(index + 1) : "");
@@ -3317,18 +3236,6 @@ window.__ModuleLoader__.load({
           const mode = explicitMode ?? active?.mode ?? null;
           const conceptId = (startsNewActivity ? queryConcept : null) ?? active?.conceptId ?? queryConcept;
           const concept2 = conceptId === null ? null : conceptTitle(snapshot.concepts, conceptId);
-          container.append(
-            renderContextBar({
-              courseEdition: courseEditionLabel(snapshot.courseEdition),
-              packVersion: active?.packVersion ?? snapshot.pack.version,
-              concept: concept2,
-              mode: mode === null ? null : SESSION_MODE_LABELS[mode],
-              saveState: state.saveState,
-              fixture: snapshot.fixture,
-              backTarget: state.backTarget?.label ?? null,
-              onBack: state.backTarget === null ? void 0 : () => void api2.back()
-            })
-          );
           if (state.offline) container.append(offlineNotice(() => void api2.refresh()));
           if (active !== null && resume !== null) {
             container.append(
@@ -3429,7 +3336,7 @@ window.__ModuleLoader__.load({
       });
     }
     
-    // education/client/shell/src/slots.ts
+    // client/shell/src/slots.ts
     var SlotRegistryError = class extends Error {
       constructor(message) {
         super(message);
@@ -3461,8 +3368,9 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/shell/src/shell.ts
+    // client/shell/src/shell.ts
     var NAV_ITEMS = [
+      { path: "/home", label: "\u9996\u9875" },
       { path: "/library", label: "\u6559\u6750\u5E93" },
       { path: "/map", label: "\u5730\u56FE" },
       { path: "/workspace", label: "\u5DE5\u4F5C\u533A" },
@@ -3633,8 +3541,7 @@ window.__ModuleLoader__.load({
         const footer = h(
           "footer",
           { class: "edu-footer" },
-          h("p", {}, "\u5B66\u4E60\u8BB0\u5F55\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\uFF1B\u4E91\u7AEF\u667A\u80FD\u53CD\u9988\u9700\u8981\u5DF2\u914D\u7F6E\u7684\u6A21\u578B\u670D\u52A1\u3002"),
-          h("p", {}, "\u5B66\u751F\u6743\u9650\u53EA\u5305\u542B\u5B66\u4E60\u76F8\u5173\u80FD\u529B\uFF1B\u7CFB\u7EDF\u7EA7\u6587\u4EF6\u4E0E\u547D\u4EE4\u80FD\u529B\u4E0D\u7531\u5BA2\u6237\u7AEF\u6388\u4E88\u3002")
+          h("p", {}, "\u5B66\u4E60\u8BB0\u5F55\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\uFF1B\u667A\u80FD\u53CD\u9988\u9700\u8981\u5148\u914D\u7F6E\u6A21\u578B\u670D\u52A1\u3002")
         );
         this.root.append(skip, header, layout, footer);
         this.renderNav();
@@ -4147,15 +4054,15 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/shell/src/data/types.ts
+    // client/shell/src/data/types.ts
     function okData(data, revision, offline = false) {
       return offline ? { ok: true, data, revision, offline: true } : { ok: true, data, revision };
     }
     
-    // education/packages/domain/src/versions.ts
+    // packages/domain/src/versions.ts
     var SCHEMA_VERSION = 1;
     
-    // education/packages/domain/src/primitives.ts
+    // packages/domain/src/primitives.ts
     var OPAQUE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:@-]{0,127}$/;
     var RFC3339_UTC_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
     var SHA256_PATTERN = /^[a-f0-9]{64}$/;
@@ -4273,7 +4180,7 @@ window.__ModuleLoader__.load({
       return typeof value === "object" && value !== null && !Array.isArray(value);
     }
     
-    // education/packages/domain/src/validation.ts
+    // packages/domain/src/validation.ts
     var IssueCollector = class {
       list = [];
       add(code, path, message) {
@@ -4544,7 +4451,7 @@ window.__ModuleLoader__.load({
       return true;
     }
     
-    // education/packages/domain/src/entities/sources.ts
+    // packages/domain/src/entities/sources.ts
     var SOURCE_IDENTITY_KINDS = [
       "cover",
       "copyright_page",
@@ -4892,7 +4799,7 @@ window.__ModuleLoader__.load({
     }
     var validateTocNode = validateWith(readTocNode);
     
-    // education/packages/domain/src/entities/content.ts
+    // packages/domain/src/entities/content.ts
     var ANSWER_DISCLOSURE_POLICIES = [
       "after_independent_attempt",
       "after_help_request",
@@ -5636,7 +5543,7 @@ window.__ModuleLoader__.load({
     }
     var validateContentPackStructure = validateWith(readContentPackAt);
     
-    // education/packages/domain/src/entities/learning.ts
+    // packages/domain/src/entities/learning.ts
     function readLearner(value, path, issues) {
       const obj = readObject(value, path, ["schemaVersion", "id", "createdAt"], issues);
       if (obj === null) return null;
@@ -6189,7 +6096,7 @@ window.__ModuleLoader__.load({
     }
     var validateConceptProgress = validateWith(readConceptProgressAt);
     
-    // education/packages/domain/src/entities/system.ts
+    // packages/domain/src/entities/system.ts
     function readImportError(value, path, issues) {
       const obj = readObject(value, path, ["code", "message", "retryable"], issues);
       if (obj === null) return null;
@@ -6781,7 +6688,7 @@ window.__ModuleLoader__.load({
     }
     var validateRealtimeEnvelope = validateWith(readRealtimeEnvelope);
     
-    // education/packages/domain/src/services/results.ts
+    // packages/domain/src/services/results.ts
     function okResult(data, revision) {
       return { ok: true, data, revision };
     }
@@ -6792,7 +6699,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/packages/domain/fixtures/packs/valid-partial.json
+    // packages/domain/fixtures/packs/valid-partial.json
     var valid_partial_default = {
       schemaVersion: 1,
       id: "pack.biology-7a",
@@ -7369,7 +7276,7 @@ window.__ModuleLoader__.load({
       ]
     };
     
-    // education/packages/domain/fixtures/progress/reviewed-and-due.json
+    // packages/domain/fixtures/progress/reviewed-and-due.json
     var reviewed_and_due_default = {
       schemaVersion: 1,
       learnerId: "learner.local.default",
@@ -7403,7 +7310,7 @@ window.__ModuleLoader__.load({
       revision: 3
     };
     
-    // education/packages/domain/fixtures/progress/learned-needs-support.json
+    // packages/domain/fixtures/progress/learned-needs-support.json
     var learned_needs_support_default = {
       schemaVersion: 1,
       learnerId: "learner.local.default",
@@ -7437,7 +7344,7 @@ window.__ModuleLoader__.load({
       revision: 3
     };
     
-    // education/packages/domain/fixtures/progress/no-evidence.json
+    // packages/domain/fixtures/progress/no-evidence.json
     var no_evidence_default = {
       schemaVersion: 1,
       learnerId: "learner.local.default",
@@ -7471,7 +7378,7 @@ window.__ModuleLoader__.load({
       revision: 0
     };
     
-    // education/packages/domain/fixtures/self-reports/cell.json
+    // packages/domain/fixtures/self-reports/cell.json
     var cell_default = {
       schemaVersion: 1,
       id: "self-report.cell.1",
@@ -7483,7 +7390,7 @@ window.__ModuleLoader__.load({
       createdAt: "2026-10-29T09:00:00Z"
     };
     
-    // education/client/shell/src/client-entry.ts
+    // client/shell/src/client-entry.ts
     var EDUCATION_ROOT_SLOT = { name: "root", locale: "common" };
     function registerEducationRoot(slots, host, options) {
       let controller = null;
@@ -7503,7 +7410,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/library/src/labels.ts
+    // client/library/src/labels.ts
     var MATERIAL_STATE_LABELS = {
       baseline: "\u672C\u671F\u5339\u914D\u57FA\u51C6",
       candidate: "\u5F85\u6838\u5B9E\u5019\u9009",
@@ -7785,7 +7692,7 @@ window.__ModuleLoader__.load({
       return "\u672A\u5F00\u59CB";
     }
     
-    // education/client/library/src/source-reader.ts
+    // client/library/src/source-reader.ts
     var SourceReader = class {
       options;
       modal = null;
@@ -8034,7 +7941,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/library/src/components.ts
+    // client/library/src/components.ts
     function fixtureNotice(text) {
       return h(
         "div",
@@ -8090,8 +7997,6 @@ window.__ModuleLoader__.load({
           { class: "edu-kv" },
           h("dt", {}, "\u9875\u6570"),
           h("dd", {}, book.pageCount > 0 ? `${book.pageCount} \u9875` : "\u2014"),
-          h("dt", {}, "\u6587\u4EF6\u6307\u7EB9"),
-          h("dd", { class: "edu-lib-inline-code" }, formatFingerprint(book.sha256)),
           h("dt", {}, "\u5185\u5BB9\u8303\u56F4"),
           h("dd", {}, `${SCOPE_LABELS[book.scope]} \xB7 ${COVERAGE_LABELS[book.coverageStatus]}`),
           h("dt", {}, "\u6750\u6599\u72B6\u6001"),
@@ -8200,7 +8105,7 @@ window.__ModuleLoader__.load({
       return "progress";
     }
     
-    // education/client/library/src/job-model.ts
+    // client/library/src/job-model.ts
     function reduceJobUpdate(current, next) {
       if (current === null) return next;
       if (current.id !== next.id) return current;
@@ -8230,7 +8135,7 @@ window.__ModuleLoader__.load({
       return job.status === "failed" && job.retryable;
     }
     
-    // education/client/library/src/controller.ts
+    // client/library/src/controller.ts
     var LibraryController = class {
       options;
       state = {
@@ -8618,11 +8523,11 @@ window.__ModuleLoader__.load({
         const section = h(
           "section",
           { class: "edu-section", "data-testid": "library-sources" },
-          h("h2", { class: "edu-section__title" }, "\u6765\u6E90\u9605\u8BFB"),
+          h("h2", { class: "edu-section__title" }, "\u8BFE\u672C\u539F\u6587\u9875\u7801"),
           h(
             "p",
             { class: "edu-section__lead" },
-            book === null ? "\u9009\u62E9\u4E00\u672C\u6559\u6750\u540E\u67E5\u770B\u6765\u6E90\u3002" : `${book.title} \xB7 PDF \u9875\u5E8F\u4E0E\u5370\u5237\u9875\u7801\u5206\u5F00\u663E\u793A\uFF1B\u67E5\u770B\u6765\u6E90\u4E0D\u4F1A\u63D0\u4EA4\u4F5C\u7B54\u3002`
+            book === null ? "\u9009\u62E9\u4E00\u672C\u6559\u6750\u540E\u67E5\u770B\u6765\u6E90\u3002" : "\u60F3\u770B\u539F\u53E5\u65F6\u70B9\u5F00\u4E00\u6761\u6765\u6E90\u5C31\u80FD\u5BF9\u7167\uFF1B\u8FD9\u91CC\u53EA\u5217\u9875\u7801\uFF0C\u4E0D\u4F1A\u63D0\u4EA4\u4F5C\u7B54\u3002"
           )
         );
         if (this.state.sourcesLoading) {
@@ -8653,7 +8558,14 @@ window.__ModuleLoader__.load({
         for (const item of this.state.sources) {
           list.append(sourceListItem(item, (selected, trigger) => this.openSource(selected, trigger)));
         }
-        section.append(list);
+        section.append(
+          h(
+            "details",
+            { class: "edu-lib-source-fold", "data-testid": "library-sources-fold" },
+            h("summary", {}, `\u67E5\u770B ${this.state.sources.length} \u6761\u6765\u6E90\uFF08PDF \u9875 / \u8BFE\u672C\u9875\uFF09`),
+            list
+          )
+        );
         return section;
       }
       renderImport() {
@@ -8942,7 +8854,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/library/src/styles.ts
+    // client/library/src/styles.ts
     var LIBRARY_STYLE_ATTRIBUTE = "data-edu-library-style";
     var libraryStyles = `
     .edu-lib { min-width: 0; }
@@ -9088,7 +9000,7 @@ window.__ModuleLoader__.load({
       return style;
     }
     
-    // education/client/library/src/page.ts
+    // client/library/src/page.ts
     function createLibraryPage(controller) {
       return {
         id: "library",
@@ -9108,7 +9020,7 @@ window.__ModuleLoader__.load({
               h(
                 "p",
                 { class: "edu-page__lead" },
-                "\u533A\u5206\u672C\u671F\u5339\u914D\u57FA\u51C6\u3001\u5F85\u6838\u5B9E\u5019\u9009\u4E0E\u4E0D\u53EF\u7528\u6750\u6599\uFF1B\u67E5\u770B\u5BFC\u5165\u8FDB\u5EA6\u4E0E\u6765\u6E90\uFF0C\u5019\u9009\u6807\u8BC6\u59CB\u7EC8\u53EF\u89C1\u3002"
+                "\u786E\u8BA4\u4F60\u7528\u7684\u662F\u54EA\u672C\u6559\u6750\u3001\u54EA\u4E00\u7248\uFF0C\u518D\u770B\u6750\u6599\u4ECE\u54EA\u91CC\u6765\u3002"
               )
             ),
             h("div", { "data-edu-slot": "library:content", "data-testid": "library-content-slot" }),
@@ -9122,7 +9034,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/packages/domain/fixtures/entities/figure.json
+    // packages/domain/fixtures/entities/figure.json
     var figure_default = {
       schemaVersion: 1,
       id: "figure.cell.1",
@@ -9135,7 +9047,7 @@ window.__ModuleLoader__.load({
       reviewState: "curator_checked"
     };
     
-    // education/packages/domain/fixtures/entities/source-ref.json
+    // packages/domain/fixtures/entities/source-ref.json
     var source_ref_default = {
       schemaVersion: 1,
       id: "source.p18",
@@ -9154,7 +9066,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/packages/domain/fixtures/entities/source-block.json
+    // packages/domain/fixtures/entities/source-block.json
     var source_block_default = {
       schemaVersion: 1,
       id: "block.cell.ocr.1",
@@ -9167,7 +9079,7 @@ window.__ModuleLoader__.load({
       reviewState: "curator_checked"
     };
     
-    // education/client/library/src/index.ts
+    // client/library/src/index.ts
     function defaultRequestFactory() {
       let counter = 0;
       return () => {
@@ -9221,7 +9133,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/map/src/model.ts
+    // client/map/src/model.ts
     var REVIEW_HISTORY_LABELS = {
       needs_support: "\u4ECD\u9700\u5DE9\u56FA",
       developing: "\u521D\u6B65\u7406\u89E3",
@@ -9518,7 +9430,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/map/src/views.ts
+    // client/map/src/views.ts
     var RELATION_TYPE_LABELS = {
       prerequisite: "\u5148\u4FEE",
       related: "\u76F8\u5173"
@@ -10075,9 +9987,19 @@ window.__ModuleLoader__.load({
         const other = payload.concepts.find((entry) => entry.id === otherId);
         relations.append(
           h(
-            "p",
+            "div",
             { class: "edu-map-detail__relation", "data-relation-id": relation2.id },
-            `${RELATION_TYPE_LABELS[relation2.type]} \xB7 ${RELATION_BASIS_LABELS[relation2.basis]} \xB7 ${relation2.fromConceptId === detail.concept.id ? "\u6307\u5411" : "\u6765\u81EA"} ${other?.title ?? otherId} \xB7 \u7406\u7531\uFF1A${relation2.rationale}`
+            h(
+              "p",
+              { class: "edu-map-detail__relation-head" },
+              `${RELATION_TYPE_LABELS[relation2.type]} \xB7 ${RELATION_BASIS_LABELS[relation2.basis]} \xB7 ${relation2.fromConceptId === detail.concept.id ? "\u6307\u5411" : "\u6765\u81EA"} ${other?.title ?? otherId}`
+            ),
+            h(
+              "details",
+              { class: "edu-map-detail__why" },
+              h("summary", {}, "\u4E3A\u4EC0\u4E48\u8FD9\u6837\u8FDE"),
+              h("p", { class: "edu-map-detail__meta" }, relation2.rationale)
+            )
           )
         );
       }
@@ -10090,7 +10012,11 @@ window.__ModuleLoader__.load({
       if (detail.sources.length === 0) {
         sources.append(h("p", {}, "\u8BE5\u6982\u5FF5\u8FD8\u6CA1\u6709\u767B\u8BB0\u51FA\u5904\u3002"));
       }
+      const seenSourcePages = /* @__PURE__ */ new Set();
       for (const source of detail.sources) {
+        const pageKey = `${source.pdfPage}|${source.printedPage ?? ""}`;
+        if (seenSourcePages.has(pageKey)) continue;
+        seenSourcePages.add(pageKey);
         sources.append(
           h(
             "p",
@@ -10232,7 +10158,7 @@ window.__ModuleLoader__.load({
       return holder;
     }
     
-    // education/client/map/src/types.ts
+    // client/map/src/types.ts
     var MAP_NODE_CAP = 24;
     var MAP_DEPTH_CAP = 2;
     var MAP_EXPAND_NODE_CAP = 25;
@@ -10240,7 +10166,7 @@ window.__ModuleLoader__.load({
     var MAP_PAGE_SIZE = 12;
     var MAP_SEARCH_LIMIT = 12;
     
-    // education/client/map/src/controller.ts
+    // client/map/src/controller.ts
     function nowMs() {
       const perf = globalThis.performance;
       if (perf !== void 0 && typeof perf.now === "function") return perf.now();
@@ -10799,7 +10725,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/map/src/styles.ts
+    // client/map/src/styles.ts
     var MAP_STYLE_ATTRIBUTE = "data-edu-map-style";
     var mapStyles = `
     .edu-map { min-width: 0; }
@@ -11044,7 +10970,7 @@ window.__ModuleLoader__.load({
       doc.head.append(style);
     }
     
-    // education/client/map/src/page.ts
+    // client/map/src/page.ts
     function createMapPage(controller) {
       return {
         id: "map",
@@ -11064,7 +10990,7 @@ window.__ModuleLoader__.load({
               h(
                 "p",
                 { class: "edu-page__lead" },
-                "\u6309\u771F\u5B9E\u76EE\u5F55\u5B9A\u4F4D\u6982\u5FF5\uFF1B\u9ED8\u8BA4\u53EA\u770B\u5F53\u524D\u7AE0\u7684\u5C40\u90E8\u5173\u7CFB\uFF0C\u8DE8\u7AE0\u6982\u5FF5\u9700\u8981\u663E\u5F0F\u5C55\u5F00\u3002\u5148\u4FEE\u53EA\u662F\u5EFA\u8BAE\uFF0C\u4E0D\u9501\u4F4F\u8FDB\u5165\u3002"
+                "\u6309\u8BFE\u672C\u76EE\u5F55\u627E\u6982\u5FF5\uFF1B\u7EBF\u8868\u793A\u5185\u5BB9\u4E4B\u95F4\u7684\u5173\u7CFB\uFF0C\u70B9\u4E00\u4E0B\u5C31\u80FD\u770B\u8BE6\u60C5\u3002"
               )
             ),
             h("div", {
@@ -11086,7 +11012,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/map/src/fixture.ts
+    // client/map/src/fixture.ts
     var COURSE_EDITION_ID = "course.biology-demo";
     var PACK_ID = "pack.biology-demo";
     var PACK_VERSION = "1.0.0";
@@ -12080,7 +12006,7 @@ window.__ModuleLoader__.load({
       return new FixtureMapDataSource(payload);
     }
     
-    // education/client/map/src/index.ts
+    // client/map/src/index.ts
     function defaultRequestFactory2() {
       let counter = 0;
       return () => {
@@ -12139,7 +12065,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/visuals/src/answer-forms.ts
+    // client/visuals/src/answer-forms.ts
     function supportsAnswerForm(activity) {
       return activity.answerSchema.kind !== "diagram_label";
     }
@@ -12149,9 +12075,7 @@ window.__ModuleLoader__.load({
       const root = document.createElement("section");
       root.className = "edu-visual-form";
       root.dataset["eduVisual"] = schema.kind;
-      const heading = document.createElement("h3");
-      heading.textContent = options.activity.stem;
-      root.append(heading);
+      root.setAttribute("aria-label", options.activity.stem);
       const inputs = [];
       let textarea = null;
       let addPairButton = null;
@@ -12237,12 +12161,14 @@ window.__ModuleLoader__.load({
       actions.className = "edu-visual-actions";
       const submit = document.createElement("button");
       submit.type = "button";
+      submit.className = "edu-button edu-button--primary";
       submit.textContent = "\u63D0\u4EA4\u4F5C\u7B54";
       submit.addEventListener("click", () => options.onSubmit(collect()));
       actions.append(submit);
       if (options.onCancel !== void 0) {
         const cancel = document.createElement("button");
         cancel.type = "button";
+        cancel.className = "edu-button";
         cancel.textContent = "\u53D6\u6D88";
         cancel.addEventListener("click", () => options.onCancel?.());
         actions.append(cancel);
@@ -12319,7 +12245,7 @@ window.__ModuleLoader__.load({
       return element;
     }
     
-    // education/client/visuals/src/feedback-view.ts
+    // client/visuals/src/feedback-view.ts
     var CLARIFICATION_ACTIONS = [
       { id: "retake", label: "\u91CD\u65B0\u62CD\u4E00\u5F20" },
       { id: "rotate", label: "\u65CB\u8F6C\u540E\u91CD\u8BD5" },
@@ -12434,7 +12360,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/study/src/machine.ts
+    // client/study/src/machine.ts
     var TRANSITIONS = {
       draft: ["submitted"],
       submitted: ["grading", "cancelled", "failed"],
@@ -12461,7 +12387,7 @@ window.__ModuleLoader__.load({
       }
     };
     
-    // education/client/study/src/source-view.ts
+    // client/study/src/source-view.ts
     var VERIFICATION_LABELS = {
       unverified: "\u6765\u6E90\u5F85\u6838\u5B9E",
       machine_matched: "\u6765\u6E90\u673A\u5668\u5339\u914D",
@@ -12524,7 +12450,15 @@ window.__ModuleLoader__.load({
       modal.open(trigger, parent);
     }
     
-    // education/client/study/src/labels.ts
+    // client/study/src/labels.ts
+    var ACTIVITY_TYPE_LABELS = {
+      recall: "\u56DE\u5FC6\u9898",
+      explain: "\u89E3\u91CA\u9898",
+      choice: "\u9009\u62E9\u9898",
+      relation: "\u5173\u7CFB\u9898",
+      diagram_label: "\u56FE\u793A\u6807\u6CE8\u9898",
+      transfer: "\u8FC1\u79FB\u9898"
+    };
     var PHASE_LABELS = {
       draft: "\u8349\u7A3F",
       submitted: "\u5DF2\u63D0\u4EA4\uFF0C\u6B63\u5728\u4FDD\u5B58",
@@ -12608,7 +12542,7 @@ window.__ModuleLoader__.load({
       }
     }
     
-    // education/client/study/src/controller.ts
+    // client/study/src/controller.ts
     var IMAGE_MIMES = ["image/png", "image/jpeg"];
     var IMAGE_MAX_BYTES = 5 * 1024 * 1024;
     function bytesToBase64(bytes) {
@@ -13555,12 +13489,10 @@ window.__ModuleLoader__.load({
           return;
         }
         const workspace = this.workspace;
-        const summary = this.summary();
         container.append(
           h(
             "div",
             { class: "edu-study-material", "data-testid": "study-material" },
-            h("p", { class: "edu-muted", "data-testid": "study-focus" }, `${workspace.courseEditionLabel} \xB7 \u5185\u5BB9\u5305 ${workspace.packVersion} \xB7 ${this.intent.mode === "review" ? "\u590D\u4E60" : "\u5B66\u4E60"}`),
             h("h2", { class: "edu-card__title" }, workspace.concept.title),
             h("p", { class: "edu-card__meta" }, `${workspace.scope === "partial" ? "\u90E8\u5206\u5185\u5BB9\uFF08\u672A\u8FBE\u5168\u518C\uFF09" : "\u5168\u518C\u8303\u56F4"} \xB7 ${workspace.trustMode === "candidate" ? "\u5019\u9009\u5185\u5BB9\uFF08\u672A\u6838\u5B9E\uFF09" : "\u6B63\u5F0F\u5185\u5BB9"}`),
             h("h3", { class: "edu-card__title" }, "\u5B66\u4E60\u76EE\u6807"),
@@ -13574,7 +13506,7 @@ window.__ModuleLoader__.load({
               ...workspace.concept.misconceptions.map((entry) => h("p", { class: "edu-study-text" }, `${entry.statement} \u2192 ${entry.correction}`))
             ) : null,
             h("h3", { class: "edu-card__title" }, "\u51FA\u5904"),
-            ...workspace.sources.map((source) => {
+            ...uniqueSources(workspace.sources).map((source) => {
               const sourceButton = button("\u67E5\u770B\u51FA\u5904", () => this.openSource(source, sourceButton), {
                 small: true,
                 dataAction: "study-source"
@@ -13583,11 +13515,10 @@ window.__ModuleLoader__.load({
                 "div",
                 { class: "edu-study-source-row" },
                 sourceButton,
-                h("span", { class: "edu-muted" }, source.label)
+                h("span", { class: "edu-muted" }, sourceLabel2(source))
               );
             }),
             h("p", { class: "edu-study-status", "data-testid": "study-draft-status" }, this.draftStatus === "saved" ? DRAFT_SAVED : this.draftStatus === "saving" ? "\u6B63\u5728\u4FDD\u5B58\u8349\u7A3F\u2026" : this.draftStatus === "failed" ? DRAFT_UNSAVED : ""),
-            h("div", { class: "edu-inline-actions" }, ...this.axisChips(summary)),
             workspace.compatibility !== null ? notice({
               tone: "warning",
               title: "\u5185\u5BB9\u7248\u672C\u4E0D\u517C\u5BB9",
@@ -13618,16 +13549,33 @@ window.__ModuleLoader__.load({
           );
         }
         const actions = h("div", { class: "edu-study-help-actions", "data-testid": "study-help-actions" });
-        for (const action of HELP_ACTIONS) {
-          actions.append(
-            button(action.label, () => void this.sendHelp(action.kind), {
-              small: true,
-              dataAction: `help-${action.kind}`,
-              title: action.note
-            })
+        const moreHost = h("div", {
+          class: "edu-study-help-actions edu-study-help-actions--more",
+          "data-testid": "study-help-more",
+          hidden: true
+        });
+        const helpButton = (action) => button(action.label, () => void this.sendHelp(action.kind), {
+          small: true,
+          dataAction: `help-${action.kind}`,
+          title: action.note
+        });
+        for (const action of HELP_ACTIONS.slice(0, 2)) actions.append(helpButton(action));
+        for (const action of HELP_ACTIONS.slice(2)) moreHost.append(helpButton(action));
+        if (HELP_ACTIONS.length > 2) {
+          const toggle = button(
+            "\u66F4\u591A\u5E2E\u52A9",
+            () => {
+              const opening = moreHost.hasAttribute("hidden");
+              if (opening) moreHost.removeAttribute("hidden");
+              else moreHost.setAttribute("hidden", "");
+              toggle.setAttribute("aria-expanded", opening ? "true" : "false");
+            },
+            { small: true, dataAction: "help-more" }
           );
+          toggle.setAttribute("aria-expanded", "false");
+          actions.append(toggle);
         }
-        root.append(actions);
+        root.append(actions, moreHost);
         if (this.helpNotice.length > 0) {
           root.append(h("p", { class: "edu-notice edu-notice--warning", role: "status", "data-testid": "study-help-notice" }, this.helpNotice));
         }
@@ -13662,7 +13610,7 @@ window.__ModuleLoader__.load({
               disabled: this.session === null
             })
           ),
-          h("p", { class: "edu-muted" }, "\u591A\u884C\u6587\u5B57\u6362\u884C\u4E0D\u4F1A\u81EA\u52A8\u63D0\u4EA4\uFF1B\u4F7F\u7528\u201C\u53D1\u9001\u201D\u6309\u94AE\u3002\u63D0\u793A\u3001\u89E3\u91CA\u3001\u793A\u8303\u548C\u770B\u7B54\u6848\u90FD\u53EF\u968F\u65F6\u8BF7\u6C42\u3002")
+          h("p", { class: "edu-muted" }, "\u60F3\u597D\u4E86\u5C31\u70B9\u53D1\u9001\uFF1B\u5361\u4F4F\u4E86\uFF0C\u5C31\u7528\u4E0A\u9762\u7684\u6309\u94AE\u8981\u4E00\u70B9\u5E2E\u52A9\u3002")
         );
         if (this.tutorState !== null && this.tutorState.consecutiveFailures >= 2) {
           root.append(
@@ -13712,7 +13660,7 @@ window.__ModuleLoader__.load({
             h("h2", { class: "edu-card__title" }, "\u5F53\u524D\u6D3B\u52A8"),
             statusChip(PHASE_LABELS[this.phase], PHASE_TONES[this.phase])
           ),
-          h("p", { class: "edu-card__meta" }, `${this.activity.type === "recall" ? "\u56DE\u5FC6" : this.activity.type === "explain" ? "\u89E3\u91CA" : this.activity.type === "choice" ? "\u9009\u62E9" : this.activity.type === "relation" ? "\u5173\u7CFB" : this.activity.type === "diagram_label" ? "\u56FE\u793A\u6807\u6CE8" : "\u8FC1\u79FB"} \xB7 \u7248\u672C ${this.activity.version}`),
+          h("p", { class: "edu-card__meta" }, `${ACTIVITY_TYPE_LABELS[this.activity.type] ?? "\u6D3B\u52A8"}`),
           h("p", { class: "edu-study-stem" }, this.activity.stem),
           draftStatus
         );
@@ -13804,7 +13752,7 @@ window.__ModuleLoader__.load({
           "div",
           { class: "edu-inline-actions" },
           button("\u8DF3\u8FC7\u672C\u9898", () => void this.skip(), { small: true, dataAction: "skip-question" }),
-          button("\u7ED3\u675F\u672C\u8F6E", () => void this.finishRound(), { small: true, tone: "primary", dataAction: "finish-round" }),
+          button("\u7ED3\u675F\u672C\u8F6E", () => void this.finishRound(), { small: true, dataAction: "finish-round" }),
           button("\u6682\u4E0D\u5B8C\u6210\uFF0C\u8FD4\u56DE\u5730\u56FE", () => this.leaveUnfinished(), { small: true })
         );
         if (this.workspace?.imageFlow !== null && this.workspace !== null) {
@@ -14263,8 +14211,23 @@ window.__ModuleLoader__.load({
     function system(text) {
       return { role: "system", text, disclosure: false };
     }
+    function uniqueSources(sources) {
+      const seen = /* @__PURE__ */ new Set();
+      const result = [];
+      for (const source of sources) {
+        const key = `${source.pdfPage}|${source.printedPage ?? ""}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push(source);
+      }
+      return result;
+    }
+    function sourceLabel2(source) {
+      const printed = source.printedPage?.trim() ?? "";
+      return printed.length > 0 ? `\u8BFE\u672C\u7B2C ${printed} \u9875` : `PDF \u7B2C ${source.pdfPage} \u9875`;
+    }
     
-    // education/client/study/src/styles.ts
+    // client/study/src/styles.ts
     var STUDY_STYLE_ATTRIBUTE = "data-edu-study-style";
     var studyStyles = `
     .edu-study { min-width: 0; }
@@ -14302,6 +14265,30 @@ window.__ModuleLoader__.load({
     .edu-study-status[data-state="saved"] { color: var(--edu-color-success); }
     .edu-study-activity-head { display: flex; flex-wrap: wrap; gap: ${DESIGN_TOKENS.spacing.xs}; align-items: center; justify-content: space-between; }
     .edu-study-stem { margin: ${DESIGN_TOKENS.spacing.sm} 0; font-size: var(--edu-font-lg); font-weight: 600; overflow-wrap: anywhere; }
+    /* Answer forms (T11 visuals) are mounted inside the study workspace; they carry
+       their own layout so options never collapse into one run-on paragraph. */
+    .edu-visual-form { display: grid; gap: ${DESIGN_TOKENS.spacing.sm}; margin-top: ${DESIGN_TOKENS.spacing.sm}; min-width: 0; }
+    .edu-visual-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: ${DESIGN_TOKENS.spacing.xs}; min-width: 0; }
+    .edu-visual-form legend { padding: 0; margin-bottom: ${DESIGN_TOKENS.spacing.xxs}; font-size: var(--edu-font-sm); color: var(--edu-color-ink-muted); }
+    .edu-visual-option {
+      display: flex;
+      align-items: flex-start;
+      gap: ${DESIGN_TOKENS.spacing.xs};
+      padding: ${DESIGN_TOKENS.spacing.xs} ${DESIGN_TOKENS.spacing.sm};
+      border: 1px solid var(--edu-color-line);
+      border-radius: var(--edu-radius-md);
+      background: var(--edu-color-surface);
+      cursor: pointer;
+    }
+    .edu-visual-option:hover { border-color: var(--edu-color-line-strong); }
+    .edu-visual-option:has(input:checked) { border-color: var(--edu-color-accent); background: var(--edu-color-accent-soft); }
+    .edu-visual-option input { flex: none; margin-top: 0.25rem; }
+    .edu-visual-option ol,
+    .edu-visual-option ul { margin: 0; padding-left: ${DESIGN_TOKENS.spacing.lg}; }
+    .edu-visual-counter { margin: 0; font-size: var(--edu-font-sm); color: var(--edu-color-ink-muted); }
+    .edu-visual-pairs { display: grid; gap: ${DESIGN_TOKENS.spacing.xs}; }
+    .edu-visual-pair { display: flex; flex-wrap: wrap; gap: ${DESIGN_TOKENS.spacing.xs}; align-items: center; }
+    .edu-visual-actions { display: flex; flex-wrap: wrap; gap: ${DESIGN_TOKENS.spacing.xs}; }
     .edu-study-pending { border: 1px dashed var(--edu-color-line-strong); border-radius: var(--edu-radius-md); padding: ${DESIGN_TOKENS.spacing.md}; margin: ${DESIGN_TOKENS.spacing.sm} 0; }
     .edu-study-message { border-left: 0.25rem solid var(--edu-color-line); padding: ${DESIGN_TOKENS.spacing.xs} ${DESIGN_TOKENS.spacing.sm}; margin: ${DESIGN_TOKENS.spacing.xs} 0; min-width: 0; }
     .edu-study-message--student { border-left-color: ${DESIGN_TOKENS.colors.info}; background: ${DESIGN_TOKENS.colors.infoSoft}; }
@@ -14309,6 +14296,8 @@ window.__ModuleLoader__.load({
     .edu-study-message--system { border-left-color: ${DESIGN_TOKENS.colors.warning}; background: ${DESIGN_TOKENS.colors.warningSoft}; }
     .edu-study-message p { margin: ${DESIGN_TOKENS.spacing.xxs} 0 0; overflow-wrap: anywhere; }
     .edu-study-help-actions { display: flex; flex-wrap: wrap; gap: ${DESIGN_TOKENS.spacing.xs}; margin: ${DESIGN_TOKENS.spacing.sm} 0; }
+    /* The hidden attribute must win over the flex display above. */
+    .edu-study-help-actions[hidden] { display: none; }
     .edu-study-chat-input { display: grid; gap: ${DESIGN_TOKENS.spacing.xs}; margin-top: ${DESIGN_TOKENS.spacing.sm}; }
     .edu-study-chat-input textarea { width: 100%; min-height: 4.5rem; }
     .edu-study-low-difficulty { margin-top: ${DESIGN_TOKENS.spacing.sm}; padding: ${DESIGN_TOKENS.spacing.sm}; border: 1px dashed var(--edu-color-line-strong); border-radius: var(--edu-radius-md); }
@@ -14346,7 +14335,7 @@ window.__ModuleLoader__.load({
       return style;
     }
     
-    // education/client/study/src/page.ts
+    // client/study/src/page.ts
     function createStudyPage(controller) {
       return {
         id: "study",
@@ -14390,7 +14379,7 @@ window.__ModuleLoader__.load({
               h(
                 "p",
                 { class: "edu-page__lead" },
-                "\u6750\u6599\u5728\u5DE6\uFF0C\u5F53\u524D\u6D3B\u52A8\u5728\u4E2D\uFF0C\u5B66\u4E60\u52A9\u624B\u4E0E\u53CD\u9988\u5728\u53F3\uFF1B\u9876\u90E8\u4FDD\u7559\u6559\u6750\u3001\u5185\u5BB9\u5305\u3001\u6982\u5FF5\u3001\u6A21\u5F0F\u3001\u4FDD\u5B58\u72B6\u6001\u4E0E\u8FD4\u56DE\u4F4D\u7F6E\u3002"
+                "\u5148\u8BFB\u5DE6\u8FB9\u7684\u6750\u6599\uFF0C\u518D\u81EA\u5DF1\u4F5C\u7B54\uFF1B\u5361\u4F4F\u4E86\u53EF\u4EE5\u770B\u53F3\u8FB9\u7684\u63D0\u793A\u3002"
               )
             ),
             grid
@@ -14406,7 +14395,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/client/study/src/fixture.ts
+    // client/study/src/fixture.ts
     var FIXTURE_STUDY_NOTICE = "\u6F14\u793A\u6570\u636E\uFF08fixture\uFF09\uFF1A\u672C\u9875\u7684\u6559\u6750\u3001\u6D3B\u52A8\u3001\u6559\u5B66\u56DE\u5408\u3001\u53CD\u9988\u4E0E\u8349\u7A3F\u5747\u4E3A\u5408\u6210\u6837\u4F8B\uFF0C\u4E0D\u662F\u771F\u5B9E\u6A21\u578B\u6216\u771F\u5B9E API \u7ED3\u679C\u3002";
     function unwrap(result, label) {
       if (!result.ok) {
@@ -15067,7 +15056,7 @@ window.__ModuleLoader__.load({
       return new FixtureStudyDataSource(options);
     }
     
-    // education/client/study/src/index.ts
+    // client/study/src/index.ts
     function defaultRequestFactory3() {
       let counter = 0;
       return () => {
@@ -15123,7 +15112,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/runtime/client-plugin/src/live-sources.ts
+    // runtime/client-plugin/src/live-sources.ts
     async function api(path, init) {
       try {
         const response = await fetch(path, {
@@ -15311,6 +15300,27 @@ window.__ModuleLoader__.load({
           const relations = data.relations.filter(
             (relation2) => relation2.fromConceptId === conceptId || relation2.toConceptId === conceptId
           );
+          const tocNodes = Array.isArray(data.toc) ? data.toc : [];
+          const tocById = new Map(tocNodes.map((node) => [node.id, node]));
+          const catalogue = Array.isArray(data.sources) ? data.sources : [];
+          const conceptRefs = new Set(Array.isArray(concept2.sourceRefs) ? concept2.sourceRefs : []);
+          const placementOf = (tocNodeId) => {
+            const path = [];
+            const seen = /* @__PURE__ */ new Set();
+            let cursor = tocById.get(tocNodeId);
+            while (cursor !== void 0 && !seen.has(cursor.id)) {
+              seen.add(cursor.id);
+              path.unshift(String(cursor.title ?? cursor.id));
+              cursor = cursor.parentId === null || cursor.parentId === void 0 ? void 0 : tocById.get(String(cursor.parentId));
+            }
+            const node = tocById.get(tocNodeId);
+            return {
+              tocNodeId,
+              title: String(node?.title ?? "\u6559\u6750\u76EE\u5F55"),
+              type: String(node?.type ?? "section"),
+              path: path.length > 0 ? path : [String(node?.title ?? "\u6559\u6750\u76EE\u5F55")]
+            };
+          };
           return {
             ok: true,
             revision: 1,
@@ -15321,13 +15331,8 @@ window.__ModuleLoader__.load({
               relations,
               prerequisites: relations.filter((relation2) => relation2.type === "prerequisite" && relation2.toConceptId === conceptId),
               evidence: data.evidence.filter((entry) => entry.conceptId === conceptId),
-              sources: [],
-              placements: concept2.placements.map((tocNodeId) => ({
-                tocNodeId,
-                title: tocNodeId,
-                type: "section",
-                path: [tocNodeId]
-              }))
+              sources: catalogue.filter((entry) => conceptRefs.has(String(entry.sourceRefId))),
+              placements: concept2.placements.map((tocNodeId) => placementOf(tocNodeId))
             }
           };
         }
@@ -15475,7 +15480,7 @@ window.__ModuleLoader__.load({
       };
     }
     
-    // education/runtime/client-plugin/src/index.ts
+    // runtime/client-plugin/src/index.ts
     var inject = ["slots"];
     var EDUCATION_ROOT_TITLE = "\u6559\u80B2\u5B66\u4E60\u5DE5\u4F5C\u533A";
     var controllerRef = null;

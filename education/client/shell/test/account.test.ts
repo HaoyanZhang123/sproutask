@@ -12,8 +12,7 @@ describe('account and model-service status', () => {
     expect(account).not.toBeNull();
     expect(apiKey).not.toBeNull();
     expect(textOf(account as HTMLElement)).toContain('不可用');
-    expect(textOf(account as HTMLElement)).toContain('不使用平台账户授权');
-    expect(textOf(account as HTMLElement)).toContain('用户已明确该路线不允许');
+    expect(textOf(account as HTMLElement)).toContain('当前版本不需要平台账号');
     expect(textOf(apiKey as HTMLElement)).toContain('已配置');
     expect(textOf(apiKey as HTMLElement)).toContain('不回显');
     expect(textOf(page)).toContain('更换模型账号不会删除学情');

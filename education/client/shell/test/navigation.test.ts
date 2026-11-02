@@ -18,10 +18,11 @@ afterEach(cleanupShells);
 const FORBIDDEN_ENTRY = /终端|源码|源代码|插件市场|开发者工具|DevTools|命令行|Skill|MCP/i;
 
 describe('education shell navigation', () => {
-  it('shows exactly four student nav items and three home entries, without development entries', async () => {
+  it('shows five student nav items (home included) and three home entries, without development entries', async () => {
     const { container } = await mountShell(fixtureOptions());
     const nav = [...container.querySelectorAll<HTMLButtonElement>('[data-nav-path]')];
     expect(nav.map((item) => item.textContent?.replace('当前', '').trim())).toEqual([
+      '首页',
       '教材库',
       '地图',
       '工作区',
@@ -54,7 +55,6 @@ describe('education shell navigation', () => {
       expect(context, path).not.toBeNull();
       const contextText = textOf(context as HTMLElement);
       expect(contextText).toContain('教材');
-      expect(contextText).toContain('内容包');
       expect(contextText).toContain('当前概念');
       expect(contextText).toContain('本地保存');
       expect(contextText).toContain('返回位置');
