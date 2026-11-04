@@ -8,7 +8,7 @@
 
 ## 1. 一句话现状
 
-**v0.4.0（2026-11-04）已准备发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
+**v0.4.0（2026-11-04）已发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
 当前状态：工作区已收拢到单线；界面 A+B 重构与文案复检已完成；v0.4.0 版本号、README、封面与发布说明已更新。
 
 ---
@@ -77,7 +77,8 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 新增双语发布说明 `docs/releases/v0.4.0.md`（新增 3 · 优化 7 · 修复 5），更新看板与进度。
 - 产物（本机构建，未上传）：`education/dist/SproutAsk-Setup-0.4.0-x64.exe`（59,436,226 B，FileVersion 0.4.0）、`SproutAsk-0.4.0-x64-portable.zip`（123,134,766 B）、`SHA256SUMS-v0.4.0.txt`；payload `version.txt` 为 0.4.0。
 - 验证：`pnpm typecheck` 全绿；`pnpm test` **705 个用例全绿**；makensis 构建成功；zip 根目录含 `launcher.cmd` 与 `version.txt`。
-- **未做**：干净机安装/启动验证；未推送 GitHub（当前克隆没有远端，`gh` 凭据失效）。
+- **已发布**：提交 `ad9e6fd`（合并远端历史后为 `817fb15`），tag `v0.4.0` 已推送；GitHub Release：<https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.4.0>，附安装版、便携版与 `SHA256SUMS`。
+- **未做**：干净机安装/启动验证。
 
 ---
 
@@ -128,7 +129,7 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 ## 7. 下一步（按顺序）
 
-1. 发布 v0.4.0：本地已打 tag 并构建产物；推送与 GitHub Releases 需先配置远端并重新登录 `gh`（当前克隆无远端、凭据失效）。
+1. 按 `docs/optimize/04-manual-test.md` 做人工走查并收集反馈。
 2. 用户按 `docs/optimize/04-manual-test.md` 走查并反馈。
 3. 后续补 live `activityId` 取下一题、self-report 持久化（需 host/契约变更，另行评估）。
 
