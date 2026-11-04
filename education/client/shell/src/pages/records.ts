@@ -759,7 +759,7 @@ function renderDataManagement(
       h(
         'p',
         {},
-        '学习记录只保存在这台电脑上。想带走或清空，都在这里；课本文件不会被删除。',
+        '学习记录只保存在这台电脑上。',
       ),
     ),
   );
@@ -768,8 +768,7 @@ function renderDataManagement(
     title: '导出学习记录',
     impact: [
       '导出内容：你的作答、判断记录、自评和复习安排。',
-      '不会包含课本原文件或课本原图。',
-      '导出文件会保存到你选择的位置，请自行妥善保管。',
+      '不含课本原文。',
     ],
     confirmLabel: '确认导出',
     onConfirm: () => {
@@ -791,7 +790,6 @@ function renderDataManagement(
     impact: [
       '会删除这台电脑上的作答、判断记录、自评和复习安排。',
       '课本文件和课本原图不会被删除。',
-      '删除后记录为空，重启后仍然为空，不会自动从云端恢复。',
     ],
     confirmLabel: '确认删除学习记录',
     onConfirm: () => {
@@ -813,8 +811,7 @@ function renderDataManagement(
     acknowledgement: '我了解只移除本机关联，不会删除课本源文件。',
     impact: [
       '会移除这台电脑与这本课本的关联和导入记录。',
-      '不会删除课本文件、课本原图或已经写好的内容。',
-      '已保存的学习记录仍保留，可以在进展里查看。',
+      '不会删除课本文件，也不会动已经写好的学习记录。',
     ],
     confirmLabel: '确认移除关联',
     onConfirm: () => {

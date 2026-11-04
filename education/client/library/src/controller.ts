@@ -640,7 +640,7 @@ export class LibraryController {
       h(
         'p',
         { class: 'edu-section__lead' },
-        '选一个本地 PDF，确认书名和版次后开始。进度、暂停和出错都照实显示，没做完的不会写成完成。',
+        '选一个本地 PDF，确认书名和版次后开始。',
       ),
     );
     if (this.state.offline) {

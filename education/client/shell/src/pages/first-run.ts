@@ -48,7 +48,7 @@ export function createFirstRunPage(): EducationPage {
         notice({
           tone: 'info',
           title: '记录在这台电脑，讲解来自云端',
-          body: '学习记录保存在这台电脑。需要智能反馈时，当前题目、作答和必要的材料片段会发给模型服务；不会上传整本教材。',
+          body: '学习记录保存在这台电脑；需要智能反馈时，会把当前题目、作答和必要材料片段发给模型服务，不会上传整本教材。',
         }),
       );
 
@@ -60,7 +60,7 @@ export function createFirstRunPage(): EducationPage {
           'div',
           { class: 'edu-card' },
           h('p', { class: 'edu-card__title' }, courseLabel),
-          h('p', { class: 'edu-card__meta' }, '内容按课本整理；原文只保存在这台电脑上。'),
+          h('p', { class: 'edu-card__meta' }, '内容按课本整理。'),
           h(
             'div',
             { class: 'edu-inline-actions' },
@@ -99,7 +99,7 @@ export function createFirstRunPage(): EducationPage {
       const updateHint = (value: ScopeChoice = scope): void => {
         hint.textContent =
           value === 'selected'
-            ? `已选了 ${selected.size} 个概念。之后随时能改。`
+            ? `已选了 ${selected.size} 个概念。`
             : value === 'all_unlearned'
               ? '从还没学过的概念开始推荐；以后可以改。'
               : '先看地图，之后随时能改。';
@@ -212,9 +212,8 @@ export function createFirstRunPage(): EducationPage {
         h(
           'p',
           { class: 'edu-section__lead' },
-          `有 ${activityCount} 道题可用。短诊断只看你选的范围，随时可以停；没测到的不会当成学会。`,
+          `有 ${activityCount} 道题，随时可以停。`,
         ),
-        h('p', { class: 'edu-muted' }, '跳过也没关系，不影响后面学习。'),
         h(
           'div',
           { class: 'edu-inline-actions' },

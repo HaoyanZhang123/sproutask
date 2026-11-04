@@ -194,8 +194,7 @@ describe('progress page', () => {
     const text = textOf(dialog as HTMLElement);
     expect(text).toContain('导出学习记录');
     expect(text).toContain('导出内容');
-    expect(text).toContain('不会包含课本原文件');
-    expect(text).toContain('保存到你选择的位置');
+    expect(text).toContain('不含课本原文');
     buttonByAction(dialog as HTMLElement, 'confirm').click();
     await tick(10);
     const status = container.querySelector<HTMLElement>('[data-testid="records-action-status"]');
@@ -212,7 +211,7 @@ describe('progress page', () => {
     const text = textOf(dialog as HTMLElement);
     expect(text).toContain('不可撤销');
     expect(text).toContain('课本文件不会被删除');
-    expect(text).toContain('不会自动从云端恢复');
+    expect(text).toContain('课本文件和课本原图不会被删除');
     const confirm = buttonByAction(dialog as HTMLElement, 'confirm');
     expect(confirm.disabled).toBe(true);
     const checkbox = dialog?.querySelector<HTMLInputElement>('input[type="checkbox"]');

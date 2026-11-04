@@ -103,7 +103,6 @@ describe('four student states derived from the learner projection', () => {
     expect(container.querySelectorAll('button.edu-map-chip[data-state="steady"]')).toHaveLength(0);
     expect(container.querySelectorAll('button.edu-map-chip[data-state="weak"]')).toHaveLength(0);
     const ch2 = chapterRow(container, 'toc.ch2');
-    expect(textOf(ch2)).toContain('已学 2 / 3');
     const detail = await openConcept(container, 'toc.ch2', 'concept.photosynthesis');
     expect(detail.getAttribute('data-state')).toBe('now');
     expect(textOf(detail)).toContain('未核实');

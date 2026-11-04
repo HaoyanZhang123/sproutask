@@ -16,7 +16,7 @@ export function createLibraryPage(controller: LibraryController): EducationPage 
       controller.onPageMount();
       const root = h('div', { class: 'edu-lib', 'data-testid': 'library-page' });
       root.append(
-        pageHeading('我的课本', '这一页只说一件事：现在用的是哪本、哪一版、内容从哪来、能不能用。'),
+        pageHeading('我的课本', '现在用的是哪本，内容从哪来。'),
         h('div', { 'data-edu-slot': 'library:content', 'data-testid': 'library-content-slot' }),
         h('div', { 'data-edu-slot': 'library:import', 'data-testid': 'library-import-slot' }),
       );

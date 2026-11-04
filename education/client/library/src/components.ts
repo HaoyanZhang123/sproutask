@@ -154,7 +154,7 @@ export function bookChooser(
       h(
         'p',
         { class: 'edu-lib-chooser__empty' },
-        '这台电脑上只有这一本。要再添一本，点“导入新的”。',
+        '这台电脑上只有这一本。',
       ),
     );
     return wrap;

@@ -50,7 +50,6 @@ import {
   HELP_ACTIONS,
   LOW_DIFFICULTY_NOTE,
   REVIEW_REASON_LABELS,
-  SKIP_NOTE,
   VERDICT_LABELS,
   answerInputType,
   decisionNotice,
@@ -664,7 +663,7 @@ export class StudyController {
       assistant(
         this.intent.mode === 'review'
           ? '复习先回忆，再给反馈。可以随时打开材料、要提示或结束本轮。'
-          : '先读材料，再试着用自己的话回答；随时可以要提示、解释或示范。',
+          : '先读材料，再自己回答。',
       ),
     ];
     this.notify();
@@ -915,7 +914,7 @@ export class StudyController {
       return;
     }
     this.tutorState = result.data.state;
-    this.skipNotice = result.data.message || SKIP_NOTE;
+    this.skipNotice = result.data.message || '已跳过。';
     this.messages = [...this.messages, system(this.skipNotice)];
     this.notify();
   }
@@ -1279,7 +1278,7 @@ export class StudyController {
       this.chromeTitle.textContent = workspace === null ? '学习' : workspace.concept.title;
     }
     if (this.chromeMode !== null) {
-      this.chromeMode.textContent = this.intent.mode === 'review' ? '复习 · 先回忆，再看反馈' : '学习 · 先读课本，再自己作答';
+      this.chromeMode.textContent = this.intent.mode === 'review' ? '复习' : '学习';
     }
     if (this.draftStatusNode !== null) {
       const text =
@@ -1753,7 +1752,7 @@ export class StudyController {
       right.append(submit);
     }
     foot.append(right);
-    root.append(body, foot, h('p', { class: 'edu-study-note' }, SKIP_NOTE));
+    root.append(body, foot);
   }
 
   private answerEcho(): HTMLElement {
@@ -2087,10 +2086,6 @@ export class StudyController {
       root.append(this.axisSection(), this.selfReportSection());
     } else if (this.loading) {
       root.append(h('p', { class: 'edu-study-note' }, '答完这一题，结论和依据会出现在这里。'));
-    } else {
-      root.append(
-        h('p', { class: 'edu-study-note' }, '答完这一题，这里会给结论、依据和出处；没答完时不会显示对错。'),
-      );
     }
     if (this.chatNotice.length > 0) {
       root.append(h('p', { class: 'edu-study-note', role: 'status' }, this.chatNotice));

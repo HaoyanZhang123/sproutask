@@ -26,7 +26,7 @@ export function createAccountPage(): EducationPage {
       const state = context.services.getState();
       const snapshot = state.snapshot;
       container.append(
-        pageHeading('设置', '这里可以改模型 Key 和字号；学习记录只保存在这台电脑上。'),
+        pageHeading('设置', '这里可以改模型 Key 和字号。'),
       );
       if (snapshot === null) {
         container.append(
@@ -189,7 +189,7 @@ export function createAccountPage(): EducationPage {
           h('label', { class: 'edu-field-label', for: 'account-key-input' }, '模型 Key'),
           keyInput,
           h('div', { class: 'edu-inline-actions' }, saveButton, clearButton),
-          h('p', { class: 'edu-muted' }, '只接受以 sk- 开头的合理长度 Key；格式或网络有问题会提示，不会保存。'),
+          h('p', { class: 'edu-muted' }, '以 sk- 开头。'),
         ),
         keyFeedback,
       );
@@ -229,7 +229,7 @@ export function createAccountPage(): EducationPage {
           'section',
           { class: 'edu-section', 'data-testid': 'account-display' },
           h('h2', { class: 'edu-section__title' }, '字号'),
-          h('p', { class: 'edu-section__lead' }, '觉得字小可以换成大字，材料和题目会一起变大。'),
+          h('p', { class: 'edu-section__lead' }, '觉得字小可以换成大字。'),
           h('div', { class: 'edu-inline-actions' }, standardButton, largeButton),
         ),
       );
@@ -243,7 +243,7 @@ export function createAccountPage(): EducationPage {
           h(
             'p',
             { class: 'edu-section__lead' },
-            '芽问 · 学生版。学习记录保存在这台电脑上；教材原文不会上传，也不会随安装包分发。',
+            '记录只在本机，教材原文不上传。',
           ),
           h(
             'details',

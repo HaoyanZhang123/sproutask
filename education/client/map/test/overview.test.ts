@@ -55,7 +55,6 @@ describe('whole-volume overview (level one)', () => {
     const first = chapterRow(container, 'toc.ch1');
     expect(textOf(first)).toContain('第 1 章 细胞');
     expect(textOf(first)).toContain('2 节 · 3 个概念');
-    expect(textOf(first)).toContain('已学 3 / 3');
     expect(chapterRow(container, 'toc.ch2').textContent).toContain('第 2 章 绿色植物的生活');
     expect(chapterRow(container, 'toc.ch3').textContent).toContain('第 3 章 生态系统');
   });

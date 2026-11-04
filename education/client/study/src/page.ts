@@ -132,7 +132,7 @@ export function createStudyPage(controller: StudyController): EducationPage {
           'h2',
           { class: 'sprout-sheet__title', id: sheetTitleId },
           '小芽',
-          h('span', { class: 'sprout-sheet__sub' }, '要提示、要解释都可以问'),
+          
         ),
         sheetClose,
       );
@@ -260,7 +260,6 @@ export function createStudyPage(controller: StudyController): EducationPage {
           'header',
           { class: 'edu-page__header' },
           h('h1', { class: 'edu-page__title', tabindex: -1 }, '学习'),
-          h('p', { class: 'edu-page__lead' }, '左边是这一节的课本，右边是题目；答完就在原地看结论和出处。'),
         ),
         top,
         ribbon,

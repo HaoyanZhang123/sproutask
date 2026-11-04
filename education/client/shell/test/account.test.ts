@@ -11,7 +11,7 @@ describe('settings: key, font and about', () => {
     expect(apiKey).not.toBeNull();
     expect(textOf(apiKey as HTMLElement)).toContain('已配置');
     expect(textOf(apiKey as HTMLElement)).toContain('不会显示完整 Key');
-    expect(textOf(page)).toContain('学习记录只保存在这台电脑上');
+    expect(textOf(page)).toContain('记录只在本机');
     expect(textOf(page)).not.toMatch(/sk-[A-Za-z0-9]|Bearer\s+[A-Za-z0-9]|api[_-]?key\s*=/);
     for (const control of buttonsOf(page)) {
       expect((control.textContent ?? '').trim()).not.toMatch(/登录|退出|授权/);

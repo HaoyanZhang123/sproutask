@@ -283,11 +283,6 @@ function renderChapterRow(
       { class: 'edu-map-chapter__meta' },
       `${entry.sections.length} 节 · ${entry.concepts.length} 个概念`,
     ),
-    h(
-      'span',
-      { class: 'edu-map-chapter__progress' },
-      `已学 ${entry.learnedCount} / ${entry.concepts.length}`,
-    ),
   );
 
   const chips = h('ul', {
@@ -403,13 +398,6 @@ export function renderOverview(
   for (const unit of filter.units) {
     holder.append(renderUnit(unit, model, filter.active, actions));
   }
-  holder.append(
-    h(
-      'p',
-      { class: 'edu-map-help' },
-      '每个概念的状态来自你实际做题和复习的记录；没做过的就是「还没开始」。',
-    ),
-  );
   return holder;
 }
 
@@ -696,9 +684,8 @@ function renderWideGraph(
     h(
       'p',
       { class: 'edu-map-graph__legend' },
-      '实线箭头：先学这个，再学那个。虚线：只是相关，没有先后。',
+      '实线＝先学，虚线＝相关',
     ),
-    h('p', { class: 'edu-map-help' }, '用 Tab 在概念之间移动，Enter 或空格打开详情。'),
   );
 }
 
@@ -1053,7 +1040,7 @@ export function renderDetailPrompt(chapter: MapChapter | null): HTMLElement {
       {},
       chapter === null
         ? '点一个概念，看它和谁连着。'
-        : '点上面一个概念，看看它先学什么、接着学什么。',
+        : '点一个概念看详情。',
     ),
     h('p', { class: 'edu-map-help' }, '只看地图不会改变你的学习进度。'),
   );

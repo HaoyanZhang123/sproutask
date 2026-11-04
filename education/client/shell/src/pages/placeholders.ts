@@ -30,7 +30,7 @@ export function createLibraryFallbackPage(): EducationPage {
               { class: 'edu-card' },
               h('p', { class: 'edu-card__title' }, courseEditionLabel(snapshot.courseEdition)),
               statusChip(snapshot.fixture ? '待核实' : '已核对', snapshot.fixture ? 'attention' : 'positive'),
-              h('p', { class: 'edu-card__meta' }, '内容按课本整理；原文只保存在这台电脑上。'),
+              h('p', { class: 'edu-card__meta' }, '内容按课本整理。'),
             ),
           ),
         );

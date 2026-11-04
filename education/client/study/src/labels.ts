@@ -51,7 +51,6 @@ export const HELP_ACTIONS: readonly {
   },
 ];
 
-export const SKIP_NOTE = '跳过这一题不会记为答错，也不会把没做的题记成做过；之后可以回来。';
 export const END_NOTE = '结束本轮只记录实际做过的部分；没做的不会标成已完成。';
 export const DRAFT_SAVED = '草稿已保存在本机。';
 export const DRAFT_UNSAVED = '草稿尚未保存；离开前请重试。';

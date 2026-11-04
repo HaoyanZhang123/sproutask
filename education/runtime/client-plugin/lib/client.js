@@ -1469,7 +1469,7 @@ window.__ModuleLoader__.load({
           const state = context.services.getState();
           const snapshot = state.snapshot;
           container.append(
-            pageHeading("\u8BBE\u7F6E", "\u8FD9\u91CC\u53EF\u4EE5\u6539\u6A21\u578B Key \u548C\u5B57\u53F7\uFF1B\u5B66\u4E60\u8BB0\u5F55\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u3002")
+            pageHeading("\u8BBE\u7F6E", "\u8FD9\u91CC\u53EF\u4EE5\u6539\u6A21\u578B Key \u548C\u5B57\u53F7\u3002")
           );
           if (snapshot === null) {
             container.append(
@@ -1623,7 +1623,7 @@ window.__ModuleLoader__.load({
               h("label", { class: "edu-field-label", for: "account-key-input" }, "\u6A21\u578B Key"),
               keyInput,
               h("div", { class: "edu-inline-actions" }, saveButton, clearButton),
-              h("p", { class: "edu-muted" }, "\u53EA\u63A5\u53D7\u4EE5 sk- \u5F00\u5934\u7684\u5408\u7406\u957F\u5EA6 Key\uFF1B\u683C\u5F0F\u6216\u7F51\u7EDC\u6709\u95EE\u9898\u4F1A\u63D0\u793A\uFF0C\u4E0D\u4F1A\u4FDD\u5B58\u3002")
+              h("p", { class: "edu-muted" }, "\u4EE5 sk- \u5F00\u5934\u3002")
             ),
             keyFeedback
           );
@@ -1662,7 +1662,7 @@ window.__ModuleLoader__.load({
               "section",
               { class: "edu-section", "data-testid": "account-display" },
               h("h2", { class: "edu-section__title" }, "\u5B57\u53F7"),
-              h("p", { class: "edu-section__lead" }, "\u89C9\u5F97\u5B57\u5C0F\u53EF\u4EE5\u6362\u6210\u5927\u5B57\uFF0C\u6750\u6599\u548C\u9898\u76EE\u4F1A\u4E00\u8D77\u53D8\u5927\u3002"),
+              h("p", { class: "edu-section__lead" }, "\u89C9\u5F97\u5B57\u5C0F\u53EF\u4EE5\u6362\u6210\u5927\u5B57\u3002"),
               h("div", { class: "edu-inline-actions" }, standardButton, largeButton)
             )
           );
@@ -1675,7 +1675,7 @@ window.__ModuleLoader__.load({
               h(
                 "p",
                 { class: "edu-section__lead" },
-                "\u82BD\u95EE \xB7 \u5B66\u751F\u7248\u3002\u5B66\u4E60\u8BB0\u5F55\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\uFF1B\u6559\u6750\u539F\u6587\u4E0D\u4F1A\u4E0A\u4F20\uFF0C\u4E5F\u4E0D\u4F1A\u968F\u5B89\u88C5\u5305\u5206\u53D1\u3002"
+                "\u8BB0\u5F55\u53EA\u5728\u672C\u673A\uFF0C\u6559\u6750\u539F\u6587\u4E0D\u4E0A\u4F20\u3002"
               ),
               h(
                 "details",
@@ -1770,7 +1770,7 @@ window.__ModuleLoader__.load({
             notice({
               tone: "info",
               title: "\u8BB0\u5F55\u5728\u8FD9\u53F0\u7535\u8111\uFF0C\u8BB2\u89E3\u6765\u81EA\u4E91\u7AEF",
-              body: "\u5B66\u4E60\u8BB0\u5F55\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u3002\u9700\u8981\u667A\u80FD\u53CD\u9988\u65F6\uFF0C\u5F53\u524D\u9898\u76EE\u3001\u4F5C\u7B54\u548C\u5FC5\u8981\u7684\u6750\u6599\u7247\u6BB5\u4F1A\u53D1\u7ED9\u6A21\u578B\u670D\u52A1\uFF1B\u4E0D\u4F1A\u4E0A\u4F20\u6574\u672C\u6559\u6750\u3002"
+              body: "\u5B66\u4E60\u8BB0\u5F55\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\uFF1B\u9700\u8981\u667A\u80FD\u53CD\u9988\u65F6\uFF0C\u4F1A\u628A\u5F53\u524D\u9898\u76EE\u3001\u4F5C\u7B54\u548C\u5FC5\u8981\u6750\u6599\u7247\u6BB5\u53D1\u7ED9\u6A21\u578B\u670D\u52A1\uFF0C\u4E0D\u4F1A\u4E0A\u4F20\u6574\u672C\u6559\u6750\u3002"
             })
           );
           const textbook = h(
@@ -1781,7 +1781,7 @@ window.__ModuleLoader__.load({
               "div",
               { class: "edu-card" },
               h("p", { class: "edu-card__title" }, courseLabel),
-              h("p", { class: "edu-card__meta" }, "\u5185\u5BB9\u6309\u8BFE\u672C\u6574\u7406\uFF1B\u539F\u6587\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u3002"),
+              h("p", { class: "edu-card__meta" }, "\u5185\u5BB9\u6309\u8BFE\u672C\u6574\u7406\u3002"),
               h(
                 "div",
                 { class: "edu-inline-actions" },
@@ -1815,7 +1815,7 @@ window.__ModuleLoader__.load({
           }
           const hint = h("p", { class: "edu-section__lead", "data-testid": "first-run-range-hint" });
           const updateHint = (value = scope) => {
-            hint.textContent = value === "selected" ? `\u5DF2\u9009\u4E86 ${selected.size} \u4E2A\u6982\u5FF5\u3002\u4E4B\u540E\u968F\u65F6\u80FD\u6539\u3002` : value === "all_unlearned" ? "\u4ECE\u8FD8\u6CA1\u5B66\u8FC7\u7684\u6982\u5FF5\u5F00\u59CB\u63A8\u8350\uFF1B\u4EE5\u540E\u53EF\u4EE5\u6539\u3002" : "\u5148\u770B\u5730\u56FE\uFF0C\u4E4B\u540E\u968F\u65F6\u80FD\u6539\u3002";
+            hint.textContent = value === "selected" ? `\u5DF2\u9009\u4E86 ${selected.size} \u4E2A\u6982\u5FF5\u3002` : value === "all_unlearned" ? "\u4ECE\u8FD8\u6CA1\u5B66\u8FC7\u7684\u6982\u5FF5\u5F00\u59CB\u63A8\u8350\uFF1B\u4EE5\u540E\u53EF\u4EE5\u6539\u3002" : "\u5148\u770B\u5730\u56FE\uFF0C\u4E4B\u540E\u968F\u65F6\u80FD\u6539\u3002";
           };
           updateHint();
           const currentScope = () => scope;
@@ -1922,9 +1922,8 @@ window.__ModuleLoader__.load({
             h(
               "p",
               { class: "edu-section__lead" },
-              `\u6709 ${activityCount} \u9053\u9898\u53EF\u7528\u3002\u77ED\u8BCA\u65AD\u53EA\u770B\u4F60\u9009\u7684\u8303\u56F4\uFF0C\u968F\u65F6\u53EF\u4EE5\u505C\uFF1B\u6CA1\u6D4B\u5230\u7684\u4E0D\u4F1A\u5F53\u6210\u5B66\u4F1A\u3002`
+              `\u6709 ${activityCount} \u9053\u9898\uFF0C\u968F\u65F6\u53EF\u4EE5\u505C\u3002`
             ),
-            h("p", { class: "edu-muted" }, "\u8DF3\u8FC7\u4E5F\u6CA1\u5173\u7CFB\uFF0C\u4E0D\u5F71\u54CD\u540E\u9762\u5B66\u4E60\u3002"),
             h(
               "div",
               { class: "edu-inline-actions" },
@@ -2122,8 +2121,7 @@ window.__ModuleLoader__.load({
                   { class: "edu-bar__track" },
                   h("span", { class: "edu-bar__learn", style: `width:${learnedPct}%` }),
                   h("span", { class: "edu-bar__review", style: `width:${reviewPct}%` })
-                ),
-                h("p", { class: "edu-bar__caption" }, `\u5168\u518C ${total} \u4E2A\u6982\u5FF5\uFF0C\u4F60\u5DF2\u7ECF\u63A5\u89E6\u8FC7 ${learned} \u4E2A\u3002`)
+                )
               ),
               button("\u67E5\u770B\u8FDB\u5C55", () => void api2.navigate("/records"), { tone: "ghost" })
             )
@@ -2315,7 +2313,7 @@ window.__ModuleLoader__.load({
                   { class: "edu-card" },
                   h("p", { class: "edu-card__title" }, courseEditionLabel(snapshot.courseEdition)),
                   statusChip(snapshot.fixture ? "\u5F85\u6838\u5B9E" : "\u5DF2\u6838\u5BF9", snapshot.fixture ? "attention" : "positive"),
-                  h("p", { class: "edu-card__meta" }, "\u5185\u5BB9\u6309\u8BFE\u672C\u6574\u7406\uFF1B\u539F\u6587\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u3002")
+                  h("p", { class: "edu-card__meta" }, "\u5185\u5BB9\u6309\u8BFE\u672C\u6574\u7406\u3002")
                 )
               )
             );
@@ -2973,7 +2971,7 @@ window.__ModuleLoader__.load({
           h(
             "p",
             {},
-            "\u5B66\u4E60\u8BB0\u5F55\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u3002\u60F3\u5E26\u8D70\u6216\u6E05\u7A7A\uFF0C\u90FD\u5728\u8FD9\u91CC\uFF1B\u8BFE\u672C\u6587\u4EF6\u4E0D\u4F1A\u88AB\u5220\u9664\u3002"
+            "\u5B66\u4E60\u8BB0\u5F55\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u3002"
           )
         )
       );
@@ -2981,8 +2979,7 @@ window.__ModuleLoader__.load({
         title: "\u5BFC\u51FA\u5B66\u4E60\u8BB0\u5F55",
         impact: [
           "\u5BFC\u51FA\u5185\u5BB9\uFF1A\u4F60\u7684\u4F5C\u7B54\u3001\u5224\u65AD\u8BB0\u5F55\u3001\u81EA\u8BC4\u548C\u590D\u4E60\u5B89\u6392\u3002",
-          "\u4E0D\u4F1A\u5305\u542B\u8BFE\u672C\u539F\u6587\u4EF6\u6216\u8BFE\u672C\u539F\u56FE\u3002",
-          "\u5BFC\u51FA\u6587\u4EF6\u4F1A\u4FDD\u5B58\u5230\u4F60\u9009\u62E9\u7684\u4F4D\u7F6E\uFF0C\u8BF7\u81EA\u884C\u59A5\u5584\u4FDD\u7BA1\u3002"
+          "\u4E0D\u542B\u8BFE\u672C\u539F\u6587\u3002"
         ],
         confirmLabel: "\u786E\u8BA4\u5BFC\u51FA",
         onConfirm: () => {
@@ -3002,8 +2999,7 @@ window.__ModuleLoader__.load({
         acknowledgement: "\u6211\u4E86\u89E3\u5220\u9664\u4E0D\u53EF\u64A4\u9500\uFF0C\u8BFE\u672C\u6587\u4EF6\u4E0D\u4F1A\u88AB\u5220\u9664\u3002",
         impact: [
           "\u4F1A\u5220\u9664\u8FD9\u53F0\u7535\u8111\u4E0A\u7684\u4F5C\u7B54\u3001\u5224\u65AD\u8BB0\u5F55\u3001\u81EA\u8BC4\u548C\u590D\u4E60\u5B89\u6392\u3002",
-          "\u8BFE\u672C\u6587\u4EF6\u548C\u8BFE\u672C\u539F\u56FE\u4E0D\u4F1A\u88AB\u5220\u9664\u3002",
-          "\u5220\u9664\u540E\u8BB0\u5F55\u4E3A\u7A7A\uFF0C\u91CD\u542F\u540E\u4ECD\u7136\u4E3A\u7A7A\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u4ECE\u4E91\u7AEF\u6062\u590D\u3002"
+          "\u8BFE\u672C\u6587\u4EF6\u548C\u8BFE\u672C\u539F\u56FE\u4E0D\u4F1A\u88AB\u5220\u9664\u3002"
         ],
         confirmLabel: "\u786E\u8BA4\u5220\u9664\u5B66\u4E60\u8BB0\u5F55",
         onConfirm: () => {
@@ -3024,8 +3020,7 @@ window.__ModuleLoader__.load({
         acknowledgement: "\u6211\u4E86\u89E3\u53EA\u79FB\u9664\u672C\u673A\u5173\u8054\uFF0C\u4E0D\u4F1A\u5220\u9664\u8BFE\u672C\u6E90\u6587\u4EF6\u3002",
         impact: [
           "\u4F1A\u79FB\u9664\u8FD9\u53F0\u7535\u8111\u4E0E\u8FD9\u672C\u8BFE\u672C\u7684\u5173\u8054\u548C\u5BFC\u5165\u8BB0\u5F55\u3002",
-          "\u4E0D\u4F1A\u5220\u9664\u8BFE\u672C\u6587\u4EF6\u3001\u8BFE\u672C\u539F\u56FE\u6216\u5DF2\u7ECF\u5199\u597D\u7684\u5185\u5BB9\u3002",
-          "\u5DF2\u4FDD\u5B58\u7684\u5B66\u4E60\u8BB0\u5F55\u4ECD\u4FDD\u7559\uFF0C\u53EF\u4EE5\u5728\u8FDB\u5C55\u91CC\u67E5\u770B\u3002"
+          "\u4E0D\u4F1A\u5220\u9664\u8BFE\u672C\u6587\u4EF6\uFF0C\u4E5F\u4E0D\u4F1A\u52A8\u5DF2\u7ECF\u5199\u597D\u7684\u5B66\u4E60\u8BB0\u5F55\u3002"
         ],
         confirmLabel: "\u786E\u8BA4\u79FB\u9664\u5173\u8054",
         onConfirm: () => {
@@ -3403,12 +3398,7 @@ window.__ModuleLoader__.load({
           this.toolsHost
         );
         const content = h("div", { class: "edu-content" }, this.main);
-        const footer = h(
-          "footer",
-          { class: "edu-footer" },
-          h("p", {}, "\u5B66\u4E60\u8BB0\u5F55\u53EA\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u3002")
-        );
-        this.root.append(skip, top, content, footer);
+        this.root.append(skip, top, content);
         this.renderNav();
         this.renderHeaderTools();
         this.renderContext();
@@ -7968,7 +7958,7 @@ window.__ModuleLoader__.load({
           h(
             "p",
             { class: "edu-lib-chooser__empty" },
-            "\u8FD9\u53F0\u7535\u8111\u4E0A\u53EA\u6709\u8FD9\u4E00\u672C\u3002\u8981\u518D\u6DFB\u4E00\u672C\uFF0C\u70B9\u201C\u5BFC\u5165\u65B0\u7684\u201D\u3002"
+            "\u8FD9\u53F0\u7535\u8111\u4E0A\u53EA\u6709\u8FD9\u4E00\u672C\u3002"
           )
         );
         return wrap;
@@ -8595,7 +8585,7 @@ window.__ModuleLoader__.load({
           h(
             "p",
             { class: "edu-section__lead" },
-            "\u9009\u4E00\u4E2A\u672C\u5730 PDF\uFF0C\u786E\u8BA4\u4E66\u540D\u548C\u7248\u6B21\u540E\u5F00\u59CB\u3002\u8FDB\u5EA6\u3001\u6682\u505C\u548C\u51FA\u9519\u90FD\u7167\u5B9E\u663E\u793A\uFF0C\u6CA1\u505A\u5B8C\u7684\u4E0D\u4F1A\u5199\u6210\u5B8C\u6210\u3002"
+            "\u9009\u4E00\u4E2A\u672C\u5730 PDF\uFF0C\u786E\u8BA4\u4E66\u540D\u548C\u7248\u6B21\u540E\u5F00\u59CB\u3002"
           )
         );
         if (this.state.offline) {
@@ -9141,7 +9131,7 @@ window.__ModuleLoader__.load({
           controller.onPageMount();
           const root = h("div", { class: "edu-lib", "data-testid": "library-page" });
           root.append(
-            pageHeading("\u6211\u7684\u8BFE\u672C", "\u8FD9\u4E00\u9875\u53EA\u8BF4\u4E00\u4EF6\u4E8B\uFF1A\u73B0\u5728\u7528\u7684\u662F\u54EA\u672C\u3001\u54EA\u4E00\u7248\u3001\u5185\u5BB9\u4ECE\u54EA\u6765\u3001\u80FD\u4E0D\u80FD\u7528\u3002"),
+            pageHeading("\u6211\u7684\u8BFE\u672C", "\u73B0\u5728\u7528\u7684\u662F\u54EA\u672C\uFF0C\u5185\u5BB9\u4ECE\u54EA\u6765\u3002"),
             h("div", { "data-edu-slot": "library:content", "data-testid": "library-content-slot" }),
             h("div", { "data-edu-slot": "library:import", "data-testid": "library-import-slot" })
           );
@@ -10064,11 +10054,6 @@ window.__ModuleLoader__.load({
           "span",
           { class: "edu-map-chapter__meta" },
           `${entry.sections.length} \u8282 \xB7 ${entry.concepts.length} \u4E2A\u6982\u5FF5`
-        ),
-        h(
-          "span",
-          { class: "edu-map-chapter__progress" },
-          `\u5DF2\u5B66 ${entry.learnedCount} / ${entry.concepts.length}`
         )
       );
       const chips = h("ul", {
@@ -10174,13 +10159,6 @@ window.__ModuleLoader__.load({
       for (const unit of filter.units) {
         holder.append(renderUnit(unit, model, filter.active, actions));
       }
-      holder.append(
-        h(
-          "p",
-          { class: "edu-map-help" },
-          "\u6BCF\u4E2A\u6982\u5FF5\u7684\u72B6\u6001\u6765\u81EA\u4F60\u5B9E\u9645\u505A\u9898\u548C\u590D\u4E60\u7684\u8BB0\u5F55\uFF1B\u6CA1\u505A\u8FC7\u7684\u5C31\u662F\u300C\u8FD8\u6CA1\u5F00\u59CB\u300D\u3002"
-        )
-      );
       return holder;
     }
     function renderChapterHeader(chapter, viewMode, actions) {
@@ -10421,9 +10399,8 @@ window.__ModuleLoader__.load({
         h(
           "p",
           { class: "edu-map-graph__legend" },
-          "\u5B9E\u7EBF\u7BAD\u5934\uFF1A\u5148\u5B66\u8FD9\u4E2A\uFF0C\u518D\u5B66\u90A3\u4E2A\u3002\u865A\u7EBF\uFF1A\u53EA\u662F\u76F8\u5173\uFF0C\u6CA1\u6709\u5148\u540E\u3002"
-        ),
-        h("p", { class: "edu-map-help" }, "\u7528 Tab \u5728\u6982\u5FF5\u4E4B\u95F4\u79FB\u52A8\uFF0CEnter \u6216\u7A7A\u683C\u6253\u5F00\u8BE6\u60C5\u3002")
+          "\u5B9E\u7EBF\uFF1D\u5148\u5B66\uFF0C\u865A\u7EBF\uFF1D\u76F8\u5173"
+        )
       );
     }
     function renderCompactGraph(chapter, selectedConceptId, model, actions) {
@@ -10730,7 +10707,7 @@ window.__ModuleLoader__.load({
         h(
           "p",
           {},
-          chapter === null ? "\u70B9\u4E00\u4E2A\u6982\u5FF5\uFF0C\u770B\u5B83\u548C\u8C01\u8FDE\u7740\u3002" : "\u70B9\u4E0A\u9762\u4E00\u4E2A\u6982\u5FF5\uFF0C\u770B\u770B\u5B83\u5148\u5B66\u4EC0\u4E48\u3001\u63A5\u7740\u5B66\u4EC0\u4E48\u3002"
+          chapter === null ? "\u70B9\u4E00\u4E2A\u6982\u5FF5\uFF0C\u770B\u5B83\u548C\u8C01\u8FDE\u7740\u3002" : "\u70B9\u4E00\u4E2A\u6982\u5FF5\u770B\u8BE6\u60C5\u3002"
         ),
         h("p", { class: "edu-map-help" }, "\u53EA\u770B\u5730\u56FE\u4E0D\u4F1A\u6539\u53D8\u4F60\u7684\u5B66\u4E60\u8FDB\u5EA6\u3002")
       );
@@ -11502,7 +11479,7 @@ window.__ModuleLoader__.load({
               h(
                 "p",
                 { class: "edu-page__lead" },
-                "\u5148\u770B\u6574\u518C\uFF1A\u6309\u5355\u5143\u627E\u7AE0\uFF0C\u7AE0\u91CC\u5217\u51FA\u6982\u5FF5\u3002\u70B9\u4E00\u7AE0\u8FDB\u53BB\uFF0C\u770B\u6982\u5FF5\u4E4B\u95F4\u7684\u5148\u5B66\u540E\u5B66\u5173\u7CFB\u3002"
+                "\u6309\u5355\u5143\u548C\u7AE0\u627E\u6982\u5FF5\u3002"
               )
             ),
             h("div", {
@@ -12884,7 +12861,6 @@ window.__ModuleLoader__.load({
         note: "\u4F1A\u663E\u793A\u7B54\u6848\uFF0C\u8FD9\u6B21\u4F5C\u7B54\u4F1A\u6807\u4E3A\u300C\u7528\u8FC7\u63D0\u793A\u300D\u3002"
       }
     ];
-    var SKIP_NOTE = "\u8DF3\u8FC7\u8FD9\u4E00\u9898\u4E0D\u4F1A\u8BB0\u4E3A\u7B54\u9519\uFF0C\u4E5F\u4E0D\u4F1A\u628A\u6CA1\u505A\u7684\u9898\u8BB0\u6210\u505A\u8FC7\uFF1B\u4E4B\u540E\u53EF\u4EE5\u56DE\u6765\u3002";
     var DRAFT_SAVED = "\u8349\u7A3F\u5DF2\u4FDD\u5B58\u5728\u672C\u673A\u3002";
     var DRAFT_UNSAVED = "\u8349\u7A3F\u5C1A\u672A\u4FDD\u5B58\uFF1B\u79BB\u5F00\u524D\u8BF7\u91CD\u8BD5\u3002";
     var VERDICT_LABELS = {
@@ -13489,7 +13465,7 @@ window.__ModuleLoader__.load({
         }
         this.messages = [
           assistant(
-            this.intent.mode === "review" ? "\u590D\u4E60\u5148\u56DE\u5FC6\uFF0C\u518D\u7ED9\u53CD\u9988\u3002\u53EF\u4EE5\u968F\u65F6\u6253\u5F00\u6750\u6599\u3001\u8981\u63D0\u793A\u6216\u7ED3\u675F\u672C\u8F6E\u3002" : "\u5148\u8BFB\u6750\u6599\uFF0C\u518D\u8BD5\u7740\u7528\u81EA\u5DF1\u7684\u8BDD\u56DE\u7B54\uFF1B\u968F\u65F6\u53EF\u4EE5\u8981\u63D0\u793A\u3001\u89E3\u91CA\u6216\u793A\u8303\u3002"
+            this.intent.mode === "review" ? "\u590D\u4E60\u5148\u56DE\u5FC6\uFF0C\u518D\u7ED9\u53CD\u9988\u3002\u53EF\u4EE5\u968F\u65F6\u6253\u5F00\u6750\u6599\u3001\u8981\u63D0\u793A\u6216\u7ED3\u675F\u672C\u8F6E\u3002" : "\u5148\u8BFB\u6750\u6599\uFF0C\u518D\u81EA\u5DF1\u56DE\u7B54\u3002"
           )
         ];
         this.notify();
@@ -13716,7 +13692,7 @@ window.__ModuleLoader__.load({
           return;
         }
         this.tutorState = result.data.state;
-        this.skipNotice = result.data.message || SKIP_NOTE;
+        this.skipNotice = result.data.message || "\u5DF2\u8DF3\u8FC7\u3002";
         this.messages = [...this.messages, system(this.skipNotice)];
         this.notify();
       }
@@ -14050,7 +14026,7 @@ window.__ModuleLoader__.load({
           this.chromeTitle.textContent = workspace === null ? "\u5B66\u4E60" : workspace.concept.title;
         }
         if (this.chromeMode !== null) {
-          this.chromeMode.textContent = this.intent.mode === "review" ? "\u590D\u4E60 \xB7 \u5148\u56DE\u5FC6\uFF0C\u518D\u770B\u53CD\u9988" : "\u5B66\u4E60 \xB7 \u5148\u8BFB\u8BFE\u672C\uFF0C\u518D\u81EA\u5DF1\u4F5C\u7B54";
+          this.chromeMode.textContent = this.intent.mode === "review" ? "\u590D\u4E60" : "\u5B66\u4E60";
         }
         if (this.draftStatusNode !== null) {
           const text = this.draftStatus === "saved" ? DRAFT_SAVED : this.draftStatus === "saving" ? "\u6B63\u5728\u4FDD\u5B58\u2026" : this.draftStatus === "failed" ? DRAFT_UNSAVED : "";
@@ -14476,7 +14452,7 @@ window.__ModuleLoader__.load({
           right.append(submit);
         }
         foot.append(right);
-        root.append(body, foot, h("p", { class: "edu-study-note" }, SKIP_NOTE));
+        root.append(body, foot);
       }
       answerEcho() {
         const wrap = h("div", { class: "edu-study-answer", "data-testid": "study-answer-echo" });
@@ -14790,10 +14766,6 @@ window.__ModuleLoader__.load({
           root.append(this.axisSection(), this.selfReportSection());
         } else if (this.loading) {
           root.append(h("p", { class: "edu-study-note" }, "\u7B54\u5B8C\u8FD9\u4E00\u9898\uFF0C\u7ED3\u8BBA\u548C\u4F9D\u636E\u4F1A\u51FA\u73B0\u5728\u8FD9\u91CC\u3002"));
-        } else {
-          root.append(
-            h("p", { class: "edu-study-note" }, "\u7B54\u5B8C\u8FD9\u4E00\u9898\uFF0C\u8FD9\u91CC\u4F1A\u7ED9\u7ED3\u8BBA\u3001\u4F9D\u636E\u548C\u51FA\u5904\uFF1B\u6CA1\u7B54\u5B8C\u65F6\u4E0D\u4F1A\u663E\u793A\u5BF9\u9519\u3002")
-          );
         }
         if (this.chatNotice.length > 0) {
           root.append(h("p", { class: "edu-study-note", role: "status" }, this.chatNotice));
@@ -15914,8 +15886,7 @@ window.__ModuleLoader__.load({
             h(
               "h2",
               { class: "sprout-sheet__title", id: sheetTitleId },
-              "\u5C0F\u82BD",
-              h("span", { class: "sprout-sheet__sub" }, "\u8981\u63D0\u793A\u3001\u8981\u89E3\u91CA\u90FD\u53EF\u4EE5\u95EE")
+              "\u5C0F\u82BD"
             ),
             sheetClose
           );
@@ -16024,8 +15995,7 @@ window.__ModuleLoader__.load({
             h(
               "header",
               { class: "edu-page__header" },
-              h("h1", { class: "edu-page__title", tabindex: -1 }, "\u5B66\u4E60"),
-              h("p", { class: "edu-page__lead" }, "\u5DE6\u8FB9\u662F\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\uFF0C\u53F3\u8FB9\u662F\u9898\u76EE\uFF1B\u7B54\u5B8C\u5C31\u5728\u539F\u5730\u770B\u7ED3\u8BBA\u548C\u51FA\u5904\u3002")
+              h("h1", { class: "edu-page__title", tabindex: -1 }, "\u5B66\u4E60")
             ),
             top,
             ribbon,
@@ -16839,7 +16809,7 @@ window.__ModuleLoader__.load({
     function createLiveLibraryDataSource() {
       return {
         kind: "live",
-        notice: "\u771F\u5B9E\u5019\u9009\u6559\u6750\uFF1A\u6765\u81EA\u672C\u673A\u5185\u5BB9\u5305\uFF0C\u5C1A\u5F85\u4EBA\u5DE5\u5BA1\u6821\uFF1B\u5019\u9009\u6807\u8BC6\u548C\u6765\u6E90\u9875\u7801\u59CB\u7EC8\u53EF\u89C1\u3002",
+        notice: "\u8FD9\u672C\u6559\u6750\u8FD8\u5728\u6838\u5BF9\u4E2D\uFF0C\u5148\u7528\u7740\u3002",
         async listBooks() {
           const book = await api("/edu/api/g1/library");
           if (!book.ok || book.data === void 0) return book;

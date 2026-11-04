@@ -8,13 +8,13 @@ describe('first use', () => {
     const { container } = await mountShell(fixtureOptions('ready', '/first-run'));
     const text = textOf(pageRoot(container));
     expect(text).toContain('学习记录保存在这台电脑');
-    expect(text).toContain('会发给模型服务');
+    expect(text).toContain('发给模型服务');
     expect(text).toContain('不会上传整本教材');
     expect(text).not.toContain('本地匿名档案');
     expect(text).toContain('当前教材');
     expect(text).toContain('内容按课本整理');
     expect(text).toContain('短诊断');
-    expect(text).toContain('道题可用');
+    expect(text).toContain('道题，随时可以停');
   });
 
   it('saves a self-reported range as a statement, not as understanding evidence', async () => {

@@ -65,7 +65,7 @@ export function createLiveShellDataSource(): any {
 export function createLiveLibraryDataSource(): any {
   return {
     kind: 'live',
-    notice: '真实候选教材：来自本机内容包，尚待人工审校；候选标识和来源页码始终可见。',
+    notice: '这本教材还在核对中，先用着。',
     async listBooks() {
       const book = await api<Record<string, unknown>>('/edu/api/g1/library');
       if (!book.ok || book.data === undefined) return book;

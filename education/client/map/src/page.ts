@@ -23,7 +23,7 @@ export function createMapPage(controller: MapController): EducationPage {
           h(
             'p',
             { class: 'edu-page__lead' },
-            '先看整册：按单元找章，章里列出概念。点一章进去，看概念之间的先学后学关系。',
+            '按单元和章找概念。',
           ),
         ),
         h('div', {

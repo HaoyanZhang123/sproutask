@@ -274,12 +274,7 @@ export class EducationShell {
       this.toolsHost,
     );
     const content = h('div', { class: 'edu-content' }, this.main);
-    const footer = h(
-      'footer',
-      { class: 'edu-footer' },
-      h('p', {}, '学习记录只保存在这台电脑上。'),
-    );
-    this.root.append(skip, top, content, footer);
+    this.root.append(skip, top, content);
     this.renderNav();
     this.renderHeaderTools();
     this.renderContext();

@@ -164,7 +164,6 @@ export function createHomePage(): EducationPage {
               h('span', { class: 'edu-bar__learn', style: `width:${learnedPct}%` }),
               h('span', { class: 'edu-bar__review', style: `width:${reviewPct}%` }),
             ),
-            h('p', { class: 'edu-bar__caption' }, `全册 ${total} 个概念，你已经接触过 ${learned} 个。`),
           ),
           button('查看进展', () => void api.navigate('/records'), { tone: 'ghost' }),
         ),

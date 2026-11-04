@@ -29,7 +29,6 @@ describe('education shell navigation', () => {
     expect(textOf(home)).toContain('继续上次');
     const progress = home.querySelector<HTMLElement>('[data-testid="home-progress"]');
     expect(progress).not.toBeNull();
-    expect(textOf(progress as HTMLElement)).toContain('全册 3 个概念');
     expect(textOf(progress as HTMLElement)).toContain('学过');
     for (const control of [...buttonsOf(container), ...nav]) {
       expect((control.textContent ?? '').trim()).not.toMatch(FORBIDDEN_ENTRY);
