@@ -15870,7 +15870,7 @@ var PageRegistry = class {
 
 // runtime/src/runtime-composition.ts
 var MESSAGES2 = {
-  "app.title": "\u6559\u80B2\u5B66\u4E60\u5DE5\u4F5C\u533A",
+  "app.title": "\u82BD\u95EE",
   "nav.library": "\u6559\u6750\u5E93",
   "nav.map": "\u5730\u56FE",
   "nav.workspace": "\u5DE5\u4F5C\u533A",

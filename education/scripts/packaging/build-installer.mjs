@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const educationRoot = path.resolve(here, '..', '..');
 const workspaceRoot = path.resolve(educationRoot, '..');
+const productVersion = JSON.parse(readFileSync(path.join(educationRoot, 'package.json'), 'utf8')).version;
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
@@ -71,7 +72,7 @@ const versionText = existsSync(versionFile) ? readFileSync(versionFile, 'utf8') 
 /** version.txt is `key=value`; accept `key: value` too for older payloads. */
 const ledger = (key) =>
   (versionText.match(new RegExp(`^\\s*${key}\\s*[:=]\\s*(.+)$`, 'im'))?.[1] ?? '').trim();
-const version = ledger('version') || '0.3.1';
+const version = ledger('version') || productVersion;
 // A payload that carries no explicit build id still has a git hash and a build
 // time: report those instead of the useless "unversioned" placeholder.
 const buildId = (

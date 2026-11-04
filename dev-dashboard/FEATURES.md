@@ -1,92 +1,81 @@
 # 功能地图
 
-## 功能: 和小芽对话：一轮一轮地问，你答完再往下走
+## 功能: 在真实 DSH 内核上对话，不是外观相似的聊天
 - 状态: 可用
-- 简介: 选好"今天想做什么"后进入对话，小芽每轮只问一件事、以问句结尾。
-- 证据: src/core/agent/session.ts, src/renderer/src/App.vue
+- 简介: 每次提问都走本机 DSH 会话与受限工具；模型只负责推理，教材与记录不离开本机。
+- 证据: education/runtime/src/g1-service.ts, education/runtime/host-plugin/src/index.ts
 - 依赖: 无
 
-### 子项: 开场先问"今天想做什么"，四个入口自己选
+### 子项: 答完能追到课本页
 - 状态: 可用
-- 简介: 预习 / 复习 / 做题 / 拓展，不猜你学到哪了。
-- 证据: src/core/agent/session.ts
+- 简介: 解释回合带出处；页码只引用本轮工具确实返回过的页。
+- 证据: education/packages/tutor/, education/content/biology-7a/source/
 
-### 子项: 每轮回复以问句收尾，把问题交回你手上
-- 状态: 可用
-- 简介: 不替你把话说完，而是让你先开口、先答。
-- 证据: src/core/prompts/v2/index.ts
+## 功能: 知识地图：先看全册，再看一章里的关系
+- 状态: 可用（重构中）
+- 简介: 全册按单元/章列出概念状态；点进一章看"先学→接着学→再学"的分层关系图，另有列表等价视图。
+- 证据: education/client/map/src/, education/content/biology-7a/fragments/relations-full.json
+- 依赖: 在真实 DSH 内核上对话，不是外观相似的聊天
 
-## 功能: 答案不直接给：要也不给，只把你引回课本
-- 状态: 可用
-- 简介: 直接索要答案、说"明天考试"、撒娇施压，都不会把结论说出来。
-- 证据: src/core/agent/guard.ts, evals/cases/socratic.yaml, evals/cases/edge.yaml
-- 依赖: 和小芽对话：一轮一轮地问，你答完再往下走
+## 功能: 学习台：读课本、作答、看反馈在一处
+- 状态: 可用（重构中）
+- 简介: 左边课本原文（可折叠易混点与出处），右边题目；提交后原地展开结论、依据、出处与下一题；小芽收成右下角浮起按钮。
+- 证据: education/client/study/src/controller.ts, education/client/study/src/page.ts
+- 依赖: 知识地图：先看全册，再看一章里的关系
 
-## 功能: 教材窗：这一节要掌握什么、在课本第几页
+### 子项: 提示与示范
 - 状态: 可用
-- 简介: 右侧一栏显示知识点、课标要求与页码出处，边聊边对照。
-- 证据: src/renderer/src/components/ReadingPane.vue, content/units/u-cell-basic-unit/knowledge-points.yaml, content/units/u-cell-basic-unit/curriculum.yaml
+- 简介: 卡住时可以要提示、解释或示范；用了帮助会如实记为"用了提示"。
+- 证据: education/client/study/src/controller.ts
 
-### 子项: 折叠答案：先自己想想，再点开对照
+### 子项: 草稿与恢复
 - 状态: 可用
-- 简介: 答案默认收起，想好了再展开。
-- 证据: src/shared/section-blocks.ts
+- 简介: 作答草稿保存在本机；离开再回来恢复到同一题。
+- 证据: education/client/study/src/machine.ts, education/packages/storage/
 
-### 子项: 在课本里找找看：搜到折叠内容只提示、不自动翻开
+## 功能: 复习与短诊断
 - 状态: 可用
-- 简介: 搜到答案会先问你要不要看，而不是替你翻开。
-- 证据: src/renderer/src/components/ReadingPane.vue
+- 简介: 按自选范围回忆作答，给出有依据的反馈；短诊断可随时结束，不锁住后续学习。
+- 证据: education/client/study/src/controller.ts, education/packages/learner/
 
-### 子项: 本机没有课本正文时，明说"请对照课本第 X 页"
+## 功能: 图片作答
 - 状态: 可用
-- 简介: 不拿占位文字冒充课本，也不让小芽编课本原话。
-- 证据: src/core/prompts/v2/l2-textbook.ts, src/main/content/runtime.ts
+- 简介: 图片先过质量门（模糊/倾斜/空白会要求重拍），再分步识别与批改；同一张图不重复记分。
+- 证据: education/client/visuals/src/image-flow.ts
+- 依赖: 在真实 DSH 内核上对话，不是外观相似的聊天
 
-## 功能: 学习记录只留在这台电脑，关掉再打开接着上次
+## 功能: 本机学习记录：三轴 + 自评 + 导出删除
 - 状态: 可用
-- 简介: 每次打开的对话各自留一份；只用学生编号，不记姓名。
-- 证据: src/main/storage/jsonl-store.ts, src/main/ipc/index.ts
+- 简介: 学习进程、理解证据、复习活动分开记录；自评单独保存；记录可导出、可确认后删除。
+- 证据: education/packages/storage/, education/packages/learner/, education/client/shell/src/pages/records.ts（重构中）
 
-### 子项: 开场记得你上次学到哪一节
+### 子项: 关掉再打开接着上次
 - 状态: 可用
-- 简介: 再打开时会说"上次你在：第四节 细胞的生活"。
-- 证据: src/main/ipc/index.ts
+- 简介: 事件日志 + 快照，崩溃后可恢复；不会把"聊过"当成"学会了"。
+- 证据: education/packages/storage/src/
+
+## 功能: 内容包与出处核对
+- 状态: 可用
+- 简介: 七上 2 单元 / 7 章 / 22 节 / 43 概念的正文结构、活动、评分与关系；原文只在本机。
+- 证据: education/content/biology-7a/, education/scripts/content-validate.mjs
+
+### 子项: 未核实内容明确标出来
+- 状态: 可用
+- 简介: 候选教材与未核对字段会显示"未核实"，并且不会被当成稳定结论。
+- 证据: education/content/biology-7a/source/, education/client/library/src/labels.ts
 
 ## 功能: 第一次打开就能自己配好
 - 状态: 可用
-- 简介: 引导填写模型钥匙，填错有中文提示；界面上不显示钥匙内容。
-- 证据: src/renderer/src/components/ConfigPanel.vue
+- 简介: 三步引导：记录只在本机、选教材、填 Key（可跳过）；没有 Key 也能读教材看记录。
+- 证据: education/client/shell/src/pages/first-run.ts, education/client/shell/src/pages/account.ts
 
-## 功能: 装到自己电脑上就能用（便携版 / 安装版）
+## 功能: 装到自己电脑上就能用
 - 状态: 可用
-- 简介: 便携版双击即用；安装版装到当前账户、不需要管理员、可卸载。
-- 证据: electron-builder.yml, docs/releases/v0.2.0-alpha.md
+- 简介: 每用户安装版（免管理员、可卸载、保留数据）与便携版；未签名，附 SHA256。
+- 证据: education/scripts/packaging/, education/dist/student/version.txt
+- 依赖: 内容包与出处核对
 
-### 子项: 有自己的图标与署名
-- 状态: 可用
-- 简介: 文件和安装包里显示芽问自己的图标与作者信息。
-- 证据: build/icon.ico
-
-## 功能: 教材内容覆盖：从一节扩到一册
+## 功能: 界面改成学生能用的
 - 状态: 进行中
-- 简介: 把课本内容做成"知识点 + 课标要求 + 页码出处"，目前只完成一节。
-- 证据: tools/extract_textbook.py, scripts/content-validate.ts
-
-### 子项: 第一单元第二章第四节「细胞的生活」
-- 状态: 可用
-- 简介: 5 个知识点 + 5 条课标要求，都带印刷页出处。
-- 证据: content/units/u-cell-basic-unit/unit.yaml, content/units/u-cell-basic-unit/curriculum.yaml
-
-### 子项: 七年级上册其余章节
-- 状态: 设想
-- 简介: 按同一套做法逐节入库（提取 → 校错 → 知识点 → 课标 → 校验）。
-
-## 功能: 改话术前后能自动比对，看有没有变差
-- 状态: 可用
-- 简介: 25 条真实用例跑一遍，专门盯"有没有漏答案、语气像不像老师"。
-- 证据: scripts/eval.ts, evals/cases/socratic.yaml
-
-## 功能: 给负责人自己的上手检查单
-- 状态: 可用
-- 简介: 一页清单，照着用鼠标走一遍，看哪里跟预期不一样。
-- 证据: docs/tutorials/真人验收清单.md
+- 简介: A 期做视觉、文案减法与状态；B 期重排主旅程（今天 / 学习 / 进展 + 设置），学习台与两级知识地图落地。
+- 证据: docs/rebuild/11-ui-redesign.md（随实施创建）, docs/PROGRESS.md

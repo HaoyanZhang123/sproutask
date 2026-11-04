@@ -15482,7 +15482,7 @@ window.__ModuleLoader__.load({
     
     // runtime/client-plugin/src/index.ts
     var inject = ["slots"];
-    var EDUCATION_ROOT_TITLE = "\u6559\u80B2\u5B66\u4E60\u5DE5\u4F5C\u533A";
+    var EDUCATION_ROOT_TITLE = "\u82BD\u95EE";
     var controllerRef = null;
     var pagesRegistered = false;
     function registerLivePages(controller) {

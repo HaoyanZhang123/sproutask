@@ -1,8 +1,8 @@
 {
   "name": "@edu/workspace",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "private": true,
-  "description": "Isolated education workspace (DSH education agent rebuild). Root old app is not affected.",
+  "description": "芽问 SproutAsk 唯一产品线：DSH 内核上的教育 Agent（学生桌面端）",
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.21.0",

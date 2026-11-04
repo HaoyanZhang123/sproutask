@@ -65,9 +65,21 @@ education/content/    biology-7a 内容包：概念、活动、rubric、关系�
 education/licenses/   第三方许可清单（含 libvips LGPL-3.0 义务）
 ```
 
+## 开发
+
+```bash
+pnpm --dir education install   # 只有 education/ 有依赖
+pnpm dev                       # 本机 DSH web + Edge 应用窗口
+pnpm typecheck
+pnpm test
+```
+
+根目录的 `package.json` 是薄入口，命令全部转发到 `education/`。
+架构见 `docs/ARCHITECTURE.md`，规范见 `docs/CONVENTIONS.md`，当前状态见 `docs/PROGRESS.md`。
+
 ## 发布
 
-见 [v0.3.1 发布说明](docs/releases/v0.3.1.md)。`main` 仍是旧的 Electron 0.2.x 线；本次 DSH 重构线发布在分支 `education-v0.3.1`。
+见 [v0.3.1 发布说明](docs/releases/v0.3.1.md)。`main` 就是 DSH 内核线；早期 Electron 0.2.x 线已归档在 `docs/history/`，不再开发。
 
 ## 当前状态与已知限制
 

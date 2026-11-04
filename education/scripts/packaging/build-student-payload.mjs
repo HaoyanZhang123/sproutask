@@ -27,6 +27,8 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const educationRoot = path.resolve(here, '..', '..');
 const workspaceRoot = path.resolve(educationRoot, '..');
+// 版本号只有一处来源：education/package.json（发布时改这里，打包自动跟随）。
+const productVersion = JSON.parse(readFileSync(path.join(educationRoot, 'package.json'), 'utf8')).version;
 
 function parseArgs(argv) {
   const args = {};
@@ -220,7 +222,7 @@ const gitHash = gitValue(['rev-parse', '--short', 'HEAD'], 'nogit');
 // The artifact must not claim to be exactly HEAD when the working tree carries
 // uncommitted changes (e.g. a runtime fix that was built before the commit).
 const gitDirty = gitValue(['status', '--porcelain'], '').trim().length > 0 ? '+dirty' : '';
-const version = '0.3.1';
+const version = productVersion;
 // The ledger must describe what this build actually contains: with
 // --keep-sharp the sharp/@img binaries ARE shipped (libvips is LGPL-3.0 and its
 // licence text is under licenses/), so they must not be listed as cropped.

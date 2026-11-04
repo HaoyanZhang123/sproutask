@@ -1,32 +1,27 @@
-# 依赖与构建产物（与源码目录同名的规则一律锚定仓库根，避免误伤 src/**/build 之类）
+# 依赖与构建产物
 node_modules/
 /out/
-/dist/
 /release/
-# 注意：写成 /build/* 而不是 /build/ —— 父目录被整体忽略时，文件级"例外"是无效的
-/build/*
-# 例外：应用图标是需要长期留存的自有资产（不是构建产物；electron-builder 从这里取）
-!/build/icon.ico
-/tmp/
-__pycache__/
-*.pyc
+/dist/
+/education/dist/
 
-# 环境与密钥
-.env
-.env.local
-.env.*.local
-
-# 不进版本库的本地资料（见 docs/ARCHITECTURE.md 的目录结构一节）
-notes/
-content/textbook/
-
-# 运行时数据（本地 SQLite / 日志，若放在仓库目录内）
+# 本地运行数据、密钥、证据与调研笔记（绝不进 git）
+/education/.local/
 data/
+notes/
+.env
+.env.*
 *.log
 
-# 开发期自检产物（SPROUTASK_SELFTEST=1 的界面截图与结果文件）
-selftest-*.png
-selftest-result.json
+# 教材原文与课程标准原文（版权；只在本机，绝不进 git、绝不随包）
+/*.pdf
+/content/textbook/
+/content/curriculum/
+
+# 设计与截图工作目录（成品截图另行归档到 docs/images/ui/）
+output/
+/tmp/
+*.tmp
 
 # 编辑器与系统
 .vscode/*
@@ -35,6 +30,5 @@ selftest-result.json
 .DS_Store
 Thumbs.db
 
-# rebuild (2026-10-29): textbook originals, secrets, local evidence never enter git
-/*.pdf
-/education/.local/
+# dev-dashboard 生成文件
+dev-dashboard/.view.json

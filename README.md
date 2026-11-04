@@ -46,6 +46,18 @@ The installer is **not code-signed**, so Windows shows an "unknown publisher" pr
 3. Import your own copy of the textbook PDF, then pick a concept from the library or the map and start learning.
 4. Without a key the app stays in local mode: materials, map and records are readable, cloud reasoning is explicitly unavailable.
 
+## Development
+
+```bash
+pnpm --dir education install   # only education/ carries dependencies
+pnpm dev                       # local DSH web + Edge app window
+pnpm typecheck
+pnpm test
+```
+
+The root `package.json` is a thin entry that forwards these commands to `education/`.
+Architecture: `docs/ARCHITECTURE.md` · conventions: `docs/CONVENTIONS.md` · current state: `docs/PROGRESS.md`.
+
 ## Configuration
 
 | Item | Value |
@@ -67,7 +79,7 @@ education/licenses/   third-party notices, incl. libvips LGPL-3.0 obligations
 
 ## Releases
 
-See [v0.3.1 release notes](docs/releases/v0.3.1.md). `main` still carries the earlier Electron 0.2.x line; this DSH rebuild ships on branch `education-v0.3.1`.
+See [v0.3.1 release notes](docs/releases/v0.3.1.md). `main` is the DSH line; the earlier Electron 0.2.x line is archived under `docs/history/` and is no longer developed.
 
 ## Current status and limits
 

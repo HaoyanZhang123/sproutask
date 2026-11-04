@@ -25,7 +25,7 @@ import {
 
 export const inject = ['slots'] as const;
 
-export const EDUCATION_ROOT_TITLE = '教育学习工作区';
+export const EDUCATION_ROOT_TITLE = '芽问';
 
 interface ShellRef {
   current: HTMLDivElement | null;

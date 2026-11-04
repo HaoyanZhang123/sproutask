@@ -140,7 +140,7 @@ export interface EducationRuntimeComposition {
 }
 
 const MESSAGES: Record<string, string> = {
-  'app.title': '教育学习工作区',
+  'app.title': '芽问',
   'nav.library': '教材库',
   'nav.map': '地图',
   'nav.workspace': '工作区',
