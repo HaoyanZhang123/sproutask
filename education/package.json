@@ -1,6 +1,6 @@
 {
   "name": "@edu/workspace",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "description": "芽问 SproutAsk 唯一产品线：DSH 内核上的教育 Agent（学生桌面端）",
   "type": "module",

@@ -2,6 +2,7 @@
 
 ## 时间线
 
+- 2026-11-04 | **v0.4.0 准备发布**：学生界面重构 + 文案减法定稿；README/封面/发布说明按规范更新 | 证据: docs/releases/v0.4.0.md、docs/images/（产物：education/dist/SproutAsk-Setup-0.4.0-x64.exe + portable zip + SHA256SUMS）
 - 2026-11-04 | **学生界面重构完成**：今天 / 学习台（对开课本+练习）/ 两级知识地图 / 进展 / 设置 / 我的课本；705 个测试全绿，三档截图归档 | 证据: docs/images/ui/、docs/rebuild/11-ui-redesign.md
 - 2026-11-04 | **工作区收拢成一条线**：删掉旧 Electron 线（约 95 个跟踪文件 + 432MB 旧产物），旧文档归档到 `docs/history/`；根目录只剩一个入口，命令全部转发到 `education/`；CI 改为验证 `education/` | 证据: docs/PROGRESS.md
 - 2026-11-04 | **界面重构方案拍板**：学习页改成"一张摊开的学习台"，知识地图做成"全册章节图 + 章级分层关系图"，共 8 天 | 证据: docs/PROGRESS.md §5
@@ -26,4 +27,4 @@
 - [x] A 期：设计 token、顶栏、文案减法与禁词扫描
 - [x] B 期：今天页 / 学习台 / 两级地图 / 进展页 / 设置
 - [ ] 按 docs/optimize/04-manual-test.md 人工走查（15 分钟）
-- [ ] 更新发布说明并发 v0.4.0（待 D2 拍板）
+- [x] 更新发布说明并发 v0.4.0（待推送 GitHub）

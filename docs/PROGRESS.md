@@ -8,8 +8,8 @@
 
 ## 1. 一句话现状
 
-**v0.3.1（2026-11-03）已发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
-当前做两件事：**工作区收拢到单线**（2026-11-04，已完成待提交）和**界面重构 A+B**（进行中）。
+**v0.4.0（2026-11-04）已准备发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
+当前状态：工作区已收拢到单线；界面 A+B 重构与文案复检已完成；v0.4.0 版本号、README、封面与发布说明已更新。
 
 ---
 
@@ -68,6 +68,17 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - CI 尚未在 GitHub 上真实跑过（本次仅改配置，等推送后看首跑结果）。
 - 未重跑打包与干净机验证（本次没动 `education/` 业务代码）。
 
+
+
+### 2026-11-04：v0.4.0 发布准备
+
+- 版本号统一升到 **0.4.0**（根 `package.json` 与 `education/package.json`，打包脚本自动跟随）。
+- 按 GitHub 呈现规范重写 `README.md` / `README.zh.md`：新封面、真实徽章、安装/使用/配置/结构/限制，配 3 张真实界面截图；重画 `docs/images/cover.png`。
+- 新增双语发布说明 `docs/releases/v0.4.0.md`（新增 3 · 优化 7 · 修复 5），更新看板与进度。
+- 产物（本机构建，未上传）：`education/dist/SproutAsk-Setup-0.4.0-x64.exe`（59,436,226 B，FileVersion 0.4.0）、`SproutAsk-0.4.0-x64-portable.zip`（123,134,766 B）、`SHA256SUMS-v0.4.0.txt`；payload `version.txt` 为 0.4.0。
+- 验证：`pnpm typecheck` 全绿；`pnpm test` **705 个用例全绿**；makensis 构建成功；zip 根目录含 `launcher.cmd` 与 `version.txt`。
+- **未做**：干净机安装/启动验证；未推送 GitHub（当前克隆没有远端，`gh` 凭据失效）。
+
 ---
 
 ## 5. 界面重构 A+B（已拍板，进行中）
@@ -85,7 +96,7 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 **设计稿**：`output/uishot/mockups/`（临时目录，不入库；定稿后截图归档到 `docs/images/ui/`）。
 **方案与实施记录**：`docs/rebuild/11-ui-redesign.md`（随实施创建）。
 
-**进度（2026-11-04）**：A+B 已实现并合入工作区。
+**进度（2026-11-04）**：A+B 已实现并合入工作区，随后按用户逐条确认完成文案减法。
 
 - 外壳：顶栏「芽问 · 今天 / 学习 / 进展 + 设置」；移除侧栏、调试状态条、服务状态卡。
 - 今天：主卡「接着上次」+ 右栏四件事 + 三个数字进度条（与进展页同口径）。
@@ -117,9 +128,9 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 ## 7. 下一步（按顺序）
 
-1. 用户按 `docs/optimize/04-manual-test.md` 走查（15 分钟）并反馈问题。
-2. 修走查问题；补 live `activityId` 取下一题、self-report 持久化（需 host/契约变更，另行评估）。
-3. 更新发布说明，视用户决定发布 v0.4.0。
+1. 发布 v0.4.0：本地已打 tag 并构建产物；推送与 GitHub Releases 需先配置远端并重新登录 `gh`（当前克隆无远端、凭据失效）。
+2. 用户按 `docs/optimize/04-manual-test.md` 走查并反馈。
+3. 后续补 live `activityId` 取下一题、self-report 持久化（需 host/契约变更，另行评估）。
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "name": "sproutask",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "description": "芽问 SproutAsk —— 运行在 DSH 内核上、本地优先的初中生物学习 Agent",
   "author": "HaoyanZhang123",
