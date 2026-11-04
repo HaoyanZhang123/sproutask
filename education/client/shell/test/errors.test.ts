@@ -31,9 +31,11 @@ describe('structured service errors', () => {
   it('falls back safely for unknown or unsafe error codes', () => {
     const unknown = renderErrorBanner({ code: 'FUTURE_CODE', message: 'x', retryable: false });
     expect(textOf(unknown)).toContain('操作没有完成');
-    expect(textOf(unknown)).toContain('错误代码：FUTURE_CODE');
+    expect(unknown.getAttribute('data-edu-error')).toBe('FUTURE_CODE');
+    expect(textOf(unknown)).not.toContain('FUTURE_CODE');
     const unsafe = renderErrorBanner({ code: '..\\..\\secret', message: 'x', retryable: false });
-    expect(textOf(unsafe)).toContain('错误代码：UNKNOWN');
+    expect(unsafe.getAttribute('data-edu-error')).toBe('UNKNOWN');
+    expect(textOf(unsafe)).not.toContain('UNKNOWN');
     expect(textOf(unsafe)).not.toContain('secret');
   });
 });

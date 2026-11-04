@@ -8,7 +8,7 @@ export function createMapPage(controller: MapController): EducationPage {
   return {
     id: 'map',
     path: '/map',
-    title: '地图',
+    title: '知识地图',
     requiresLearner: false,
     fallback: false,
     mount(context: EducationPageContext) {
@@ -19,11 +19,11 @@ export function createMapPage(controller: MapController): EducationPage {
         h(
           'header',
           { class: 'edu-page__header' },
-          h('h1', { class: 'edu-page__title', tabindex: -1 }, '地图'),
+          h('h1', { class: 'edu-page__title', tabindex: -1 }, '知识地图'),
           h(
             'p',
             { class: 'edu-page__lead' },
-            '按课本目录找概念；线表示内容之间的关系，点一下就能看详情。',
+            '先看整册：按单元找章，章里列出概念。点一章进去，看概念之间的先学后学关系。',
           ),
         ),
         h('div', {

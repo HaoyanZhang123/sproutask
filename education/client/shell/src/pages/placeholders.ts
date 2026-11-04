@@ -12,13 +12,13 @@ export function createLibraryFallbackPage(): EducationPage {
   return definePage({
     id: 'shell.library-fallback',
     path: '/library',
-    title: '教材库',
+    title: '我的课本',
     requiresLearner: false,
     fallback: true,
     mount(container, context: EducationPageContext) {
       const api = context.services.shell;
       const snapshot = context.services.getState().snapshot;
-      container.append(pageHeading('教材库', '确认你用的是哪本教材、哪一版，再看材料从哪里来。'));
+      container.append(pageHeading('我的课本', '看看现在用的是哪本、内容从哪来。'));
       if (snapshot !== null) {
         container.append(
           h(
@@ -29,30 +29,21 @@ export function createLibraryFallbackPage(): EducationPage {
               'div',
               { class: 'edu-card' },
               h('p', { class: 'edu-card__title' }, courseEditionLabel(snapshot.courseEdition)),
-              statusChip(snapshot.fixture ? '合成 fixture（非真实版本）' : snapshot.pack.status, 'attention'),
-              h(
-                'p',
-                { class: 'edu-card__meta' },
-                `内容包 ${snapshot.pack.version} · ${snapshot.pack.scope === 'partial' ? '部分内容（尚未达到全册）' : '全册范围'}`,
-              ),
-              h(
-                'p',
-                { class: 'edu-card__meta' },
-                '这里只显示教材摘要；导入、材料可用性与审校详情会在教材库内容就绪后提供。',
-              ),
+              statusChip(snapshot.fixture ? '待核实' : '已核对', snapshot.fixture ? 'attention' : 'positive'),
+              h('p', { class: 'edu-card__meta' }, '内容按课本整理；原文只保存在这台电脑上。'),
             ),
           ),
         );
       }
       container.append(
         emptyState({
-          title: '教材库内容还没有可显示的条目',
-          body: '当前不会生成空壳全册地图或虚构教材。可以返回首页，或查看已有本地记录。',
+          title: '还没有可显示的课本',
+          body: '先在下面导入或换一本；不会生成空壳内容。',
           testId: 'library-fallback',
           actions: [
-            { label: '重新检查本地材料', onClick: () => void api.refresh(), tone: 'primary' },
-            { label: '返回首页', onClick: () => void api.navigate('/home') },
-            { label: '查看记录', onClick: () => void api.navigate('/records') },
+            { label: '重新检查', onClick: () => void api.refresh(), tone: 'primary' },
+            { label: '返回今天', onClick: () => void api.navigate('/home') },
+            { label: '查看进展', onClick: () => void api.navigate('/records') },
           ],
         }),
       );
@@ -68,21 +59,21 @@ export function createMapFallbackPage(): EducationPage {
   return definePage({
     id: 'shell.map-fallback',
     path: '/map',
-    title: '地图',
+    title: '知识地图',
     requiresLearner: false,
     fallback: true,
     mount(container, context: EducationPageContext) {
       const api = context.services.shell;
-      container.append(pageHeading('地图', '按课本目录找概念，点开看它和相关内容的关系。'));
+      container.append(pageHeading('知识地图', '按课本目录找概念，点开看它和相关内容的关系。'));
       container.append(
         emptyState({
-          title: '还没有可显示的概念地图',
-          body: '地图只展示当前教材真实目录中的内容；没有匹配材料时不会合成节点。可以先去教材库选择材料。',
+          title: '还没有可显示的概念',
+          body: '这里只显示真实目录里的内容；没有匹配材料时不会编节点。可以先去我的课本选一本。',
           testId: 'map-fallback',
           actions: [
-            { label: '去教材库', onClick: () => void api.navigate('/library'), tone: 'primary' },
-            { label: '返回首页', onClick: () => void api.navigate('/home') },
-            { label: '查看记录', onClick: () => void api.navigate('/records') },
+            { label: '去我的课本', onClick: () => void api.navigate('/library'), tone: 'primary' },
+            { label: '返回今天', onClick: () => void api.navigate('/home') },
+            { label: '查看进展', onClick: () => void api.navigate('/records') },
           ],
         }),
       );
@@ -109,8 +100,8 @@ export function createNotFoundPage(): EducationPage {
           title: '页面不存在',
           body: '没有改动任何本地记录。',
           actions: [
-            { label: '返回首页', onClick: () => void context.services.shell.navigate('/home'), tone: 'primary' },
-            { label: '去教材库', onClick: () => void context.services.shell.navigate('/library') },
+            { label: '返回今天', onClick: () => void context.services.shell.navigate('/home'), tone: 'primary' },
+            { label: '去我的课本', onClick: () => void context.services.shell.navigate('/library') },
           ],
         }),
       );

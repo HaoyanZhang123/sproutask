@@ -1,4 +1,4 @@
-/** Account and model-service status: two separate layers, no credentials in the DOM. */
+/** 设置：模型 Key、字号、关于。凭据只在本机宿主，页面只显示是否已配置。 */
 
 import type { EducationPage, EducationPageContext } from '../contracts.js';
 import { h } from '../dom.js';
@@ -6,7 +6,6 @@ import { button } from '../components/button.js';
 import { ConfirmDialog } from '../components/confirm-dialog.js';
 import { notice } from '../components/states.js';
 import { statusChip } from '../components/status-chip.js';
-import { formatDateTime } from '../labels.js';
 import {
   maskedKeySuffix,
   validateApiKey,
@@ -19,7 +18,7 @@ export function createAccountPage(): EducationPage {
   return definePage({
     id: 'shell.account',
     path: '/account',
-    title: '账户与模型服务',
+    title: '设置',
     requiresLearner: true,
     fallback: true,
     mount(container, context: EducationPageContext) {
@@ -27,10 +26,7 @@ export function createAccountPage(): EducationPage {
       const state = context.services.getState();
       const snapshot = state.snapshot;
       container.append(
-        pageHeading(
-          '账户与模型服务',
-          '这里是这台电脑上的学习档案和模型服务设置；学习记录只存在本机。',
-        ),
+        pageHeading('设置', '这里可以改模型 Key 和字号；学习记录只保存在这台电脑上。'),
       );
       if (snapshot === null) {
         container.append(
@@ -44,54 +40,13 @@ export function createAccountPage(): EducationPage {
         return;
       }
 
-      container.append(
-        h(
-          'section',
-          { class: 'edu-section', 'data-testid': 'account-identity' },
-          h('h2', { class: 'edu-section__title' }, '本地学习身份'),
-          h(
-            'div',
-            { class: 'edu-card' },
-            statusChip('本机档案', 'positive'),
-            h('p', { class: 'edu-card__title' }, '只属于这台电脑'),
-            h(
-              'p',
-              { class: 'edu-card__meta' },
-              `创建于 ${formatDateTime(snapshot.learner.createdAt)}。学习记录只属于这台电脑；模型账号不是学习身份。`,
-            ),
-          ),
-        ),
-      );
-
-      const account = snapshot.auth.account;
-      const accountUnavailable = account.status !== 'available';
-      container.append(
-        h(
-          'section',
-          { class: 'edu-section', 'data-testid': 'account-model-account' },
-          h('h2', { class: 'edu-section__title' }, '模型账号'),
-          h(
-            'div',
-            { class: 'edu-card' },
-            statusChip(accountUnavailable ? '不可用' : '可用', accountUnavailable ? 'neutral' : 'positive'),
-            h(
-              'p',
-              { class: 'edu-card__meta' },
-              accountUnavailable
-                ? '当前版本不需要平台账号：填好下面的模型 Key 就能使用智能反馈。'
-                : `账号可用；最后检查：${formatDateTime(account.lastCheckedAt)}。`,
-            ),
-          ),
-        ),
-      );
-
       const apiKey = snapshot.auth.apiKey;
       let keyConfigured = apiKey.status === 'available' || state.keyStatus === 'configured';
       let keySuffix = state.keySuffix;
       const keySection = h(
         'section',
         { class: 'edu-section', 'data-testid': 'account-api-key' },
-        h('h2', { class: 'edu-section__title' }, 'API Key（模型服务配置）'),
+        h('h2', { class: 'edu-section__title' }, '模型 Key'),
       );
       const keyCard = h('div', { class: 'edu-card' });
       const keyStatusLine = h('div', {
@@ -109,7 +64,7 @@ export function createAccountPage(): EducationPage {
         type: 'password',
         id: 'account-key-input',
         class: 'edu-input',
-        'aria-label': '模型 API Key',
+        'aria-label': '模型 Key',
         placeholder: 'sk-…',
         autocomplete: 'off',
         autocapitalize: 'off',
@@ -132,24 +87,24 @@ export function createAccountPage(): EducationPage {
         dataAction: 'clear-key',
       });
       const clearDialog = new ConfirmDialog({
-        title: '清除模型 API Key？',
+        title: '清除模型 Key？',
         impact: [
-          '清除后回到本地模式：教材、地图、记录和草稿仍可读。',
-          '云推理与模型反馈会不可用，直到重新配置。',
-          '不会删除任何学习记录、证据或自评。',
+          '清除后回到本地模式：教材、地图、记录和草稿仍然能看。',
+          '智能反馈会不可用，直到重新配置。',
+          '不会删除任何学习记录、理解记录或自评。',
         ],
-        confirmLabel: '清除 Key 并回到本地模式',
+        confirmLabel: '清除并回到本地模式',
         tone: 'danger',
         onConfirm: () => void clearKey(),
       });
 
       const updateKeyState = (): void => {
         keyStatusLine.replaceChildren(
-          statusChip(keyConfigured ? '已配置' : '未配置', keyConfigured ? 'positive' : 'attention'),
+          statusChip(keyConfigured ? '已配置' : '还没有配置', keyConfigured ? 'positive' : 'attention'),
         );
         keyStatusText.textContent = keyConfigured
-          ? `已配置（****${keySuffix ?? ''}）。界面只显示脱敏状态，不回显、不复制、不写入学习记录。`
-          : 'API Key 未配置：当前为本地模式；可读本地内容（教材、记录和草稿），云推理不可用。';
+          ? `已配置（****${keySuffix ?? ''}）。只在本机加密保存，不会显示完整 Key。`
+          : '还没有配置模型 Key。现在可以先读教材、看记录；配好之后才能用智能反馈。';
         clearButton.disabled = !keyConfigured;
         saveButton.textContent = keyConfigured ? '更换 Key' : '保存 Key';
       };
@@ -175,9 +130,7 @@ export function createAccountPage(): EducationPage {
           return;
         }
         saveButton.disabled = true;
-        keyFeedback.replaceChildren(
-          h('p', { class: 'edu-muted', role: 'status' }, '正在交给本机宿主保存…'),
-        );
+        keyFeedback.replaceChildren(h('p', { class: 'edu-muted', role: 'status' }, '正在交给本机保存…'));
         try {
           const result = await api.saveKey(raw);
           if (!result.ok) {
@@ -190,8 +143,8 @@ export function createAccountPage(): EducationPage {
           keyFeedback.replaceChildren(
             notice({
               tone: 'info',
-              title: '已保存到本机宿主',
-              body: '宿主已确认配置；Key 不会出现在页面、日志、快照或 URL 中。',
+              title: '已保存到本机',
+              body: 'Key 不会出现在页面、日志或链接里。',
               testId: 'account-key-saved',
             }),
           );
@@ -216,7 +169,7 @@ export function createAccountPage(): EducationPage {
           notice({
             tone: 'info',
             title: '已回到本地模式',
-            body: '教材、地图与记录仍可读；未配置模型 Key 时不会发送云推理请求。',
+            body: '教材、地图与记录仍可读；没有 Key 时不会发请求。',
             testId: 'account-key-cleared',
           }),
         );
@@ -231,21 +184,12 @@ export function createAccountPage(): EducationPage {
         keyStatusLine,
         keyStatusText,
         h(
-          'p',
-          { class: 'edu-muted' },
-          '密钥只交给本机宿主加密保存；客户端不持久化、不写 localStorage/sessionStorage，也不会把 Key 放进 URL 或日志。',
-        ),
-        h(
           'div',
           { class: 'edu-key-form', 'data-testid': 'account-key-form' },
-          h('label', { class: 'edu-field-label', for: 'account-key-input' }, '模型 API Key'),
+          h('label', { class: 'edu-field-label', for: 'account-key-input' }, '模型 Key'),
           keyInput,
           h('div', { class: 'edu-inline-actions' }, saveButton, clearButton),
-          h(
-            'p',
-            { class: 'edu-muted' },
-            '只接受以 sk- 开头的合理长度 Key；格式错误、鉴权失败、网络失败、配额不足会分别提示。',
-          ),
+          h('p', { class: 'edu-muted' }, '只接受以 sk- 开头的合理长度 Key；格式或网络有问题会提示，不会保存。'),
         ),
         keyFeedback,
       );
@@ -258,42 +202,8 @@ export function createAccountPage(): EducationPage {
         updateKeyState();
       });
 
-      const capabilities = snapshot.capabilities;
-      container.append(
-        h(
-          'section',
-          { class: 'edu-section', 'data-testid': 'account-runtime' },
-          h('h2', { class: 'edu-section__title' }, '运行与模型能力'),
-          h(
-            'div',
-            { class: 'edu-grid' },
-            capabilityCard('DSH 运行内核', capabilities.dsh.bound ? '已绑定' : '未绑定', capabilities.dsh.bound ? 'positive' : 'attention'),
-            capabilityCard('文本模型', capabilities.model.text ? '可用' : '不可用', capabilities.model.text ? 'positive' : 'attention'),
-            capabilityCard('图像模型', capabilities.model.image ? '可用' : '不可用', capabilities.model.image ? 'positive' : 'attention'),
-          ),
-          h(
-            'p',
-            { class: 'edu-muted' },
-            `当前受控学习工具：${capabilities.tools.length} 项；网络：${capabilities.network === 'loopback_only' ? '仅本机回环' : '不可用'}。系统级文件与命令能力不属于学生权限。`,
-          ),
-        ),
-      );
-
-      container.append(
-        h(
-          'section',
-          { class: 'edu-section', 'data-testid': 'account-display' },
-          h('h2', { class: 'edu-section__title' }, '显示字号'),
-          h(
-            'p',
-            { class: 'edu-section__lead' },
-            '默认使用 20px 基准字号；所有字号和间距用 rem，浏览器缩放或系统字体放大后主旅程仍可完成。',
-          ),
-        ),
-      );
-      const displaySection = container.lastElementChild as HTMLElement;
       const standardButton = button(
-        '标准字号（20px 基准）',
+        '标准字号',
         () => {
           api.setFontScale('standard');
           updatePressed();
@@ -301,7 +211,7 @@ export function createAccountPage(): EducationPage {
         { small: true, dataAction: 'font-standard' },
       );
       const largeButton = button(
-        '较大字号',
+        '大字',
         () => {
           api.setFontScale('large');
           updatePressed();
@@ -314,55 +224,65 @@ export function createAccountPage(): EducationPage {
         largeButton.setAttribute('aria-pressed', String(current === 'large'));
       };
       updatePressed();
-      displaySection.append(h('div', { class: 'edu-inline-actions' }, standardButton, largeButton));
-
-      container.append(
-        notice({
-          tone: 'info',
-          title: '更换模型账号不会删除学情',
-          body: '退出或更换模型账户、服务授权失效，都不会删除本机教材、活动、证据、自评或复习安排；也不会自动续发之前的请求。',
-          actions: [
-            { label: '查看本地记录与数据管理', onClick: () => void api.navigate('/records') },
-            { label: '返回首页', onClick: () => void api.navigate('/home') },
-          ],
-        }),
-      );
       container.append(
         h(
-          'p',
-          { class: 'edu-muted' },
-          '学生权限不包含系统级文件、命令或任意文件读取；这些限制由后端执行，不依赖本页隐藏入口。',
+          'section',
+          { class: 'edu-section', 'data-testid': 'account-display' },
+          h('h2', { class: 'edu-section__title' }, '字号'),
+          h('p', { class: 'edu-section__lead' }, '觉得字小可以换成大字，材料和题目会一起变大。'),
+          h('div', { class: 'edu-inline-actions' }, standardButton, largeButton),
+        ),
+      );
+
+      const capabilities = snapshot.capabilities;
+      container.append(
+        h(
+          'section',
+          { class: 'edu-section', 'data-testid': 'account-about' },
+          h('h2', { class: 'edu-section__title' }, '关于'),
+          h(
+            'p',
+            { class: 'edu-section__lead' },
+            '芽问 · 学生版。学习记录保存在这台电脑上；教材原文不会上传，也不会随安装包分发。',
+          ),
+          h(
+            'details',
+            { class: 'edu-fold' },
+            h('summary', {}, '技术信息'),
+            h(
+              'dl',
+              { class: 'edu-kv' },
+              h('dt', {}, 'DSH 内核'),
+              h('dd', {}, capabilities.dsh.bound ? '已连接' : '未连接'),
+              h('dt', {}, '文字模型'),
+              h('dd', {}, capabilities.model.text ? '可用' : '不可用'),
+              h('dt', {}, '图像模型'),
+              h('dd', {}, capabilities.model.image ? '可用' : '不可用'),
+            ),
+          ),
+          h(
+            'div',
+            { class: 'edu-inline-actions' },
+            button('导出或删除学习记录', () => void api.navigate('/records'), { tone: 'ghost' }),
+          ),
         ),
       );
     },
   });
 }
 
-function capabilityCard(
-  title: string,
-  value: string,
-  tone: 'positive' | 'attention',
-): HTMLElement {
-  return h(
-    'div',
-    { class: 'edu-card' },
-    h('h3', { class: 'edu-card__title' }, title),
-    statusChip(value, tone),
-  );
-}
-
 function keyErrorTitle(category: AuthKeyCategory): string {
   switch (category) {
     case 'format':
-      return '格式错误';
+      return '格式不对';
     case 'auth':
-      return '鉴权失败';
+      return 'Key 没有被接受';
     case 'network':
-      return '网络失败';
+      return '没能连上本机服务';
     case 'quota':
       return '配额不足';
     case 'not_implemented':
-      return '接口未实现';
+      return '接口还没准备好';
     default:
       return '保存没有完成';
   }
@@ -373,14 +293,14 @@ function keyErrorBody(category: AuthKeyCategory): string {
     case 'format':
       return '只接受以 sk- 开头、长度合理的 Key；Key 没有保存。';
     case 'auth':
-      return '本机宿主没有接受这个 Key；请检查后重试，Key 没有保存。';
+      return '这个 Key 没被接受；请检查后重试，Key 没有保存。';
     case 'network':
-      return '无法连接本机宿主端点；Key 没有保存，当前仍为本地模式。';
+      return '无法连接本机服务；Key 没有保存，当前仍是本地模式。';
     case 'quota':
-      return '该 Key 的配额不足或请求受限；请更换 Key 或稍后重试。';
+      return '这个 Key 的配额不足或请求受限；可以换一个 Key 或稍后再试。';
     case 'not_implemented':
-      return '本机宿主尚未提供 /edu/api/auth/key；Key 没有保存，不能假装成功。';
+      return '本机服务还没有提供 Key 配置；Key 没有保存。';
     default:
-      return '宿主没有确认保存；Key 没有保存，当前仍为本地模式。';
+      return '本机服务没有确认保存；Key 没有保存，当前仍是本地模式。';
   }
 }

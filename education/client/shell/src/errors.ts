@@ -157,7 +157,6 @@ export function renderErrorBanner(error: ErrorLike, options: ErrorBannerOptions 
     },
     h(headingTag as 'h2', { class: 'edu-notice__title' }, described.title),
     h('p', { class: 'edu-notice__body' }, described.detail),
-    h('p', { class: 'edu-notice__body' }, `错误代码：${described.code}`),
   );
   const actions = h('div', { class: 'edu-notice__actions' });
   if (described.retryable && options.onRetry !== undefined) {

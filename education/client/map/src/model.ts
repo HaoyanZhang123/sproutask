@@ -1,71 +1,63 @@
 /**
- * Map display model: tree navigation rows, chapter scope, three-axis labels,
- * aggregate counts (deduplicated by conceptId) and a deterministic graph layout.
+ * Map display model: two-level knowledge map.
  *
- * This file contains UI derivation only. It never invents content, never
- * upgrades a state and never merges the three axes: every label is composed
- * from the frozen `@edu/domain` fields plus the T06 semantics (learning,
- * understanding, review are independent; self-report stays separate).
+ * - `buildTocModel` keeps the catalog index (still the only source of
+ *   chapter/section membership and order).
+ * - `createMapModel` derives the whole-volume overview (unit → chapter rows and
+ *   four-state concept chips) and one chapter view (ordered concepts,
+ *   in-chapter relations, cross-chapter links and the layered layout).
+ * - State is derived from the frozen learner projection only: the four student
+ *   states (在学 / 要再练 / 比较稳 / 还没开始) are labels over learning +
+ *   understanding + review; nothing here writes or upgrades learning state.
  */
 
 import type {
   Concept,
   ConceptProgress,
   Id,
-  LearningState,
   Relation,
   ReviewOutcome,
+  SelfReport,
   TocNodeLike,
-  UnderstandingState,
   Validity,
 } from '@edu/domain';
+import type { StatusTone } from '../../shell/src/index.js';
 import {
   LEARNING_LABELS,
   SELF_REPORT_LABELS,
   UNDERSTANDING_LABELS,
   VALIDITY_LABELS,
 } from '../../shell/src/index.js';
-import type { GraphSlice, MapPayload } from './types.js';
+import { layoutChapter, type ChapterLayout } from './layout.js';
+import type { MapPayload } from './types.js';
 
-export type Tone = 'neutral' | 'progress' | 'attention' | 'positive' | 'danger' | 'info';
-
-/** Review history wording distinct from the understanding axis. */
-export const REVIEW_HISTORY_LABELS: Record<ReviewOutcome, string> = {
-  needs_support: '仍需巩固',
-  developing: '初步理解',
-  supported: '表现稳定',
-};
-
-export type StateFilter = 'all' | 'needs_support' | 'due' | 'unassessed';
-
-export const FILTER_LABELS: Record<StateFilter, string> = {
-  all: '全部概念',
-  needs_support: '理解：需巩固',
-  due: '复习：待复习',
-  unassessed: '理解：尚无足够证据',
-};
-
-export type MapViewMode = 'graph' | 'relations' | 'concepts';
+export type MapViewMode = 'graph' | 'list';
 
 export const VIEW_MODE_LABELS: Record<MapViewMode, string> = {
   graph: '关系图',
-  relations: '关系列表（文字替代）',
-  concepts: '本章概念列表',
+  list: '列表',
 };
 
-/* ------------------------------------------------------------- tree model */
+/** Four student-facing concept states. Colour, words and shape all carry it. */
+export type ConceptState = 'now' | 'weak' | 'steady' | 'todo';
+export type ConceptShape = 'ring' | 'triangle' | 'diamond' | 'square';
 
-export interface TocTreeRow {
-  readonly node: TocNodeLike;
-  readonly depth: number;
-  readonly hasChildren: boolean;
-  readonly expanded: boolean;
-  /** Distinct concepts in this subtree (a multi-placement concept counts once). */
-  readonly conceptCount: number;
-  readonly learnedCount: number;
-  readonly dueCount: number;
-  readonly needsSupportCount: number;
+export interface ConceptStateMeta {
+  readonly label: string;
+  readonly tone: StatusTone;
+  readonly shape: ConceptShape;
 }
+
+export const CONCEPT_STATE_META: Record<ConceptState, ConceptStateMeta> = {
+  now: { label: '在学', tone: 'info', shape: 'ring' },
+  weak: { label: '要再练', tone: 'attention', shape: 'triangle' },
+  steady: { label: '比较稳', tone: 'positive', shape: 'diamond' },
+  todo: { label: '还没开始', tone: 'neutral', shape: 'square' },
+};
+
+export const CONCEPT_STATE_ORDER: readonly ConceptState[] = ['now', 'weak', 'steady', 'todo'];
+
+/* ------------------------------------------------------------- tree model */
 
 export interface TocTreeModel {
   readonly roots: readonly TocNodeLike[];
@@ -75,9 +67,9 @@ export interface TocTreeModel {
   chapterOf(id: Id): TocNodeLike | null;
   ancestorsOf(id: Id): readonly Id[];
   subtreeNodeIds(id: Id): readonly Id[];
-  conceptIdsIn(id: Id): readonly Id[];
+  /** Concepts under `id`, in catalog (toc) order. */
+  orderedConceptIdsIn(id: Id): readonly Id[];
   chapters(): readonly TocNodeLike[];
-  visibleRows(expandedIds: ReadonlySet<Id>): readonly TocTreeRow[];
 }
 
 function sortNodes(nodes: readonly TocNodeLike[]): readonly TocNodeLike[] {
@@ -96,12 +88,12 @@ export function buildTocModel(payload: MapPayload): TocTreeModel {
   }
   const roots = sortNodes(payload.toc.filter((node) => node.parentId === null));
 
-  const placements = new Map<Id, Set<Id>>();
+  const placements = new Map<Id, Id[]>();
   for (const concept of payload.concepts) {
     for (const placement of concept.placements) {
-      const set = placements.get(placement) ?? new Set<Id>();
-      set.add(concept.id);
-      placements.set(placement, set);
+      const list = placements.get(placement) ?? [];
+      list.push(concept.id);
+      placements.set(placement, list);
     }
   }
 
@@ -123,16 +115,20 @@ export function buildTocModel(payload: MapPayload): TocTreeModel {
     return output;
   };
 
-  const conceptCache = new Map<Id, readonly Id[]>();
-  const conceptIdsIn = (id: Id): readonly Id[] => {
-    const cached = conceptCache.get(id);
+  const orderedCache = new Map<Id, readonly Id[]>();
+  const orderedConceptIdsIn = (id: Id): readonly Id[] => {
+    const cached = orderedCache.get(id);
     if (cached !== undefined) return cached;
-    const distinct = new Set<Id>();
+    const seen = new Set<Id>();
+    const ordered: Id[] = [];
     for (const nodeId of subtreeNodeIds(id)) {
-      for (const conceptId of placements.get(nodeId) ?? []) distinct.add(conceptId);
+      for (const conceptId of placements.get(nodeId) ?? []) {
+        if (seen.has(conceptId)) continue;
+        seen.add(conceptId);
+        ordered.push(conceptId);
+      }
     }
-    const ordered = payload.concepts.filter((concept) => distinct.has(concept.id)).map((concept) => concept.id);
-    conceptCache.set(id, ordered);
+    orderedCache.set(id, ordered);
     return ordered;
   };
 
@@ -159,44 +155,21 @@ export function buildTocModel(payload: MapPayload): TocTreeModel {
     return path;
   };
 
-  const progressByConcept = new Map<Id, ConceptProgress>(
-    payload.progress.map((entry) => [entry.conceptId, entry]),
-  );
-  const stateById = new Map<Id, ConceptStateSummary>(
-    payload.concepts.map((concept) => [concept.id, summarizeConceptState(payload, concept.id)]),
-  );
-
-  const visibleRows = (expandedIds: ReadonlySet<Id>): readonly TocTreeRow[] => {
-    const rows: TocTreeRow[] = [];
-    const walk = (node: TocNodeLike, depth: number): void => {
-      const kids = children.get(node.id) ?? [];
-      const conceptIds = conceptIdsIn(node.id);
-      let learned = 0;
-      let due = 0;
-      let needsSupport = 0;
-      for (const conceptId of conceptIds) {
-        const state = stateById.get(conceptId);
-        const entry = progressByConcept.get(conceptId);
-        if (entry?.learning.state === 'completed') learned += 1;
-        if (entry?.review.dueAt !== null && entry?.review.dueAt !== undefined) due += 1;
-        if (state?.understanding.state === 'needs_support') needsSupport += 1;
-      }
-      rows.push({
-        node,
-        depth,
-        hasChildren: kids.length > 0,
-        expanded: expandedIds.has(node.id),
-        conceptCount: conceptIds.length,
-        learnedCount: learned,
-        dueCount: due,
-        needsSupportCount: needsSupport,
-      });
-      if (expandedIds.has(node.id)) {
-        for (const child of kids) walk(child, depth + 1);
+  const chapters = (): readonly TocNodeLike[] => {
+    const output: TocNodeLike[] = [];
+    const walk = (nodes: readonly TocNodeLike[]): void => {
+      for (const node of nodes) {
+        if (node.type === 'chapter') output.push(node);
+        const kids = children.get(node.id) ?? [];
+        if (kids.length > 0) walk(kids);
       }
     };
-    for (const root of roots) walk(root, 0);
-    return rows;
+    walk(roots);
+    // Guard against a toc whose chapters are not reachable from a root.
+    for (const node of sortNodes(payload.toc.filter((entry) => entry.type === 'chapter'))) {
+      if (!output.includes(node)) output.push(node);
+    }
+    return output;
   };
 
   return {
@@ -207,9 +180,8 @@ export function buildTocModel(payload: MapPayload): TocTreeModel {
     chapterOf,
     ancestorsOf: (id) => pathOf(id).slice(0, -1).map((node) => node.id),
     subtreeNodeIds,
-    conceptIdsIn,
-    chapters: () => payload.toc.filter((node) => node.type === 'chapter'),
-    visibleRows,
+    orderedConceptIdsIn,
+    chapters,
   };
 }
 
@@ -218,256 +190,528 @@ export function buildTocModel(payload: MapPayload): TocTreeModel {
 export interface ConceptStateSummary {
   readonly conceptId: Id;
   readonly title: string;
-  readonly learning: { readonly state: LearningState; readonly label: string; readonly tone: Tone };
-  readonly understanding: {
-    readonly state: UnderstandingState;
-    readonly label: string;
-    readonly tone: Tone;
-    readonly validity: Validity | null;
-    readonly validityLabel: string | null;
-    readonly strongClaimAllowed: boolean;
-    readonly candidateDisabled: boolean;
-  };
-  readonly review: {
-    readonly historyLabel: string;
-    readonly dueLabel: string;
-    readonly activeLabel: string | null;
-    readonly tone: Tone;
-  };
+  readonly state: ConceptState;
+  readonly stateLabel: string;
+  readonly tone: StatusTone;
+  readonly learningLabel: string;
+  readonly understandingLabel: string;
+  readonly reviewLabel: string;
+  readonly due: boolean;
+  readonly needsSupport: boolean;
   readonly selfReportLabel: string | null;
-  readonly evidenceCount: number;
-  readonly currentIndependentEvidenceCount: number;
-  readonly needsAttention: boolean;
 }
 
-function learningTone(state: LearningState): Tone {
-  if (state === 'completed') return 'positive';
-  if (state === 'in_progress') return 'progress';
-  return 'neutral';
+const REVIEW_HISTORY_LABELS: Record<ReviewOutcome, string> = {
+  needs_support: '仍需巩固',
+  developing: '初步理解',
+  supported: '表现稳定',
+};
+
+function deriveConceptState(
+  progress: ConceptProgress | null,
+  trustMode: MapPayload['trustMode'],
+): ConceptState {
+  if (progress === null) return 'todo';
+  const learning = progress.learning.state;
+  const understanding = progress.understanding.state;
+  const needsSupport =
+    understanding === 'needs_support' || progress.review.latestOutcome === 'needs_support';
+  if (trustMode === 'candidate') {
+    // Candidate content cannot carry a strong conclusion (比较稳 / 要再练).
+    return learning === 'not_started' && understanding === 'unassessed' ? 'todo' : 'now';
+  }
+  if (needsSupport) return 'weak';
+  const current = progress.understanding.validity === 'current';
+  if (learning === 'completed' && understanding === 'supported' && current) return 'steady';
+  if (learning !== 'not_started') return 'now';
+  if (understanding !== 'unassessed') return 'now';
+  if (progress.review.dueAt !== null) return 'now';
+  return 'todo';
 }
 
-function understandingTone(state: UnderstandingState): Tone {
-  if (state === 'supported') return 'positive';
-  if (state === 'needs_support') return 'attention';
-  if (state === 'developing') return 'progress';
-  return 'neutral';
+function understandingText(progress: ConceptProgress, trustMode: MapPayload['trustMode']): string {
+  const raw = progress.understanding.state;
+  const validity: Validity = progress.understanding.validity;
+  if (trustMode === 'candidate') return '尚无足够证据（候选内容，未核实）';
+  const label = UNDERSTANDING_LABELS[raw];
+  return validity === 'current' ? label : `${label}（${VALIDITY_LABELS[validity]}）`;
 }
 
-export function summarizeConceptState(payload: MapPayload, conceptId: Id): ConceptStateSummary {
-  const concept = payload.concepts.find((entry) => entry.id === conceptId);
-  const progress = payload.progress.find((entry) => entry.conceptId === conceptId) ?? null;
-  const selfReport = payload.selfReports.find((entry) => entry.conceptId === conceptId) ?? null;
-  const evidence = payload.evidence.filter((entry) => entry.conceptId === conceptId);
-  const candidate = payload.trustMode === 'candidate';
-  const learningState = progress?.learning.state ?? 'not_started';
-  const rawUnderstanding = progress?.understanding.state ?? 'unassessed';
-  const validity = progress === null ? null : progress.understanding.validity;
-  const validityLabel =
-    validity === null || validity === 'current' ? null : VALIDITY_LABELS[validity];
-  const candidateDisabled = candidate && rawUnderstanding !== 'unassessed';
-  const understandingState: UnderstandingState = candidate ? 'unassessed' : rawUnderstanding;
-  const understandingText = candidate
-    ? `${UNDERSTANDING_LABELS.unassessed}（候选内容禁用强结论）`
-    : `${UNDERSTANDING_LABELS[understandingState]}${validityLabel === null ? '' : `（${validityLabel}）`}`;
-  const outcome = progress?.review.latestOutcome ?? null;
-  const historyLabel =
-    progress?.review.lastCompletedAt === null || progress?.review.lastCompletedAt === undefined
-      ? '尚未复习'
-      : outcome === null
-        ? '已复习'
-        : `复习完成 · ${REVIEW_HISTORY_LABELS[outcome]}`;
-  const dueLabel =
-    progress?.review.dueAt === null || progress?.review.dueAt === undefined
-      ? '暂无复习安排'
-      : '待复习';
-  const reviewTone: Tone =
-    outcome === 'needs_support' ? 'attention' : progress?.review.dueAt ? 'info' : 'neutral';
-  return {
-    conceptId,
-    title: concept?.title ?? conceptId,
-    learning: { state: learningState, label: LEARNING_LABELS[learningState], tone: learningTone(learningState) },
-    understanding: {
-      state: understandingState,
-      label: understandingText,
-      tone: understandingTone(understandingState),
-      validity,
-      validityLabel,
-      strongClaimAllowed: !candidate,
-      candidateDisabled,
-    },
-    review: {
-      historyLabel,
-      dueLabel,
-      activeLabel: progress?.review.activeSessionId ? '复习进行中' : null,
-      tone: reviewTone,
-    },
-    selfReportLabel:
-      selfReport === null
-        ? null
-        : `你的自评：${SELF_REPORT_LABELS[selfReport.claimedState]}（学生自述，不算证据）`,
-    evidenceCount: evidence.length,
-    currentIndependentEvidenceCount: evidence.filter(
-      (entry) => entry.assistance === 'unassisted' && entry.validity === 'current',
-    ).length,
-    needsAttention:
-      understandingState === 'needs_support' ||
-      (understandingState === 'unassessed' && learningState !== 'not_started'),
-  };
+/* -------------------------------------------------------------- overview */
+
+export interface OverviewChapter {
+  readonly chapter: TocNodeLike;
+  readonly unit: TocNodeLike | null;
+  readonly sections: readonly TocNodeLike[];
+  readonly concepts: readonly Concept[];
+  readonly learnedCount: number;
 }
 
-export function matchesStateFilter(summary: ConceptStateSummary, filter: StateFilter): boolean {
-  if (filter === 'all') return true;
-  if (filter === 'needs_support') return summary.understanding.state === 'needs_support';
-  if (filter === 'unassessed') return summary.understanding.state === 'unassessed';
-  return summary.review.dueLabel === '待复习';
+export interface OverviewUnit {
+  readonly unit: TocNodeLike | null;
+  /** Unit title, or the volume title when the volume has no units. */
+  readonly title: string;
+  /** e.g. 第一单元 / 第二单元; null when the volume has no unit layer. */
+  readonly numberLabel: string | null;
+  readonly chapters: readonly OverviewChapter[];
+  readonly conceptCount: number;
+  readonly learnedCount: number;
 }
 
-export interface MapAggregate {
-  readonly formalTotal: number;
+export interface OverviewTotals {
+  readonly units: number;
+  readonly chapters: number;
+  readonly sections: number;
+  readonly concepts: number;
   readonly learned: number;
-  readonly due: number;
-  readonly needsSupport: number;
-  readonly unassessed: number;
-  readonly candidateTotal: number;
-  readonly activityCoverageLabel: string;
 }
 
-/**
- * Aggregate counts by distinct conceptId. A concept placed in two sections is
- * counted once; candidate concepts are listed separately and never enter the
- * formal denominator (T06 semantics). No mastery percentage is produced.
- */
-export function aggregateMapSummary(payload: MapPayload): MapAggregate {
-  const formal = payload.concepts.filter((concept) => concept.reviewState !== 'candidate');
-  const candidateTotal = payload.concepts.length - formal.length;
-  const progressByConcept = new Map<Id, ConceptProgress>(
+export interface MapOverview {
+  readonly units: readonly OverviewUnit[];
+  readonly totals: OverviewTotals;
+}
+
+export interface OverviewFilterResult {
+  readonly active: boolean;
+  readonly query: string;
+  readonly matchCount: number;
+  readonly units: readonly OverviewUnit[];
+}
+
+const CHINESE_UNIT_NUMBERS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'] as const;
+
+function unitNumberLabel(index: number): string {
+  const value = CHINESE_UNIT_NUMBERS[index];
+  return value === undefined ? `第 ${index + 1} 单元` : `第${value}单元`;
+}
+
+/* --------------------------------------------------------------- chapter */
+
+export interface MapChapter {
+  readonly chapter: TocNodeLike;
+  readonly unit: TocNodeLike | null;
+  readonly path: readonly TocNodeLike[];
+  readonly sections: readonly TocNodeLike[];
+  readonly concepts: readonly Concept[];
+  readonly relations: readonly Relation[];
+  /** Relations with one endpoint outside this chapter. */
+  readonly externalRelations: readonly Relation[];
+  readonly layout: ChapterLayout;
+  readonly previousChapterId: Id | null;
+  readonly nextChapterId: Id | null;
+}
+
+export interface RelationPeer {
+  readonly relationId: Id;
+  readonly conceptId: Id;
+  readonly title: string;
+  readonly inChapter: boolean;
+  readonly learned: boolean;
+}
+
+export interface SourcePage {
+  readonly sourceRefId: Id;
+  readonly label: string;
+  readonly unverified: boolean;
+  readonly available: boolean;
+}
+
+/* ------------------------------------------------------------- map model */
+
+export interface MapModel {
+  readonly payload: MapPayload;
+  readonly toc: TocTreeModel;
+  summary(conceptId: Id): ConceptStateSummary;
+  overview(): MapOverview;
+  chapter(chapterId: Id): MapChapter | null;
+  chapterOfConcept(conceptId: Id): TocNodeLike | null;
+  filterOverview(query: string): OverviewFilterResult;
+}
+
+export function createMapModel(payload: MapPayload): MapModel {
+  const toc = buildTocModel(payload);
+  const conceptsById = new Map<Id, Concept>(payload.concepts.map((concept) => [concept.id, concept]));
+  const progressById = new Map<Id, ConceptProgress>(
     payload.progress.map((entry) => [entry.conceptId, entry]),
   );
-  let learned = 0;
-  let due = 0;
-  let needsSupport = 0;
-  let unassessed = 0;
-  for (const concept of formal) {
-    const progress = progressByConcept.get(concept.id);
-    const summary = summarizeConceptState(payload, concept.id);
-    if (progress?.learning.state === 'completed') learned += 1;
-    if (progress?.review.dueAt !== null && progress?.review.dueAt !== undefined) due += 1;
-    if (summary.understanding.state === 'needs_support') needsSupport += 1;
-    if (summary.understanding.state === 'unassessed') unassessed += 1;
-  }
-  const formalTotal = payload.trustMode === 'candidate' ? 0 : formal.length;
-  const formalLearned = payload.trustMode === 'candidate' ? 0 : learned;
-  return {
-    formalTotal,
-    learned: formalLearned,
-    due: payload.trustMode === 'candidate' ? 0 : due,
-    needsSupport: payload.trustMode === 'candidate' ? 0 : needsSupport,
-    unassessed: payload.trustMode === 'candidate' ? 0 : unassessed,
-    candidateTotal:
-      payload.trustMode === 'candidate' ? payload.concepts.length : candidateTotal,
-    activityCoverageLabel: `活动覆盖（按去重概念计数）：已学 ${formalLearned} / 可学习 ${formalTotal}`,
+  const selfReportById = new Map<Id, SelfReport>(
+    payload.selfReports.map((entry) => [entry.conceptId, entry]),
+  );
+  const chapterOfConcept = (conceptId: Id): TocNodeLike | null => {
+    const concept = conceptsById.get(conceptId);
+    if (concept === undefined) return null;
+    const placement = concept.placements[0];
+    return placement === undefined ? null : toc.chapterOf(placement);
   };
-}
 
-/* ------------------------------------------------------------ graph layout */
+  const summaryCache = new Map<Id, ConceptStateSummary>();
+  const summary = (conceptId: Id): ConceptStateSummary => {
+    const cached = summaryCache.get(conceptId);
+    if (cached !== undefined) return cached;
+    const concept = conceptsById.get(conceptId);
+    const progress = progressById.get(conceptId) ?? null;
+    const state = deriveConceptState(progress, payload.trustMode);
+    const selfReport = selfReportById.get(conceptId) ?? null;
+    const reviewLabel =
+      progress === null || progress.review.lastCompletedAt === null
+        ? '尚未复习'
+        : progress.review.dueAt !== null
+          ? '待复习'
+          : progress.review.latestOutcome === null
+            ? '已复习'
+            : `复习：${REVIEW_HISTORY_LABELS[progress.review.latestOutcome]}`;
+    const value: ConceptStateSummary = {
+      conceptId,
+      title: concept?.title ?? conceptId,
+      state,
+      stateLabel: CONCEPT_STATE_META[state].label,
+      tone: CONCEPT_STATE_META[state].tone,
+      learningLabel: progress === null ? LEARNING_LABELS.not_started : LEARNING_LABELS[progress.learning.state],
+      understandingLabel:
+        progress === null ? UNDERSTANDING_LABELS.unassessed : understandingText(progress, payload.trustMode),
+      reviewLabel,
+      due: progress !== null && progress.review.dueAt !== null,
+      needsSupport:
+        progress !== null &&
+        (progress.understanding.state === 'needs_support' ||
+          progress.review.latestOutcome === 'needs_support'),
+      selfReportLabel:
+        selfReport === null ? null : `你之前自评：${SELF_REPORT_LABELS[selfReport.claimedState]}`,
+    };
+    summaryCache.set(conceptId, value);
+    return value;
+  };
 
-export interface GraphPosition {
-  readonly col: number;
-  readonly row: number;
-}
+  const sectionsUnder = (chapterId: Id): readonly TocNodeLike[] =>
+    toc
+      .subtreeNodeIds(chapterId)
+      .filter((nodeId) => toc.node(nodeId)?.type === 'section')
+      .map((nodeId) => toc.node(nodeId))
+      .filter((node): node is TocNodeLike => node !== undefined);
 
-export interface GraphLayout {
-  readonly positions: ReadonlyMap<Id, GraphPosition>;
-  readonly columns: number;
-  readonly rows: number;
-  readonly centerConceptId: Id | null;
-}
+  // “已学”只表示有学习记录（在学/完成），不是掌握结论；候选内容也照样可以计数。
+  const isLearned = (conceptId: Id): boolean => {
+    const state = progressById.get(conceptId)?.learning.state;
+    return state === 'in_progress' || state === 'completed';
+  };
 
-/** Deterministic layered layout: distance from the centre, then concept id. */
-export function layoutGraph(
-  slice: GraphSlice,
-  visibleConceptIds: readonly Id[],
-  centerConceptId: Id | null,
-): GraphLayout {
-  const visible = new Set(visibleConceptIds);
-  const adjacency = new Map<Id, Id[]>();
-  for (const relation of slice.relations) {
-    if (!visible.has(relation.fromConceptId) || !visible.has(relation.toConceptId)) continue;
-    const left = adjacency.get(relation.fromConceptId) ?? [];
-    left.push(relation.toConceptId);
-    adjacency.set(relation.fromConceptId, left);
-    const right = adjacency.get(relation.toConceptId) ?? [];
-    right.push(relation.fromConceptId);
-    adjacency.set(relation.toConceptId, right);
-  }
-  const layer = new Map<Id, number>();
-  const center = centerConceptId !== null && visible.has(centerConceptId) ? centerConceptId : (visibleConceptIds[0] ?? null);
-  if (center !== null) {
-    layer.set(center, 0);
-    let frontier: Id[] = [center];
-    let depth = 0;
-    while (frontier.length > 0 && depth < 8) {
-      depth += 1;
-      const next: Id[] = [];
-      for (const current of [...frontier].sort()) {
-        for (const neighbor of adjacency.get(current) ?? []) {
-          if (layer.has(neighbor)) continue;
-          layer.set(neighbor, depth);
-          next.push(neighbor);
-        }
-      }
-      frontier = next.sort();
+  const makeChapter = (chapter: TocNodeLike, unit: TocNodeLike | null): OverviewChapter => {
+    const concepts = toc
+      .orderedConceptIdsIn(chapter.id)
+      .map((conceptId) => conceptsById.get(conceptId))
+      .filter((concept): concept is Concept => concept !== undefined);
+    return {
+      chapter,
+      unit,
+      sections: sectionsUnder(chapter.id),
+      concepts,
+      learnedCount: concepts.filter((concept) => isLearned(concept.id)).length,
+    };
+  };
+
+  let cachedOverview: MapOverview | null = null;
+  const overview = (): MapOverview => {
+    if (cachedOverview !== null) return cachedOverview;
+    const units = payload.toc
+      .filter((node) => node.type === 'unit')
+      .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id));
+    const groups: OverviewUnit[] = [];
+    const covered = new Set<Id>();
+    units.forEach((unit, index) => {
+      const chapters = toc
+        .subtreeNodeIds(unit.id)
+        .filter((nodeId) => nodeId !== unit.id)
+        .map((nodeId) => toc.node(nodeId))
+        .filter((node): node is TocNodeLike => node !== undefined && node.type === 'chapter');
+      const entries = chapters.map((chapter) => {
+        covered.add(chapter.id);
+        return makeChapter(chapter, unit);
+      });
+      const distinct = new Set<Id>();
+      for (const entry of entries) for (const concept of entry.concepts) distinct.add(concept.id);
+      groups.push({
+        unit,
+        title: unit.title,
+        numberLabel: unitNumberLabel(index),
+        chapters: entries,
+        conceptCount: distinct.size,
+        learnedCount: entries.reduce((total, entry) => total + entry.learnedCount, 0),
+      });
+    });
+
+    // Chapters that live directly under the volume (no unit layer in this book).
+    const remaining = toc
+      .chapters()
+      .filter((chapter) => !covered.has(chapter.id));
+    const byParent = new Map<Id | null, TocNodeLike[]>();
+    for (const chapter of remaining) {
+      const list = byParent.get(chapter.parentId) ?? [];
+      list.push(chapter);
+      byParent.set(chapter.parentId, list);
     }
-  }
-  let maxLayer = 0;
-  for (const entry of visibleConceptIds) {
-    if (!layer.has(entry)) layer.set(entry, 0);
-    maxLayer = Math.max(maxLayer, layer.get(entry) ?? 0);
-  }
-  const byLayer = new Map<number, Id[]>();
-  for (const entry of [...visibleConceptIds].sort()) {
-    const value = layer.get(entry) ?? 0;
-    const list = byLayer.get(value) ?? [];
-    list.push(entry);
-    byLayer.set(value, list);
-  }
-  const positions = new Map<Id, GraphPosition>();
-  let rows = 0;
-  for (const [col, ids] of [...byLayer.entries()].sort((left, right) => left[0] - right[0])) {
-    ids.forEach((id, row) => positions.set(id, { col, row }));
-    rows = Math.max(rows, ids.length);
-  }
+    for (const [parentId, chapters] of byParent) {
+      const parent = parentId === null ? null : toc.node(parentId) ?? null;
+      const entries = chapters.map((chapter) => makeChapter(chapter, null));
+      const distinct = new Set<Id>();
+      for (const entry of entries) for (const concept of entry.concepts) distinct.add(concept.id);
+      groups.push({
+        unit: null,
+        title: parent?.title ?? '全册',
+        numberLabel: null,
+        chapters: entries,
+        conceptCount: distinct.size,
+        learnedCount: entries.reduce((total, entry) => total + entry.learnedCount, 0),
+      });
+    }
+
+    const allConcepts = new Set<Id>();
+    for (const group of groups) {
+      for (const entry of group.chapters) for (const concept of entry.concepts) allConcepts.add(concept.id);
+    }
+    let learned = 0;
+    for (const conceptId of allConcepts) if (isLearned(conceptId)) learned += 1;
+    cachedOverview = {
+      units: groups,
+      totals: {
+        units: payload.toc.filter((node) => node.type === 'unit').length,
+        chapters: payload.toc.filter((node) => node.type === 'chapter').length,
+        sections: payload.toc.filter((node) => node.type === 'section').length,
+        concepts: allConcepts.size,
+        learned,
+      },
+    };
+    return cachedOverview;
+  };
+
+  const filterOverview = (query: string): OverviewFilterResult => {
+    const base = overview();
+    const needle = query.trim().toLowerCase();
+    if (needle.length === 0) {
+      const matchCount = base.units.reduce(
+        (total, unit) => total + unit.chapters.reduce((sum, entry) => sum + entry.concepts.length, 0),
+        0,
+      );
+      return { active: false, query: '', matchCount, units: base.units };
+    }
+    const matches = (concept: Concept): boolean =>
+      concept.title.toLowerCase().includes(needle) ||
+      concept.aliases.some((alias) => alias.toLowerCase().includes(needle));
+    const matchedIds = new Set<Id>();
+    const units: OverviewUnit[] = [];
+    for (const unit of base.units) {
+      const chapters: OverviewChapter[] = [];
+      for (const entry of unit.chapters) {
+        const matched = entry.concepts.filter((concept) => matches(concept));
+        if (matched.length === 0) continue;
+        for (const concept of matched) matchedIds.add(concept.id);
+        chapters.push({ ...entry, concepts: matched });
+      }
+      if (chapters.length === 0) continue;
+      units.push({ ...unit, chapters });
+    }
+    return { active: true, query: query.trim(), matchCount: matchedIds.size, units };
+  };
+
+  const chapterCache = new Map<Id, MapChapter | null>();
+  const chapter = (chapterId: Id): MapChapter | null => {
+    const cached = chapterCache.get(chapterId);
+    if (cached !== undefined) return cached;
+    const node = toc.node(chapterId);
+    if (node === undefined || node.type !== 'chapter') {
+      chapterCache.set(chapterId, null);
+      return null;
+    }
+    const parent = node.parentId === null ? null : toc.node(node.parentId) ?? null;
+    const unit = parent?.type === 'unit' ? parent : null;
+    const concepts = toc
+      .orderedConceptIdsIn(node.id)
+      .map((conceptId) => conceptsById.get(conceptId))
+      .filter((concept): concept is Concept => concept !== undefined);
+    const conceptIds = new Set<Id>(concepts.map((concept) => concept.id));
+    const relations = payload.relations.filter(
+      (relation) =>
+        conceptIds.has(relation.fromConceptId) && conceptIds.has(relation.toConceptId),
+    );
+    const externalRelations = payload.relations.filter((relation) => {
+      const fromInside = conceptIds.has(relation.fromConceptId);
+      const toInside = conceptIds.has(relation.toConceptId);
+      return (fromInside && !toInside) || (!fromInside && toInside);
+    });
+    const layout = layoutChapter({
+      conceptIds: concepts.map((concept) => concept.id),
+      relations,
+    });
+    const chapters = toc.chapters();
+    const index = chapters.findIndex((entry) => entry.id === node.id);
+    const value: MapChapter = {
+      chapter: node,
+      unit,
+      path: toc.pathOf(node.id),
+      sections: sectionsUnder(node.id),
+      concepts,
+      relations,
+      externalRelations,
+      layout,
+      previousChapterId: index > 0 ? (chapters[index - 1]?.id ?? null) : null,
+      nextChapterId: index >= 0 && index < chapters.length - 1 ? (chapters[index + 1]?.id ?? null) : null,
+    };
+    chapterCache.set(chapterId, value);
+    return value;
+  };
+
   return {
-    positions,
-    columns: Math.max(1, maxLayer + 1),
-    rows: Math.max(1, rows),
-    centerConceptId: center,
+    payload,
+    toc,
+    summary,
+    overview,
+    chapter,
+    chapterOfConcept,
+    filterOverview,
   };
 }
 
-export function filterGraphSlice(
-  slice: GraphSlice,
-  conceptIds: readonly Id[],
-): { readonly concepts: readonly Concept[]; readonly relations: readonly Relation[] } {
-  const visible = new Set(conceptIds);
-  return {
-    concepts: slice.concepts.filter((concept) => visible.has(concept.id)),
-    relations: slice.relations.filter(
-      (relation) => visible.has(relation.fromConceptId) && visible.has(relation.toConceptId),
-    ),
-  };
-}
+/* ---------------------------------------------------------------- helpers */
 
-export function prerequisiteSources(
+/** Relations around one concept, split into 先修 / 后继 / 相关 (cross-chapter included). */
+export function relationPeers(
   payload: MapPayload,
   conceptId: Id,
-): readonly { readonly relation: Relation; readonly concept: Concept | null; readonly learned: boolean }[] {
-  const incoming = payload.relations.filter(
-    (relation) => relation.type === 'prerequisite' && relation.toConceptId === conceptId,
-  );
-  return incoming.map((relation) => {
-    const concept = payload.concepts.find((entry) => entry.id === relation.fromConceptId) ?? null;
-    const progress = payload.progress.find((entry) => entry.conceptId === relation.fromConceptId) ?? null;
-    return { relation, concept, learned: progress?.learning.state === 'completed' };
-  });
+  chapterConceptIds: ReadonlySet<Id>,
+): { prerequisites: RelationPeer[]; successors: RelationPeer[]; related: RelationPeer[] } {
+  const titleOf = (id: Id): string =>
+    payload.concepts.find((concept) => concept.id === id)?.title ?? id;
+  const learned = (id: Id): boolean => {
+    const state = payload.progress.find((entry) => entry.conceptId === id)?.learning.state;
+    return state === 'in_progress' || state === 'completed';
+  };
+  const prerequisites: RelationPeer[] = [];
+  const successors: RelationPeer[] = [];
+  const related: RelationPeer[] = [];
+  for (const relation of payload.relations) {
+    const isFrom = relation.fromConceptId === conceptId;
+    const isTo = relation.toConceptId === conceptId;
+    if (!isFrom && !isTo) continue;
+    const otherId = isFrom ? relation.toConceptId : relation.fromConceptId;
+    const peer: RelationPeer = {
+      relationId: relation.id,
+      conceptId: otherId,
+      title: titleOf(otherId),
+      inChapter: chapterConceptIds.has(otherId),
+      learned: learned(otherId),
+    };
+    if (relation.type === 'related') related.push(peer);
+    else if (isTo) prerequisites.push(peer);
+    else successors.push(peer);
+  }
+  return { prerequisites, successors, related };
+}
+
+/** Textbook page(s) for a concept; `未核实` when the page was not human checked. */
+export function sourcePagesFor(payload: MapPayload, sourceRefs: readonly Id[]): SourcePage[] {
+  const pages: SourcePage[] = [];
+  const seen = new Set<string>();
+  for (const sourceRefId of sourceRefs) {
+    const source = payload.sources.find((entry) => entry.sourceRefId === sourceRefId);
+    if (source === undefined) {
+      const key = `${sourceRefId}|unknown`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      pages.push({ sourceRefId, label: '出处未核实', unverified: true, available: false });
+      continue;
+    }
+    const page = source.printedPage ?? String(source.pdfPage);
+    const key = `${page}|${source.bookAvailable ? 'y' : 'n'}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    pages.push({
+      sourceRefId,
+      label: `课本第 ${page} 页`,
+      unverified: source.verification !== 'human_checked',
+      available: source.bookAvailable,
+    });
+  }
+  return pages;
+}
+
+export interface ResumeTarget {
+  readonly chapterId: Id;
+  readonly conceptId: Id | null;
+  readonly title: string | null;
+}
+
+/** Newest local learning/review timestamp for one concept, if it has any. */
+function latestActivityOf(progress: ConceptProgress): string | null {
+  const stamps = [
+    progress.understanding.updatedAt,
+    progress.review.lastCompletedAt,
+    progress.learning.lastCompletedAt,
+    progress.learning.startedAt,
+  ].filter((value): value is string => typeof value === 'string' && value.length > 0);
+  if (stamps.length === 0) return null;
+  return stamps.sort()[stamps.length - 1] ?? null;
+}
+
+/** Concept with the most recent local activity; null when nothing was studied yet. */
+function latestStudiedConceptId(payload: MapPayload): Id | null {
+  let bestId: Id | null = null;
+  let bestAt = '';
+  for (const progress of payload.progress) {
+    const at = latestActivityOf(progress);
+    if (at === null) continue;
+    if (at > bestAt) {
+      bestAt = at;
+      bestId = progress.conceptId;
+    }
+  }
+  return bestId;
+}
+
+/** "回到我正在学的": the concept with the newest local activity, then the source hint. */
+export function resumeTarget(payload: MapPayload, toc: TocTreeModel): ResumeTarget | null {
+  const latestId = latestStudiedConceptId(payload);
+  const latestConcept =
+    latestId === null ? null : payload.concepts.find((concept) => concept.id === latestId) ?? null;
+  const initialConcept = payload.initialConceptId === null
+    ? null
+    : payload.concepts.find((concept) => concept.id === payload.initialConceptId) ?? null;
+  const fallbackConcept =
+    latestConcept ??
+    initialConcept ??
+    payload.concepts.find((concept) => {
+      const progress = payload.progress.find((entry) => entry.conceptId === concept.id);
+      return progress?.learning.state === 'in_progress';
+    }) ??
+    null;
+  const conceptChapter = fallbackConcept === null ? null : (() => {
+    const placement = fallbackConcept.placements[0];
+    return placement === undefined ? null : toc.chapterOf(placement);
+  })();
+  const chapter =
+    conceptChapter ??
+    (payload.initialTocNodeId === null ? null : toc.chapterOf(payload.initialTocNodeId)) ??
+    toc.chapters()[0] ??
+    null;
+  if (chapter === null) return null;
+  return {
+    chapterId: chapter.id,
+    conceptId: fallbackConcept?.id ?? null,
+    title: fallbackConcept?.title ?? null,
+  };
+}
+
+/** All relation peers for a chapter's concept, used by the list view. */
+export function chapterPeers(
+  payload: MapPayload,
+  chapter: MapChapter,
+): ReadonlyMap<Id, { prerequisites: RelationPeer[]; successors: RelationPeer[] }> {
+  const ids = new Set<Id>(chapter.concepts.map((concept) => concept.id));
+  const result = new Map<Id, { prerequisites: RelationPeer[]; successors: RelationPeer[] }>();
+  for (const conceptId of ids) {
+    const peers = relationPeers(payload, conceptId, ids);
+    result.set(conceptId, {
+      prerequisites: peers.prerequisites,
+      successors: peers.successors,
+    });
+  }
+  return result;
 }

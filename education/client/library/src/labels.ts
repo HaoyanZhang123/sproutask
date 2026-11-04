@@ -3,79 +3,56 @@
 import type {
   ImportStage,
   ImportStatus,
-  PackCoverageStatus,
-  PackScope,
   ReviewState,
   SourceBlockType,
   SourceVerificationState,
-  TrustMode,
 } from '@edu/domain';
-import type { EditionVerification, LibraryMaterialState } from './types.js';
+import type { LibraryMaterialState } from './types.js';
 
-export const MATERIAL_STATE_LABELS: Record<LibraryMaterialState, string> = {
-  baseline: '本期匹配基准',
-  candidate: '待核实候选',
-  unavailable: '不可用材料',
+/** 学科名只用于封面，不在正文重复。 */
+export const SUBJECT_LABELS: Readonly<Record<string, string>> = {
+  biology: '生物学',
 };
 
-export const MATERIAL_STATE_TONES: Record<LibraryMaterialState, 'positive' | 'attention' | 'danger'> = {
-  baseline: 'positive',
-  candidate: 'attention',
-  unavailable: 'danger',
-};
-
-export const MATERIAL_STATE_NOTES: Record<LibraryMaterialState, string> = {
-  baseline: '已通过本期基准匹配；仍按内容包范围显示，部分内容不等于全册就绪。',
-  candidate: '候选内容未核实，不能作为基准，也不能用于强掌握结论。',
-  unavailable: '材料不可用；已保存的其他教材和个人记录不受影响。',
-};
-
-export const EDITION_VERIFICATION_LABELS: Record<EditionVerification, string> = {
-  verified: '版本已核实',
-  machine_matched: '机器匹配',
-  unverified: '版本待核实',
-  rejected: '版本被拒绝',
+/** 换一本书时一行的状态词；不是 chip，也不重复“待核实”。 */
+export const MATERIAL_STATE_WORDS: Record<LibraryMaterialState, string> = {
+  baseline: '核对过的课本',
+  candidate: '先当参考',
+  unavailable: '打不开',
 };
 
 export const REVIEW_STATE_LABELS: Record<ReviewState, string> = {
-  candidate: '候选（未核实）',
-  machine_checked: '机器检查（非专家）',
-  curator_checked: '人工审校',
-  published: '已发布',
-  rejected: '已拒绝',
-};
-
-export const TRUST_MODE_LABELS: Record<TrustMode, string> = {
-  published: '正式内容',
-  candidate: '候选试用（未核实）',
-};
-
-export const SCOPE_LABELS: Record<PackScope, string> = {
-  partial: '部分内容（未达全册）',
-  full_volume: '全册范围',
-};
-
-export const COVERAGE_LABELS: Record<PackCoverageStatus, string> = {
-  partial: '覆盖未完成',
-  complete: '覆盖完整',
+  candidate: '还没核对',
+  machine_checked: '程序看过，还没人核对',
+  curator_checked: '人工核对过',
+  published: '核对过',
+  rejected: '不用这份',
 };
 
 export const SOURCE_VERIFICATION_LABELS: Record<SourceVerificationState, string> = {
-  unverified: '来源待核实',
-  machine_matched: '来源机器匹配',
-  human_checked: '来源人工核对',
-  rejected: '来源被拒绝',
+  unverified: '页码还没核对',
+  machine_matched: '按页码对得上',
+  human_checked: '人工核对过',
+  rejected: '不采用',
+};
+
+export const BLOCK_TYPE_LABELS: Record<SourceBlockType, string> = {
+  heading: '标题',
+  paragraph: '段落',
+  caption: '图注',
+  table: '表格',
+  list: '列表',
 };
 
 export const STAGE_LABELS: Record<ImportStage, string> = {
-  accepted: '接受任务',
-  identify: '识别文件',
-  extract: '提取内容',
-  structure: '整理结构',
-  concepts: '生成概念候选',
+  accepted: '准备开始',
+  identify: '认出这本书',
+  extract: '读出页面文字',
+  structure: '整理章节',
+  concepts: '整理知识点',
   validate: '检查内容',
-  await_review: '等待审校',
-  ready: '材料就绪',
+  await_review: '等你确认',
+  ready: '可以用了',
 };
 
 export const STAGE_ORDER: readonly ImportStage[] = [
@@ -92,10 +69,10 @@ export const STAGE_ORDER: readonly ImportStage[] = [
 export const STATUS_LABELS: Record<ImportStatus, string> = {
   queued: '排队中',
   running: '进行中',
-  paused: '已暂停',
-  failed: '失败',
+  paused: '暂停了',
+  failed: '出错',
   cancelled: '已取消',
-  completed: '已完成',
+  completed: '完成',
 };
 
 export const STATUS_TONES: Record<ImportStatus, 'neutral' | 'progress' | 'attention' | 'danger' | 'positive'> = {
@@ -107,14 +84,6 @@ export const STATUS_TONES: Record<ImportStatus, 'neutral' | 'progress' | 'attent
   completed: 'positive',
 };
 
-export const BLOCK_TYPE_LABELS: Record<SourceBlockType, string> = {
-  heading: '标题',
-  paragraph: '段落',
-  caption: '图注',
-  table: '表格',
-  list: '列表',
-};
-
 export interface ImportErrorCopy {
   readonly title: string;
   readonly detail: string;
@@ -124,138 +93,138 @@ export interface ImportErrorCopy {
 export const IMPORT_ERROR_COPY: Record<string, ImportErrorCopy> = {
   PDF_CORRUPT: {
     title: 'PDF 文件损坏',
-    detail: '文件结构或交叉引用无法读取，没有发布不完整的页面。',
-    next: '重新选择文件或从备份恢复；已完成的本地步骤会保留。',
+    detail: '文件结构读不出来，没有发布不完整的页面。',
+    next: '重新选择文件或从备份恢复；已经做过的本地步骤会保留。',
   },
   PDF_ENCRYPTED: {
     title: 'PDF 受密码保护',
-    detail: '当前不能读取受加密保护的教材文件。',
-    next: '请解除文件保护或换用未加密的 PDF 后重试。',
+    detail: '现在还读不了加了密的课本文件。',
+    next: '解除文件保护，或换一个没加密的 PDF 再试。',
   },
   PDF_NO_PAGES: {
     title: '没有可导入的页面',
-    detail: 'PDF 没有读到有效页，不能生成空壳教材。',
-    next: '确认文件完整后重新选择；不会自动创建空教材。',
+    detail: '这个 PDF 没有读到有效页，不会凭空建一本空课本。',
+    next: '确认文件完整后重新选择；不会自动建空课本。',
   },
   PDF_READ_FAILED: {
-    title: '读取 PDF 失败',
-    detail: '文件可能被占用、损坏或权限不足。',
-    next: '关闭占用程序并确认文件可读，然后重试。',
+    title: '读不了这个 PDF',
+    detail: '文件可能正被其他程序占用、损坏或没有读取权限。',
+    next: '关闭占用它的程序，确认能打开后重试。',
   },
   TEXT_LAYER_UNAVAILABLE: {
-    title: '没有可用的文本层',
-    detail: '该 PDF 可能需要逐页 OCR；这不是学生作答错误。',
-    next: '若本机 OCR 组件可用，将继续扫描识别；否则请查看材料说明。',
+    title: '这些页面没有文字层',
+    detail: '这一本像是扫描件，需要先识别图像上的字；这不是你答错了。',
+    next: '本机识别组件可用时会继续识别；否则会说明哪几页读不到。',
   },
   OCR_ENGINE_UNAVAILABLE: {
-    title: '本机 OCR 组件不可用',
-    detail: '扫描页需要 Windows 自带的 OCR 组件。',
-    next: '在系统组件中启用 OCR 后重试；已完成文本不会丢失。',
+    title: '本机的文字识别组件不可用',
+    detail: '扫描页需要系统自带的文字识别组件。',
+    next: '在系统组件里打开识别功能后重试；已经读出的文字不会丢。',
   },
   OCR_LANGUAGE_UNAVAILABLE: {
-    title: '缺少中文 OCR 语言包',
-    detail: '本机 OCR 组件存在，但没有中文识别语言包。',
-    next: '在 Windows 语言设置中安装中文 OCR 语言包后重试；已完成页会保留。',
+    title: '缺少中文识别语言包',
+    detail: '本机有识别组件，但还没装中文语言包。',
+    next: '在系统的语言设置里安装中文识别语言包后重试；已完成的页会保留。',
   },
   PAGE_RENDER_FAILED: {
-    title: '页面渲染失败',
-    detail: '个别页面没有成功转成可识别图像。',
-    next: '重试该页；其他已完成页和来源信息会保留。',
+    title: '有几页没能转成图片',
+    detail: '个别页面没有成功渲染，所以没有去识别它们。',
+    next: '重试这几页；其他已完成的页和来源会保留。',
   },
   PAGE_OCR_FAILED: {
-    title: '单页识别失败',
-    detail: '这一页没有成功识别；没有编造页面文字。',
-    next: '重试该页，或稍后重新导入；已完成的页面不会重复。',
+    title: '有一页没认出来',
+    detail: '这一页没有识别成功；没有编造页面文字。',
+    next: '重试这一页，或稍后重新导入；已完成的页面不会重复。',
   },
   JOB_NOT_FOUND: {
-    title: '找不到导入任务',
-    detail: '任务可能已被清理或不属于当前教材。',
-    next: '回到教材库重新选择文件；不会自动改用其他教材。',
+    title: '找不到这次导入',
+    detail: '它可能已经被清理，或者不属于当前这本课本。',
+    next: '回到课本页重新选择文件；不会自动改用其他课本。',
   },
   JOB_CANCELLED: {
     title: '导入已取消',
-    detail: '取消后到达的结果不会写入教材或记录。',
-    next: '可以恢复同一任务，或重新选择文件。',
+    detail: '取消之后才回来的结果不会写进课本或记录。',
+    next: '可以接着恢复这次导入，或重新选择文件。',
   },
   LATE_RESULT_REJECTED: {
-    title: '迟到结果已丢弃',
-    detail: '取消之后返回的页面结果没有发布，已保存内容不受影响。',
-    next: '如需继续，请恢复任务或重新导入。',
+    title: '迟到的结果没有采用',
+    detail: '取消之后返回的页面结果没有发布，已保存的内容不受影响。',
+    next: '如果要继续，请恢复这次导入或重新选一次文件。',
   },
   CHECKPOINT_CORRUPT: {
-    title: '导入进度记录损坏',
-    detail: '本机保存的阶段信息无法安全恢复。',
-    next: '重新开始导入；原教材和其他记录不受影响。',
+    title: '上次的进度记录坏了',
+    detail: '本机保存的阶段信息没法安全接着用。',
+    next: '重新开始导入；原来的课本和其他记录不受影响。',
   },
   CHECKPOINT_VERSION_MISMATCH: {
-    title: '导入进度版本不匹配',
-    detail: '上次任务由不同解析器版本保存，不能继续套用。',
-    next: '重新开始导入，或查看已完成材料的说明。',
+    title: '上次的进度记录版本对不上',
+    detail: '上次是旧版本的程序保存的，不能直接接着用。',
+    next: '重新开始导入，或先看看已经做好的那部分。',
   },
   CLOUD_EXTRACTION_PAUSED: {
-    title: '在线概念抽取暂缓',
-    detail: '本地解析已完成，但当前离线或未配置模型服务；没有伪装成导入完成。',
-    next: '网络/模型恢复后可恢复导入；已有本地材料仍可阅读。',
+    title: '联网的整理步骤先停了下来',
+    detail: '本机的步骤已经做完，但现在没联网或还没配置模型服务；不会假装已经完成。',
+    next: '网络或模型服务恢复后可以接着做；已经做好的本地内容仍然能看。',
   },
   CLOUD_AUTH_FAILED: {
     title: '模型服务没有完成授权',
-    detail: '需要有效模型服务才能继续概念抽取；本地步骤已保留。',
-    next: '在账户页确认服务状态后重试，不会要求粘贴他人密钥。',
+    detail: '要继续整理知识点，需要可用的模型服务；本机的步骤已经保留。',
+    next: '到设置里确认服务状态后重试，不会让你粘贴别人的密钥。',
   },
   CLOUD_RATE_LIMITED: {
-    title: '模型服务请求过多',
-    detail: '本次云端步骤没有完成，已完成页面仍保留。',
-    next: '稍后重试；不会重复计费或重复建书。',
+    title: '模型服务请求太多',
+    detail: '这次联网的步骤没有完成，已经做好的页面还在。',
+    next: '稍后再试；不会重复花钱，也不会重复建课本。',
   },
   STORAGE_FULL: {
     title: '磁盘空间不足',
-    detail: '导入产物没有发布，本机已有记录没有被删除。',
-    next: '清理磁盘空间后重试；已完成的阶段可恢复。',
+    detail: '这次导入的结果没有保存，本机原有记录没有被删除。',
+    next: '清出一些磁盘空间后重试；已经完成的阶段可以接着做。',
   },
   STORAGE_WRITE_FAILED: {
-    title: '写入本机存储失败',
-    detail: '页面或进度没有保存成功，界面不会显示为已完成。',
-    next: '检查磁盘权限与空间后重试；不会伪造已保存。',
+    title: '写进本机存储失败',
+    detail: '页面或进度没有保存成功，界面不会显示成已完成。',
+    next: '检查磁盘权限和空间后重试；不会假装已经保存。',
   },
   ASSET_HANDLE_INVALID: {
-    title: '文件句柄无效',
-    detail: '只能使用宿主提供的受管文件，不能直接读取任意路径。',
-    next: '请通过“选择本地 PDF”重新提供文件。',
+    title: '文件引用无效',
+    detail: '只能使用应用里选中的文件，不能直接读取电脑上的其他位置。',
+    next: '重新用“选择本地 PDF”选一次文件。',
   },
   ASSET_PATH_OUTSIDE_ROOT: {
-    title: '文件不在允许的目录内',
-    detail: '为保护本机文件，导入只接受宿主管理的教材文件。',
-    next: '重新选择教材文件；不会尝试访问其他路径。',
+    title: '文件不在允许的目录里',
+    detail: '为了保护本机文件，导入只接受应用管理的课本文件。',
+    next: '重新选择课本文件；不会去读其他位置。',
   },
   ASSET_NOT_FOUND: {
     title: '找不到所选文件',
-    detail: '文件可能被移动、重命名或删除。',
+    detail: '文件可能被移动、改名或删除了。',
     next: '重新选择文件；已保存的个人记录不受影响。',
   },
   ASSET_NOT_A_FILE: {
-    title: '所选对象不是文件',
-    detail: '不能把文件夹或其他对象当作教材导入。',
-    next: '重新选择 PDF 文件。',
+    title: '选中的不是文件',
+    detail: '文件夹或其他东西不能当作课本导入。',
+    next: '重新选一个 PDF 文件。',
   },
   ASSET_HASH_MISMATCH: {
-    title: '文件指纹不一致',
-    detail: '文件在选择后发生了变化，未按原文件导入。',
-    next: '重新选择文件并确认指纹后再试。',
+    title: '文件在选择之后变过',
+    detail: '文件和选择时对不上，没有按原文件导入。',
+    next: '重新选择一次这个文件再试。',
   },
   ASSET_METADATA_MISMATCH: {
-    title: '文件信息不一致',
-    detail: '填写的页数或元数据与实际文件不一致。',
-    next: '检查元数据或重新选择文件；不会用错误信息绑定教材。',
+    title: '填的文件信息对不上',
+    detail: '填的页数或书名和实际文件不一致。',
+    next: '核对信息或重新选择文件；不会把错误信息记到课本上。',
   },
   INPUT_MISSING: {
-    title: '缺少导入文件',
-    detail: '没有收到受管文件，任务没有开始。',
-    next: '先选择本地 PDF，再确认开始导入。',
+    title: '还没有选文件',
+    detail: '没有收到文件，这次导入没有开始。',
+    next: '先选一个本地 PDF，再确认开始导入。',
   },
   UNSUPPORTED: {
-    title: '当前文件类型不支持',
-    detail: '本期导入只支持 PDF；没有把其他格式伪装成教材。',
-    next: '选择 PDF 文件，或查看已有本地材料。',
+    title: '这种文件类型还不支持',
+    detail: '现在只能导入 PDF；其他格式不会被当成课本。',
+    next: '换一个 PDF 文件，或先看已有的课本。',
   },
 };
 
@@ -267,18 +236,13 @@ export function describeImportError(code: string, retryable: boolean): ImportErr
     code: safe,
     retryable,
     title: '导入没有完成',
-    detail: '发生了未归类的导入错误；界面不会把未知结果标成完成。',
-    next: '可以重试或重新选择文件；已有本地材料仍可阅读。',
+    detail: '出现了没有归类的问题；界面不会把没做完的事标成完成。',
+    next: '可以重试或重新选择文件；已有的课本仍然能看。',
   };
 }
 
-export function formatFingerprint(sha256: string): string {
-  if (sha256.length <= 16) return sha256;
-  return `${sha256.slice(0, 12)}…${sha256.slice(-4)}`;
-}
-
 export function formatBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return '未知大小';
+  if (!Number.isFinite(bytes) || bytes < 0) return '大小未知';
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -309,12 +273,12 @@ export function stageStateLabel(stage: ImportStage, current: ImportStage, jobSta
   const currentIndex = stageIndex(current);
   const index = stageIndex(stage);
   if (stage === current) {
-    if (jobStatus === 'failed') return '停在当前阶段';
+    if (jobStatus === 'failed') return '停在这一步';
     if (jobStatus === 'cancelled') return '已取消';
-    if (stage === 'await_review') return '待审核（不是完成）';
-    if (stage === 'ready') return '已完成';
-    return '进行中';
+    if (stage === 'await_review') return '还在等你确认';
+    if (stage === 'ready') return '已经可以用';
+    return '正在做';
   }
-  if (index < currentIndex) return '已通过';
-  return '未开始';
+  if (index < currentIndex) return '已经完成';
+  return '还没开始';
 }

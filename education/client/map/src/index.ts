@@ -19,6 +19,7 @@ import type { MapDataSource, MapRequest } from './types.js';
 
 export * from './types.js';
 export * from './model.js';
+export * from './layout.js';
 export * from './views.js';
 export * from './fixture.js';
 export * from './styles.js';
@@ -28,7 +29,8 @@ export * from './page.js';
 export interface CreateMapUiOptions {
   readonly dataSource?: MapDataSource;
   readonly createRequest?: () => MapRequest;
-  readonly pageSize?: number;
+  /** Fixed viewport width for tests; production reads the real window width. */
+  readonly viewportWidth?: number;
   /** Only used when no `dataSource` is supplied. */
   readonly fixtureScenario?: MapScenario;
 }
@@ -70,7 +72,7 @@ export function createMapUi(options: CreateMapUiOptions = {}): MapUi {
   const controllerOptions: MapControllerOptions = {
     dataSource,
     createRequest: options.createRequest ?? defaultRequestFactory(),
-    pageSize: options.pageSize,
+    viewportWidth: options.viewportWidth,
   };
   const controller = new MapController(controllerOptions);
   const page = createMapPage(controller);

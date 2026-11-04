@@ -91,13 +91,13 @@ export class SourceReader {
       clear(content);
       content.append(
         h('p', { class: 'edu-state__body' }, '没有可打开的来源条目。'),
-        h('div', { class: 'edu-inline-actions' }, button('返回教材库', () => this.close())),
+        h('div', { class: 'edu-inline-actions' }, button('回去看课本', () => this.close())),
       );
       return;
     }
     const token = ++this.loadToken;
     clear(content);
-    content.append(h('p', { class: 'edu-state__body', role: 'status' }, '正在打开来源…'));
+    content.append(h('p', { class: 'edu-state__body', role: 'status' }, '正在打开这条来源…'));
     const result = await this.options.dataSource.openSource(this.options.createRequest(), item.sourceRefId);
     if (token !== this.loadToken || this.content === null) return;
     clear(content);
@@ -107,12 +107,12 @@ export class SourceReader {
         h(
           'p',
           { class: 'edu-lib-status-line' },
-          '来源文件、页码或资产不可用；没有跳转到任何页面，也不会编造引用位置。',
+          '这条来源现在打不开：文件、页码或这一页的位置取不到；没有跳到别的页面，也不会编一个位置。',
         ),
         renderErrorBanner(result.error, {
           headingLevel: 'h3',
           onBack: () => this.close(),
-          backLabel: '返回教材库',
+          backLabel: '回去看课本',
         }),
       );
       return;
@@ -151,13 +151,13 @@ export class SourceReader {
         h(
           'div',
           { class: 'edu-lib-page-info__box', 'data-testid': 'source-pdf-page' },
-          h('p', { class: 'edu-lib-page-info__label' }, 'PDF 页序（1 基）'),
+          h('p', { class: 'edu-lib-page-info__label' }, 'PDF 里是第几页'),
           h('p', { class: 'edu-lib-page-info__value' }, `PDF 第 ${source.sourceRef.pdfPage} 页`),
         ),
         h(
           'div',
           { class: 'edu-lib-page-info__box', 'data-testid': 'source-printed-page' },
-          h('p', { class: 'edu-lib-page-info__label' }, '印刷页码（课本页脚/页眉标签）'),
+          h('p', { class: 'edu-lib-page-info__label' }, '课本上印的页码'),
           h(
             'p',
             { class: 'edu-lib-page-info__value' },
@@ -170,20 +170,20 @@ export class SourceReader {
       h(
         'p',
         { class: 'edu-lib-status-line' },
-        'PDF 页序与印刷页码是不同单位，不能互相替代；未识别时不做偏移猜测。',
+        'PDF 第几页和课本上印的页码不是一回事，不会拿一个去推另一个；认不出来就空着。',
       ),
     );
 
     if (source.candidate) {
-      content.append(statusChip('候选来源（未核实）', 'attention'));
+      content.append(statusChip('先当参考', 'attention'));
     }
     content.append(
       h(
         'div',
         { class: 'edu-inline-actions' },
         statusChip(SOURCE_VERIFICATION_LABELS[source.sourceRef.verification.state], 'neutral'),
-        statusChip(`审校：${REVIEW_STATE_LABELS[source.candidate ? 'candidate' : source.block?.reviewState ?? source.figure?.reviewState ?? 'candidate']}`, 'neutral'),
-        h('span', { class: 'edu-muted', 'data-testid': 'source-verification' }, `来源核实：${source.sourceRef.verification.notes ?? '无说明'}`),
+        statusChip(`核对：${REVIEW_STATE_LABELS[source.candidate ? 'candidate' : source.block?.reviewState ?? source.figure?.reviewState ?? 'candidate']}`, 'neutral'),
+        h('span', { class: 'edu-muted', 'data-testid': 'source-verification' }, `核对说明：${source.sourceRef.verification.notes ?? '暂无'}`),
       ),
     );
 
@@ -192,7 +192,7 @@ export class SourceReader {
         h(
           'p',
           { class: 'edu-lib-status-line' },
-          '本来源没有受控页图；只显示准确页码与出处，不伪造页面图像。',
+          '这条来源没有页图；只写准确页码和出处，不伪造页面。',
         ),
       );
     } else {
@@ -208,7 +208,7 @@ export class SourceReader {
         h(
           'span',
           { class: 'edu-lib-page__fixture' },
-          `受控页图位置 · ${image.assetId}${image.fixtureOnly ? '（fixture 示意，不含真实页面图像）' : ''}`,
+          `这一页的原文位置${image.fixtureOnly ? '（fixture 示意，不含真实页面图像）' : ''}`,
         ),
       );
       const region = h('span', {
@@ -227,7 +227,7 @@ export class SourceReader {
         h(
           'p',
           { class: 'edu-lib-status-line' },
-          '区域使用归一化坐标（0–1）；只接受宿主受管页图句柄，不使用本机路径。',
+          '方框标出的，就是这句原文在这一页上的位置。',
         ),
       );
     }
@@ -254,7 +254,7 @@ export class SourceReader {
       h(
         'p',
         { class: 'edu-muted' },
-        '查看来源不会提交作答、不会改变理解判断；关闭后焦点返回刚才的来源按钮。',
+        '看原文不会提交作答，也不会改变记录；关掉后会回到刚才那条来源。',
       ),
       actions,
     );
@@ -264,7 +264,7 @@ export class SourceReader {
     return h(
       'div',
       { class: 'edu-lib-block', 'data-block-id': block.id },
-      h('p', { class: 'edu-card__title' }, `${BLOCK_TYPE_LABELS[block.type]}来源块`),
+      h('p', { class: 'edu-card__title' }, `${BLOCK_TYPE_LABELS[block.type]}`),
       h(
         'p',
         { class: 'edu-lib-block__text' },
@@ -273,7 +273,7 @@ export class SourceReader {
       h(
         'p',
         { class: 'edu-lib-status-line' },
-        `提取方式：${block.extractionMethod === 'ocr' ? 'OCR' : block.extractionMethod === 'text_layer' ? '文本层' : '人工'} · 审校：${REVIEW_STATE_LABELS[block.reviewState]}`,
+        `${block.extractionMethod === 'ocr' ? '这页是扫描后认出来的字' : '这页本来就有文字'} · ${REVIEW_STATE_LABELS[block.reviewState]}`,
       ),
     );
   }
@@ -287,7 +287,7 @@ export class SourceReader {
       h(
         'p',
         { class: 'edu-lib-status-line' },
-        `类型：${figure.type === 'diagram' ? '示意图' : figure.type === 'photo' ? '照片' : figure.type} · 当前资产：${figure.activeAssetId} · 审校：${REVIEW_STATE_LABELS[figure.reviewState]}`,
+        `${figure.type === 'diagram' ? '示意图' : figure.type === 'photo' ? '照片' : '图'} · ${REVIEW_STATE_LABELS[figure.reviewState]}`,
       ),
     );
   }

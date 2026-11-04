@@ -57,7 +57,7 @@ describe('page and panel mounting contracts', () => {
     expect(pageRoot(document.body).querySelector('[data-testid="contract-page"]')).not.toBeNull();
     await shell.navigate('/home');
     expect(calls).toEqual(['mount', 'unmount']);
-    expect((pageRoot(document.body) as HTMLElement).textContent).toContain('首页');
+    expect((pageRoot(document.body) as HTMLElement).textContent).toContain('今天');
   });
 
   it('rejects duplicate ids/paths and malformed paths', () => {

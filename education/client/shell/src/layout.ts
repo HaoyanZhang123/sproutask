@@ -1,16 +1,18 @@
 /**
- * Layout budget used by tests and by the shell's compact-mode decision.
+ * Layout budget used by tests, the shell's compact-mode decision and the
+ * study desk. happy-dom has no layout engine, so we assert a *logical* layout
+ * contract instead of pretending to measure pixels:
  *
- * happy-dom has no layout engine, so the shell asserts a *logical* layout
- * contract instead of pretending to measure pixels: the sidebar + gap + a
- * readable content column must fit inside the viewport, and below the compact
- * breakpoint the shell stacks to one column.
+ * - the content column never exceeds the readable maximum;
+ * - it never drops below the readable minimum (otherwise: horizontal overflow);
+ * - below the compact breakpoint the study desk stacks to a single page.
  */
 
 import { DESIGN_TOKENS } from './tokens.js';
 
-export type LayoutMode = 'sidebar' | 'stacked';
-export type NavOrientation = 'vertical' | 'horizontal';
+export type LayoutMode = 'wide' | 'compact';
+/** Navigation is always a horizontal top bar; compact keeps it above content. */
+export type NavOrientation = 'horizontal';
 
 export interface LayoutBudget {
   readonly viewportWidth: number;
@@ -18,9 +20,11 @@ export interface LayoutBudget {
   readonly baseFontPx: number;
   readonly mode: LayoutMode;
   readonly navOrientation: NavOrientation;
+  /** Kept for callers that still ask about the retired sidebar: always 0. */
   readonly sidebarWidthPx: number;
   readonly gapPx: number;
   readonly contentWidthPx: number;
+  readonly maxContentWidthPx: number;
   readonly minContentWidthPx: number;
   readonly pagePaddingPx: number;
   /** The content column stays at or above the readable minimum. */
@@ -36,43 +40,25 @@ export function remToPx(rem: number, baseFontPx: number): number {
 export function evaluateLayout(
   viewportWidth: number,
   viewportHeight: number,
-  baseFontPx: number = 20,
+  baseFontPx: number = 16,
 ): LayoutBudget {
-  const sidebarWidthPx = remToPx(DESIGN_TOKENS.layout.sidebarRem, baseFontPx);
-  const gapPx = remToPx(DESIGN_TOKENS.layout.gapRem, baseFontPx);
   const pagePaddingPx = remToPx(DESIGN_TOKENS.layout.pagePaddingRem, baseFontPx);
   const minContentWidthPx = remToPx(DESIGN_TOKENS.layout.minContentRem, baseFontPx);
+  const maxContentWidthPx = remToPx(DESIGN_TOKENS.layout.maxContentRem, baseFontPx);
+  const available = Math.max(0, viewportWidth - pagePaddingPx * 2);
+  const contentWidthPx = Math.min(available, maxContentWidthPx);
   const compact = viewportWidth < DESIGN_TOKENS.breakpoints.compact;
-  const sidebarFits = sidebarWidthPx + gapPx + minContentWidthPx <= viewportWidth;
 
-  if (!compact && sidebarFits) {
-    const contentWidthPx = viewportWidth - sidebarWidthPx - gapPx - pagePaddingPx * 2;
-    return {
-      viewportWidth,
-      viewportHeight,
-      baseFontPx,
-      mode: 'sidebar',
-      navOrientation: 'vertical',
-      sidebarWidthPx,
-      gapPx,
-      contentWidthPx,
-      minContentWidthPx,
-      pagePaddingPx,
-      fits: contentWidthPx >= minContentWidthPx,
-      horizontalOverflow: contentWidthPx < minContentWidthPx,
-    };
-  }
-
-  const contentWidthPx = viewportWidth - pagePaddingPx * 2;
   return {
     viewportWidth,
     viewportHeight,
     baseFontPx,
-    mode: 'stacked',
+    mode: compact ? 'compact' : 'wide',
     navOrientation: 'horizontal',
-    sidebarWidthPx,
-    gapPx,
+    sidebarWidthPx: 0,
+    gapPx: 0,
     contentWidthPx,
+    maxContentWidthPx,
     minContentWidthPx,
     pagePaddingPx,
     fits: contentWidthPx >= minContentWidthPx,
@@ -80,10 +66,10 @@ export function evaluateLayout(
   };
 }
 
-/** Base font in px for the supported scale steps (standard is the 20px base). */
+/** Base font in px for the supported scale steps (standard is the 16px base). */
 export const FONT_SCALE_STEPS = {
-  standard: 20,
-  large: 25,
+  standard: 16,
+  large: 20,
 } as const;
 
 export type FontScale = keyof typeof FONT_SCALE_STEPS;

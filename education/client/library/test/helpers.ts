@@ -60,9 +60,11 @@ export function startLibrary(options: {
   return mounted;
 }
 
+/** Mounts and waits for books + the first source list to land. */
 export async function mountLibrary(options: Parameters<typeof startLibrary>[0] = {}): Promise<MountedLibrary> {
   const mounted = startLibrary(options);
   await mounted.ready;
+  await tick(20);
   return mounted;
 }
 
@@ -89,6 +91,21 @@ export function pageRoot(container: HTMLElement): HTMLElement {
   const page = container.querySelector<HTMLElement>('[data-page-id]');
   if (page === null) throw new Error('page root not found');
   return page;
+}
+
+export function byTestId<T extends HTMLElement = HTMLElement>(root: ParentNode, testId: string): T | null {
+  return root.querySelector<T>(`[data-testid="${testId}"]`);
+}
+
+/** Same as `byTestId`, but fails loudly instead of returning null. */
+export function el<T extends HTMLElement = HTMLElement>(root: ParentNode, testId: string): T {
+  const found = byTestId<T>(root, testId);
+  if (found === null) throw new Error(`testid not found: ${testId}`);
+  return found;
+}
+
+export function chipsOf(root: ParentNode): HTMLElement[] {
+  return [...root.querySelectorAll<HTMLElement>('.edu-chip')];
 }
 
 export function buttonsOf(root: ParentNode): HTMLButtonElement[] {
@@ -124,4 +141,25 @@ export function hasPercent(text: string): boolean {
 
 export function dispatchKey(target: EventTarget, key: string, options: KeyboardEventInit = {}): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...options }));
+}
+
+/** 换到另一本课本（先展开“换一本”，再点整行按钮）。 */
+export async function switchToBook(
+  container: HTMLElement,
+  bookId: string,
+): Promise<HTMLButtonElement> {
+  const page = pageRoot(container);
+  buttonByAction(page, 'switch-book').click();
+  const row = page.querySelector<HTMLButtonElement>(`button[data-action="choose-book"][data-book-id="${bookId}"]`);
+  if (row === null) throw new Error(`book row not found: ${bookId}`);
+  row.click();
+  await tick(20);
+  return row;
+}
+
+/** 展开“课本原文从哪来”。 */
+export function openSourcesFold(container: HTMLElement): HTMLElement {
+  const page = pageRoot(container);
+  buttonByAction(page, 'toggle-sources').click();
+  return el(page, 'library-sources');
 }

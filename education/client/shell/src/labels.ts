@@ -16,13 +16,13 @@ import type {
 } from '@edu/domain';
 
 export const PAGE_TITLES = {
-  home: '首页',
+  home: '今天',
   firstRun: '首次使用',
-  library: '教材库',
-  map: '地图',
-  workspace: '工作区',
-  records: '记录',
-  account: '账户与模型服务',
+  library: '我的课本',
+  map: '知识地图',
+  workspace: '学习',
+  records: '进展',
+  account: '设置',
   notFound: '页面不存在',
 } as const;
 
@@ -84,8 +84,8 @@ export const VALIDITY_LABELS: Record<Validity, string> = {
 };
 
 export const TRUST_MODE_LABELS: Record<TrustMode, string> = {
-  published: '已审核内容包',
-  candidate: '候选内容（未核实）',
+  published: '已核对',
+  candidate: '待核实',
 };
 
 export const SUBJECT_LABELS: Record<string, string> = {

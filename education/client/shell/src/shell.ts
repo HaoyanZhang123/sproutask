@@ -24,8 +24,7 @@ import {
   type AuthKeySaveReceipt,
   type AuthKeyStatus,
 } from './key-port.js';
-import { renderContextBar } from './components/context-bar.js';
-import { loadingState, fixtureBadge } from './components/states.js';
+import { loadingState } from './components/states.js';
 import { statusChip } from './components/status-chip.js';
 import { button } from './components/button.js';
 import {
@@ -48,11 +47,7 @@ import type {
 } from './data/types.js';
 import { h, clear } from './dom.js';
 import { renderErrorBanner } from './errors.js';
-import {
-  SESSION_MODE_LABELS,
-  courseEditionLabel,
-} from './labels.js';
-import { evaluateLayout } from './layout.js';
+import { evaluateLayout, FONT_SCALE_STEPS } from './layout.js';
 import { EducationPageRegistry } from './pages/registry.js';
 import { createAccountPage } from './pages/account.js';
 import { createFirstRunPage } from './pages/first-run.js';
@@ -93,11 +88,9 @@ export interface EducationShellController {
 }
 
 const NAV_ITEMS = [
-  { path: '/home', label: '首页' },
-  { path: '/library', label: '教材库' },
-  { path: '/map', label: '地图' },
-  { path: '/workspace', label: '工作区' },
-  { path: '/records', label: '记录' },
+  { path: '/home', label: '今天' },
+  { path: '/workspace', label: '学习' },
+  { path: '/records', label: '进展' },
 ] as const;
 
 export class EducationShell {
@@ -113,7 +106,6 @@ export class EducationShell {
   private readonly api: EducationShellApi;
   private readonly services: EducationShellServices;
   private readonly navHost: HTMLElement;
-  private readonly contextHost: HTMLElement;
   private readonly toolsHost: HTMLElement;
   private readonly main: HTMLElement;
   private readonly pageHost: HTMLElement;
@@ -204,8 +196,7 @@ export class EducationShell {
       'data-font-scale': this.state.fontScale,
     });
     this.navHost = h('nav', { class: 'edu-nav', 'aria-label': '主导航', 'data-testid': 'edu-nav' });
-    this.contextHost = h('div', { 'data-testid': 'edu-context-host' });
-    this.toolsHost = h('div', { class: 'edu-header__tools', 'data-testid': 'edu-header-tools' });
+    this.toolsHost = h('div', { class: 'edu-topbar__tools', 'data-testid': 'edu-header-tools' });
     this.pageHost = h('div', { class: 'edu-main__inner', 'data-testid': 'page-host' });
     this.liveRegion = h('p', {
       class: 'edu-visually-hidden',
@@ -246,6 +237,7 @@ export class EducationShell {
   }
 
   private buildFrame(): void {
+    const doc = this.root.ownerDocument;
     const skip = h(
       'a',
       {
@@ -266,23 +258,28 @@ export class EducationShell {
         onclick: () => void this.navigate('/home'),
         'data-action': 'brand-home',
       },
-      h('span', { class: 'edu-brand__mark', 'aria-hidden': 'true' }, '育'),
-      h('span', {}, '生物学习'),
+      brandMark(doc),
+      h(
+        'span',
+        { class: 'edu-brand__text' },
+        '芽问',
+        h('small', {}, '生物学习'),
+      ),
     );
-    const top = h('div', { class: 'edu-header__top' }, brand, this.toolsHost);
-    const header = h('header', { class: 'edu-header' }, top, this.contextHost);
-    const layout = h(
-      'div',
-      { class: 'edu-layout' },
-      h('aside', { class: 'edu-sidebar' }, this.navHost),
-      this.main,
+    const top = h(
+      'header',
+      { class: 'edu-topbar', 'data-testid': 'edu-topbar' },
+      brand,
+      this.navHost,
+      this.toolsHost,
     );
+    const content = h('div', { class: 'edu-content' }, this.main);
     const footer = h(
       'footer',
       { class: 'edu-footer' },
-      h('p', {}, '学习记录只保存在这台电脑；智能反馈需要先配置模型服务。'),
+      h('p', {}, '学习记录只保存在这台电脑上。'),
     );
-    this.root.append(skip, header, layout, footer);
+    this.root.append(skip, top, content, footer);
     this.renderNav();
     this.renderHeaderTools();
     this.renderContext();
@@ -297,13 +294,12 @@ export class EducationShell {
         'button',
         {
           type: 'button',
-          class: 'edu-nav__link',
+          class: 'edu-tab',
           'aria-current': active ? 'page' : undefined,
           'data-nav-path': item.path,
           onclick: () => void this.navigate(item.path),
         },
-        h('span', {}, item.label),
-        active ? h('span', { class: 'edu-nav__current' }, '当前') : null,
+        item.label,
       );
       this.navHost.append(link);
     }
@@ -313,9 +309,9 @@ export class EducationShell {
     clear(this.toolsHost);
     const snapshot = this.state.snapshot;
     if (this.state.keyStatus === 'missing') {
-      const localMode = statusChip('本地模式', 'neutral');
+      const localMode = statusChip('未连接模型', 'attention');
       localMode.setAttribute('data-testid', 'local-mode-badge');
-      localMode.title = '未配置模型 Key；教材、地图与记录仍可在本机使用。';
+      localMode.title = '还没有配置模型 Key；教材和记录仍可离线使用。';
       this.toolsHost.append(localMode);
     }
     this.toolsHost.append(
@@ -323,60 +319,19 @@ export class EducationShell {
         'button',
         {
           type: 'button',
-          class: 'edu-account-link',
+          class: 'edu-settings-link',
           onclick: () => void this.navigate('/account'),
           'data-action': 'account-status',
-          title: '账户与模型服务状态分开显示；不包含凭据',
+          title: '设置：模型 Key、字号、数据与关于',
         },
-        h('span', {}, '账户与模型服务'),
-        snapshot === null
-          ? statusChip('状态读取中', 'neutral')
-          : snapshot.auth.apiKey.status === 'available'
-            ? statusChip('云推理可用', 'positive')
-            : statusChip('云推理不可用', 'attention'),
+        '设置',
       ),
     );
-    if (snapshot !== null && snapshot.fixture) this.toolsHost.append(fixtureBadge());
+    void snapshot;
   }
 
   private renderContext(): void {
-    const snapshot = this.state.snapshot;
-    const path = this.state.currentPath.split('?')[0] ?? '';
-    const routeQuery = queryOf(this.state.currentPath);
-    const routeMode =
-      path === '/workspace' &&
-      (routeQuery.get('mode') === 'learn' ||
-        routeQuery.get('mode') === 'review' ||
-        routeQuery.get('mode') === 'diagnostic')
-        ? (routeQuery.get('mode') as 'learn' | 'review' | 'diagnostic')
-        : null;
-    const routeConcept = path === '/workspace' ? routeQuery.get('concept') : null;
-    const active = this.state.resume?.session ?? this.state.home?.activeSession ?? null;
-    const conceptId = routeConcept ?? active?.conceptId ?? null;
-    const concept =
-      routeConcept !== null
-        ? (snapshot?.concepts.find((entry) => entry.id === routeConcept)?.title ?? routeConcept)
-        : (this.state.resume?.conceptTitle ??
-          (conceptId === null || snapshot === null
-            ? null
-            : (snapshot.concepts.find((entry) => entry.id === conceptId)?.title ?? null)));
-    const mode = routeMode ?? (active === null ? null : active.mode);
-    clear(this.contextHost);
-    this.contextHost.append(
-      renderContextBar({
-        courseEdition:
-          snapshot === null ? null : courseEditionLabel(snapshot.courseEdition),
-        packVersion: snapshot?.pack.version ?? null,
-        concept,
-        mode: mode === null ? null : SESSION_MODE_LABELS[mode],
-        saveState: this.state.saveState,
-        fixture: snapshot?.fixture ?? false,
-        backTarget: this.state.backTarget?.label ?? null,
-        onBack:
-          this.state.backTarget === null ? undefined : () => void this.back(),
-      }),
-    );
-    // The context bar is always visible; keep the page title in document metadata.
+    // 页头只保留品牌、三个主入口和设置；教材/概念/保存状态由各页面自己用学生话表达。
     const page = this.pages.resolve(this.state.currentPath.split('?')[0] ?? '');
     this.state.currentPageTitle = page?.title ?? '页面不存在';
   }
@@ -822,8 +777,28 @@ export class EducationShell {
 
   /** Debug/test-only layout budget for the current viewport. */
   layoutBudget(width: number, height: number): ReturnType<typeof evaluateLayout> {
-    return evaluateLayout(width, height, this.state.fontScale === 'large' ? 25 : 20);
+    return evaluateLayout(width, height, FONT_SCALE_STEPS[this.state.fontScale]);
   }
+}
+
+/** 芽问的芽形标记：内联 SVG，不引图标依赖。 */
+function brandMark(doc: Document): SVGSVGElement {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = doc.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('class', 'edu-brand__mark');
+  svg.setAttribute('aria-hidden', 'true');
+  const paths: readonly Record<string, string>[] = [
+    { d: 'M12 21v-6.2', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.9', 'stroke-linecap': 'round' },
+    { d: 'M12 14.8c0-3.4-2.6-5.6-6.2-5.6C5.6 12.9 8 15 12 14.8Z', fill: 'currentColor', opacity: '0.85' },
+    { d: 'M12 13.4c.3-3 2.6-4.9 5.8-4.9.2 3.3-2 5.2-5.8 4.9Z', fill: 'currentColor', opacity: '0.55' },
+  ];
+  for (const attrs of paths) {
+    const path = doc.createElementNS(ns, 'path');
+    for (const [name, value] of Object.entries(attrs)) path.setAttribute(name, value);
+    svg.append(path);
+  }
+  return svg;
 }
 
 function normalizePath(path: string): string {
@@ -869,6 +844,6 @@ export function mountEducationShell(
 }
 
 /** Width helper used by integration tests (not a pixel-measurement claim). */
-export function shellLayoutMode(width: number, height: number, baseFontPx = 20): string {
+export function shellLayoutMode(width: number, height: number, baseFontPx = 16): string {
   return evaluateLayout(width, height, baseFontPx).mode;
 }

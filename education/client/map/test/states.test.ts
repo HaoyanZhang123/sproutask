@@ -1,138 +1,124 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { buildDemoPayload, createMapModel, resumeTarget } from '../src/index.js';
 import {
-  buttonByAction,
+  chapterRow,
   cleanupMaps,
+  detailRoot,
   hasPercent,
   mountMap,
+  openConcept,
   textOf,
-  treeItem,
+  tick,
 } from './helpers.js';
 
 afterEach(cleanupMaps);
 
-async function tick(ms = 20): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function openChapter(container: HTMLElement, tocId: string): Promise<void> {
-  treeItem(container, tocId).click();
-  await tick();
-}
-
-async function openConcept(container: HTMLElement, tocId: string, conceptId: string): Promise<void> {
-  await openChapter(container, tocId);
-  container.querySelector<HTMLButtonElement>(`button[data-concept-id="${conceptId}"]`)?.click();
-  await tick(25);
-}
-
-function chipTestId(container: HTMLElement, id: string): string {
-  return (container.querySelector(`[data-testid="${id}"]`)?.textContent ?? '').replace(/\s+/g, ' ').trim();
-}
-
-describe('three-axis state, self report and aggregate honesty (A18/A12 L2)', () => {
-  it('shows learning, understanding and review as separate labels (reviewed but still needs support)', async () => {
-    const { container } = await mountMap();
-    await openConcept(container, 'toc.ch2', 'concept.photosynthesis');
-    const detail = container.querySelector<HTMLElement>('[data-testid="map-detail"]');
-    expect(detail?.dataset['conceptId']).toBe('concept.photosynthesis');
-    expect(chipTestId(container, 'detail-learning')).toContain('本轮已完成');
-    expect(chipTestId(container, 'detail-understanding')).toContain('需巩固');
-    // A18: a finished review with a wrong answer keeps both facts visible.
-    expect(chipTestId(container, 'detail-review-history')).toContain('复习完成 · 仍需巩固');
-    expect(chipTestId(container, 'detail-review-due')).toContain('待复习');
-    expect(textOf(detail as HTMLElement)).toContain('你的自评：不确定（学生自述，不算证据）');
-    expect(textOf(detail as HTMLElement)).toContain('证据：共 1 条');
+describe('four student states derived from the learner projection', () => {
+  it('maps learning + understanding + review to 在学 / 要再练 / 比较稳 / 还没开始 without inventing state', () => {
+    const model = createMapModel(buildDemoPayload('demo'));
+    const state = (conceptId: string): string => model.summary(conceptId).state;
+    // completed + supported + current evidence → 比较稳
+    expect(state('concept.cell')).toBe('steady');
+    // completed but only 初步理解 → still 在学
+    expect(state('concept.cell-structure')).toBe('now');
+    // started but no judgement yet → 在学
+    expect(state('concept.cell-division')).toBe('now');
+    expect(state('concept.organism')).toBe('steady');
+    // understanding needs support (or last review needs support) → 要再练
+    expect(state('concept.photosynthesis')).toBe('weak');
+    // never touched → 还没开始
+    expect(state('concept.respiration')).toBe('todo');
+    // stale evidence never becomes 比较稳
+    expect(state('concept.ecosystem')).toBe('now');
+    for (const concept of model.payload.concepts) {
+      const summary = model.summary(concept.id);
+      expect(summary.stateLabel).toBe(
+        { now: '在学', weak: '要再练', steady: '比较稳', todo: '还没开始' }[summary.state],
+      );
+    }
   });
 
-  it('labels stale evidence instead of presenting a strong state as current', async () => {
-    const { container } = await mountMap();
-    expect(chipTestId(container, 'detail-understanding')).toContain('初步理解');
-    expect(chipTestId(container, 'detail-understanding')).toContain('已过期');
-    expect(textOf(container)).toContain('证据：共 1 条');
+  it('finds the concept with the newest local activity even if the source hint is stale', () => {
+    const payload = { ...buildDemoPayload('demo'), initialConceptId: 'concept.cell', initialTocNodeId: 'toc.ch1' };
+    const model = createMapModel(payload);
+    const target = resumeTarget(payload, model.toc);
+    // cell-division was started most recently (2026-10-29) and has an open session
+    expect(target?.conceptId).toBe('concept.cell-division');
+    expect(target?.chapterId).toBe('toc.ch1');
+    expect(target?.title).toBe('细胞分裂');
   });
 
-  it('marks candidate content and disables strong claims', async () => {
-    const { container } = await mountMap({ scenario: 'candidate' });
-    expect(container.querySelector('[data-testid="map-candidate-banner"]')).not.toBeNull();
-    await openConcept(container, 'toc.ch2', 'concept.photosynthesis');
-    const understanding = chipTestId(container, 'detail-understanding');
-    expect(understanding).toContain('候选内容禁用强结论');
-    expect(understanding).not.toContain('需巩固');
-    expect(container.querySelector('[data-testid="map-candidate-claim-warning"]')).not.toBeNull();
-    expect(textOf(container)).toContain('候选概念 7 个（单列，不进入正式分母）');
-    expect(textOf(container)).toContain('已学 0 / 可学习 0');
-  });
-
-  it('keeps the formal denominator deduplicated and shows no mastery percentage', async () => {
+  it('shows the same four states as chips in the overview, tied to each chapter', async () => {
     const { container } = await mountMap();
-    expect(textOf(container)).toContain('活动覆盖（按去重概念计数）：已学 5 / 可学习 7');
-    expect(textOf(container)).toContain('部分内容（未覆盖全册）');
-    expect(textOf(container)).not.toContain('掌握率');
+    const stateOf = (chapterId: string, conceptId: string): string | null =>
+      chapterRow(container, chapterId)
+        .querySelector(`button.edu-map-chip[data-concept-id="${conceptId}"]`)
+        ?.getAttribute('data-state') ?? null;
+    expect(stateOf('toc.ch1', 'concept.cell')).toBe('steady');
+    expect(stateOf('toc.ch1', 'concept.cell-structure')).toBe('now');
+    expect(stateOf('toc.ch1', 'concept.cell-division')).toBe('now');
+    expect(stateOf('toc.ch2', 'concept.photosynthesis')).toBe('weak');
+    expect(stateOf('toc.ch2', 'concept.respiration')).toBe('todo');
+    expect(stateOf('toc.ch3', 'concept.ecosystem')).toBe('now');
+    expect(textOf(container)).toContain('还没开始');
     expect(hasPercent(textOf(container))).toBe(false);
-    // 8 placements but 7 distinct concepts; the tree badge already proves dedupe.
-    expect(treeItem(container, 'toc.volume').dataset['label']).toContain('7 个概念');
   });
 
-  it('does not treat browsing or opening a page as learning progress', async () => {
+  it('opens a 要再练 concept with 先复习 as the primary action', async () => {
     const { container } = await mountMap();
+    const detail = await openConcept(container, 'toc.ch2', 'concept.photosynthesis');
+    expect(detail.getAttribute('data-state')).toBe('weak');
+    expect(textOf(detail)).toContain('要再练');
+    const review = detail.querySelector<HTMLButtonElement>('button[data-action="start-review"]');
+    const learn = detail.querySelector<HTMLButtonElement>('button[data-action="start-learn"]');
+    expect(review?.className).toContain('edu-button--primary');
+    expect(learn?.className).not.toContain('edu-button--primary');
+    expect(review?.getAttribute('data-route')).toBe(
+      '/workspace?mode=review&concept=concept.photosynthesis',
+    );
+    // due review stays visible as its own fact
+    expect(textOf(detail)).toContain('待复习');
+  });
+
+  it('keeps 还没开始 honest and starts learning from the detail card', async () => {
+    const { container } = await mountMap();
+    const detail = await openConcept(container, 'toc.ch2', 'concept.respiration');
+    expect(detail.getAttribute('data-state')).toBe('todo');
+    expect(textOf(detail)).toContain('还没开始');
+    expect(textOf(detail)).toContain('课本第 28 页');
+    expect(textOf(detail)).toContain('未核实');
+    const learn = detail.querySelector<HTMLButtonElement>('button[data-action="start-learn"]');
+    expect(learn?.className).toContain('edu-button--primary');
+    expect(learn?.getAttribute('data-route')).toBe(
+      '/workspace?mode=learn&concept=concept.respiration',
+    );
+  });
+
+  it('marks candidate content as 未核实 and never shows a strong state', async () => {
+    const { container } = await mountMap({ scenario: 'candidate' });
+    expect(textOf(container)).toContain('候选内容（未核实）');
+    expect(container.querySelector('[data-testid="map-candidate-banner"]')?.textContent).toContain(
+      '候选内容还没核实',
+    );
+    expect(container.querySelectorAll('button.edu-map-chip[data-state="steady"]')).toHaveLength(0);
+    expect(container.querySelectorAll('button.edu-map-chip[data-state="weak"]')).toHaveLength(0);
+    const ch2 = chapterRow(container, 'toc.ch2');
+    expect(textOf(ch2)).toContain('已学 2 / 3');
+    const detail = await openConcept(container, 'toc.ch2', 'concept.photosynthesis');
+    expect(detail.getAttribute('data-state')).toBe('now');
+    expect(textOf(detail)).toContain('未核实');
+  });
+
+  it('browsing the map never turns into learning progress', async () => {
+    const { container } = await mountMap();
+    const before = textOf(container);
     await openConcept(container, 'toc.ch2', 'concept.respiration');
-    expect(chipTestId(container, 'detail-learning')).toContain('未开始');
-    expect(chipTestId(container, 'detail-understanding')).toContain('尚无足够证据');
-    // browse other chapters and come back: no state is invented
-    await openChapter(container, 'toc.ch1');
-    await openChapter(container, 'toc.ch2');
-    await openConcept(container, 'toc.ch2', 'concept.respiration');
-    expect(chipTestId(container, 'detail-learning')).toContain('未开始');
-    expect(textOf(container)).toContain('活动覆盖（按去重概念计数）：已学 5 / 可学习 7');
-  });
-
-  it('filters by state and offers a clear-filter action when nothing matches', async () => {
-    const { container } = await mountMap();
-    await openChapter(container, 'toc.ch2');
-    container.querySelector<HTMLButtonElement>('button[data-filter="needs_support"]')?.click();
     await tick(5);
-    const nodes = [...container.querySelectorAll<HTMLElement>('button.edu-map-node')];
-    expect(nodes.map((node) => node.dataset['conceptId'])).toEqual(['concept.photosynthesis']);
-
-    container.querySelector<HTMLButtonElement>('button[data-view-mode="concepts"]')?.click();
+    expect(textOf(detailRoot(container) as HTMLElement)).toContain('还没开始');
+    container.querySelector<HTMLButtonElement>('button[data-action="back-overview"]')?.click();
     await tick(5);
-    expect(
-      [...container.querySelectorAll<HTMLElement>('[data-testid="map-concept-list"] li')],
-    ).toHaveLength(1);
-
-    await openChapter(container, 'toc.ch3');
-    container.querySelector<HTMLButtonElement>('button[data-filter="needs_support"]')?.click();
-    await tick(5);
-    container.querySelector<HTMLButtonElement>('button[data-view-mode="graph"]')?.click();
-    await tick(5);
-    expect(container.querySelector('[data-testid="map-graph-filtered-empty"]')).not.toBeNull();
-    buttonByAction(container, 'clear-filter').click();
-    await tick(5);
-    expect(container.querySelector('[data-testid="map-graph-filtered-empty"]')).toBeNull();
-    expect(container.querySelectorAll('button.edu-map-node').length).toBeGreaterThan(0);
-  });
-
-  it('searches by alias, keeps the keyword and locates the matching chapter', async () => {
-    const { container } = await mountMap();
-    const input = container.querySelector<HTMLInputElement>('[data-testid="map-search-input"]');
-    expect(input).not.toBeNull();
-    if (input === null) return;
-    input.value = 'cell';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    buttonByAction(container, 'search').click();
-    await tick(25);
-    const results = container.querySelector<HTMLElement>('[data-testid="map-search-results"]');
-    expect(results?.textContent).toContain('细胞');
-    expect(results?.textContent).toContain('命中别名');
-    (results?.querySelector('button') as HTMLButtonElement).click();
-    await tick(30);
-    expect(
-      container.querySelector('[data-testid="map-detail"]')?.getAttribute('data-concept-id'),
-    ).toBe('concept.cell');
-    const after = container.querySelector<HTMLInputElement>('[data-testid="map-search-input"]');
-    expect(after?.value).toBe('cell');
-    buttonByAction(container, 'clear-search').click();
-    await tick(5);
-    expect(container.querySelector('[data-testid="map-search-results"]')).toBeNull();
+    expect(textOf(container)).toContain('已学 6 / 7 个概念');
+    expect(textOf(container)).not.toMatch(/掌握|覆盖率|%/);
+    expect(before).toContain('2 个单元 · 3 章 · 5 节 · 7 个概念');
   });
 });

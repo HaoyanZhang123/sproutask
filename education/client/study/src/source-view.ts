@@ -61,8 +61,11 @@ export function openSourcePopover(
       h(
         'p',
         { class: 'edu-inline-actions' },
-        statusChip(VERIFICATION_LABELS[source.verification], source.verification === 'human_checked' ? 'positive' : 'attention'),
-        h('span', { class: 'edu-muted' }, `来源：${source.label}`),
+        statusChip(
+          VERIFICATION_LABELS[source.verification],
+          source.verification === 'human_checked' ? 'positive' : 'attention',
+        ),
+        h('span', { class: 'edu-muted' }, `这一处是${sourceKindLabel(source)}`),
       ),
       h(
         'p',
@@ -73,4 +76,11 @@ export function openSourcePopover(
   }
   const modal = new Modal('出处', content, '关闭出处');
   modal.open(trigger, parent);
+}
+
+/** 数据里的 label 末尾可能带内部标识；这里只留学生能看懂的那一段。 */
+function sourceKindLabel(source: StudySource): string {
+  const head = source.label.split('·')[0]?.trim() ?? '';
+  const looksInternal = /^[A-Za-z0-9._-]+$/.test(head) && head.includes('.');
+  return head.length > 0 && !looksInternal ? head : '课本正文';
 }

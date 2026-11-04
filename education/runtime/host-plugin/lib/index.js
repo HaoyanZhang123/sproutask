@@ -15871,10 +15871,10 @@ var PageRegistry = class {
 // runtime/src/runtime-composition.ts
 var MESSAGES2 = {
   "app.title": "\u82BD\u95EE",
-  "nav.library": "\u6559\u6750\u5E93",
-  "nav.map": "\u5730\u56FE",
-  "nav.workspace": "\u5DE5\u4F5C\u533A",
-  "nav.records": "\u8BB0\u5F55",
+  "nav.library": "\u6211\u7684\u8BFE\u672C",
+  "nav.map": "\u77E5\u8BC6\u5730\u56FE",
+  "nav.workspace": "\u5B66\u4E60",
+  "nav.records": "\u8FDB\u5C55",
   "status.localFirst": "\u5B66\u4E60\u8BB0\u5F55\u4FDD\u5B58\u5728\u672C\u673A",
   "status.fixture": "\u5F00\u53D1\u9636\u6BB5\u4F7F\u7528\u793A\u4F8B\u6570\u636E",
   "auth.apiKeyConfigured": "API Key \u5DF2\u914D\u7F6E",
@@ -16080,12 +16080,12 @@ async function composeEducationRuntime(options) {
   });
   const pages = new PageRegistry();
   const pageSpecs = [
-    ["home", "/", "\u9996\u9875"],
-    ["library", "/library", "\u6559\u6750\u5E93"],
-    ["map", "/map", "\u5730\u56FE"],
-    ["workspace", "/workspace", "\u5DE5\u4F5C\u533A"],
-    ["records", "/records", "\u8BB0\u5F55"],
-    ["account", "/account", "\u8D26\u6237"]
+    ["home", "/", "\u4ECA\u5929"],
+    ["library", "/library", "\u6211\u7684\u8BFE\u672C"],
+    ["map", "/map", "\u77E5\u8BC6\u5730\u56FE"],
+    ["workspace", "/workspace", "\u5B66\u4E60"],
+    ["records", "/records", "\u8FDB\u5C55"],
+    ["account", "/account", "\u8BBE\u7F6E"]
   ];
   for (const [id, route, title] of pageSpecs) {
     pages.register({

@@ -22,18 +22,22 @@ import {
 afterEach(cleanupShells);
 
 describe('tokens, readable layout and keyboard accessibility', () => {
-  it('defines a 20px base with rem type and a visible focus ring', () => {
-    expect(remToPx(1.25, 16)).toBe(20);
-    expect(FONT_SCALE_STEPS.standard).toBe(20);
-    expect(FONT_SCALE_STEPS.large).toBe(25);
-    expect(DESIGN_TOKENS.baseFontSize).toBe('1.25rem');
+  it('defines a 16px base with rem type and a visible focus ring', () => {
+    expect(remToPx(1, 16)).toBe(16);
+    expect(FONT_SCALE_STEPS.standard).toBe(16);
+    expect(FONT_SCALE_STEPS.large).toBe(20);
+    expect(DESIGN_TOKENS.baseFontSize).toBe('1rem');
     expect(educationStyles).toContain('--edu-focus-ring: 3px solid');
     expect(educationStyles).toContain(':focus-visible');
     for (const match of educationStyles.matchAll(/font-size:\s*([^;]+);/g)) {
       const value = (match[1] ?? '').trim();
       expect(value, value).not.toMatch(/\d+px/);
       expect(
-        value.endsWith('rem') || value.endsWith('em') || value.startsWith('var(') || value === 'inherit',
+        value.endsWith('rem') ||
+          value.endsWith('em') ||
+          value.startsWith('var(') ||
+          value.startsWith('clamp(') ||
+          value === 'inherit',
         value,
       ).toBe(true);
     }
@@ -44,21 +48,21 @@ describe('tokens, readable layout and keyboard accessibility', () => {
       [1280, 800],
       [1440, 900],
     ] as const) {
-      const budget = evaluateLayout(width, height, 20);
+      const budget = evaluateLayout(width, height, 16);
       expect(budget.fits, `${width}x${height}`).toBe(true);
       expect(budget.horizontalOverflow, `${width}x${height}`).toBe(false);
-      expect(budget.mode).toBe('sidebar');
+      expect(budget.mode).toBe('wide');
       expect(budget.contentWidthPx).toBeGreaterThanOrEqual(budget.minContentWidthPx);
     }
-    const narrow = evaluateLayout(1024, 768, 20);
-    expect(narrow.mode).toBe('stacked');
+    const narrow = evaluateLayout(1024, 768, 16);
+    expect(narrow.mode).toBe('compact');
     expect(narrow.fits).toBe(true);
-    const largeText = evaluateLayout(1280, 800, 25);
+    const largeText = evaluateLayout(1280, 800, 20);
     expect(largeText.fits).toBe(true);
     expect(largeText.horizontalOverflow).toBe(false);
-    expect(educationStyles).toContain('grid-template-columns: minmax(0, 1fr)');
     expect(educationStyles).toContain('min-width: 0');
     expect(educationStyles).toContain('overflow-wrap: anywhere');
+    expect(educationStyles).toContain('.edu-topbar');
   });
 
   it('uses landmarks, a skip link, native controls and a live region', async () => {

@@ -6,10 +6,7 @@ import { button } from '../components/button.js';
 import { notice, offlineNotice } from '../components/states.js';
 import { statusChip } from '../components/status-chip.js';
 import { renderErrorBanner } from '../errors.js';
-import {
-  courseEditionLabel,
-  formatDateTime,
-} from '../labels.js';
+import { courseEditionLabel } from '../labels.js';
 import { definePage, pageHeading } from './common.js';
 
 type ScopeChoice = 'selected' | 'all_unlearned' | 'uncertain';
@@ -50,27 +47,9 @@ export function createFirstRunPage(): EducationPage {
       container.append(
         notice({
           tone: 'info',
-          title: '关于保存与云端服务',
-          body: '学习记录保存在这台电脑。智能反馈需要已配置的模型服务；使用云端反馈时，相关作答和所选材料可能发送到该服务。不能把全部数据说成从不离机。',
+          title: '记录在这台电脑，讲解来自云端',
+          body: '学习记录保存在这台电脑。需要智能反馈时，当前题目、作答和必要的材料片段会发给模型服务；不会上传整本教材。',
         }),
-      );
-
-      container.append(
-        h(
-          'section',
-          { class: 'edu-section' },
-          h('h2', { class: 'edu-section__title' }, '你的本地学习身份'),
-          h(
-            'div',
-            { class: 'edu-card' },
-            h('p', { class: 'edu-card__title' }, `本地匿名档案：${snapshot.learner.id}`),
-            h(
-              'p',
-              { class: 'edu-card__meta' },
-              `创建于 ${formatDateTime(snapshot.learner.createdAt)}。这不是平台模型账号；模型服务连接状态单独显示，切换模型账号不会删除学情。`,
-            ),
-          ),
-        ),
       );
 
       const textbook = h(
@@ -81,15 +60,11 @@ export function createFirstRunPage(): EducationPage {
           'div',
           { class: 'edu-card' },
           h('p', { class: 'edu-card__title' }, courseLabel),
-          h(
-            'p',
-            { class: 'edu-card__meta' },
-            `内容包版本 ${snapshot.pack.version} · ${snapshot.pack.scope === 'partial' ? '部分内容' : '全册范围'} · 审校状态：${snapshot.fixture ? '合成 fixture（非真实版本）' : snapshot.pack.status}`,
-          ),
+          h('p', { class: 'edu-card__meta' }, '内容按课本整理；原文只保存在这台电脑上。'),
           h(
             'div',
             { class: 'edu-inline-actions' },
-            button('去教材库选择匹配教材', () => void api.navigate('/library'), { small: true }),
+            button('换一本教材', () => void api.navigate('/library'), { small: true }),
           ),
         ),
       );
@@ -116,7 +91,7 @@ export function createFirstRunPage(): EducationPage {
           updateHint();
         });
         conceptCheckboxes.append(
-          h('label', { class: 'edu-choice' }, input, h('span', {}, `${concept.title}（${concept.id}）`)),
+          h('label', { class: 'edu-choice' }, input, h('span', {}, concept.title)),
         );
       }
 
@@ -124,10 +99,10 @@ export function createFirstRunPage(): EducationPage {
       const updateHint = (value: ScopeChoice = scope): void => {
         hint.textContent =
           value === 'selected'
-            ? `已选择 ${selected.size} 个概念。这是学生自述，不会自动标记为已理解。`
+            ? `已选了 ${selected.size} 个概念。之后随时能改。`
             : value === 'all_unlearned'
-              ? '全未学：学习建议会从尚无证据的概念开始；不会自动生成理解判断。'
-              : '暂不确定：可以先看地图，之后随时修改范围。';
+              ? '从还没学过的概念开始推荐；以后可以改。'
+              : '先看地图，之后随时能改。';
       };
       updateHint();
 
@@ -139,11 +114,11 @@ export function createFirstRunPage(): EducationPage {
           'data-testid': 'first-run-range-form',
           onsubmit: (event: Event) => event.preventDefault(),
         },
-        h('h2', { class: 'edu-section__title' }, '我学过的范围（自述）'),
+        h('h2', { class: 'edu-section__title' }, '你之前学过哪些？（可选）'),
         h(
           'p',
           { class: 'edu-section__lead' },
-          '可以选择部分概念、全未学或暂不确定。这个选择用于推荐起点，不是理解证据，也不会一键把内容标为已掌握。',
+          '选你学过的概念，或者“全未学 / 暂不确定”。选它只是用来推荐从哪开始，不会当作已经学会。',
         ),
         h(
           'div',
@@ -175,8 +150,8 @@ export function createFirstRunPage(): EducationPage {
                   status.replaceChildren(
                     notice({
                       tone: 'warning',
-                      title: '还不能保存',
-                      body: '请至少选择一个概念；也可以选择“全未学”或“暂不确定”。',
+                      title: '还没选概念',
+                      body: '请至少选一个；也可以选“全未学”或“暂不确定”。',
                     }),
                   );
                   return;
@@ -187,12 +162,12 @@ export function createFirstRunPage(): EducationPage {
                   diagnosticSkipped: state.diagnosticSkipped,
                 });
                 if (result.ok) {
-                  savedMessage = `已保存为自述范围（${result.data.range.conceptIds.length} 个概念）。它不会自动标记为已理解；之后可以修改。`;
+                  savedMessage = `已记下 ${result.data.range.conceptIds.length} 个概念。之后可以改，不会当作已经学会。`;
                   status.replaceChildren(
                     notice({
                       tone: 'info',
-                      title: '自述范围已保存',
-                      body: `${savedMessage}${result.data.diagnosticSuggested ? ' 建议先看地图，或做一次短诊断获得初步证据。' : ''}`,
+                      title: '记下了',
+                      body: `${savedMessage}${result.data.diagnosticSuggested ? ' 要不要顺手做一次短诊断？' : ''}`,
                     }),
                   );
                 } else {
@@ -228,24 +203,18 @@ export function createFirstRunPage(): EducationPage {
         role: 'status',
         'aria-live': 'polite',
         'data-testid': 'first-run-diagnostic-status',
-        text: state.diagnosticSkipped
-          ? '已跳过诊断；不会生成理解判断，也不会把跳过记为完成。'
-          : '',
+        text: state.diagnosticSkipped ? '已跳过；不影响后面的学习。' : '',
       });
       const diagnostic = h(
         'section',
         { class: 'edu-section', 'data-testid': 'first-run-diagnostic' },
-        h('h2', { class: 'edu-section__title' }, '短诊断（可选）'),
+        h('h2', { class: 'edu-section__title' }, '要不要做一次短诊断？（可选）'),
         h(
           'p',
           { class: 'edu-section__lead' },
-          `当前内容包有 ${activityCount} 个可用活动。短诊断只覆盖你选择的范围，题数来自实际可用活动，开始前可见；可随时结束，未测部分保持“尚无足够证据”。`,
+          `有 ${activityCount} 道题可用。短诊断只看你选的范围，随时可以停；没测到的不会当成学会。`,
         ),
-        h(
-          'p',
-          { class: 'edu-muted' },
-          '诊断不是使用门槛：跳过、失败或中止都不会锁住学习，也不会伪造已掌握。',
-        ),
+        h('p', { class: 'edu-muted' }, '跳过也没关系，不影响后面学习。'),
         h(
           'div',
           { class: 'edu-inline-actions' },
@@ -262,7 +231,7 @@ export function createFirstRunPage(): EducationPage {
             '跳过诊断',
             () => {
               api.setDiagnosticSkipped(true);
-              diagnosticStatus.textContent = '已跳过诊断；不会生成理解判断，也不会把跳过记为完成。';
+              diagnosticStatus.textContent = '已跳过；不影响后面的学习。';
             },
           ),
           button('先看地图', () => void api.navigate('/map')),
@@ -274,23 +243,23 @@ export function createFirstRunPage(): EducationPage {
       const modelStatus = h(
         'section',
         { class: 'edu-section' },
-        h('h2', { class: 'edu-section__title' }, '模型服务'),
+        h('h2', { class: 'edu-section__title' }, '智能反馈'),
         snapshot.auth.apiKey.status === 'available' || state.keyStatus === 'configured'
           ? h(
               'div',
               { class: 'edu-card' },
-              statusChip('API Key 已配置', 'positive'),
-              h('p', { class: 'edu-card__meta' }, '云推理可用。学生身份与模型账号分别管理。'),
+              statusChip('已连接', 'positive'),
+              h('p', { class: 'edu-card__meta' }, '可以用小芽讲解、批改和追问。'),
             )
           : h(
               'div',
               { class: 'edu-card' },
-              statusChip('API Key 未配置', 'attention'),
-              h('p', { class: 'edu-card__meta' }, '可读本地内容、保存自述范围与草稿；云推理不可用。'),
+              statusChip('还没有连接', 'attention'),
+              h('p', { class: 'edu-card__meta' }, '现在可以读教材、选范围；连上之后才有讲解和批改。'),
               h(
                 'div',
                 { class: 'edu-inline-actions' },
-                button('查看账户与模型服务', () => void api.navigate('/account'), { small: true }),
+                button('去设置', () => void api.navigate('/account'), { small: true }),
               ),
             ),
       );

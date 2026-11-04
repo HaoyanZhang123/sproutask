@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Framework-agnostic DOM study/review workspace: material reading, activity state machine with draft persistence, teaching help/disclosure, review range, feedback and three-axis summary. Reuses the T08 shell, T11 visuals and T10 state labels.",
+  "description": "Framework-agnostic DOM study desk: one spread with a textbook page and a work page, in-place feedback after grading, and a floating sprout assistant sheet. Keeps draft persistence, the activity state machine, review range, image answers and the shell/visuals seams.",
   "license": "UNLICENSED",
   "sideEffects": false,
   "main": "./src/index.ts",

@@ -1,6 +1,9 @@
 /**
  * Library controller: owns view state shared by the page and its two panels.
  * It never decides whether content is a baseline; that is a server match result.
+ *
+ * The page follows one rule: 一页只说一件事 —— 现在用的是哪本、哪一版、内容从哪来、
+ * 能不能用。内部术语只留在代码里，不上屏。
  */
 
 import type { ImportJob, RequestContext, ServiceError } from '@edu/domain';
@@ -26,7 +29,13 @@ import {
   formatLocalTime,
   stageStateLabel,
 } from './labels.js';
-import { bookCard, candidateBanner, fixtureNotice, selectedFileCard, sourceListItem } from './components.js';
+import {
+  bookChooser,
+  bookHero,
+  selectedFileCard,
+  sourceListItem,
+  trialBanner,
+} from './components.js';
 import { canCancel, canResume, canRetry, reduceJobUpdate } from './job-model.js';
 import type {
   ImportMatch,
@@ -50,9 +59,11 @@ interface LibraryState {
   booksError: ServiceError | null;
   offline: boolean;
   selectedBookId: string | null;
+  chooserOpen: boolean;
   sources: readonly SourceListItem[];
   sourcesLoading: boolean;
   sourcesError: ServiceError | null;
+  sourcesOpen: boolean;
   selectedFile: SelectedFile | null;
   metadataDraft: MetadataDraft | null;
   job: ImportJob | null;
@@ -72,9 +83,11 @@ export class LibraryController {
     booksError: null,
     offline: false,
     selectedBookId: null,
+    chooserOpen: false,
     sources: [],
     sourcesLoading: false,
     sourcesError: null,
+    sourcesOpen: false,
     selectedFile: null,
     metadataDraft: null,
     job: null,
@@ -169,6 +182,11 @@ export class LibraryController {
   }
 
   async selectBook(bookId: string): Promise<void> {
+    if (this.state.selectedBookId === bookId && this.state.sources.length > 0) {
+      this.state.selectedBookId = bookId;
+      this.notify();
+      return;
+    }
     this.state.selectedBookId = bookId;
     this.state.sources = [];
     this.state.sourcesError = null;
@@ -191,6 +209,44 @@ export class LibraryController {
     }
     this.state.sources = result.data;
     this.notify();
+  }
+
+  /** 换一本：只切换当前课本，不猜测、不合并。 */
+  chooseBook(book: LibraryBook): void {
+    this.state.chooserOpen = false;
+    void this.selectBook(book.id);
+  }
+
+  toggleChooser(): void {
+    this.state.chooserOpen = !this.state.chooserOpen;
+    this.notify();
+    this.focusInContent('[data-action="switch-book"]');
+  }
+
+  toggleSources(): void {
+    this.state.sourcesOpen = !this.state.sourcesOpen;
+    this.notify();
+    this.focusInContent('[data-action="toggle-sources"]');
+  }
+
+  /** 主按钮“用这本开始”：候选课本先要一次显式确认，然后进入地图。 */
+  startCurrentBook(book: LibraryBook, trigger: HTMLElement): void {
+    if (book.materialState === 'unavailable') return;
+    if (book.materialState === 'candidate' && this.state.candidateTrialBookId !== book.id) {
+      this.startCandidateTrial(book, trigger);
+      return;
+    }
+    this.state.selectedBookId = book.id;
+    this.navigate?.('/map');
+  }
+
+  /** 次按钮“导入新的”：沿用既有导入流程，接着走选择文件与元数据确认。 */
+  openImportPanel(): void {
+    const run = async (): Promise<void> => {
+      if (this.state.job === null && this.state.selectedFile === null) await this.chooseFile();
+      this.focusImportPanel();
+    };
+    void run();
   }
 
   async chooseFile(): Promise<void> {
@@ -232,7 +288,7 @@ export class LibraryController {
     if (file === null || draft === null || this.state.jobBusy) return;
     const pageCount = draft.pageCount.trim() === '' ? null : Number(draft.pageCount);
     if (pageCount !== null && (!Number.isInteger(pageCount) || pageCount <= 0)) {
-      this.state.actionNotice = '页数需要是正整数；没有开始导入。';
+      this.state.actionNotice = '页数要填正整数；这次没有开始导入。';
       this.notify();
       return;
     }
@@ -303,7 +359,7 @@ export class LibraryController {
       this.state.importError = result.error;
     } else {
       this.state.job = result.data;
-      this.state.actionNotice = '已取消导入；取消后到达的迟到结果不会写入教材或学习记录。';
+      this.state.actionNotice = '已取消导入；取消之后才回来的结果不会写进课本或学习记录。';
     }
     this.notify();
   }
@@ -319,7 +375,7 @@ export class LibraryController {
       this.state.importError = result.error;
     } else {
       this.state.job = result.data;
-      this.state.actionNotice = '已恢复同一导入任务；不会重复建书。';
+      this.state.actionNotice = '已接着上次的导入继续，不会重复建一本。';
     }
     this.notify();
   }
@@ -335,7 +391,7 @@ export class LibraryController {
       this.state.importError = result.error;
     } else {
       this.state.job = result.data;
-      this.state.actionNotice = '已重试失败阶段；不会重复记录已完成页。';
+      this.state.actionNotice = '已重试出错的那一步；做过的页面不会重复记。';
     }
     this.notify();
   }
@@ -355,21 +411,22 @@ export class LibraryController {
 
   startCandidateTrial(book: LibraryBook, trigger: HTMLElement): void {
     const dialog = new ConfirmDialog({
-      title: '以候选身份试用（未核实）',
-      tone: 'danger',
-      acknowledgement: '我了解候选内容未核实，不能作为基准或强掌握结论。',
+      title: '先试看这本',
+      tone: 'default',
+      acknowledgement: '我知道这本还没核对过，只能当参考。',
       impact: [
-        '候选身份会贯穿地图、阅读与反馈；界面持续显示“候选（未核实）”。',
-        '不会因为点击确认就把候选变成已审校基准。',
-        '可以随时退出候选试用，回到已核实材料。',
+        '试看时页面会一直提示这本还没核对，结论也会更保守。',
+        '点了确认也不会把它变成已经核对过的课本。',
+        '随时可以退出试看，换回核对过的课本。',
       ],
-      confirmLabel: '确认以候选身份试用',
+      confirmLabel: '开始试看',
       onConfirm: () => {
         this.state.candidateTrialBookId = book.id;
         this.state.selectedBookId = book.id;
-        this.state.actionNotice = '已进入候选试用；强结论仍被禁用，候选标识不会消失。';
+        this.state.chooserOpen = false;
         this.notify();
         void this.loadSources(book.id);
+        this.navigate?.('/map');
       },
     });
     const parent = this.contentContainer ?? trigger.parentElement ?? trigger.ownerDocument.body;
@@ -378,7 +435,6 @@ export class LibraryController {
 
   exitCandidateTrial(): void {
     this.state.candidateTrialBookId = null;
-    this.state.actionNotice = '已退出候选试用。';
     this.notify();
     const baseline = this.state.books.find((book) => book.materialState === 'baseline');
     if (baseline !== undefined) void this.selectBook(baseline.id);
@@ -398,21 +454,42 @@ export class LibraryController {
     this.reader.open(this.state.sources, index < 0 ? 0 : index, trigger, this.contentContainer);
   }
 
+  private currentBook(): LibraryBook | null {
+    const id = this.state.selectedBookId;
+    const found = id === null ? null : this.state.books.find((book) => book.id === id) ?? null;
+    return found ?? this.state.books[0] ?? null;
+  }
+
   private notify(): void {
     for (const renderer of this.renderers) renderer();
+  }
+
+  private focusInContent(selector: string): void {
+    const container = this.contentContainer;
+    if (container === null) return;
+    container.querySelector<HTMLElement>(selector)?.focus();
+  }
+
+  private focusImportPanel(): void {
+    const container = this.importContainer;
+    if (container === null) return;
+    container.querySelector<HTMLElement>('[data-testid="library-import-heading"]')?.focus();
+    if (typeof container.scrollIntoView === 'function') {
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   private renderContent(): void {
     const container = this.contentContainer;
     if (container === null) return;
     clear(container);
-    const root = h('div', { class: 'edu-lib', 'data-testid': 'library-content-panel' });
-    root.append(fixtureNotice(this.options.dataSource.notice ?? '演示数据（fixture）'));
+    const root = h('div', { class: 'edu-lib__content', 'data-testid': 'library-content-panel' });
+
     if (this.state.candidateTrialBookId !== null) {
-      root.append(candidateBanner(() => this.exitCandidateTrial()));
+      root.append(trialBanner(() => this.exitCandidateTrial()));
     }
     if (this.state.booksLoading) {
-      root.append(loadingState({ title: '正在读取教材库…', body: '不会显示虚构的教材或进度。' }));
+      root.append(loadingState({ title: '正在看这台电脑上的课本…', body: '没读到之前不会显示任何课本。' }));
       container.append(root);
       return;
     }
@@ -420,22 +497,23 @@ export class LibraryController {
       root.append(
         renderErrorBanner(this.state.booksError, {
           onRetry: () => void this.ensureBooks(true),
-          backLabel: '返回首页',
+          backLabel: '回到今天',
           onBack: () => this.navigate?.('/home'),
         }),
       );
       container.append(root);
       return;
     }
-    if (this.state.books.length === 0) {
+    const current = this.currentBook();
+    if (current === null) {
       root.append(
         emptyState({
-          title: '还没有可用教材',
-          body: '先选择本地 PDF 或连接已有教材；不会生成空壳全册地图。',
+          title: '还没有课本',
+          body: '先选一个本地 PDF，把正在用的那本放进来；不会凭空生成一本空课本。',
           testId: 'library-empty',
           actions: [
             { label: '选择本地 PDF', onClick: () => void this.chooseFile(), tone: 'primary' },
-            { label: '查看记录', onClick: () => this.navigate?.('/records') },
+            { label: '看看记录', onClick: () => this.navigate?.('/records') },
           ],
         }),
       );
@@ -443,103 +521,108 @@ export class LibraryController {
       return;
     }
 
-    const groups: readonly { title: string; state: LibraryBook['materialState']; books: readonly LibraryBook[] }[] = [
-      { title: '本期匹配基准', state: 'baseline', books: this.state.books.filter((book) => book.materialState === 'baseline') },
-      { title: '待核实候选', state: 'candidate', books: this.state.books.filter((book) => book.materialState === 'candidate') },
-      { title: '不可用材料', state: 'unavailable', books: this.state.books.filter((book) => book.materialState === 'unavailable') },
-    ];
-    for (const group of groups) {
-      if (group.books.length === 0) continue;
-      const section = h(
-        'section',
-        { class: 'edu-section', 'data-testid': `library-group-${group.state}` },
-        h('h2', { class: 'edu-section__title' }, group.title),
-        h(
-          'p',
-          { class: 'edu-section__lead' },
-          group.state === 'candidate'
-            ? '候选内容未核实；只有显式试用后才会打开，标识会持续可见。'
-            : group.state === 'unavailable'
-              ? '这些材料不可用，但不会删除其他教材或个人记录。'
-              : '已匹配本期基准；内容范围仍需按包声明显示。',
-        ),
+    root.append(
+      bookHero(current, {
+        sourceCount: this.state.sources.length,
+        chooserOpen: this.state.chooserOpen,
+        onStart: (book, trigger) => this.startCurrentBook(book, trigger),
+        onToggleChooser: () => this.toggleChooser(),
+        onImport: () => this.openImportPanel(),
+      }),
+    );
+    root.append(
+      bookChooser(this.state.books, current.id, (book) => this.chooseBook(book), this.state.chooserOpen),
+    );
+    if (this.state.offline) {
+      root.append(
+        notice({
+          tone: 'warning',
+          title: '当前离线',
+          body: '已经在本机的课本和原文还能看；需要联网的步骤会停下来，不会假装完成。',
+          testId: 'library-offline',
+        }),
       );
-      const grid = h('div', { class: 'edu-lib-grid' });
-      for (const book of group.books) {
-        grid.append(
-          bookCard(book, {
-            candidateTrial: this.state.candidateTrialBookId === book.id,
-            onViewSources: (selected) => void this.selectBook(selected.id),
-            onTrialCandidate: (selected, trigger) => this.startCandidateTrial(selected, trigger),
-            onExitTrial: () => this.exitCandidateTrial(),
-            onChooseFile: () => {
-              this.resetImport();
-              void this.chooseFile();
-            },
-            onSetCurrent: (selected) => void this.selectBook(selected.id),
-          }),
-        );
-      }
-      section.append(grid);
-      root.append(section);
     }
-
-    root.append(this.renderSources());
+    root.append(this.renderSources(current));
+    root.append(
+      h(
+        'p',
+        { class: 'edu-muted', 'data-testid': 'library-fixture-notice' },
+        this.options.dataSource.notice ?? '演示数据（fixture）：这里的课本和来源都是样例，不是真实教材。',
+      ),
+    );
     container.append(root);
   }
 
-  private renderSources(): HTMLElement {
-    const book = this.state.books.find((entry) => entry.id === this.state.selectedBookId) ?? null;
-    const section = h(
-      'section',
-      { class: 'edu-section', 'data-testid': 'library-sources' },
-      h('h2', { class: 'edu-section__title' }, '课本原文页码'),
+  private renderSources(book: LibraryBook): HTMLElement {
+    const open = this.state.sourcesOpen;
+    const count = this.state.sources.length;
+    const section = h('section', {
+      class: 'edu-lib-sources',
+      'data-testid': 'library-sources',
+      'data-open': open ? 'true' : 'false',
+    });
+    const toggle = h(
+      'button',
+      {
+        type: 'button',
+        class: 'edu-lib-sources__toggle',
+        'data-action': 'toggle-sources',
+        'aria-expanded': open ? 'true' : 'false',
+        'aria-controls': 'library-sources-body',
+        onclick: () => this.toggleSources(),
+      },
+      h('span', { class: 'edu-lib-sources__count' }, count > 0 ? `${count} 条来源` : '课本原文'),
+      h('span', { class: 'edu-lib-sources__hint' }, '课本原文从哪来'),
+      h('span', { class: 'edu-lib-sources__chevron', 'aria-hidden': 'true' }, '▸'),
+    );
+    section.append(toggle);
+    const body = h('div', {
+      class: 'edu-lib-sources__body',
+      id: 'library-sources-body',
+      'data-testid': 'library-sources-body',
+      hidden: !open,
+    });
+    if (!open) {
+      section.append(body);
+      return section;
+    }
+    body.append(
       h(
         'p',
-        { class: 'edu-section__lead' },
-        book === null
-          ? '选择一本教材后查看来源。'
-          : '想看原句时点开一条来源就能对照；这里只列页码，不会提交作答。',
+        { class: 'edu-lib-sources__note' },
+        'PDF 第几页和课本第几页不是同一个数字：每条来源两样都写着，点开能对照原句；认不出课本页时不会猜。',
       ),
     );
     if (this.state.sourcesLoading) {
-      section.append(loadingState({ title: '正在读取来源列表…' }));
-      return section;
-    }
-    if (this.state.sourcesError !== null) {
-      section.append(
+      body.append(loadingState({ title: '正在读这本的原文位置…' }));
+    } else if (this.state.sourcesError !== null) {
+      body.append(
         renderErrorBanner(this.state.sourcesError, {
+          headingLevel: 'h3',
           onRetry: () => void this.loadSources(this.state.selectedBookId ?? ''),
-          backLabel: '返回教材库',
-          onBack: () => this.navigate?.('/library'),
+          backLabel: '回到今天',
+          onBack: () => this.navigate?.('/home'),
         }),
       );
-      return section;
-    }
-    if (this.state.sources.length === 0) {
-      section.append(
+    } else if (this.state.sources.length === 0) {
+      body.append(
         h(
           'p',
           { class: 'edu-state__body' },
-          book?.materialState === 'unavailable'
-            ? '不可用材料没有可阅读来源；教材库不会伪造页面。'
-            : '当前教材还没有可显示的来源条目。',
+          book.materialState === 'unavailable'
+            ? '这本打不开，所以没有能对照的原文；不会伪造页面。'
+            : '这本还没有能对照的原文位置。',
         ),
       );
-      return section;
+    } else {
+      const list = h('ul', { class: 'edu-lib-source-list' });
+      for (const item of this.state.sources) {
+        list.append(sourceListItem(item, (selected, trigger) => this.openSource(selected, trigger)));
+      }
+      body.append(list);
     }
-    const list = h('ul', { class: 'edu-lib-source-list' });
-    for (const item of this.state.sources) {
-      list.append(sourceListItem(item, (selected, trigger) => this.openSource(selected, trigger)));
-    }
-    section.append(
-      h(
-        'details',
-        { class: 'edu-lib-source-fold', 'data-testid': 'library-sources-fold' },
-        h('summary', {}, `查看 ${this.state.sources.length} 条来源（PDF 页 / 课本页）`),
-        list,
-      ),
-    );
+    section.append(body);
     return section;
   }
 
@@ -547,29 +630,25 @@ export class LibraryController {
     const container = this.importContainer;
     if (container === null) return;
     clear(container);
-    const root = h('div', { class: 'edu-lib', 'data-testid': 'library-import-panel' });
+    const root = h('section', { class: 'edu-lib__import', 'data-testid': 'library-import-panel' });
     root.append(
-      h('h2', { class: 'edu-section__title' }, '导入教材'),
+      h(
+        'h2',
+        { class: 'edu-section__title', tabindex: -1, 'data-testid': 'library-import-heading' },
+        '导入新的课本',
+      ),
       h(
         'p',
         { class: 'edu-section__lead' },
-        '选择本地 PDF 后确认元数据再开始；进度、取消、恢复与失败都显示真实阶段。上传范围会在发送前说明，不默认上传整本。',
-      ),
-      h(
-        'p',
-        { class: 'edu-muted', 'data-testid': 'library-import-fixture' },
-        '导入任务为演示数据（fixture），不是真实解析结果。',
+        '选一个本地 PDF，确认书名和版次后开始。进度、暂停和出错都照实显示，没做完的不会写成完成。',
       ),
     );
-    if (this.state.candidateTrialBookId !== null) {
-      root.append(candidateBanner(() => this.exitCandidateTrial()));
-    }
     if (this.state.offline) {
       root.append(
         notice({
           tone: 'warning',
           title: '当前离线',
-          body: '本地选择与已完成页面仍可查看；云端步骤会暂停，不会伪装完成。',
+          body: '本机已经导入的内容还能看；需要联网的步骤会停下来，不会假装完成。',
         }),
       );
     }
@@ -578,6 +657,7 @@ export class LibraryController {
       if (this.state.importError !== null) {
         root.append(
           renderErrorBanner(this.state.importError, {
+            headingLevel: 'h3',
             onRetry: () => void this.chooseFile(),
             backLabel: '重新选择文件',
             onBack: () => void this.chooseFile(),
@@ -585,27 +665,12 @@ export class LibraryController {
         );
       }
       if (this.state.selectedFile === null) {
-        root.append(
-          h(
-            'div',
-            { class: 'edu-lib-file' },
-            h('p', { class: 'edu-card__title' }, '还没有选择文件'),
-            h(
-              'p',
-              { class: 'edu-card__meta' },
-              '只接受宿主管理的 PDF；选择本身不会上传或导入。',
-            ),
-            h(
-              'div',
-              { class: 'edu-inline-actions' },
-              button('选择本地 PDF 文件', () => void this.chooseFile(), {
-                tone: 'primary',
-                disabled: this.state.jobBusy,
-                dataAction: 'choose-file',
-              }),
-            ),
-          ),
-        );
+        const choose = button('选择本地 PDF', () => void this.chooseFile(), {
+          tone: 'primary',
+          disabled: this.state.jobBusy,
+          dataAction: 'choose-file',
+        });
+        root.append(h('div', { class: 'edu-inline-actions' }, choose));
       } else {
         root.append(selectedFileCard(this.state.selectedFile), this.renderMetadataForm());
       }
@@ -616,7 +681,11 @@ export class LibraryController {
       root.append(
         h(
           'p',
-          { class: 'edu-notice edu-notice--info', role: 'status', 'data-testid': 'library-action-notice' },
+          {
+            class: 'edu-notice edu-notice--info',
+            role: 'status',
+            'data-testid': 'library-action-notice',
+          },
           this.state.actionNotice,
         ),
       );
@@ -643,31 +712,39 @@ export class LibraryController {
         value: draft[name],
         oninput: (event: Event) => this.updateMetadata(name, (event.currentTarget as HTMLInputElement).value),
       });
-      return h('div', { class: 'edu-field' }, h('label', { class: 'edu-field__label', for: `library-meta-${name}` }, label), input);
+      return h(
+        'div',
+        { class: 'edu-field' },
+        h('label', { class: 'edu-field__label', for: `library-meta-${name}` }, label),
+        input,
+      );
     };
     form.append(
-      field('书名（可空）', 'title'),
-      field('出版社（可空）', 'publisher'),
-      field('版次/印次（可空）', 'editionLabel'),
+      field('书名（可以空着）', 'title'),
+      field('出版社（可以空着）', 'publisher'),
+      field('版次/印次（可以空着）', 'editionLabel'),
       field('页数', 'pageCount', 'number'),
     );
     form.append(
       h(
         'div',
         { class: 'edu-inline-actions' },
-        button('确认元数据并开始导入', () => void this.startImport(), {
+        button('开始导入', () => void this.startImport(), {
           tone: 'primary',
           disabled: this.state.jobBusy,
           dataAction: 'start-import',
         }),
-        button('重新选择文件', () => void this.chooseFile(), { small: true, disabled: this.state.jobBusy }),
+        button('重新选择文件', () => void this.chooseFile(), {
+          small: true,
+          disabled: this.state.jobBusy,
+        }),
       ),
     );
     form.append(
       h(
         'p',
         { class: 'edu-card__meta' },
-        '元数据只用于匹配/候选标识，不会因为填写书名就成为已核实基准。页数与实际文件不一致时服务会拒绝。',
+        '这些信息只用来对上同一本书，不会因为填了书名就变成核对过的课本。页数和文件对不上时不会开始导入。',
       ),
     );
     return form;
@@ -679,24 +756,20 @@ export class LibraryController {
       h(
         'div',
         { class: 'edu-lib-job__head' },
-        h('h3', { class: 'edu-lib-job__title' }, `导入任务 ${job.id}`),
+        h('h3', { class: 'edu-lib-job__title' }, '导入进度'),
         h(
           'div',
           { class: 'edu-inline-actions' },
           statusChip(STATUS_LABELS[job.status], STATUS_TONES[job.status]),
-          statusChip(`当前阶段：${STAGE_LABELS[job.stage]}`, job.stage === 'await_review' ? 'attention' : 'progress'),
+          statusChip(`现在：${STAGE_LABELS[job.stage]}`, job.stage === 'await_review' ? 'attention' : 'progress'),
         ),
       ),
-      h(
-        'p',
-        { class: 'edu-lib-status-line' },
-        `解析器 ${job.parserVersion} · 更新于 ${formatLocalTime(job.updatedAt)}`,
-      ),
+      h('p', { class: 'edu-lib-status-line' }, `最近更新：${formatLocalTime(job.updatedAt)}`),
       progressSummary({
-        label: '已处理页数',
+        label: '已经处理',
         current: job.completedUnits,
         total: job.totalUnits,
-        note: '阶段与页数由导入服务返回；界面不伪造进度，也不把等待审校当作完成。',
+        note: '页数和阶段来自导入过程本身；没做完的不会显示成完成。',
       }),
     );
 
@@ -726,8 +799,8 @@ export class LibraryController {
       wrapper.append(
         notice({
           tone: 'info',
-          title: '同一文件已存在，已复用任务',
-          body: '没有重复建书；同一指纹的既有任务被继续使用。',
+          title: '这本书之前导入过',
+          body: '没有重复建课本，接着用原来那一份。',
           testId: 'library-duplicate-notice',
         }),
       );
@@ -736,8 +809,8 @@ export class LibraryController {
       wrapper.append(
         notice({
           tone: this.state.match.kind === 'same_hash' || this.state.match.kind === 'same_edition_rescan' ? 'info' : 'warning',
-          title: '匹配结果',
-          body: this.state.match.label,
+          title: '这本和已有的课本对上了吗',
+          body: matchSentence(this.state.match),
           testId: 'library-match-notice',
         }),
       );
@@ -747,8 +820,8 @@ export class LibraryController {
       wrapper.append(
         notice({
           tone: 'warning',
-          title: '待审核：不是导入完成',
-          body: '内容已到达审校队列；在审校完成前不能作为已核实基准，也不显示“已完成”。',
+          title: '还在核对，不算导入完成',
+          body: '内容已经整理好，等确认过才能当成核对过的课本；现在不会显示“完成”。',
           testId: 'library-await-review',
         }),
       );
@@ -756,8 +829,8 @@ export class LibraryController {
       wrapper.append(
         notice({
           tone: 'info',
-          title: '材料就绪（按包声明的范围）',
-          body: '材料已就绪；若为部分范围，不等于全册就绪。请查看内容范围与来源。',
+          title: '这本可以用了',
+          body: '目前放进去的是这本书的一部分；范围之外的章节还看不到，也不会假装都有。',
           testId: 'library-ready',
         }),
       );
@@ -777,7 +850,6 @@ export class LibraryController {
           h('p', { class: 'edu-notice__title' }, copy.title),
           h('p', { class: 'edu-notice__body' }, copy.detail),
           h('p', { class: 'edu-notice__body' }, `下一步：${copy.next}`),
-          h('p', { class: 'edu-notice__body' }, `错误代码：${copy.code}`),
         ),
       );
     }
@@ -787,7 +859,7 @@ export class LibraryController {
         notice({
           tone: 'info',
           title: '导入已取消',
-          body: '取消后到达的迟到结果不会写入教材或学习记录；可以恢复同一任务或重新选择文件。',
+          body: '取消之后才回来的结果不会写进课本或学习记录；可以接着恢复，也可以重新选择文件。',
           testId: 'library-cancelled',
         }),
       );
@@ -806,7 +878,7 @@ export class LibraryController {
     }
     if (canRetry(job)) {
       actions.append(
-        button('重试失败阶段', () => void this.retryImport(), {
+        button('重试出错的那一步', () => void this.retryImport(), {
           small: true,
           tone: 'primary',
           disabled: this.state.jobBusy,
@@ -815,7 +887,7 @@ export class LibraryController {
       );
     } else if (canResume(job) && job.stage !== 'await_review') {
       actions.append(
-        button(job.status === 'failed' ? '恢复任务' : '恢复导入', () => void this.resumeImport(), {
+        button(job.status === 'failed' ? '接着做' : '接着导入', () => void this.resumeImport(), {
           small: true,
           disabled: this.state.jobBusy,
           dataAction: 'resume-import',
@@ -823,7 +895,7 @@ export class LibraryController {
       );
     }
     actions.append(
-      button('刷新状态', () => void this.refreshJob(), {
+      button('刷新进度', () => void this.refreshJob(), {
         small: true,
         disabled: this.state.jobBusy,
         dataAction: 'refresh-import',
@@ -831,10 +903,24 @@ export class LibraryController {
     );
     actions.append(button('重新选择文件', () => this.resetImport(), { small: true }));
     if (job.stage === 'ready' || job.stage === 'await_review') {
-      actions.append(button('去地图查看材料', () => this.navigate?.('/map'), { small: true }));
+      actions.append(button('去地图看看', () => this.navigate?.('/map'), { small: true }));
     }
     wrapper.append(actions);
     return wrapper;
+  }
+}
+
+/** 匹配结果用学生话讲，不直接念服务端标签。 */
+function matchSentence(match: ImportMatch): string {
+  switch (match.kind) {
+    case 'same_hash':
+      return '同一个文件已经在这台电脑上，接着用原来那一份。';
+    case 'same_edition_rescan':
+      return '同一版的另一份扫描：页码要重新对一遍，先当参考。';
+    case 'different_edition':
+      return '和已经核对过的版本对不上，先当参考。';
+    default:
+      return '没认出是哪一版，先当参考用。';
   }
 }
 

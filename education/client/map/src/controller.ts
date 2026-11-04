@@ -1,15 +1,16 @@
 /**
- * Map controller: owns map view state, loads read models through `MapDataSource`
- * and renders the two shell panels (`map:content`, `map:details`).
+ * Map controller for the two-level knowledge map.
  *
- * It is strictly read-only: browsing the tree/graph, searching, filtering and
- * opening a detail never writes learning state. "开始学习/开始复习" only
- * navigates; the workspace (T12) owns mutating flows.
+ * State: overview (whole volume) ⇄ one chapter. It owns view state, loads read
+ * models through `MapDataSource` and renders the two shell panels
+ * (`map:content`, `map:details`). It is strictly read-only: browsing, searching
+ * and opening a concept never write learning state. 开始学习 / 先复习 only
+ * navigate; the workspace owns mutating flows.
  */
 
 import type { ServiceError } from '@edu/domain';
 import {
-  button,
+  DESIGN_TOKENS,
   clear,
   h,
   loadingState,
@@ -17,49 +18,35 @@ import {
   type EducationPageContext,
 } from '../../shell/src/index.js';
 import {
-  aggregateMapSummary,
-  buildTocModel,
-  matchesStateFilter,
-  summarizeConceptState,
+  createMapModel,
+  resumeTarget,
+  type MapChapter,
+  type MapModel,
   type MapViewMode,
-  type StateFilter,
-  type TocTreeModel,
 } from './model.js';
 import {
-  renderConceptList,
+  renderChapterGraph,
+  renderChapterHeader,
+  renderChapterList,
   renderDetail,
-  renderFilterBar,
+  renderDetailPrompt,
   renderFixtureNotice,
-  renderGraph,
+  renderOverview,
   renderPackBadges,
-  renderRangeHeader,
-  renderRelationList,
-  renderSearch,
-  renderSummaryBar,
-  renderTree,
-  renderTreeHelp,
-  renderViewTabs,
   type MapActions,
 } from './views.js';
-import {
-  MAP_DEPTH_CAP,
-  MAP_EXPAND_DEPTH_CAP,
-  MAP_EXPAND_NODE_CAP,
-  MAP_NODE_CAP,
-  MAP_PAGE_SIZE,
-  MAP_SEARCH_LIMIT,
-  type ConceptDetail,
-  type ConceptSearchHit,
-  type GraphSlice,
-  type MapDataSource,
-  type MapPayload,
-  type MapRequest,
+import type {
+  ConceptDetail,
+  MapDataSource,
+  MapPayload,
+  MapRequest,
 } from './types.js';
 
 export interface MapControllerOptions {
   readonly dataSource: MapDataSource;
   readonly createRequest: () => MapRequest;
-  readonly pageSize?: number;
+  /** Optional fixed viewport width (tests); defaults to the real window. */
+  readonly viewportWidth?: number;
 }
 
 export interface MapTimings {
@@ -71,6 +58,8 @@ export interface MapTimings {
 }
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
+type MapLevel = 'overview' | 'chapter';
+type PendingFocus = 'chapter-title' | `concept:${string}` | `chapter-row:${string}`;
 
 function nowMs(): number {
   const perf = (globalThis as { performance?: { now?: () => number } }).performance;
@@ -82,45 +71,42 @@ function round(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
+function viewportFromWindow(): number {
+  const width = (globalThis as { innerWidth?: number }).innerWidth;
+  return typeof width === 'number' && Number.isFinite(width) && width > 0
+    ? width
+    : DESIGN_TOKENS.breakpoints.wide;
+}
+
 export class MapController {
   private readonly dataSource: MapDataSource;
   private readonly createRequest: () => MapRequest;
-  private readonly pageSize: number;
 
   private context: EducationPageContext | null = null;
   private contentHost: HTMLElement | null = null;
   private detailsHost: HTMLElement | null = null;
 
   private payload: MapPayload | null = null;
-  private tocModel: TocTreeModel | null = null;
+  private model: MapModel | null = null;
   private loadState: LoadState = 'idle';
   private error: ServiceError | null = null;
 
-  private expandedIds = new Set<string>();
-  private selectedNodeId: string | null = null;
-  private scopeChapterId: string | null = null;
+  private level: MapLevel = 'overview';
+  private chapterId: string | null = null;
   private selectedConceptId: string | null = null;
-  private focusTocId: string | null = null;
-  private focusTocRequested = false;
-  private pendingConceptFocus: string | null = null;
-
   private viewMode: MapViewMode = 'graph';
-  private filter: StateFilter = 'all';
   private query = '';
-  private submittedQuery: string | null = null;
-  private searchHits: readonly ConceptSearchHit[] | null = null;
-  private searchError: ServiceError | null = null;
-
-  private chapterGraph: GraphSlice | null = null;
-  private expandedSlice: GraphSlice | null = null;
-  private visibleConceptCount = MAP_NODE_CAP;
+  private notice: string | null = null;
 
   private detail: ConceptDetail | null = null;
   private detailError: ServiceError | null = null;
 
+  private viewportWidth: number;
+  private resizeBound = false;
+  private pendingFocus: PendingFocus | null = null;
+
   private loadPromise: Promise<void> | null = null;
   private disposed = false;
-  private keydownBound = false;
 
   private readonly actions: MapActions;
   private timings: MapTimings = {
@@ -134,51 +120,37 @@ export class MapController {
   constructor(options: MapControllerOptions) {
     this.dataSource = options.dataSource;
     this.createRequest = options.createRequest;
-    this.pageSize = options.pageSize ?? MAP_PAGE_SIZE;
-    this.visibleConceptCount = MAP_NODE_CAP;
+    this.viewportWidth = options.viewportWidth ?? viewportFromWindow();
     this.actions = {
-      selectNode: (nodeId) => void this.selectNode(nodeId),
-      toggleNode: (nodeId) => this.toggleNode(nodeId),
+      openChapter: (chapterId) => this.openChapter(chapterId),
+      backToOverview: () => this.backToOverview(),
       selectConcept: (conceptId) => void this.selectConcept(conceptId),
       setViewMode: (mode) => {
         this.viewMode = mode;
         this.render();
       },
-      setFilter: (filter) => {
-        this.filter = filter;
-        this.render();
-      },
-      clearFilter: () => {
-        this.filter = 'all';
-        this.render();
-      },
       setQuery: (value) => {
-        // Keep the caret: typing updates state only, the input is not rebuilt.
         this.query = value;
+        this.notice = null;
+        this.render();
       },
-      submitSearch: () => void this.submitSearch(),
       clearSearch: () => {
         this.query = '';
-        this.submittedQuery = null;
-        this.searchHits = null;
-        this.searchError = null;
         this.render();
       },
-      showMoreConcepts: () => void this.showMoreConcepts(),
-      expandExternal: (conceptId) => void this.expandExternal(conceptId),
-      collapseExternal: () => {
-        this.expandedSlice = null;
-        this.render();
-      },
+      resume: () => void this.resume(),
       navigate: (path) => {
         if (this.context !== null) this.context.navigate(path);
       },
+      retry: () => this.retry(),
     };
   }
 
   getTimings(): MapTimings {
     return this.timings;
   }
+
+  /* ------------------------------------------------------------- mounting */
 
   onPageMount(context: EducationPageContext): void {
     this.context = context;
@@ -187,27 +159,29 @@ export class MapController {
   }
 
   onPageUnmount(): void {
-    this.contentHost = null;
-    this.detailsHost = null;
+    this.unmountContent();
+    this.unmountDetails();
   }
 
   dispose(): void {
     this.disposed = true;
-    this.contentHost = null;
-    this.detailsHost = null;
+    this.unmountContent();
+    this.unmountDetails();
   }
 
   mountContent(host: HTMLElement): void {
     this.contentHost = host;
-    if (!this.keydownBound) {
-      host.addEventListener('keydown', (event) => this.onTreeKeyDown(event));
-      this.keydownBound = true;
-    }
+    host.addEventListener('keydown', this.onKeyDown);
+    this.bindResize(host.ownerDocument);
     void this.ensureLoaded();
     this.render();
   }
 
   unmountContent(): void {
+    if (this.contentHost !== null) {
+      this.contentHost.removeEventListener('keydown', this.onKeyDown);
+      this.unbindResize(this.contentHost.ownerDocument);
+    }
     this.contentHost = null;
   }
 
@@ -221,10 +195,11 @@ export class MapController {
     this.detailsHost = null;
   }
 
-  /* ----------------------------------------------------------- data loading */
+  /* ---------------------------------------------------------- data loading */
 
   private async ensureLoaded(): Promise<void> {
-    if (this.payload !== null || this.loadState === 'loading') return;
+    // `error` waits for the explicit retry action, never for the next mount.
+    if (this.payload !== null || this.loadState === 'loading' || this.loadState === 'error') return;
     if (this.loadPromise !== null) return this.loadPromise;
     this.loadState = 'loading';
     this.render();
@@ -243,73 +218,14 @@ export class MapController {
       this.render();
       return;
     }
-    this.timings = { ...this.timings, mapLoadMs: round(nowMs() - started) };
+    const firstRender = nowMs();
+    this.timings = { ...this.timings, mapLoadMs: round(firstRender - started) };
     this.payload = result.data;
-    this.tocModel = buildTocModel(result.data);
+    this.model = createMapModel(result.data);
     this.loadState = 'ready';
     this.error = null;
-    this.selectInitialRange(result.data);
-    await this.loadChapterGraph();
-    const initialConceptId = result.data.initialConceptId;
-    if (initialConceptId !== null) {
-      this.selectedConceptId = initialConceptId;
-      await this.loadDetail(initialConceptId);
-    }
-    const firstRender = nowMs();
     this.render();
     this.timings = { ...this.timings, firstRenderMs: round(nowMs() - firstRender) };
-  }
-
-  private selectInitialRange(payload: MapPayload): void {
-    const model = this.tocModel;
-    if (model === null) return;
-    const chapterFromConcept = (() => {
-      if (payload.initialConceptId === null) return null;
-      const concept = payload.concepts.find((entry) => entry.id === payload.initialConceptId);
-      if (concept === undefined) return null;
-      const firstPlacement = concept.placements[0];
-      return firstPlacement === undefined ? null : model.chapterOf(firstPlacement);
-    })();
-    const initialNode =
-      chapterFromConcept ??
-      (payload.initialTocNodeId === null ? null : model.node(payload.initialTocNodeId)) ??
-      model.chapters()[0] ??
-      model.roots[0] ??
-      null;
-    const chapter = initialNode === null ? null : model.chapterOf(initialNode.id) ?? initialNode;
-    this.scopeChapterId = chapter?.id ?? null;
-    this.selectedNodeId = chapter?.id ?? null;
-    // Volume + units stay open so chapters are always reachable (chapter-level
-    // folding); only the current chapter reveals its sections.
-    this.expandedIds = new Set<string>(
-      payload.toc.filter((node) => node.type === 'volume' || node.type === 'unit').map((node) => node.id),
-    );
-    for (const root of model.roots) this.expandedIds.add(root.id);
-    if (chapter !== null) {
-      for (const ancestorId of model.ancestorsOf(chapter.id)) this.expandedIds.add(ancestorId);
-      this.expandedIds.add(chapter.id);
-    }
-    this.focusTocId = chapter?.id ?? null;
-  }
-
-  private async loadChapterGraph(): Promise<void> {
-    const chapterId = this.scopeChapterId;
-    if (chapterId === null) return;
-    const started = nowMs();
-    const result = await this.dataSource.loadChapterGraph(this.createRequest(), chapterId, {
-      maxNodes: MAP_NODE_CAP * 4,
-      maxDepth: MAP_DEPTH_CAP,
-      visibleConceptCount: this.visibleConceptCount,
-    });
-    if (this.disposed) return;
-    this.timings = { ...this.timings, lastGraphLoadMs: round(nowMs() - started) };
-    if (result.ok) {
-      this.chapterGraph = result.data;
-      this.expandedSlice = null;
-    } else {
-      this.chapterGraph = null;
-      this.error = result.error;
-    }
   }
 
   private async loadDetail(conceptId: string): Promise<void> {
@@ -326,235 +242,143 @@ export class MapController {
 
   /* -------------------------------------------------------------- commands */
 
-  private async selectNode(nodeId: string): Promise<void> {
-    const model = this.tocModel;
-    if (model === null || this.payload === null) return;
-    const node = model.node(nodeId);
-    if (node === undefined) return;
-    this.selectedNodeId = nodeId;
-    this.focusTocId = nodeId;
-    this.focusTocRequested = true;
-    const chapter = model.chapterOf(nodeId);
-    if (chapter !== null) {
-      if (!this.expandedIds.has(chapter.id)) this.expandedIds.add(chapter.id);
-      for (const ancestorId of model.ancestorsOf(chapter.id)) this.expandedIds.add(ancestorId);
-    }
-    const nextScope = chapter?.id ?? nodeId;
-    const changed = nextScope !== this.scopeChapterId;
-    this.scopeChapterId = nextScope;
+  private openChapter(chapterId: string): void {
+    const model = this.model;
+    if (model === null) return;
+    const chapter = model.chapter(chapterId);
+    if (chapter === null) return;
+    const changed = chapterId !== this.chapterId;
+    this.level = 'chapter';
+    this.chapterId = chapterId;
+    this.notice = null;
+    this.query = '';
     if (changed) {
       this.selectedConceptId = null;
       this.detail = null;
-      this.expandedSlice = null;
-      this.visibleConceptCount = MAP_NODE_CAP;
-      const started = nowMs();
-      await this.loadChapterGraph();
-      this.timings = { ...this.timings, chapterSwitchMs: round(nowMs() - started) };
+      this.detailError = null;
     }
+    this.pendingFocus = 'chapter-title';
+    const started = nowMs();
     this.render();
+    const elapsed = round(nowMs() - started);
+    this.timings = { ...this.timings, lastGraphLoadMs: elapsed, chapterSwitchMs: elapsed };
   }
 
-  private toggleNode(nodeId: string): void {
-    if (this.expandedIds.has(nodeId)) this.expandedIds.delete(nodeId);
-    else this.expandedIds.add(nodeId);
-    this.focusTocId = nodeId;
-    this.focusTocRequested = true;
+  private backToOverview(): void {
+    const previous = this.chapterId;
+    this.level = 'overview';
+    this.selectedConceptId = null;
+    this.detail = null;
+    this.detailError = null;
+    this.notice = null;
+    this.pendingFocus = previous === null ? null : `chapter-row:${previous}`;
     this.render();
   }
 
   private async selectConcept(conceptId: string): Promise<void> {
-    const payload = this.payload;
-    const model = this.tocModel;
-    if (payload === null || model === null) return;
-    const concept = payload.concepts.find((entry) => entry.id === conceptId);
-    if (concept === undefined) return;
+    const model = this.model;
+    if (model === null) return;
+    if (!model.payload.concepts.some((concept) => concept.id === conceptId)) return;
+    const chapter = model.chapterOfConcept(conceptId);
+    const chapterId = chapter?.id ?? this.chapterId;
+    if (chapterId === null) return;
+    const changed = chapterId !== this.chapterId;
+    this.level = 'chapter';
+    this.chapterId = chapterId;
     this.selectedConceptId = conceptId;
-    this.pendingConceptFocus = conceptId;
-    this.viewMode = this.viewMode === 'concepts' ? 'concepts' : this.viewMode;
-    const firstPlacement = concept.placements[0];
-    const chapter = firstPlacement === undefined ? null : model.chapterOf(firstPlacement);
-    if (chapter !== null && chapter.id !== this.scopeChapterId) {
-      this.scopeChapterId = chapter.id;
-      this.selectedNodeId = chapter.id;
-      this.focusTocId = chapter.id;
-      for (const ancestorId of model.ancestorsOf(chapter.id)) this.expandedIds.add(ancestorId);
-      this.expandedIds.add(chapter.id);
-      this.visibleConceptCount = Math.max(MAP_NODE_CAP, this.visibleConceptCount);
-      const started = nowMs();
-      await this.loadChapterGraph();
-      this.timings = { ...this.timings, chapterSwitchMs: round(nowMs() - started) };
+    this.notice = null;
+    this.query = '';
+    if (changed) {
+      this.detail = null;
+      this.detailError = null;
     }
     await this.loadDetail(conceptId);
+    this.pendingFocus = `concept:${conceptId}`;
     this.render();
   }
 
-  private async submitSearch(): Promise<void> {
-    const query = this.query.trim();
-    this.submittedQuery = query;
-    if (query.length === 0) {
-      this.searchHits = null;
-      this.searchError = null;
+  private async resume(): Promise<void> {
+    const model = this.model;
+    if (model === null) return;
+    const target = resumeTarget(model.payload, model.toc);
+    if (target === null) {
+      this.level = 'overview';
+      this.notice = '这本教材还没有可以继续学的概念，先点一章开始吧。';
       this.render();
       return;
     }
-    const result = await this.dataSource.searchConcepts(
-      this.createRequest(),
-      query,
-      MAP_SEARCH_LIMIT,
-    );
-    if (result.ok) {
-      this.searchHits = result.data;
-      this.searchError = null;
-    } else {
-      this.searchHits = null;
-      this.searchError = result.error;
+    if (target.conceptId !== null) {
+      await this.selectConcept(target.conceptId);
+      return;
     }
+    this.openChapter(target.chapterId);
+    this.notice = '还没有正在学的概念，先看看这一章。';
     this.render();
-  }
-
-  private async showMoreConcepts(): Promise<void> {
-    this.visibleConceptCount += this.pageSize;
-    this.expandedSlice = null;
-    await this.loadChapterGraph();
-    this.render();
-  }
-
-  private async expandExternal(conceptId: string): Promise<void> {
-    const result = await this.dataSource.expandConcept(this.createRequest(), conceptId, {
-      maxNodes: MAP_EXPAND_NODE_CAP,
-      maxDepth: MAP_EXPAND_DEPTH_CAP,
-    });
-    if (this.disposed) return;
-    if (result.ok) {
-      this.expandedSlice = result.data;
-      this.selectedConceptId = conceptId;
-      this.pendingConceptFocus = conceptId;
-      await this.loadDetail(conceptId);
-      this.render();
-    }
   }
 
   private retry(): void {
     this.payload = null;
-    this.tocModel = null;
+    this.model = null;
     this.loadState = 'idle';
     this.error = null;
-    this.chapterGraph = null;
-    this.expandedSlice = null;
-    this.detail = null;
+    this.chapterId = null;
     this.selectedConceptId = null;
+    this.detail = null;
     this.detailError = null;
+    this.level = 'overview';
+    this.notice = null;
     void this.ensureLoaded();
   }
 
   /* ------------------------------------------------------------- keyboard */
 
-  private onTreeKeyDown(event: Event): void {
+  private readonly onKeyDown = (event: Event): void => {
     const keyboard = event as KeyboardEvent;
-    const target = keyboard.target;
-    if (!(target instanceof HTMLElement)) return;
-    const item = target.closest<HTMLElement>('[data-toc-id]');
-    if (item === null) return;
-    const model = this.tocModel;
-    if (model === null) return;
-    const rows = model.visibleRows(this.expandedIds);
-    const index = rows.findIndex((row) => row.node.id === item.dataset['tocId']);
-    if (index < 0) return;
-    const row = rows[index];
-    if (row === undefined) return;
-    const focusRow = (nextIndex: number): void => {
-      const next = rows[nextIndex];
-      if (next === undefined) return;
-      this.focusTocId = next.node.id;
-      this.focusTocRequested = true;
+    if (keyboard.key !== 'Escape') return;
+    if (this.level === 'chapter') {
+      keyboard.preventDefault();
+      this.backToOverview();
+      return;
+    }
+    if (this.query.length > 0) {
+      keyboard.preventDefault();
+      this.query = '';
       this.render();
-    };
-    switch (keyboard.key) {
-      case 'ArrowDown':
-        keyboard.preventDefault();
-        focusRow(Math.min(rows.length - 1, index + 1));
-        break;
-      case 'ArrowUp':
-        keyboard.preventDefault();
-        focusRow(Math.max(0, index - 1));
-        break;
-      case 'ArrowRight': {
-        keyboard.preventDefault();
-        if (row.hasChildren && !row.expanded) {
-          this.expandedIds.add(row.node.id);
-          this.focusTocId = row.node.id;
-          this.focusTocRequested = true;
-          this.render();
-        } else if (row.hasChildren) {
-          focusRow(index + 1);
-        }
-        break;
-      }
-      case 'ArrowLeft': {
-        keyboard.preventDefault();
-        if (row.expanded && row.hasChildren) {
-          this.expandedIds.delete(row.node.id);
-          this.focusTocId = row.node.id;
-          this.focusTocRequested = true;
-          this.render();
-        } else if (row.node.parentId !== null) {
-          const parentIndex = rows.findIndex((entry) => entry.node.id === row.node.parentId);
-          focusRow(parentIndex >= 0 ? parentIndex : index - 1);
-        }
-        break;
-      }
-      case 'Home':
-        keyboard.preventDefault();
-        focusRow(0);
-        break;
-      case 'End':
-        keyboard.preventDefault();
-        focusRow(rows.length - 1);
-        break;
-      case 'Enter':
-      case ' ':
-        keyboard.preventDefault();
-        void this.selectNode(row.node.id);
-        break;
-      default:
-        break;
     }
+  };
+
+  private bindResize(doc: Document): void {
+    if (this.resizeBound) return;
+    const view = doc.defaultView;
+    if (view === null) return;
+    view.addEventListener('resize', this.onResize);
+    this.resizeBound = true;
   }
 
-  private focusTocItem(nodeId: string): void {
-    if (this.contentHost === null) return;
-    const element = this.contentHost.querySelector<HTMLElement>(`[data-toc-id="${nodeId}"]`);
-    element?.focus();
+  private unbindResize(doc: Document): void {
+    if (!this.resizeBound) return;
+    doc.defaultView?.removeEventListener('resize', this.onResize);
+    this.resizeBound = false;
   }
 
-  private focusConcept(conceptId: string): void {
-    for (const host of [this.contentHost, this.detailsHost]) {
-      if (host === null) continue;
-      const element = host.querySelector<HTMLElement>(`[data-concept-id="${conceptId}"]`);
-      if (element !== null) {
-        element.focus();
-        return;
-      }
-    }
-  }
+  private readonly onResize = (): void => {
+    const next = viewportFromWindow();
+    if (next === this.viewportWidth) return;
+    this.viewportWidth = next;
+    this.render();
+  };
 
-  /* --------------------------------------------------------------- render */
+  /* ----------------------------------------------------------------- render */
 
   private render(): void {
     if (this.disposed) return;
     const started = nowMs();
+    const searchFocused = this.isSearchFocused();
     if (this.contentHost !== null) this.renderContent(this.contentHost);
     if (this.detailsHost !== null) this.renderDetails(this.detailsHost);
     this.timings = { ...this.timings, lastRenderMs: round(nowMs() - started) };
-    if (this.focusTocRequested && this.focusTocId !== null) {
-      this.focusTocRequested = false;
-      this.focusTocItem(this.focusTocId);
-    }
-    const conceptFocus = this.pendingConceptFocus;
-    if (conceptFocus !== null) {
-      this.pendingConceptFocus = null;
-      this.focusConcept(conceptFocus);
-    }
+    if (searchFocused) this.restoreSearchFocus();
+    this.applyPendingFocus();
   }
 
   private renderContent(host: HTMLElement): void {
@@ -562,96 +386,73 @@ export class MapController {
     if (this.loadState === 'loading') {
       host.append(
         loadingState({
-          title: '正在打开当前教材的地图…',
-          body: '只读取已保存的目录、概念与状态；浏览不会改变学习进程。',
+          title: '正在打开知识地图…',
+          body: '只读取已保存的目录和记录；浏览不会改变你的学习进度。',
         }),
       );
       return;
     }
     if (this.loadState === 'error') {
       host.append(
-        renderErrorBanner(this.error ?? { code: 'STORAGE_FAILED', message: '地图暂时无法打开', retryable: true }, {
-          onRetry: () => this.retry(),
-          onBack: () => this.actions.navigate('/library'),
-          backLabel: '去教材库',
-        }),
+        renderErrorBanner(
+          this.error ?? { code: 'UNAVAILABLE', message: '知识地图暂时打不开', retryable: true },
+          {
+            onRetry: () => this.actions.retry(),
+            onBack: () => this.actions.navigate('/library'),
+            backLabel: '去我的课本',
+          },
+        ),
       );
       return;
     }
-    const payload = this.payload;
-    const model = this.tocModel;
-    if (payload === null || model === null) return;
-
-    const fixture = renderFixtureNotice(payload);
+    const model = this.model;
+    if (model === null) return;
+    const fixture = renderFixtureNotice(model.payload);
     if (fixture !== null) host.append(fixture);
-    host.append(renderPackBadges(payload));
-    host.append(renderSummaryBar(payload, aggregateMapSummary(payload)));
-    host.append(
-      renderSearch(
-        this.query,
-        this.submittedQuery,
-        this.searchHits,
-        this.searchError?.code === undefined ? null : '搜索暂时没有完成，可以重试或清除搜索。',
-        this.actions,
-      ),
-    );
-    host.append(renderFilterBar(this.filter, this.actions));
-
-    const treePane = h('div', { class: 'edu-map-navpane', 'data-testid': 'map-navpane' });
-    treePane.append(
-      h('h2', { class: 'edu-map-pane-title' }, '教材目录'),
-      renderTree(model.visibleRows(this.expandedIds), this.selectedNodeId, this.focusTocId, this.actions),
-      renderTreeHelp(),
-    );
-    const workPane = h('div', { class: 'edu-map-workpane', 'data-testid': 'map-workpane' });
-    workPane.append(renderViewTabs(this.viewMode, this.actions));
-
-    const slice = this.activeSlice();
-    const visibleConceptIds = this.visibleConceptIds(slice);
-    if (slice !== null) {
-      workPane.append(renderRangeHeader(slice, payload, visibleConceptIds, this.actions));
-    }
-    if (this.viewMode === 'relations') {
-      workPane.append(
-        slice === null
-          ? h('p', { class: 'edu-map-help' }, '还没有可显示的关系。')
-          : renderRelationList(slice, payload, visibleConceptIds, this.actions),
+    host.append(renderPackBadges(model.payload));
+    if (this.notice !== null) {
+      host.append(
+        h(
+          'p',
+          { class: 'edu-map-notice', role: 'status', 'data-testid': 'map-notice' },
+          this.notice,
+        ),
       );
-    } else if (this.viewMode === 'concepts') {
-      const concepts =
-        slice === null
-          ? []
-          : slice.concepts.filter((concept) => {
-              const summary = summarizeConceptState(payload, concept.id);
-              return matchesStateFilter(summary, this.filter);
-            });
-      workPane.append(renderConceptList(concepts, payload, this.filter, this.actions));
-    } else {
-      if (slice === null) {
-        workPane.append(h('p', { class: 'edu-map-help' }, '当前范围没有可绘制的概念。'));
-      } else if (visibleConceptIds.length === 0) {
-        workPane.append(
-          h(
-            'div',
-            { class: 'edu-map-empty', 'data-testid': 'map-graph-filtered-empty' },
-            h('p', {}, '当前筛选没有匹配的概念，图暂不绘制。'),
-            button('清除筛选', this.actions.clearFilter, {
-              tone: 'primary',
-              dataAction: 'clear-filter',
-            }),
-          ),
-        );
-      } else {
-        workPane.append(renderGraph(slice, payload, visibleConceptIds, this.actions));
-      }
     }
-    host.append(h('div', { class: 'edu-map-main' }, treePane, workPane));
+    if (this.level === 'overview') {
+      host.append(renderOverview(model.filterOverview(this.query), model, this.actions));
+      return;
+    }
+    const chapter = this.chapterId === null ? null : model.chapter(this.chapterId);
+    if (chapter === null) {
+      this.level = 'overview';
+      host.append(renderOverview(model.filterOverview(this.query), model, this.actions));
+      return;
+    }
+    host.append(renderChapterHeader(chapter, this.viewMode, this.actions));
+    if (this.viewMode === 'list') {
+      host.append(renderChapterList(chapter, this.selectedConceptId, model, this.actions));
+    } else {
+      host.append(
+        renderChapterGraph(
+          chapter,
+          this.selectedConceptId,
+          this.viewportWidth < DESIGN_TOKENS.breakpoints.compact,
+          model,
+          this.actions,
+        ),
+      );
+    }
   }
 
   private renderDetails(host: HTMLElement): void {
     clear(host);
-    if (this.detail !== null && this.payload !== null) {
-      host.append(renderDetail(this.detail, this.payload, this.actions));
+    if (this.level !== 'chapter') return;
+    const model = this.model;
+    if (model === null) return;
+    const chapter: MapChapter | null = this.chapterId === null ? null : model.chapter(this.chapterId);
+    if (this.detail !== null) {
+      host.append(renderDetail(this.detail, model, chapter, this.actions));
       return;
     }
     if (this.detailError !== null) {
@@ -659,34 +460,64 @@ export class MapController {
         h(
           'p',
           { class: 'edu-map-notice', role: 'alert', 'data-testid': 'map-detail-error' },
-          '这个概念详情暂时打不开；目录、关系列表和概念列表仍可使用。',
+          '这个概念详情暂时打不开；关系图和列表仍然可以用。',
         ),
       );
     }
-    host.append(
-      h(
-        'div',
-        { class: 'edu-map-detail edu-map-detail--empty', 'data-testid': 'map-detail-placeholder' },
-        h('h2', { class: 'edu-map-detail__title' }, '概念详情'),
-        h(
-          'p',
-          {},
-          '从左侧目录、关系图或概念列表选择一个概念：可以查看三轴状态、建议先修、出处与学习/复习入口。',
-        ),
-        h('p', { class: 'edu-map-help' }, '只看地图不会把概念标记为已学；开始学习/复习在独立工作区进行。'),
-      ),
+    host.append(renderDetailPrompt(chapter));
+  }
+
+  private isSearchFocused(): boolean {
+    if (this.contentHost === null) return false;
+    const active = this.contentHost.ownerDocument.activeElement;
+    return (
+      active instanceof HTMLElement &&
+      active.getAttribute('data-testid') === 'map-search-input'
     );
   }
 
-  private activeSlice(): GraphSlice | null {
-    return this.expandedSlice ?? this.chapterGraph;
+  private restoreSearchFocus(): void {
+    if (this.contentHost === null) return;
+    const input = this.contentHost.querySelector<HTMLInputElement>('[data-testid="map-search-input"]');
+    if (input === null) return;
+    input.focus();
+    const end = input.value.length;
+    try {
+      input.setSelectionRange(end, end);
+    } catch {
+      /* some environments do not implement selection on search inputs */
+    }
   }
 
-  private visibleConceptIds(slice: GraphSlice | null): readonly string[] {
-    const payload = this.payload;
-    if (slice === null || payload === null) return [];
-    return slice.concepts
-      .filter((concept) => matchesStateFilter(summarizeConceptState(payload, concept.id), this.filter))
-      .map((concept) => concept.id);
+  private findInHosts(selector: string): HTMLElement | null {
+    for (const host of [this.contentHost, this.detailsHost]) {
+      const found = host?.querySelector<HTMLElement>(selector) ?? null;
+      if (found !== null) return found;
+    }
+    return null;
+  }
+
+  private applyPendingFocus(): void {
+    const target = this.pendingFocus;
+    if (target === null) return;
+    this.pendingFocus = null;
+    if (target === 'chapter-title') {
+      this.findInHosts('[data-testid="map-chapter-title"]')?.focus();
+      return;
+    }
+    if (target.startsWith('chapter-row:')) {
+      const id = target.slice('chapter-row:'.length);
+      this.findInHosts(`button[data-action="open-chapter"][data-chapter-id="${id}"]`)?.focus();
+      return;
+    }
+    const conceptId = target.slice('concept:'.length);
+    const detailTitle = this.findInHosts(
+      `[data-testid="map-detail"][data-concept-id="${conceptId}"] [data-testid="map-detail-title"]`,
+    );
+    if (detailTitle !== null) {
+      detailTitle.focus();
+      return;
+    }
+    this.findInHosts(`button.edu-map-node[data-concept-id="${conceptId}"]`)?.focus();
   }
 }

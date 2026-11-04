@@ -18,28 +18,19 @@ afterEach(cleanupShells);
 const FORBIDDEN_ENTRY = /终端|源码|源代码|插件市场|开发者工具|DevTools|命令行|Skill|MCP/i;
 
 describe('education shell navigation', () => {
-  it('shows five student nav items (home included) and three home entries, without development entries', async () => {
+  it('shows the three student entries (today/study/progress) without development entries', async () => {
     const { container } = await mountShell(fixtureOptions());
     const nav = [...container.querySelectorAll<HTMLButtonElement>('[data-nav-path]')];
-    expect(nav.map((item) => item.textContent?.replace('当前', '').trim())).toEqual([
-      '首页',
-      '教材库',
-      '地图',
-      '工作区',
-      '记录',
-    ]);
+    expect(nav.map((item) => item.textContent?.trim())).toEqual(['今天', '学习', '进展']);
     const home = pageRoot(container);
     expect(home.querySelector('[data-testid="home-continue"]')).not.toBeNull();
     expect(home.querySelector('[data-testid="home-map"]')).not.toBeNull();
     expect(home.querySelector('[data-testid="home-review"]')).not.toBeNull();
     expect(textOf(home)).toContain('继续上次');
-    const progress = home.querySelector<HTMLProgressElement>('[data-testid="home-progress"] progress');
+    const progress = home.querySelector<HTMLElement>('[data-testid="home-progress"]');
     expect(progress).not.toBeNull();
-    expect(progress?.value).toBe(2);
-    expect(progress?.max).toBeGreaterThan(0);
-    expect(textOf(home.querySelector('[data-testid="home-progress"]') as HTMLElement)).toContain(
-      '内容覆盖计数',
-    );
+    expect(textOf(progress as HTMLElement)).toContain('全册 3 个概念');
+    expect(textOf(progress as HTMLElement)).toContain('学过');
     for (const control of [...buttonsOf(container), ...nav]) {
       expect((control.textContent ?? '').trim()).not.toMatch(FORBIDDEN_ENTRY);
     }
@@ -47,20 +38,17 @@ describe('education shell navigation', () => {
     expect(container.querySelector('main')?.id).toBe('edu-main');
   });
 
-  it('navigates to all four pages and keeps the current textbook/concept/mode context locatable', async () => {
+  it('navigates to all four pages and keeps the current entry locatable', async () => {
     const { shell, container } = await mountShell(fixtureOptions());
     for (const path of ['/library', '/map', '/workspace', '/records']) {
       await shell.navigate(path);
-      const context = container.querySelector('[data-testid="edu-context-bar"]');
-      expect(context, path).not.toBeNull();
-      const contextText = textOf(context as HTMLElement);
-      expect(contextText).toContain('教材');
-      expect(contextText).toContain('当前概念');
-      expect(contextText).toContain('本地保存');
-      expect(contextText).toContain('返回位置');
-      expect(container.querySelector('[aria-current="page"]')?.textContent ?? '').toContain(
-        path === '/library' ? '教材库' : path === '/map' ? '地图' : path === '/workspace' ? '工作区' : '记录',
-      );
+      expect(container.querySelector('[data-testid="edu-topbar"]'), path).not.toBeNull();
+      const current = container.querySelector('[aria-current="page"]')?.textContent ?? '';
+      if (path === '/workspace' || path === '/records') {
+        expect(current).toContain(path === '/workspace' ? '学习' : '进展');
+      }
+      // 页头只保留品牌/主入口/设置：不再有"返回位置/本地保存/内容包版本"这类调试条。
+      expect(textOf(container)).not.toContain('返回位置');
     }
     await shell.navigate('/home');
     expect(pageRoot(container).querySelector('[data-testid="home-continue"]')).not.toBeNull();
@@ -162,13 +150,12 @@ describe('education shell navigation', () => {
     expect(document.activeElement?.tagName).toBe('H1');
   });
 
-  it('keeps a discoverable account entry and separates service state from study identity', async () => {
+  it('keeps a discoverable settings entry and never exposes credentials', async () => {
     const { container } = await mountShell(fixtureOptions());
     const account = container.querySelector('[data-action="account-status"]');
     expect(account).not.toBeNull();
     const text = textOf(account as HTMLElement);
-    expect(text).toContain('账户与模型服务');
-    expect(text).toContain('云推理可用');
+    expect(text).toContain('设置');
     expect(text).not.toMatch(/token|Bearer|sk-/i);
   });
 });

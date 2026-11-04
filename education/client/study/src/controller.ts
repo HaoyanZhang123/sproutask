@@ -22,43 +22,42 @@ import {
   h,
   loadingState,
   notice,
-  progressSummary,
   renderErrorBanner,
   statusChip,
-  Modal,
 } from '../../shell/src/index.js';
 import {
   mountAnswerForm,
-  mountFeedbackView,
   supportsAnswerForm,
   type AnswerFormController,
   type AnswerFormValue,
   type FeedbackViewController,
 } from '../../visuals/src/index.js';
 import {
-  summarizeConceptState,
-  type MapPayload,
-} from '../../map/src/index.js';
-import type { EducationPageContext } from '../../shell/src/index.js';
+  LEARNING_LABELS,
+  REVIEW_OUTCOME_LABELS,
+  SELF_REPORT_LABELS,
+  UNDERSTANDING_LABELS,
+  VALIDITY_LABELS,
+  type EducationPageContext,
+} from '../../shell/src/index.js';
 import { ActivityStateMachine } from './machine.js';
 import { openSourcePopover } from './source-view.js';
 import {
   ACTIVITY_TYPE_LABELS,
-  ASSISTANCE_NOTE,
+  CRITERION_LABELS,
   DRAFT_SAVED,
   DRAFT_UNSAVED,
-  END_NOTE,
   HELP_ACTIONS,
   LOW_DIFFICULTY_NOTE,
-  PHASE_LABELS,
-  PHASE_TONES,
   REVIEW_REASON_LABELS,
   SKIP_NOTE,
+  VERDICT_LABELS,
   answerInputType,
   decisionNotice,
   encodeAnswer,
   formatStudyTime,
 } from './labels.js';
+import { chevronIcon } from './icons.js';
 import type {
   StudyActivityPhase,
   StudyDataSource,
@@ -192,6 +191,14 @@ interface StateSummary {
   readonly selfReport: string;
 }
 
+/** 学习台顶部两条带子：标题/保存/结束本轮，以及「第几题 / 共几题」。 */
+export interface StudyChromeElements {
+  readonly top: HTMLElement;
+  readonly ribbon: HTMLElement;
+  /** 窄屏课本抽屉条上的「课本原文 · 课本第 N 页」。 */
+  readonly materialSummary: HTMLElement;
+}
+
 export class StudyController {
   private readonly options: StudyControllerOptions;
   private readonly machine = new ActivityStateMachine();
@@ -204,6 +211,21 @@ export class StudyController {
   private feedbackContainer: HTMLElement | null = null;
   private feedbackRoot: HTMLElement | null = null;
   private draftStatusNode: HTMLElement | null = null;
+  private chrome: StudyChromeElements | null = null;
+  private chromeTitle: HTMLElement | null = null;
+  private chromeMode: HTMLElement | null = null;
+  private chromeFinish: HTMLButtonElement | null = null;
+  private ribbonBars: HTMLElement | null = null;
+  private ribbonCap: HTMLElement | null = null;
+  private ribbonBarCount = -1;
+  private chatThread: HTMLElement | null = null;
+  private chatNoticeHost: HTMLElement | null = null;
+  private chatErrorHost: HTMLElement | null = null;
+  private chatLowHost: HTMLElement | null = null;
+  private chatInputNode: HTMLTextAreaElement | null = null;
+  private chatSendNode: HTMLButtonElement | null = null;
+  private openChatHook: (() => void) | null = null;
+  private openMaterialHook: (() => void) | null = null;
 
   private intent: Intent = { conceptId: null, mode: 'learn', sessionId: null, activityId: null, fromResume: false };
   private workspace: StudyWorkspace | null = null;
@@ -213,6 +235,8 @@ export class StudyController {
   private selfReport: SelfReport | null = null;
   private activity: Activity | null = null;
   private answer: AnswerFormValue | null = null;
+  /** 提交后用于回显「你写的 / 你选的」；草稿被清空也不丢。 */
+  private lastAnswer: AnswerFormValue | null = null;
   private draft: StudyDraft | null = null;
   private draftStatus: DraftStatus = 'none';
   private draftError: ServiceError | null = null;
@@ -324,6 +348,64 @@ export class StudyController {
     this.feedbackContainer = null;
     this.feedbackRoot = null;
     this.draftStatusNode = null;
+    this.chrome = null;
+    this.chromeTitle = null;
+    this.chromeMode = null;
+    this.chromeFinish = null;
+    this.ribbonBars = null;
+    this.ribbonCap = null;
+    this.ribbonBarCount = -1;
+    this.chatThread = null;
+    this.chatNoticeHost = null;
+    this.chatErrorHost = null;
+    this.chatLowHost = null;
+    this.chatInputNode = null;
+    this.chatSendNode = null;
+    this.openChatHook = null;
+    this.openMaterialHook = null;
+  }
+
+  /** 页面骨架把三条带子交给控制器，控制器只填内容。 */
+  mountChrome(elements: StudyChromeElements): void {
+    this.chrome = elements;
+    this.chromeTitle = h('h2', { class: 'edu-study-top__title', 'data-testid': 'study-title' }, '学习');
+    this.chromeMode = h('p', { class: 'edu-study-top__mode', 'data-testid': 'study-mode' });
+    const save = h('span', {
+      class: 'edu-study-save',
+      'data-testid': 'study-draft-status',
+      'data-state': 'none',
+      'aria-live': 'polite',
+    });
+    this.draftStatusNode = save;
+    this.chromeFinish = button('结束本轮', () => void this.finishRound(), {
+      small: true,
+      tone: 'ghost',
+      dataAction: 'finish-round',
+    });
+    const leave = button('先不学了', () => this.leaveUnfinished(), {
+      small: true,
+      tone: 'ghost',
+      dataAction: 'leave-unfinished',
+    });
+    elements.top.append(
+      h('div', { class: 'edu-study-top__main' }, this.chromeTitle, this.chromeMode),
+      h('div', { class: 'edu-study-top__side' }, save, this.chromeFinish, leave),
+    );
+    this.ribbonBars = h('div', { class: 'edu-study-ribbon__bars', 'aria-hidden': 'true' });
+    this.ribbonCap = h('span', { class: 'edu-study-ribbon__cap', 'data-testid': 'study-ribbon-cap' });
+    elements.ribbon.append(this.ribbonBars, this.ribbonCap);
+    this.renderers.add(() => this.renderChrome());
+    this.renderChrome();
+  }
+
+  /** 小芽浮层的开合由页面骨架负责，控制器只请求「打开」。 */
+  setChatOpener(open: () => void): void {
+    this.openChatHook = open;
+  }
+
+  /** 「再看看材料」：窄屏开抽屉、宽屏聚焦课本。 */
+  setMaterialOpener(open: () => void): void {
+    this.openMaterialHook = open;
   }
 
   mountMaterial(container: HTMLElement): void {
@@ -334,6 +416,69 @@ export class StudyController {
 
   mountChat(container: HTMLElement): void {
     this.chatContainer = container;
+    container.replaceChildren();
+    const thread = h('ol', { class: 'sprout-thread', 'data-testid': 'sprout-thread', 'aria-live': 'polite' });
+    const quick = h('div', { class: 'sprout-quick', 'data-testid': 'study-help-actions' });
+    const moreHost = h('div', { class: 'sprout-quick', 'data-testid': 'study-help-more', hidden: true });
+    const noticeHost = h('div', { class: 'sprout-sheet__notice', 'data-testid': 'study-help-notice' });
+    const errorHost = h('div', { class: 'sprout-sheet__error' });
+    const lowHost = h('div', { class: 'sprout-sheet__low', 'data-testid': 'study-low-difficulty' });
+    // 三个日常快捷入口直接露出；「分步示范 / 直接看答案」收在「更多帮助」里，
+    // 免得第一次用的学生一次面对五个并列按钮。
+    for (const action of HELP_ACTIONS.slice(0, 3)) {
+      quick.append(
+        button(action.label, () => void this.sendHelp(action.kind), {
+          small: true,
+          dataAction: `help-${action.kind}`,
+          title: action.note,
+        }),
+      );
+    }
+    const moreButton = button(
+      '更多帮助',
+      () => {
+        const opening = moreHost.hasAttribute('hidden');
+        if (opening) moreHost.removeAttribute('hidden');
+        else moreHost.setAttribute('hidden', '');
+        moreButton.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      },
+      { small: true, dataAction: 'help-more' },
+    );
+    moreButton.setAttribute('aria-expanded', 'false');
+    quick.append(moreButton);
+    for (const action of HELP_ACTIONS.slice(3)) {
+      moreHost.append(
+        button(action.label, () => void this.sendHelp(action.kind), {
+          small: true,
+          dataAction: `help-${action.kind}`,
+          title: action.note,
+        }),
+      );
+    }
+    const input = h('textarea', {
+      class: 'edu-input',
+      rows: 3,
+      'aria-label': '给小芽发消息',
+      'data-testid': 'sprout-input',
+      oninput: (event: Event) => {
+        this.chatText = (event.currentTarget as HTMLTextAreaElement).value;
+      },
+    });
+    input.value = this.chatText;
+    const send = button('发送', () => void this.sendMessage(input.value), {
+      small: true,
+      tone: 'primary',
+      dataAction: 'send-chat',
+    });
+    send.setAttribute('data-testid', 'sprout-send');
+    const compose = h('div', { class: 'sprout-compose' }, input, send);
+    container.append(thread, quick, moreHost, noticeHost, errorHost, lowHost, compose);
+    this.chatThread = thread;
+    this.chatNoticeHost = noticeHost;
+    this.chatErrorHost = errorHost;
+    this.chatLowHost = lowHost;
+    this.chatInputNode = input;
+    this.chatSendNode = send;
     this.renderers.add(() => this.renderChat());
     this.renderChat();
   }
@@ -392,6 +537,7 @@ export class StudyController {
     this.selfReport = null;
     this.activity = null;
     this.answer = null;
+    this.lastAnswer = null;
     this.draft = null;
     this.draftStatus = 'none';
     this.draftError = null;
@@ -689,6 +835,7 @@ export class StudyController {
       this.notify();
       return;
     }
+    this.lastAnswer = this.answer ?? this.lastAnswer;
     this.feedback = attempt.grade;
     this.phase = 'feedback';
     this.machine.transition('feedback');
@@ -1107,7 +1254,8 @@ export class StudyController {
     await this.options.dataSource.clearDraft(this.request(), this.draftKey());
     this.draft = null;
     this.answer = null;
-    this.draftStatus = 'saved';
+    // 交卷后草稿本来就清空了：不要还挂着「草稿已保存」让人误会。
+    this.draftStatus = 'none';
     this.updateDraftStatusNodes();
   }
 
@@ -1123,12 +1271,71 @@ export class StudyController {
 
   /* -------------------------------------------------------------- renders */
 
+  private renderChrome(): void {
+    const chrome = this.chrome;
+    if (chrome === null) return;
+    const workspace = this.workspace;
+    if (this.chromeTitle !== null) {
+      this.chromeTitle.textContent = workspace === null ? '学习' : workspace.concept.title;
+    }
+    if (this.chromeMode !== null) {
+      this.chromeMode.textContent = this.intent.mode === 'review' ? '复习 · 先回忆，再看反馈' : '学习 · 先读课本，再自己作答';
+    }
+    if (this.draftStatusNode !== null) {
+      const text =
+        this.draftStatus === 'saved'
+          ? DRAFT_SAVED
+          : this.draftStatus === 'saving'
+            ? '正在保存…'
+            : this.draftStatus === 'failed'
+              ? DRAFT_UNSAVED
+              : '';
+      this.draftStatusNode.textContent = text;
+      this.draftStatusNode.dataset['state'] = this.draftStatus;
+    }
+    if (this.chromeFinish !== null) {
+      this.chromeFinish.disabled = this.session === null || this.finishReceipt !== null;
+    }
+    const sources = workspace === null ? [] : uniqueSources(workspace.sources);
+    const firstSource = sources[0];
+    chrome.materialSummary.textContent =
+      workspace === null
+        ? '课本原文'
+        : firstSource !== undefined && firstSource.printedPage !== null
+          ? `课本原文 · 课本第 ${firstSource.printedPage} 页`
+          : '课本原文';
+
+    // 进度条：一道题一段，已答过/正在答/还没答靠形状 + 文字说明，不只靠颜色。
+    const activities = workspace?.activities ?? [];
+    const index = workspace === null ? -1 : activities.findIndex((entry) => entry.id === workspace.activity.id);
+    if (this.ribbonBars !== null) {
+      if (this.ribbonBarCount !== activities.length) {
+        this.ribbonBars.replaceChildren();
+        for (let bar = 0; bar < activities.length; bar += 1) {
+          this.ribbonBars.append(h('span', { class: 'edu-study-ribbon__bar', 'data-state': 'todo' }));
+        }
+        this.ribbonBarCount = activities.length;
+      }
+      const bars = [...this.ribbonBars.children];
+      bars.forEach((bar, barIndex) => {
+        if (!(bar instanceof HTMLElement)) return;
+        bar.dataset['state'] = barIndex < index ? 'done' : barIndex === index ? 'now' : 'todo';
+      });
+    }
+    if (this.ribbonCap !== null) {
+      if (this.finishReceipt !== null) this.ribbonCap.textContent = '本轮结束，下一轮接着来';
+      else if (activities.length === 0) this.ribbonCap.textContent = '';
+      else if (index >= 0) this.ribbonCap.textContent = `第 ${index + 1} 题，共 ${activities.length} 题`;
+      else this.ribbonCap.textContent = `共 ${activities.length} 题`;
+    }
+  }
+
   private renderMaterial(): void {
     const container = this.materialContainer;
     if (container === null) return;
     clear(container);
     if (this.loading) {
-      container.append(loadingState({ title: '正在打开学习材料…' }));
+      container.append(loadingState({ title: '正在打开这一节的课本…' }));
       return;
     }
     if (this.error !== null) {
@@ -1141,11 +1348,22 @@ export class StudyController {
       );
       return;
     }
+    if (this.workspace === null && this.reviewRange !== null) {
+      container.append(
+        h(
+          'div',
+          { class: 'edu-study-material' },
+          h('div', { class: 'edu-study-kicker' }, h('h3', {}, '复习')),
+          h('p', { class: 'edu-study-page-text' }, '先从右边挑一个要复习的范围；选好后这一页会换成对应课本。'),
+        ),
+      );
+      return;
+    }
     if (this.workspace === null) {
       container.append(
         emptyState({
-          title: '还没有选择学习活动',
-          body: '从地图选择概念，或在首页继续上次。',
+          title: '还没有选好这一节',
+          body: '从地图选一个概念，或者在首页接着上次。',
           actions: [
             { label: '去地图', onClick: () => this.navigate?.('/map'), tone: 'primary' },
             { label: '返回首页', onClick: () => this.navigate?.('/home') },
@@ -1155,143 +1373,170 @@ export class StudyController {
       return;
     }
     const workspace = this.workspace;
+    const doc = container.ownerDocument;
+    const sources = uniqueSources(workspace.sources);
+    const pageLabel =
+      sources.length > 0 && sources[0] !== undefined && sources[0].printedPage !== null
+        ? `课本第 ${sources[0].printedPage} 页`
+        : null;
     container.append(
       h(
         'div',
         { class: 'edu-study-material', 'data-testid': 'study-material' },
-        h('h2', { class: 'edu-card__title' }, workspace.concept.title),
-        h('p', { class: 'edu-card__meta' }, `${workspace.scope === 'partial' ? '部分内容（未达全册）' : '全册范围'} · ${workspace.trustMode === 'candidate' ? '候选内容（未核实）' : '正式内容'}`),
-        h('h3', { class: 'edu-card__title' }, '学习目标'),
-        h('ul', { class: 'edu-study-list' }, ...workspace.concept.learningObjectives.map((objective) => h('li', {}, objective))),
-        h('h3', { class: 'edu-card__title' }, '材料'),
-        h('p', { class: 'edu-study-text' }, workspace.concept.explanation),
-        workspace.concept.misconceptions.length > 0
+        h(
+          'div',
+          { class: 'edu-study-kicker' },
+          h('h3', {}, '课本原文'),
+          pageLabel === null
+            ? statusChip('页脚页码待核实', 'attention')
+            : h('span', { class: 'edu-chip', 'data-tone': 'neutral' }, pageLabel),
+        ),
+        h('p', { class: 'edu-study-page-text' }, workspace.concept.explanation),
+        workspace.concept.learningObjectives.length > 0
           ? h(
               'div',
-              { class: 'edu-study-misconceptions' },
-              h('h3', { class: 'edu-card__title' }, '容易混淆'),
-              ...workspace.concept.misconceptions.map((entry) => h('p', { class: 'edu-study-text' }, `${entry.statement} → ${entry.correction}`)),
+              {},
+              h('h4', { class: 'edu-study-subtitle' }, '学习目标'),
+              h(
+                'ul',
+                { class: 'edu-study-list' },
+                ...workspace.concept.learningObjectives.map((objective) => h('li', {}, objective)),
+              ),
             )
           : null,
-        h('h3', { class: 'edu-card__title' }, '出处'),
-        ...uniqueSources(workspace.sources).map((source) => {
-          const sourceButton = button('查看出处', () => this.openSource(source, sourceButton), {
-            small: true,
-            dataAction: 'study-source',
-          });
-          return h(
-            'div',
-            { class: 'edu-study-source-row' },
-            sourceButton,
-            h('span', { class: 'edu-muted' }, sourceLabel(source)),
-          );
-        }),
-        h('p', { class: 'edu-study-status', 'data-testid': 'study-draft-status' }, this.draftStatus === 'saved' ? DRAFT_SAVED : this.draftStatus === 'saving' ? '正在保存草稿…' : this.draftStatus === 'failed' ? DRAFT_UNSAVED : ''),
+        workspace.concept.misconceptions.length > 0
+          ? h(
+              'details',
+              { class: 'edu-study-fold', open: true, 'data-testid': 'study-misconceptions' },
+              h(
+                'summary',
+                {},
+                h('span', { class: 'edu-study-fold__chev' }, chevronIcon(doc)),
+                '容易混淆',
+              ),
+              h(
+                'div',
+                { class: 'edu-study-fold__body' },
+                ...workspace.concept.misconceptions.map((entry) =>
+                  h('p', {}, `${entry.statement} → ${entry.correction}`),
+                ),
+              ),
+            )
+          : null,
+        sources.length > 0
+          ? h(
+              'details',
+              { class: 'edu-study-fold', 'data-testid': 'study-sources' },
+              h(
+                'summary',
+                {},
+                h('span', { class: 'edu-study-fold__chev' }, chevronIcon(doc)),
+                '这一页的出处',
+              ),
+              h(
+                'div',
+                { class: 'edu-study-fold__body edu-study-source-row' },
+                ...sources.map((source) => {
+                  const trigger = h(
+                    'button',
+                    {
+                      type: 'button',
+                      class: 'edu-study-source-chip',
+                      'data-action': 'study-source',
+                      onclick: () => this.openSource(source, trigger),
+                    },
+                    sourceLabel(source),
+                  );
+                  return trigger;
+                }),
+              ),
+            )
+          : null,
+        pageLabel !== null && sources[0] !== undefined
+          ? h('span', { class: 'edu-study-page-num' }, `— ${sources[0].printedPage} —`)
+          : null,
         workspace.compatibility !== null
           ? notice({
               tone: 'warning',
               title: '内容版本不兼容',
-              body: `上次内容版本 ${workspace.compatibility.previousPackVersion}，当前 ${workspace.compatibility.currentPackVersion}。${workspace.compatibility.reason} 旧记录仍可查看，不会静默迁移。`,
+              body: `上次用的版本是 ${workspace.compatibility.previousPackVersion}，现在是 ${workspace.compatibility.currentPackVersion}。${workspace.compatibility.reason} 旧记录仍可查看，不会悄悄迁移。`,
               actions: [
                 { label: '查看旧记录', onClick: () => this.navigate?.('/records') },
                 { label: '去教材库', onClick: () => this.navigate?.('/library') },
               ],
             })
           : null,
-        workspace.notice !== null ? h('p', { class: 'edu-muted', 'data-testid': 'study-fixture-notice' }, workspace.notice) : null,
+        workspace.notice !== null
+          ? h('p', { class: 'edu-study-muted', 'data-testid': 'study-fixture-notice' }, workspace.notice)
+          : null,
       ),
     );
   }
 
   private renderChat(): void {
-    const container = this.chatContainer;
-    if (container === null) return;
-    clear(container);
-    const root = h('div', { class: 'edu-study-chat', 'data-testid': 'study-chat' }, h('h3', { class: 'edu-card__title' }, '学习助手'));
-    for (const message of this.messages) {
-      root.append(
+    const thread = this.chatThread;
+    if (thread === null) return;
+    thread.replaceChildren(...this.messages.map((message) => this.messageBubble(message)));
+    if (this.messages.length === 0) {
+      thread.append(
         h(
-          'div',
-          { class: `edu-study-message edu-study-message--${message.role}`, 'data-role': message.role },
-          h('span', { class: 'edu-muted' }, message.role === 'student' ? '你' : message.role === 'assistant' ? '助手' : '状态'),
-          h('p', {}, message.text),
-          message.disclosure ? statusChip('本轮包含 disclosure', 'attention') : null,
+          'li',
+          { class: 'sprout-msg', 'data-role': 'assistant' },
+          h('span', { class: 'sprout-msg__who' }, '小芽'),
+          h('p', {}, '我是小芽。课本哪句没看懂、题目怎么想，都可以直接问我。'),
         ),
       );
     }
-    const actions = h('div', { class: 'edu-study-help-actions', 'data-testid': 'study-help-actions' });
-    // Two everyday help actions stay visible; the rest sit behind "更多帮助" so a
-    // first-time student is not faced with five competing buttons.
-    const moreHost = h('div', {
-      class: 'edu-study-help-actions edu-study-help-actions--more',
-      'data-testid': 'study-help-more',
-      hidden: true,
-    });
-    const helpButton = (action: (typeof HELP_ACTIONS)[number]): HTMLElement =>
-      button(action.label, () => void this.sendHelp(action.kind), {
-        small: true,
-        dataAction: `help-${action.kind}`,
-        title: action.note,
-      });
-    for (const action of HELP_ACTIONS.slice(0, 2)) actions.append(helpButton(action));
-    for (const action of HELP_ACTIONS.slice(2)) moreHost.append(helpButton(action));
-    if (HELP_ACTIONS.length > 2) {
-      const toggle = button(
-        '更多帮助',
-        () => {
-          const opening = moreHost.hasAttribute('hidden');
-          if (opening) moreHost.removeAttribute('hidden');
-          else moreHost.setAttribute('hidden', '');
-          toggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
-        },
-        { small: true, dataAction: 'help-more' },
-      );
-      toggle.setAttribute('aria-expanded', 'false');
-      actions.append(toggle);
+    if (this.chatNoticeHost !== null) {
+      this.chatNoticeHost.replaceChildren();
+      if (this.helpNotice.length > 0) {
+        this.chatNoticeHost.append(
+          h('p', { class: 'edu-notice edu-notice--warning', role: 'status' }, this.helpNotice),
+        );
+      }
     }
-    root.append(actions, moreHost);
-    if (this.helpNotice.length > 0) {
-      root.append(h('p', { class: 'edu-notice edu-notice--warning', role: 'status', 'data-testid': 'study-help-notice' }, this.helpNotice));
+    if (this.chatErrorHost !== null) {
+      this.chatErrorHost.replaceChildren();
+      if (this.chatError !== null) {
+        this.chatErrorHost.append(
+          renderErrorBanner(this.chatError, {
+            onRetry: () => void this.sendMessage('请再试一次。'),
+            backLabel: '先继续读',
+            onBack: () => undefined,
+          }),
+        );
+      }
     }
-    if (this.chatError !== null) {
-      root.append(
-        renderErrorBanner(this.chatError, {
-          onRetry: () => void this.sendMessage('请重试这次请求。'),
-          backLabel: '继续读材料',
-          onBack: () => undefined,
-        }),
-      );
+    if (this.chatLowHost !== null) {
+      this.chatLowHost.replaceChildren();
+      if (this.tutorState !== null && this.tutorState.consecutiveFailures >= 2) {
+        this.chatLowHost.append(
+          h('p', { class: 'edu-study-note' }, LOW_DIFFICULTY_NOTE),
+          button('换一种讲法', () => void this.lowerDifficulty(), {
+            small: true,
+            dataAction: 'lower-difficulty',
+          }),
+        );
+      }
     }
-    const input = h('textarea', {
-      class: 'edu-input',
-      rows: 3,
-      'aria-label': '给学习助手发消息',
-      'data-testid': 'study-chat-input',
-      oninput: (event: Event) => {
-        this.chatText = (event.currentTarget as HTMLTextAreaElement).value;
-      },
-    });
-    input.value = this.chatText;
-    root.append(
+    if (this.chatSendNode !== null) this.chatSendNode.disabled = this.session === null;
+    if (this.chatInputNode !== null && this.chatInputNode.value !== this.chatText) {
+      this.chatInputNode.value = this.chatText;
+    }
+  }
+
+  private messageBubble(message: ChatMessage): HTMLElement {
+    return h(
+      'li',
+      { class: 'sprout-msg', 'data-role': message.role },
       h(
-        'div',
-        { class: 'edu-study-chat-input' },
-        input,
-        button('发送', () => void this.sendMessage(input.value), {
-          small: true,
-          tone: 'primary',
-          dataAction: 'send-chat',
-          disabled: this.session === null,
-        }),
+        'span',
+        { class: 'sprout-msg__who' },
+        message.role === 'student' ? '你' : message.role === 'assistant' ? '小芽' : '提示',
       ),
-      h('p', { class: 'edu-muted' }, '想好了就点发送；卡住了，就用上面的按钮要一点帮助。'),
+      h('p', {}, message.text),
+      message.disclosure ? statusChip('这次看过完整答案', 'attention') : null,
     );
-    if (this.tutorState !== null && this.tutorState.consecutiveFailures >= 2) {
-      root.append(
-        h('div', { class: 'edu-study-low-difficulty' }, h('p', { class: 'edu-muted' }, LOW_DIFFICULTY_NOTE), button('换一种讲法', () => void this.lowerDifficulty(), { small: true, dataAction: 'lower-difficulty' })),
-      );
-    }
-    container.append(root);
   }
 
   private renderActivity(): void {
@@ -1303,44 +1548,48 @@ export class StudyController {
     }
     if (this.loading) {
       clear(container);
-      container.append(loadingState({ title: '正在准备活动…' }));
+      container.append(loadingState({ title: '正在准备这一题…' }));
       return;
     }
     if (this.error !== null) {
       clear(container);
-      container.append(renderErrorBanner(this.error, { onRetry: () => void this.load(this.loadedKey), backLabel: '返回地图', onBack: () => this.navigate?.('/map') }));
+      container.append(
+        renderErrorBanner(this.error, {
+          onRetry: () => void this.load(this.loadedKey),
+          backLabel: '返回地图',
+          onBack: () => this.navigate?.('/map'),
+        }),
+      );
       return;
     }
     if (this.workspace === null || this.activity === null) {
       clear(container);
-      container.append(emptyState({ title: '还没有打开活动', body: '从地图选择概念后进入学习或复习。', actions: [{ label: '去地图', onClick: () => this.navigate?.('/map'), tone: 'primary' }] }));
+      container.append(
+        emptyState({
+          title: '还没有打开题目',
+          body: '从地图选一个概念，再进入学习或复习。',
+          testId: 'study-empty',
+          actions: [{ label: '去地图', onClick: () => this.navigate?.('/map'), tone: 'primary' }],
+        }),
+      );
       return;
     }
-    if (this.imageMode) {
-      this.renderImageAnswer(container);
-      return;
-    }
-    // Do not rebuild the form on draft autosave.
+    // 草稿自动保存会触发重绘；此时不要重建表单，否则光标会丢。
     if (this.form !== null && this.phase === 'draft' && this.formActivityId === this.activity.id) {
       return;
     }
     clear(container);
     const root = h('div', { class: 'edu-study-activity', 'data-testid': 'study-activity' });
-    const draftStatus = h('p', { class: 'edu-study-status', 'data-testid': 'study-activity-draft-status' });
-    this.draftStatusNode = draftStatus;
-    this.updateDraftStatusNodes();
-    root.append(
-      h('div', { class: 'edu-study-activity-head' },
-        h('h2', { class: 'edu-card__title' }, '当前活动'),
-        statusChip(PHASE_LABELS[this.phase], PHASE_TONES[this.phase]),
-      ),
-      h('p', { class: 'edu-card__meta' }, `${ACTIVITY_TYPE_LABELS[this.activity.type] ?? '活动'}`),
-      h('p', { class: 'edu-study-stem' }, this.activity.stem),
-      draftStatus,
-    );
-    if (this.lateNotice.length > 0) root.append(h('p', { class: 'edu-notice edu-notice--warning', role: 'status' }, this.lateNotice));
-    if (this.failureNotice.length > 0) root.append(h('p', { class: 'edu-notice edu-notice--warning', role: 'status' }, this.failureNotice));
-    if (this.skipNotice.length > 0) root.append(h('p', { class: 'edu-notice edu-notice--info', role: 'status' }, this.skipNotice));
+    root.append(this.questionHead(), this.stemBlock());
+    if (this.lateNotice.length > 0) {
+      root.append(h('p', { class: 'edu-notice edu-notice--warning', role: 'status' }, this.lateNotice));
+    }
+    if (this.failureNotice.length > 0) {
+      root.append(h('p', { class: 'edu-notice edu-notice--warning', role: 'status' }, this.failureNotice));
+    }
+    if (this.skipNotice.length > 0) {
+      root.append(h('p', { class: 'edu-notice edu-notice--info', role: 'status' }, this.skipNotice));
+    }
     if (this.failedError !== null) {
       root.append(
         renderErrorBanner(this.failedError, {
@@ -1352,37 +1601,51 @@ export class StudyController {
     }
     if (this.phase === 'failed') {
       root.append(
-        h('div', { class: 'edu-inline-actions' },
-          button('重试批改', () => void this.retry(), { small: true, tone: 'primary', dataAction: 'retry-grading' }),
+        h(
+          'div',
+          { class: 'edu-study-slot-actions' },
+          button('重试批改', () => void this.retry(), {
+            small: true,
+            tone: 'primary',
+            dataAction: 'retry-grading',
+          }),
           button('改文字', () => this.editAnswer(), { small: true, dataAction: 'edit-answer' }),
         ),
       );
     }
+    if (this.imageMode) {
+      this.renderImageAnswer(root);
+      container.append(root);
+      return;
+    }
     if (this.finishReceipt !== null) {
-      root.append(this.finishSummary());
+      root.append(h('p', { class: 'edu-study-note' }, '这一轮已经结束；结果和下一步在下面。'));
       container.append(root);
       return;
     }
     if (this.phase === 'submitted' || this.phase === 'grading') {
       root.append(
-        h('div', { class: 'edu-study-pending', role: 'status' },
+        h(
+          'div',
+          { class: 'edu-study-pending', role: 'status' },
           h('p', {}, this.phase === 'submitted' ? '原答已提交，正在保存…' : '原答已保存，正在等待反馈…'),
-          h('p', { class: 'edu-muted' }, '反馈完成前不会显示为已掌握；可以取消，原答和草稿会保留。'),
+          h(
+            'p',
+            { class: 'edu-study-note' },
+            '反馈完成前不会显示为已掌握；可以取消，原答和草稿会保留。',
+          ),
         ),
-        button('取消本次反馈', () => this.cancelTurn(), { small: true, tone: 'danger-ghost', dataAction: 'cancel-turn' }),
+        button('取消本次反馈', () => this.cancelTurn(), {
+          small: true,
+          tone: 'danger-ghost',
+          dataAction: 'cancel-turn',
+        }),
       );
       container.append(root);
       return;
     }
     if (this.phase === 'feedback') {
-      root.append(
-        h('p', { class: 'edu-muted' }, '本次作答已提交；反馈在右侧。你可以改文字再试一次，或结束本轮。'),
-        h('div', { class: 'edu-inline-actions' },
-          button('改文字再试', () => this.editAnswer(), { small: true, dataAction: 'edit-answer' }),
-          button('结束本轮', () => void this.finishRound(), { small: true, tone: 'primary', dataAction: 'finish-round' }),
-          button('暂不完成，返回地图', () => this.leaveUnfinished(), { small: true }),
-        ),
-      );
+      root.append(this.answerEcho());
       container.append(root);
       return;
     }
@@ -1390,20 +1653,60 @@ export class StudyController {
     container.append(root);
   }
 
+  private questionHead(): HTMLElement {
+    const parts: HTMLElement[] = [];
+    const number = this.questionNumber();
+    if (number !== null) {
+      parts.push(h('span', {}, number));
+      parts.push(h('span', { class: 'edu-study-q-head__dot', 'aria-hidden': 'true' }, '·'));
+    }
+    parts.push(h('span', {}, ACTIVITY_TYPE_LABELS[this.activity?.type ?? ''] ?? '这一题'));
+    const phaseNote =
+      this.phase === 'feedback'
+        ? '已作答'
+        : this.phase === 'failed'
+          ? '提交没有完成'
+          : this.phase === 'submitted' || this.phase === 'grading'
+            ? '正在批改'
+            : null;
+    if (phaseNote !== null) {
+      parts.push(h('span', { class: 'edu-study-q-head__dot', 'aria-hidden': 'true' }, '·'));
+      parts.push(h('span', {}, phaseNote));
+    }
+    return h('p', { class: 'edu-study-q-head' }, ...parts);
+  }
+
+  private stemBlock(): HTMLElement {
+    return h('h3', { class: 'edu-study-stem', 'data-testid': 'study-stem' }, this.activity?.stem ?? '');
+  }
+
+  private questionNumber(): string | null {
+    const workspace = this.workspace;
+    if (workspace === null) return null;
+    const index = workspace.activities.findIndex((entry) => entry.id === workspace.activity.id);
+    return index >= 0 ? `第 ${index + 1} 题` : null;
+  }
+
   private renderForm(root: HTMLElement): void {
     if (this.activity === null) return;
     this.form?.unmount();
     this.form = null;
+    const body = h('div', { class: 'edu-study-answer-body' });
+    let submitButton: HTMLButtonElement | null = null;
     if (!supportsAnswerForm(this.activity)) {
-      root.append(
-        h('p', { class: 'edu-notice edu-notice--info' }, '这是图示标注活动；请在下方图示区完成，或使用编号列表/文字替代路径。'),
+      body.append(
+        h(
+          'p',
+          { class: 'edu-notice edu-notice--info' },
+          '这是图示标注题；图示打不开时，可以用文字把位置和名称写清楚。',
+        ),
       );
     } else {
-      const form = mountAnswerForm(root, {
+      const form = mountAnswerForm(body, {
         activity: this.activity,
-        initial: this.answer,
+        // 草稿在交卷后清空；「改文字再试」仍回到上次写的内容，不用从空白开始。
+        initial: this.answer ?? this.lastAnswer,
         onSubmit: (value) => void this.submit(value),
-        onCancel: () => this.leaveUnfinished(),
       });
       this.form = form;
       this.formActivityId = this.activity.id;
@@ -1415,38 +1718,92 @@ export class StudyController {
         };
         form.element.addEventListener('input', save);
         form.element.addEventListener('change', save);
+        // 表单自带的「提交作答」搬到题目页底栏，和「需要一点提示 / 先跳过」同一行。
+        const actions = form.element.querySelector<HTMLElement>('.edu-visual-actions');
+        submitButton = actions?.querySelector<HTMLButtonElement>('.edu-button--primary') ?? null;
+        actions?.remove();
       }
     }
-    const actions = h('div', { class: 'edu-inline-actions' },
-      button('跳过本题', () => void this.skip(), { small: true, dataAction: 'skip-question' }),
-      button('结束本轮', () => void this.finishRound(), { small: true, dataAction: 'finish-round' }),
-      button('暂不完成，返回地图', () => this.leaveUnfinished(), { small: true }),
+    const foot = h('div', { class: 'edu-study-work-foot' });
+    foot.append(
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'edu-study-hint-link',
+          'data-action': 'hint',
+          onclick: () => this.requestHint(),
+        },
+        '需要一点提示',
+      ),
     );
-    if (this.workspace?.imageFlow !== null && this.workspace !== null) {
-      actions.append(button('改用图片作答', () => this.startImageMode(), { small: true, dataAction: 'image-answer' }));
+    const right = h('div', { class: 'edu-study-work-foot__right' });
+    if (this.workspace !== null && this.workspace.imageFlow !== null) {
+      right.append(
+        button('改用图片作答', () => this.startImageMode(), {
+          small: true,
+          dataAction: 'image-answer',
+        }),
+      );
     }
-    root.append(actions, h('p', { class: 'edu-muted' }, SKIP_NOTE));
+    right.append(button('先跳过', () => void this.skip(), { small: true, dataAction: 'skip-question' }));
+    if (submitButton !== null) {
+      const submit = submitButton;
+      submit.setAttribute('data-action', 'submit-answer');
+      right.append(submit);
+    }
+    foot.append(right);
+    root.append(body, foot, h('p', { class: 'edu-study-note' }, SKIP_NOTE));
+  }
+
+  private answerEcho(): HTMLElement {
+    const wrap = h('div', { class: 'edu-study-answer', 'data-testid': 'study-answer-echo' });
+    const answer = this.answer ?? this.lastAnswer;
+    const activity = this.activity;
+    if (answer === null || activity === null) {
+      wrap.append(h('span', { class: 'edu-study-answer__label' }, '你的作答'), '已提交');
+      return wrap;
+    }
+    if (answer.kind === 'choice') {
+      const schema = activity.answerSchema;
+      const labels =
+        schema.kind === 'choice'
+          ? schema.options
+              .filter((option) => answer.optionIds.includes(option.id))
+              .map((option) => option.label)
+          : [];
+      wrap.append(
+        h('span', { class: 'edu-study-answer__label' }, '你选的'),
+        h('span', {}, labels.length > 0 ? labels.join('、') : '还没有选择'),
+      );
+      return wrap;
+    }
+    if (answer.kind === 'text') {
+      wrap.append(
+        h('span', { class: 'edu-study-answer__label' }, '你写的'),
+        h('span', {}, answer.text.trim().length > 0 ? answer.text : '（没有写下内容）'),
+      );
+      return wrap;
+    }
+    wrap.append(
+      h('span', { class: 'edu-study-answer__label' }, '你的作答'),
+      h('span', {}, `已提交 ${answer.pairs.length} 条关系`),
+    );
+    return wrap;
   }
 
   /**
-   * Image answer entry. The file input, explicit local preview and the
-   * confirm-send step are separate: selecting a file never uploads anything.
+   * 图片作答入口。选文件、本机预览、确认发送是三步：选文件本身从不上传。
    */
-  private renderImageAnswer(container: HTMLElement): void {
-    clear(container);
-    const root = h(
-      'div',
-      { class: 'edu-study-activity edu-study-image', 'data-testid': 'study-activity' },
+  private renderImageAnswer(root: HTMLElement): void {
+    if (this.activity === null) return;
+    root.append(
       h(
-        'div',
-        { class: 'edu-study-activity-head' },
-        h('h2', { class: 'edu-card__title' }, '上传图片作答'),
-        statusChip(PHASE_LABELS[this.phase], PHASE_TONES[this.phase]),
+        'p',
+        { class: 'edu-study-note' },
+        '拍照或选择图片（PNG / JPEG，不超过 5 MB）。选图不等于发送：先在本机预览，再确认发送给模型识别。',
       ),
-      h('p', { class: 'edu-muted' }, '拍照或选择图片（PNG / JPEG，不超过 5 MB）。选择不等于发送：先在本机预览，再确认发送给模型识别。'),
-      h('p', { class: 'edu-card__meta' }, this.activity?.stem ?? ''),
     );
-
     const inputId = 'edu-study-image-file';
     const fileInput = h('input', {
       type: 'file',
@@ -1469,7 +1826,6 @@ export class StudyController {
         fileInput,
       ),
     );
-
     if (this.imageBusy) {
       root.append(
         h(
@@ -1480,7 +1836,6 @@ export class StudyController {
         button('取消等待', () => this.cancelImageWait(), { small: true, dataAction: 'image-cancel-wait' }),
       );
     }
-
     if (this.imageDraft !== null) {
       const draft = this.imageDraft;
       root.append(
@@ -1500,15 +1855,12 @@ export class StudyController {
           }),
         );
       } else {
-        root.append(h('p', { class: 'edu-visual-preview-placeholder' }, '图片预览仅在本机显示。'));
+        root.append(h('p', { class: 'edu-visual-preview-placeholder' }, '图片预览只在这台电脑上显示。'));
       }
     } else if (!this.imageBusy) {
-      root.append(
-        h('p', { class: 'edu-muted' }, '还没有选择图片。选好并预览后，再确认发送给模型识别。'),
-      );
+      root.append(h('p', { class: 'edu-study-note' }, '还没有选择图片。选好并预览后，再确认发送。'));
     }
-
-    const actions = h('div', { class: 'edu-inline-actions' });
+    const actions = h('div', { class: 'edu-study-slot-actions' });
     if (this.imageDraft !== null && !this.imageBusy) {
       const preview = button('预览图片', () => this.previewImage(), { small: true, dataAction: 'image-preview' });
       preview.dataset['imageAction'] = 'preview';
@@ -1531,23 +1883,30 @@ export class StudyController {
       dataAction: 'image-answer-send',
     });
     send.dataset['imageAction'] = 'confirm-send';
-    actions.append(send, button('取消本次作答', () => this.stopImageMode(), { small: true, dataAction: 'image-cancel' }));
+    actions.append(
+      send,
+      button('取消本次作答', () => this.stopImageMode(), { small: true, dataAction: 'image-cancel' }),
+    );
     root.append(actions);
-
     root.append(
       h(
         'p',
-        { class: 'edu-cloud-note' },
-        '发送说明：图片会通过模型服务识别，用于给出反馈；不会上传整本教材或其他学习记录。发送前可以随时取消。',
+        { class: 'edu-study-cloud-note' },
+        '发送说明：图片会通过模型服务识别，用来给出反馈；不会上传整本教材或其他学习记录。发送前可以随时取消。',
       ),
     );
-
     if (this.imageNotice.length > 0) {
-      root.append(h('p', { class: 'edu-muted', role: 'status', 'data-testid': 'image-notice' }, this.imageNotice));
+      root.append(
+        h('p', { class: 'edu-study-status', role: 'status', 'data-testid': 'image-notice' }, this.imageNotice),
+      );
     }
     if (this.imageFileError.length > 0) {
       root.append(
-        h('p', { class: 'edu-danger-text', role: 'alert', 'data-testid': 'image-file-error' }, this.imageFileError),
+        h(
+          'p',
+          { class: 'edu-danger-text', role: 'alert', 'data-testid': 'image-file-error' },
+          this.imageFileError,
+        ),
       );
     }
     if (this.imageError !== null) {
@@ -1560,94 +1919,61 @@ export class StudyController {
       );
     }
     if (this.imageResult !== null) root.append(this.imageResultSection());
-    container.append(root);
   }
 
+  /**
+   * 图片本身的补充说明；判读结论统一交给原地反馈区，避免同一句话出现两次。
+   * 这里只留图片质量/记录状态这类图片特有的信息。
+   */
   private imageResultSection(): HTMLElement {
     const info = this.imageResult;
     const grade = this.feedback;
     const section = h('div', { class: 'edu-study-image-result', 'data-testid': 'image-result' });
-    const clarification =
-      info?.stage === 'clarification_required' || grade?.requiresClarification === true;
+    const clarification = info?.stage === 'clarification_required' || grade?.requiresClarification === true;
     if (clarification) {
       section.append(
-        h('h3', { class: 'edu-card__title' }, '这张图片还不能判读'),
+        h('h3', { class: 'edu-study-subtitle' }, '这张图片还不能判读'),
         h(
           'p',
           { class: 'edu-notice edu-notice--warning', role: 'status' },
-          grade?.feedback ??
+          studentCopy(
             info?.clarification?.message ??
-            '图片质量或识别结果不足以形成判断；系统不会因此判你答错。',
+              '图片质量或识别结果不足以形成判断；系统不会因此判你答错。',
+          ),
         ),
       );
-      const reasons = [
-        ...(info?.qualitySignal?.reasons ?? []),
-        ...(info?.clarification?.reasons ?? []),
-      ].filter((reason, index, all) => reason.length > 0 && all.indexOf(reason) === index);
+      const reasons = [...(info?.qualitySignal?.reasons ?? []), ...(info?.clarification?.reasons ?? [])].filter(
+        (reason, index, all) => reason.length > 0 && all.indexOf(reason) === index,
+      );
       if (reasons.length > 0) {
-        section.append(h('ul', { class: 'edu-study-list' }, ...reasons.map((reason) => h('li', {}, reason))));
-      }
-      if (grade !== null) {
-        const sources = grade.sourceRefs.map((ref) => {
-          const source = this.workspace?.sources.find((entry) => entry.sourceRefId === ref);
-          if (source === undefined) return ref;
-          return source.printedPage === null ? `PDF 第 ${source.pdfPage} 页` : `课本第 ${source.printedPage} 页`;
-        });
-        if (sources.length > 0) {
-          section.append(h('p', { class: 'edu-muted' }, `出处：${[...new Set(sources)].join('、')}`));
-        }
         section.append(
-          h('p', { class: 'edu-muted', 'data-testid': 'image-grader-version' }, `评分版本：${grade.graderVersion}`),
+          h(
+            'ul',
+            { class: 'edu-study-list' },
+            ...reasons.map((reason) => h('li', {}, studentCopy(reason))),
+          ),
         );
       }
       section.append(
         h(
           'p',
-          { class: 'edu-muted' },
-          '这次只记为待澄清（draft/pending），不会写入成绩；可以重拍、重新选择，或改用文字作答。',
+          { class: 'edu-study-note' },
+          '这次只记为待澄清，不会写入成绩；可以重拍、重新选择，或改用文字作答。',
         ),
       );
-    } else if (grade !== null) {
-      section.append(h('h3', { class: 'edu-card__title' }, '本次图片判分'));
-      if (grade.feedback.length > 0) section.append(h('p', { class: 'edu-study-text' }, grade.feedback));
-      const label = { yes: '已达成', no: '未达成', unclear: '待确认' } as const;
-      section.append(
-        h(
-          'ul',
-          { class: 'edu-study-list', 'data-testid': 'image-criteria' },
-          ...grade.criteria.map((criterion) =>
-            h('li', {}, `要点 ${criterion.criterionId}：${label[criterion.met]}。${criterion.rationale}`),
-          ),
-        ),
-      );
-      if (grade.uncertainties.length > 0) {
-        section.append(
-          h('div', { 'data-testid': 'image-uncertainties' },
-            h('p', { class: 'edu-muted' }, '不确定项'),
-            h('ul', { class: 'edu-study-list' }, ...grade.uncertainties.map((item) => h('li', {}, item))),
-          ),
-        );
-      }
-      const sources = grade.sourceRefs.map((ref) => {
-        const source = this.workspace?.sources.find((entry) => entry.sourceRefId === ref);
-        if (source === undefined) return ref;
-        return source.printedPage === null ? `PDF 第 ${source.pdfPage} 页` : `课本第 ${source.printedPage} 页`;
-      });
-      if (sources.length > 0) {
-        section.append(h('p', { class: 'edu-muted', 'data-testid': 'image-sources' }, `出处：${[...new Set(sources)].join('、')}`));
-      }
-      section.append(
-        h('p', { class: 'edu-muted', 'data-testid': 'image-grader-version' }, `评分版本：${grade.graderVersion}`),
-      );
-      const persistence = info?.persistence;
+    } else if (info !== null) {
+      section.append(h('h3', { class: 'edu-study-subtitle' }, '图片已保存'));
+      const persistence = info.persistence;
       if (persistence?.duplicate === true) {
-        section.append(h('p', { class: 'edu-muted' }, '同一张图片此前已经提交；本次没有重复记答，也没有再次调用模型。'));
+        section.append(h('p', { class: 'edu-study-note' }, '同一张图片此前已经交过；这次没有重复记录，也没有再次调用模型。'));
       } else if (persistence?.assessmentCommitted === false) {
-        section.append(h('p', { class: 'edu-muted' }, '原答与证据已保存；理解判断仍需更多证据，未升级为“已掌握”。'));
+        section.append(h('p', { class: 'edu-study-note' }, '原答与记录已保存；理解判断还需要更多证据，没有升级为「已掌握」。'));
+      } else {
+        section.append(h('p', { class: 'edu-study-note' }, '图片已经保存；判读结果在下面。'));
       }
     } else {
       section.append(
-        h('p', { class: 'edu-muted', role: 'status' }, this.imageNotice || '这次图片没有形成可显示的结果。'),
+        h('p', { class: 'edu-study-note', role: 'status' }, this.imageNotice || '这次图片没有形成可显示的结果。'),
       );
     }
     if (info?.persistence?.error !== undefined && info?.persistence?.error !== null) {
@@ -1658,12 +1984,9 @@ export class StudyController {
     section.append(
       h(
         'div',
-        { class: 'edu-inline-actions' },
+        { class: 'edu-study-slot-actions' },
         button('重新上传', () => this.retakeImage(), { small: true, dataAction: 'image-retake-result' }),
         button('改用文字作答', () => this.stopImageMode(), { small: true, dataAction: 'image-text-fallback' }),
-        grade !== null && !clarification
-          ? button('结束本轮', () => void this.finishRound(), { small: true, tone: 'primary', dataAction: 'image-finish' })
-          : null,
       ),
     );
     return section;
@@ -1672,10 +1995,19 @@ export class StudyController {
   private renderReviewRange(container: HTMLElement): void {
     clear(container);
     const range = this.reviewRange;
-    const root = h('div', { class: 'edu-study-activity', 'data-testid': 'study-review-range' }, h('h2', { class: 'edu-card__title' }, '复习范围'));
-    root.append(h('p', { class: 'edu-muted' }, '先看推荐范围和理由；可以调整、跳过推荐或暂缓一次。复习开始后先回忆，再给反馈。'));
+    const root = h('div', { class: 'edu-study-activity', 'data-testid': 'study-review-range' });
+    root.append(
+      h('p', { class: 'edu-study-q-head' }, h('span', {}, '复习范围')),
+      h('p', { class: 'edu-study-note' }, '先看推荐的范围和理由；可以调整、跳过推荐，或暂缓一次。开始后先回忆，再给反馈。'),
+    );
     if (range === null || range.candidates.length === 0) {
-      root.append(emptyState({ title: '当前没有待复习项目', body: '仍可自选范围，或回到地图选择概念。', actions: [{ label: '去地图自选', onClick: () => this.navigate?.('/map'), tone: 'primary' }] }));
+      root.append(
+        emptyState({
+          title: '当前没有待复习项目',
+          body: '仍可自选范围，或回到地图选择概念。',
+          actions: [{ label: '去地图自选', onClick: () => this.navigate?.('/map'), tone: 'primary' }],
+        }),
+      );
       container.append(root);
       return;
     }
@@ -1683,18 +2015,28 @@ export class StudyController {
     for (const candidate of range.candidates) {
       list.append(this.reviewCandidateRow(candidate));
     }
-    root.append(list, h('p', { class: 'edu-note' }, range.note));
-    if (this.reviewNotice.length > 0) root.append(h('p', { class: 'edu-muted', role: 'status' }, this.reviewNotice));
-    if (this.reviewSkipped) root.append(h('p', { class: 'edu-muted' }, '已跳过推荐；仍可从下面的范围自选。'));
+    root.append(list, h('p', { class: 'edu-study-note' }, range.note));
+    if (this.reviewNotice.length > 0) {
+      root.append(h('p', { class: 'edu-study-note', role: 'status' }, this.reviewNotice));
+    }
+    if (this.reviewSkipped) {
+      root.append(h('p', { class: 'edu-study-note' }, '已跳过推荐；仍可从下面的范围自选。'));
+    }
     root.append(
-      h('div', { class: 'edu-inline-actions' },
-        button('开始复习', () => {
-          const chosen = [...this.reviewSelected][0] ?? range.candidates[0]?.conceptId ?? null;
-          if (chosen !== null) void this.startReview(chosen);
-        }, { tone: 'primary', dataAction: 'start-review' }),
+      h(
+        'div',
+        { class: 'edu-study-result__actions' },
+        button(
+          '开始复习',
+          () => {
+            const chosen = [...this.reviewSelected][0] ?? range.candidates[0]?.conceptId ?? null;
+            if (chosen !== null) void this.startReview(chosen);
+          },
+          { tone: 'primary', dataAction: 'start-review' },
+        ),
         button('跳过推荐', () => this.skipReviewRange(), { small: true, dataAction: 'skip-review-range' }),
         button('暂缓一次', () => void this.deferReview(), { small: true, dataAction: 'defer-review' }),
-        button('返回地图', () => this.navigate?.('/map'), { small: true }),
+        button('返回地图', () => this.navigate?.('/map'), { small: true, dataAction: 'back-to-map' }),
       ),
     );
     container.append(root);
@@ -1705,17 +2047,29 @@ export class StudyController {
       type: 'checkbox',
       id: `review-${candidate.conceptId}`,
       checked: this.reviewSelected.has(candidate.conceptId),
-      onchange: (event: Event) => this.toggleReview(candidate.conceptId, (event.currentTarget as HTMLInputElement).checked),
+      onchange: (event: Event) =>
+        this.toggleReview(candidate.conceptId, (event.currentTarget as HTMLInputElement).checked),
     });
     return h(
       'li',
       { class: 'edu-study-review-item' },
-      h('label', { class: 'edu-study-review-label', for: `review-${candidate.conceptId}` },
+      h(
+        'label',
+        { class: 'edu-study-review-label', for: `review-${candidate.conceptId}` },
         input,
         h('span', { class: 'edu-card__title' }, candidate.title),
-        statusChip(REVIEW_REASON_LABELS[candidate.reason], candidate.reason === 'needs_support' ? 'attention' : 'progress'),
-        h('span', { class: 'edu-muted' }, candidate.dueAt === null ? '暂无安排' : `待复习：${formatStudyTime(candidate.dueAt)}`),
-        candidate.lastReviewedAt !== null ? h('span', { class: 'edu-muted' }, `上次复习：${formatStudyTime(candidate.lastReviewedAt)}`) : null,
+        statusChip(
+          REVIEW_REASON_LABELS[candidate.reason],
+          candidate.reason === 'needs_support' ? 'attention' : 'progress',
+        ),
+        h(
+          'span',
+          { class: 'edu-muted' },
+          candidate.dueAt === null ? '暂无安排' : `待复习：${formatStudyTime(candidate.dueAt)}`,
+        ),
+        candidate.lastReviewedAt !== null
+          ? h('span', { class: 'edu-muted' }, `上次复习：${formatStudyTime(candidate.lastReviewedAt)}`)
+          : null,
       ),
     );
   }
@@ -1726,159 +2080,497 @@ export class StudyController {
     clear(container);
     const root = h('div', { class: 'edu-study-feedback', 'data-testid': 'study-feedback', tabindex: -1 });
     this.feedbackRoot = root;
-    if (this.loading) {
-      root.append(loadingState({ title: '反馈会在这里显示' }));
-    } else if (this.finishReceipt !== null) {
+    if (this.finishReceipt !== null) {
       root.append(this.finishSummary());
     } else if (this.feedback !== null) {
-      this.feedbackController?.unmount();
-      const feedbackHost = h('div', { 'data-testid': 'study-feedback-grade' });
-      root.append(feedbackHost);
-      this.feedbackController = mountFeedbackView(feedbackHost, {
-        grade: this.feedback,
-        sourceLabel: (sourceRefId) => {
-          const source = this.workspace?.sources.find((entry) => entry.sourceRefId === sourceRefId);
-          return source === undefined ? `出处 ${sourceRefId}` : source.printedPage === null ? `来源 · PDF 第 ${source.pdfPage} 页` : `来源 · 课本第 ${source.printedPage} 页`;
-        },
-        onOpenSource: (sourceRefId) => this.openSourceById(sourceRefId),
-        onClarificationAction: (action) => {
-          this.chatNotice = `已记录澄清动作：${action}；不会因此判错。`;
-          this.notify();
-        },
-        candidateOnly: true,
-      });
-      root.append(this.axisSection());
-      root.append(this.selfReportSection());
-      root.append(
-        h('div', { class: 'edu-inline-actions' },
-          button('改文字再试', () => this.editAnswer(), { small: true, dataAction: 'edit-answer' }),
-          button('结束本轮', () => void this.finishRound(), { small: true, tone: 'primary', dataAction: 'finish-round' }),
-        ),
-      );
+      root.append(this.feedbackResult());
+      root.append(this.axisSection(), this.selfReportSection());
+    } else if (this.loading) {
+      root.append(h('p', { class: 'edu-study-note' }, '答完这一题，结论和依据会出现在这里。'));
     } else {
       root.append(
-        h('p', { class: 'edu-muted' }, '提交作答后，这里会显示逐条要点、待确认项、出处、评分版本与证据候选；不会显示掌握百分比。'),
-        this.axisSection(),
-        this.selfReportSection(),
+        h('p', { class: 'edu-study-note' }, '答完这一题，这里会给结论、依据和出处；没答完时不会显示对错。'),
       );
     }
-    if (this.chatNotice.length > 0) root.append(h('p', { class: 'edu-muted', role: 'status' }, this.chatNotice));
+    if (this.chatNotice.length > 0) {
+      root.append(h('p', { class: 'edu-study-note', role: 'status' }, this.chatNotice));
+    }
     container.append(root);
+  }
+
+  /**
+   * 原地反馈。
+   *
+   * 标题层级只有「结论 chip + 一句结论」；依据段落只在还有别的信息时出现。
+   * 同一句话在整块反馈里最多出现一次（结论 / 依据 / 要点 / 不确定项共用一份
+   * 已展示清单），模型的内部字段（答案键、criterion、正确项 id）先翻译成学生话。
+   */
+  private feedbackResult(): HTMLElement {
+    const grade = this.feedback;
+    const wrap = h('div', { class: 'edu-study-result', 'data-testid': 'study-feedback-grade' });
+    if (grade === null) return wrap;
+    const verdict = this.verdict();
+    const assisted = this.tutorState?.disclosure === true;
+    const shown = new Set<string>([normalizedCopy(verdict.label)]);
+
+    // 「选择正确。」这类只是复述结论的句子不进正文：对错已经由 chip 说了。
+    const feedbackSentences = splitSentences(studentCopy(grade.feedback)).filter(
+      (sentence) => !isVerdictOnlySentence(sentence),
+    );
+    let conclusion = feedbackSentences[0] ?? '';
+    let rest = feedbackSentences.slice(1);
+    if (conclusion.length === 0) {
+      conclusion =
+        grade.criteria
+          .map((criterion) => studentCopy(criterion.rationale).trim())
+          .find((rationale) => rationale.length > 0) ?? '';
+      rest = feedbackSentences;
+    }
+    if (conclusion.length > 0) shown.add(normalizedCopy(conclusion));
+
+    const reasons: string[] = [];
+    for (const sentence of rest) {
+      const key = normalizedCopy(sentence);
+      if (key.length === 0 || shown.has(key)) continue;
+      shown.add(key);
+      reasons.push(sentence);
+      if (reasons.length >= 2) break;
+    }
+
+    const verdictRow = h('div', { class: 'edu-study-verdict' }, statusChip(verdict.label, verdict.tone));
+    verdictRow.append(
+      statusChip(assisted ? '这次用过提示' : '自己想的，没用提示', assisted ? 'attention' : 'neutral'),
+    );
+    if (conclusion.length > 0) {
+      verdictRow.append(
+        h('p', { class: 'edu-study-verdict__line', 'data-testid': 'study-verdict' }, conclusion),
+      );
+    }
+    wrap.append(verdictRow);
+    if (reasons.length > 0) {
+      wrap.append(h('p', { class: 'edu-study-why' }, reasons.join('')));
+    }
+
+    if (grade.requiresClarification) {
+      wrap.append(
+        h(
+          'div',
+          { class: 'edu-study-clarify' },
+          h('p', { class: 'edu-study-note' }, '系统不会因为图片不清或信息不足而判你答错。可以这样继续：'),
+          this.clarificationActions(),
+        ),
+      );
+    }
+
+    // 出处：只留本轮真的用到、而且能对上页码的页；同一页只出现一次，最多 3 个。
+    const pages = this.feedbackSourcePages(grade.sourceRefs);
+    if (pages.length > 0) {
+      const row = h('div', { class: 'edu-study-result__sources', 'data-testid': 'study-feedback-sources' });
+      for (const page of pages) {
+        row.append(
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'edu-study-source-chip',
+              'data-source-ref': page.sourceRefId,
+              onclick: (event: Event) =>
+                this.openSourceById(page.sourceRefId, event.currentTarget as HTMLElement | null),
+            },
+            page.label,
+          ),
+        );
+      }
+      wrap.append(row);
+    }
+
+    const detailRows: string[] = [];
+    for (const criterion of grade.criteria) {
+      const rationale = studentCopy(criterion.rationale).trim();
+      if (rationale.length === 0) continue;
+      const key = normalizedCopy(rationale);
+      if (shown.has(key)) continue;
+      shown.add(key);
+      detailRows.push(`${CRITERION_LABELS[criterion.met]}：${rationale}`);
+    }
+    for (const uncertainty of grade.uncertainties) {
+      const item = studentCopy(uncertainty).trim();
+      if (item.length === 0) continue;
+      const key = normalizedCopy(item);
+      if (shown.has(key)) continue;
+      shown.add(key);
+      detailRows.push(item);
+    }
+    if (detailRows.length > 0) {
+      wrap.append(
+        h(
+          'details',
+          { class: 'edu-study-detail', 'data-testid': 'study-feedback-criteria' },
+          h('summary', {}, '这次看的是哪些要点'),
+          h('ul', { class: 'edu-study-criteria' }, ...detailRows.map((row) => h('li', {}, row))),
+        ),
+      );
+    }
+
+    const hasNext = this.nextActivityId() !== null;
+    const needsAnotherTry = verdict.tone === 'attention';
+    const primary = hasNext
+      ? button('下一题', () => void this.nextQuestion(), { tone: 'primary', dataAction: 'next-question' })
+      : button('再答一次', () => this.editAnswer(), { tone: 'primary', dataAction: 'edit-answer' });
+    wrap.append(
+      h(
+        'div',
+        { class: 'edu-study-result__actions' },
+        primary,
+        button('再看看材料', () => this.showMaterial(), { tone: 'ghost', dataAction: 'review-material' }),
+      ),
+    );
+    // 只有还需要重答时才给「改文字再试」；答对时只留「下一题 / 再看看材料」。
+    if (hasNext && needsAnotherTry) {
+      wrap.append(
+        h(
+          'div',
+          { class: 'edu-study-result__more' },
+          button('改文字再试', () => this.editAnswer(), { small: true, dataAction: 'edit-answer' }),
+        ),
+      );
+    }
+    return wrap;
+  }
+
+  /** 本轮真的用过、且能对上页码的出处（同页去重，最多 3 个）。 */
+  private feedbackSourcePages(
+    sourceRefs: readonly string[],
+  ): readonly { readonly sourceRefId: string; readonly label: string }[] {
+    const sources = this.workspace?.sources ?? [];
+    const seen = new Set<string>();
+    const pages: { sourceRefId: string; label: string }[] = [];
+    for (const ref of sourceRefs) {
+      const source = sources.find((entry) => entry.sourceRefId === ref);
+      if (source === undefined) continue;
+      const label = sourceLabel(source);
+      if (seen.has(label)) continue;
+      seen.add(label);
+      pages.push({ sourceRefId: source.sourceRefId, label });
+      if (pages.length >= 3) break;
+    }
+    return pages;
+  }
+
+  private verdict(): { readonly label: string; readonly tone: 'positive' | 'attention' | 'neutral' } {
+    const grade = this.feedback;
+    if (grade === null) return { label: VERDICT_LABELS.neutral, tone: 'neutral' };
+    if (grade.requiresClarification) return { label: VERDICT_LABELS.clarify, tone: 'attention' };
+    if (grade.criteria.some((criterion) => criterion.met === 'no')) {
+      return { label: VERDICT_LABELS.practise, tone: 'attention' };
+    }
+    if (grade.criteria.length > 0 && grade.criteria.every((criterion) => criterion.met === 'yes')) {
+      return { label: VERDICT_LABELS.correct, tone: 'positive' };
+    }
+    if (grade.criteria.some((criterion) => criterion.met === 'unclear')) {
+      return { label: VERDICT_LABELS.clarify, tone: 'attention' };
+    }
+    return { label: VERDICT_LABELS.neutral, tone: 'neutral' };
+  }
+
+  private clarificationActions(): HTMLElement {
+    const row = h('div', { class: 'edu-study-clarify__actions' });
+    const actions: readonly { readonly id: string; readonly label: string; readonly run: () => void }[] = [
+      {
+        id: 'retake',
+        label: '重新拍一张',
+        run: () => {
+          if (this.workspace !== null && this.workspace.imageFlow !== null) this.startImageMode();
+          else this.chatNotice = '可以换一个更清楚的角度重新上传。';
+          this.notify();
+        },
+      },
+      {
+        id: 'rotate',
+        label: '旋转后重试',
+        run: () => {
+          this.chatNotice = '把图片摆正后再试一次，会更容易看清。';
+          this.notify();
+        },
+      },
+      {
+        id: 'edit_text',
+        label: '改正识别文字',
+        run: () => this.editAnswer(),
+      },
+      {
+        id: 'text_fallback',
+        label: '改用文字作答',
+        run: () => {
+          if (this.imageMode) this.stopImageMode();
+          else this.editAnswer();
+        },
+      },
+      {
+        id: 'retry_later',
+        label: '稍后再试',
+        run: () => {
+          this.chatNotice = '可以稍后再试；这一题不会因此判错。';
+          this.notify();
+        },
+      },
+    ];
+    for (const action of actions) {
+      row.append(
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'edu-button edu-button--small',
+            'data-clarification-action': action.id,
+            onclick: action.run,
+          },
+          action.label,
+        ),
+      );
+    }
+    return row;
   }
 
   private finishSummary(): HTMLElement {
     const summary = this.summary();
     const receipt = this.finishReceipt;
-    const root = h('div', { class: 'edu-study-finish', 'data-testid': 'study-finish' },
-      h('h3', { class: 'edu-card__title' }, this.finishLabel || '本轮结果'),
-      h('p', { class: 'edu-study-status' }, summary.review),
-      h('div', { class: 'edu-inline-actions' }, ...this.axisChips(summary)),
+    const root = h(
+      'div',
+      { class: 'edu-study-finish', 'data-testid': 'study-finish' },
+      h('h3', { class: 'edu-study-finish__title' }, this.finishLabel || '本轮结果'),
+      h('p', { class: 'edu-study-finish__line' }, summary.review),
+      h('div', { class: 'edu-study-finish__chips' }, ...this.axisChips(summary)),
     );
     if (receipt !== null) {
       root.append(
-        h('p', { class: 'edu-muted' }, `复习安排：${formatStudyTime(receipt.dueAt)} · 策略 ${receipt.policyVersion}${receipt.early ? ' · 提前复习' : ''}`),
+        h(
+          'p',
+          { class: 'edu-study-note' },
+          `复习安排：${formatStudyTime(receipt.dueAt)}${receipt.early === true ? '（可以提前复习）' : ''}`,
+        ),
       );
     }
     root.append(
-      h('p', { class: 'edu-muted' }, '活动结束与理解判断分开记录；结束本轮不会自动把理解升级为“表现稳定”。'),
-      h('div', { class: 'edu-inline-actions' },
-        button('返回地图', () => this.navigate?.('/map'), { small: true, tone: 'primary' }),
-        button('查看记录', () => this.navigate?.('/records'), { small: true }),
+      h(
+        'p',
+        { class: 'edu-study-note' },
+        '结束本轮只记录实际做过的部分；不会把没做的题记成已完成，也不会把理解升级成「表现稳定」。',
+      ),
+      h(
+        'div',
+        { class: 'edu-study-result__actions' },
+        button('回地图', () => this.navigate?.('/map'), { tone: 'primary', dataAction: 'back-to-map' }),
+        button('看记录', () => this.navigate?.('/records'), { dataAction: 'view-records' }),
       ),
     );
     return root;
   }
 
+  /**
+   * 学习状态只读投影片段，不写回任何东西。标签复用 shell 的同一套学生话，
+   * 因此学习页和记录页不会出现两套说法。
+   */
   private summary(): StateSummary {
     const workspace = this.workspace;
     if (workspace === null) {
-      return { learning: '尚未开始', understanding: '尚无足够证据', review: '尚未复习', due: '暂无复习安排', selfReport: '未填写' };
+      return {
+        learning: LEARNING_LABELS.not_started,
+        understanding: UNDERSTANDING_LABELS.unassessed,
+        review: '尚未复习',
+        due: '暂无复习安排',
+        selfReport: '未填写（可选）',
+      };
     }
-    const payload = this.mapPayload();
-    const summary = summarizeConceptState(payload, workspace.concept.id);
+    const progress = this.progress;
+    const learningState = progress?.learning.state ?? 'not_started';
+    const understandingState = progress?.understanding.state ?? 'unassessed';
+    const validity = progress?.understanding.validity ?? null;
+    const understanding =
+      validity === null || validity === 'current'
+        ? UNDERSTANDING_LABELS[understandingState]
+        : `${UNDERSTANDING_LABELS[understandingState]}（${VALIDITY_LABELS[validity]}）`;
+    const outcome = progress?.review.latestOutcome ?? null;
+    const historyLabel =
+      progress?.review.lastCompletedAt === null || progress?.review.lastCompletedAt === undefined
+        ? '尚未复习'
+        : outcome === null
+          ? '已复习'
+          : `复习完成 · ${REVIEW_OUTCOME_LABELS[outcome]}`;
+    const dueLabel =
+      progress?.review.dueAt === null || progress?.review.dueAt === undefined ? '暂无复习安排' : '待复习';
+    const selfReportLabel =
+      this.selfReport === null ? null : SELF_REPORT_LABELS[this.selfReport.claimedState];
     return {
-      learning: summary.learning.label,
-      understanding: summary.understanding.label,
-      review: summary.review.historyLabel,
-      due: summary.review.dueLabel,
-      selfReport: summary.selfReportLabel ?? '未填写（可选）',
-    };
-  }
-
-  private mapPayload(): MapPayload {
-    const workspace = this.workspace;
-    if (workspace === null) {
-      throw new Error('workspace is not loaded');
-    }
-    return {
-      courseEditionId: workspace.courseEditionId,
-      courseEditionLabel: workspace.courseEditionLabel,
-      packId: workspace.packId,
-      packVersion: workspace.packVersion,
-      trustMode: workspace.trustMode,
-      scope: workspace.scope,
-      coverageStatus: workspace.coverageStatus,
-      toc: [],
-      concepts: [workspace.concept],
-      relations: [],
-      progress: this.progress === null ? [] : [this.progress],
-      selfReports: this.selfReport === null ? [] : [this.selfReport],
-      evidence: [],
-      sources: [],
-      initialTocNodeId: null,
-      initialConceptId: workspace.concept.id,
-      fixture: workspace.fixture,
-      notice: workspace.notice,
+      learning: LEARNING_LABELS[learningState],
+      understanding,
+      review: historyLabel,
+      due: dueLabel,
+      selfReport: selfReportLabel ?? '未填写（可选）',
     };
   }
 
   private axisChips(summary: StateSummary): HTMLElement[] {
     return [
-      statusChip(`学习进程：${summary.learning}`, 'neutral'),
-      statusChip(`理解证据：${summary.understanding}`, summary.understanding.includes('需巩固') ? 'attention' : summary.understanding.includes('表现稳定') ? 'positive' : 'neutral'),
+      statusChip(`学习：${summary.learning}`, 'neutral'),
+      statusChip(
+        `理解：${summary.understanding}`,
+        summary.understanding.includes('需巩固')
+          ? 'attention'
+          : summary.understanding.includes('表现稳定')
+            ? 'positive'
+            : 'neutral',
+      ),
       statusChip(`复习：${summary.review}`, summary.review.includes('仍需巩固') ? 'attention' : 'neutral'),
-      statusChip(`待复习：${summary.due}`, summary.due === '待复习' ? 'attention' : 'neutral'),
+      statusChip(
+        summary.due === '待复习' ? '复习安排：待复习' : '复习安排：暂无',
+        summary.due === '待复习' ? 'attention' : 'neutral',
+      ),
     ];
   }
 
   private axisSection(): HTMLElement {
     const summary = this.summary();
-    return h('section', { class: 'edu-study-axis', 'data-testid': 'study-axis-summary' },
-      h('h3', { class: 'edu-card__title' }, '三轴状态（与记录页一致）'),
-      h('div', { class: 'edu-inline-actions' }, ...this.axisChips(summary)),
-      h('p', { class: 'edu-muted' }, `自评（学生自述）：${summary.selfReport}。自评独立保存，不替代系统证据。`),
+    return h(
+      'details',
+      { class: 'edu-study-detail', 'data-testid': 'study-axis-summary' },
+      h('summary', {}, '学习状态'),
+      h('div', { class: 'edu-study-axis__chips' }, ...this.axisChips(summary)),
+      h('p', { class: 'edu-study-note' }, `你的自评：${summary.selfReport}。`),
     );
   }
 
   private selfReportSection(): HTMLElement {
-    const section = h('section', { class: 'edu-study-self-report', 'data-testid': 'study-self-report' },
-      h('h3', { class: 'edu-card__title' }, '自评（可选）'),
-      h('p', { class: 'edu-muted' }, '这是你的感受，单独保存；不会改变系统判断，也不会覆盖证据。'),
+    const section = h(
+      'div',
+      { class: 'edu-study-self-report', 'data-testid': 'study-self-report' },
+      h('h3', { class: 'edu-study-subtitle' }, '你觉得自己学会了吗？（可选）'),
+      h('p', { class: 'edu-study-note' }, '选一个，记下来。'),
     );
-    for (const [state, label] of [['uncertain', '不确定'], ['basically_understood', '基本会'], ['can_explain', '能解释']] as const) {
-      section.append(button(label, () => void this.saveSelfReport(state), { small: true, dataAction: `self-report-${state}` }));
+    const row = h('div', { class: 'edu-study-result__more' });
+    for (const [state, label] of [
+      ['uncertain', '不确定'],
+      ['basically_understood', '基本会'],
+      ['can_explain', '能解释'],
+    ] as const) {
+      row.append(
+        button(label, () => void this.saveSelfReport(state), {
+          small: true,
+          dataAction: `self-report-${state}`,
+        }),
+      );
     }
+    section.append(row);
     if (this.selfReport !== null) {
-      section.append(h('p', { class: 'edu-muted' }, `已保存自评：${this.selfReport.claimedState === 'can_explain' ? '能解释' : this.selfReport.claimedState === 'basically_understood' ? '基本会' : '不确定'} · ${formatStudyTime(this.selfReport.createdAt)}`));
+      const claimed =
+        this.selfReport.claimedState === 'can_explain'
+          ? '能解释'
+          : this.selfReport.claimedState === 'basically_understood'
+            ? '基本会'
+            : '不确定';
+      section.append(
+        h('p', { class: 'edu-study-note' }, `已保存自评：${claimed} · ${formatStudyTime(this.selfReport.createdAt)}`),
+      );
     }
     return section;
   }
 
+  /* -------------------------------------------------------------- actions */
+
+  private intentKey(): string {
+    const intent = this.intent;
+    return `${intent.conceptId ?? 'none'}|${intent.mode}|${intent.sessionId ?? 'new'}|${intent.activityId ?? 'none'}`;
+  }
+
+  /** 这一节里当前题目之后还有没有题（没有就退化成「再答一次」）。 */
+  private nextActivityId(): string | null {
+    const workspace = this.workspace;
+    if (workspace === null) return null;
+    const index = workspace.activities.findIndex((entry) => entry.id === workspace.activity.id);
+    if (index < 0 || index + 1 >= workspace.activities.length) return null;
+    return workspace.activities[index + 1]?.id ?? null;
+  }
+
+  /** 只用现有的 loadWorkspace/startSession 路径换下一题，不新增数据语义。 */
+  async nextQuestion(): Promise<void> {
+    const nextId = this.nextActivityId();
+    if (nextId === null) {
+      this.editAnswer();
+      return;
+    }
+    this.intent = { ...this.intent, activityId: nextId, fromResume: false };
+    const key = this.intentKey();
+    this.loadedKey = key;
+    this.resetView();
+    await this.load(key);
+    if (this.workspace !== null && this.workspace.activity.id !== nextId) {
+      this.chatNotice = '这一节暂时换不到下一道题；刚才的记录不受影响，可以先结束本轮。';
+      this.notify();
+    }
+  }
+
+  private requestHint(): void {
+    this.openChatHook?.();
+    void this.sendHelp('hint');
+  }
+
+  private showMaterial(): void {
+    if (this.openMaterialHook !== null) {
+      this.openMaterialHook();
+      return;
+    }
+    this.materialContainer?.scrollIntoView?.({ block: 'start' });
+  }
+
   private openSource(source: StudySource, trigger: HTMLElement | null): void {
-    const parent = this.materialContainer ?? this.activityContainer;
+    // 弹层挂在页面容器上：窄屏时课本是带 transform 的抽屉，挂在里面会跟着抽屉一起藏起来。
+    const parent =
+      this.pageContext?.container ?? this.materialContainer ?? this.activityContainer;
     if (parent === null) return;
     openSourcePopover(parent, trigger ?? parent, this.workspace?.sources ?? [], source.sourceRefId);
   }
 
-  private openSourceById(sourceRefId: string): void {
+  private openSourceById(sourceRefId: string, trigger: HTMLElement | null = null): void {
     const source = this.workspace?.sources.find((entry) => entry.sourceRefId === sourceRefId);
     if (source === undefined) {
-      this.chatNotice = '这条出处暂时不可用；没有跳转到任何页面。';
+      this.chatNotice = '这条出处暂时打不开；没有跳到任何页面。';
       this.notify();
       return;
     }
-    this.openSource(source, null);
+    this.openSource(source, trigger);
   }
+}
+
+/** 把模型/评分里的内部词换成学生话；认不出来的保留原文，不臆造内容。 */
+function studentCopy(value: string): string {
+  return value
+    .replace(/答案键/gu, '正确答案')
+    .replace(/正确项\s*id/giu, '正确选项')
+    .replace(/\bcriterion(?:Id)?(?:\.[A-Za-z0-9_-]+)+/giu, '要点')
+    .replace(/\bcriterion(?:Id)?\b/giu, '要点')
+    .replace(/\boption(?:\.[A-Za-z0-9_-]+)+/giu, '这个选项')
+    .replace(/\boption[._][A-Za-z0-9_-]+/giu, '这个选项')
+    .replace(/\bactivity(?:\.[A-Za-z0-9_-]+)+/giu, '这道题')
+    .replace(/\bsource(?:\.[A-Za-z0-9_-]+)+/giu, '出处');
+}
+
+function splitSentences(value: string): string[] {
+  return value
+    .split(/(?<=[。！？!?])/u)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+}
+
+/** 比较“同一句话”时忽略空白与标点。 */
+function normalizedCopy(value: string): string {
+  return value.replace(/[\s。！？!?，,、；;：:「」“”"'（）()]/gu, '').toLowerCase();
+}
+
+/** 只复述对错、不提供信息的句子（「选择正确。」「答对了」）。 */
+function isVerdictOnlySentence(value: string): boolean {
+  return /^(选择正确|选择不正确|回答正确|回答不正确|完全正确|答对了|答错了|正确|不正确)[。！!]?$/u.test(
+    value.trim(),
+  );
 }
 
 function hasAnswer(value: AnswerFormValue): boolean {

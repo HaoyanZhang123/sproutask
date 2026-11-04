@@ -36,25 +36,40 @@ export const HELP_ACTIONS: readonly {
   readonly label: string;
   readonly note: string;
 }[] = [
-  { kind: 'hint', label: '给我提示', note: '会记为使用提示；提示不等于完整答案。' },
-  { kind: 'explanation', label: '解释一下', note: '会记为使用解释；解释仍可能保留独立思考空间。' },
-  { kind: 'example', label: '看个示范', note: '会记为使用示例；示范会影响本次独立证据判断。' },
+  { kind: 'hint', label: '给我提示', note: '会记下这次用过提示；提示不等于完整答案。' },
+  { kind: 'explanation', label: '解释一下', note: '会记下这次用过解释。' },
+  { kind: 'example', label: '举个例子', note: '会记下这次用过例子。' },
   {
     kind: 'worked_solution',
     label: '分步示范',
-    note: '会显示完整步骤，属于 disclosure；本次作答不能作为独立证据。',
+    note: '会显示完整步骤，这次作答会标为「用过提示」。',
   },
   {
     kind: 'answer',
     label: '直接看答案',
-    note: '会显示答案，属于 disclosure；本次作答不能作为独立证据。',
+    note: '会显示答案，这次作答会标为「用过提示」。',
   },
 ];
 
-export const SKIP_NOTE = '跳过本题不会记为答错，也不会伪造活动完成；可以稍后回来。';
-export const END_NOTE = '结束本轮只记录实际做过的部分；未完成内容不会被标为已完成。';
+export const SKIP_NOTE = '跳过这一题不会记为答错，也不会把没做的题记成做过；之后可以回来。';
+export const END_NOTE = '结束本轮只记录实际做过的部分；没做的不会标成已完成。';
 export const DRAFT_SAVED = '草稿已保存在本机。';
 export const DRAFT_UNSAVED = '草稿尚未保存；离开前请重试。';
+
+/** 提交后原地反馈的第一行：一句结论，不出现分数或百分比。 */
+export const VERDICT_LABELS = {
+  correct: '答对了',
+  practise: '再练一次',
+  clarify: '还需要再看看',
+  neutral: '收到反馈',
+} as const;
+
+/** 要点结论（批改要点的人话版本）。 */
+export const CRITERION_LABELS: Record<'yes' | 'no' | 'unclear', string> = {
+  yes: '说到了',
+  no: '还差一点',
+  unclear: '还需要确认',
+};
 
 export const REVIEW_REASON_LABELS: Record<'due' | 'needs_support' | 'chosen', string> = {
   due: '已到复习时间',
@@ -63,13 +78,13 @@ export const REVIEW_REASON_LABELS: Record<'due' | 'needs_support' | 'chosen', st
 };
 
 export const DISCLOSURE_NOTE =
-  '本轮已经显示完整答案或分步示范。按证据规则，接下来这次作答会标为使用了 disclosure/assisted，不能作为独立掌握证据；这是记录方式，不是惩罚。';
+  '本轮已经看过完整答案或分步示范。按记录规则，这次作答会标为「用过提示」，不能作为独立完成的凭证；这只是记录方式，不是惩罚。';
 
 export const ASSISTANCE_NOTE =
-  '本轮已使用提示、解释或示例。系统会把帮助使用记录在本次作答中；是否算独立证据由服务规则判断，不由界面自行决定。';
+  '本轮用过提示、解释或示例，记录里会注明「用过提示」。这次算不算独立完成由学习记录判断，页面不替你下结论。';
 
 export const LOW_DIFFICULTY_NOTE =
-  '连续受挫时可以选择换一种讲法；具体降低难度或换表示由教学服务决定，界面不自行改教学策略。';
+  '连着几次没答出来时，可以换一种讲法；具体怎么讲由小芽决定，页面不会自己改。';
 
 export function decisionNotice(decision: StudyDecision): string | null {
   if (decision.disclosure) return DISCLOSURE_NOTE;

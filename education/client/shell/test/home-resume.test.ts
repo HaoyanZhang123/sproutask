@@ -13,7 +13,7 @@ describe('home continue / map / review', () => {
     expect(cardText).toContain('学习');
     // The saved cursor is resumed, not printed: raw activity ids and step ids stay out.
     expect(cardText).not.toMatch(/activity\.|step-\d/);
-    expect(cardText).toContain('已保存草稿');
+    expect(cardText).toContain('上次停在第 1 步');
 
     buttonByAction(pageRoot(container), 'resume-last').click();
     await tick(10);
@@ -45,7 +45,7 @@ describe('home continue / map / review', () => {
     const { container } = await mountShell(fixtureOptions('first-run'));
     const card = container.querySelector<HTMLElement>('[data-testid="home-first-use"]');
     expect(card).not.toBeNull();
-    expect(textOf(card as HTMLElement)).toContain('选择教材，开始学习');
+    expect(textOf(card as HTMLElement)).toContain('先挑一个概念开始');
     expect(container.querySelector('[data-testid="home-continue"]')).toBeNull();
     expect(container.querySelector('[data-testid="home-completed"]')).toBeNull();
   });
@@ -57,7 +57,7 @@ describe('home continue / map / review', () => {
     const text = textOf(notice as HTMLElement);
     expect(text).toContain('0.9.0');
     expect(text).toContain('1.0.0');
-    expect(text).toContain('不会自动迁移');
+    expect(text).toContain('不会自动变成新的理解记录');
     expect(buttonByText(notice as HTMLElement, '查看旧记录')).toBeDefined();
     expect(buttonByText(notice as HTMLElement, '重新关联')).toBeDefined();
     expect(buttonByText(notice as HTMLElement, '开始新活动')).toBeDefined();
@@ -68,31 +68,35 @@ describe('home continue / map / review', () => {
     buttonByAction(pageRoot(container), 'resume-last').click();
     await tick(10);
     expect(shell.getState().currentPath).toBe('/home');
-    const alert = container.querySelector<HTMLElement>('[role="alert"]');
+    const alert = container.querySelector<HTMLElement>('[data-testid="home-resume-error"]');
     expect(alert).not.toBeNull();
     const text = textOf(alert as HTMLElement);
-    expect(text).toContain('内容已经有了更新');
-    expect(text).toContain('STALE_REVISION');
-    expect(buttonByText(alert as HTMLElement, '查看旧记录')).toBeDefined();
+    expect(text).toContain('没能恢复');
+    expect(buttonByText(alert as HTMLElement, '查看记录')).toBeDefined();
+    expect(buttonByText(alert as HTMLElement, '去地图')).toBeDefined();
     expect(shell.getState().resume).toBeNull();
   });
 
   it('opens review mode in the workspace from the home review entry', async () => {
     const { shell, container } = await mountShell(fixtureOptions());
-    buttonByText(pageRoot(container), '开始复习').click();
+    const review = container.querySelector<HTMLElement>('[data-testid="home-review"]');
+    expect(review).not.toBeNull();
+    expect(textOf(review as HTMLElement)).toContain('复习 2 个概念');
+    (review as HTMLButtonElement).click();
     await tick(20);
     expect(shell.getState().currentPath).toContain('/workspace?mode=review');
     const text = textOf(pageRoot(container));
     expect(text).toContain('准备开始：复习');
     expect(text).toContain('请选择要复习的范围');
-    expect(textOf(container.querySelector('[data-testid="edu-context-bar"]') as HTMLElement)).toContain('复习');
   });
 
   it('still offers a self-selected review range when nothing is due', async () => {
-    const { container } = await mountShell(fixtureOptions('no-due'));
+    const { shell, container } = await mountShell(fixtureOptions('no-due'));
     const review = container.querySelector<HTMLElement>('[data-testid="home-review"]');
     expect(review).not.toBeNull();
-    expect(textOf(review as HTMLElement)).toContain('当前没有待复习项目');
-    expect(buttonByText(review as HTMLElement, '自选复习范围')).toBeDefined();
+    expect(textOf(review as HTMLElement)).toContain('还没有到期的复习');
+    (review as HTMLButtonElement).click();
+    await tick(20);
+    expect(shell.getState().currentPath).toContain('/map?intent=review');
   });
 });

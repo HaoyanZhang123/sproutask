@@ -141,10 +141,10 @@ export interface EducationRuntimeComposition {
 
 const MESSAGES: Record<string, string> = {
   'app.title': '芽问',
-  'nav.library': '教材库',
-  'nav.map': '地图',
-  'nav.workspace': '工作区',
-  'nav.records': '记录',
+  'nav.library': '我的课本',
+  'nav.map': '知识地图',
+  'nav.workspace': '学习',
+  'nav.records': '进展',
   'status.localFirst': '学习记录保存在本机',
   'status.fixture': '开发阶段使用示例数据',
   'auth.apiKeyConfigured': 'API Key 已配置',
@@ -412,12 +412,12 @@ export async function composeEducationRuntime(
 
   const pages = new PageRegistry();
   const pageSpecs = [
-    ['home', '/', '首页'],
-    ['library', '/library', '教材库'],
-    ['map', '/map', '地图'],
-    ['workspace', '/workspace', '工作区'],
-    ['records', '/records', '记录'],
-    ['account', '/account', '账户'],
+    ['home', '/', '今天'],
+    ['library', '/library', '我的课本'],
+    ['map', '/map', '知识地图'],
+    ['workspace', '/workspace', '学习'],
+    ['records', '/records', '进展'],
+    ['account', '/account', '设置'],
   ] as const;
   for (const [id, route, title] of pageSpecs) {
     pages.register({

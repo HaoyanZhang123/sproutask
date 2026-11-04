@@ -109,10 +109,10 @@ describe('first-start key guide and local mode', () => {
     const guide = container.querySelector<HTMLElement>('[data-testid="first-start-guide"]');
     expect(guide).not.toBeNull();
     const text = textOf(guide as HTMLElement);
-    expect(text).toContain('这是本地学习工作区');
-    expect(text).toContain('教材原文与学习记录保存在这台电脑');
-    expect(text).toContain('云模型只接收当前任务必要片段');
-    expect(text).toContain('可以随时修改');
+    expect(text).toContain('记录只在这台电脑');
+    expect(text).toContain('教材原文与学习记录保存在本机');
+    expect(text).toContain('云端只收当前这一题');
+    expect(text).toContain('随时能改');
     expect(buttonByAction(guide as HTMLElement, 'skip-key-intro')).toBeDefined();
     expect(buttonByAction(guide as HTMLElement, 'open-account-key')).toBeDefined();
     expect(container.querySelector('[data-testid="local-mode-badge"]')).not.toBeNull();
@@ -120,7 +120,7 @@ describe('first-start key guide and local mode', () => {
     buttonByAction(guide as HTMLElement, 'skip-key-intro').click();
     expect(container.querySelector('[data-testid="first-start-guide"]')).toBeNull();
     expect(localStorage.getItem(INTRO_KEY)).toBe('1');
-    expect(textOf(container)).toContain('进入地图');
+    expect(textOf(container)).toContain('去目录挑一个概念');
   });
 
   it('does not show the first-start guide when the host already reports configured', async () => {
@@ -145,7 +145,7 @@ describe('API key entry and host status', () => {
     expect(textOf(container)).not.toContain(secret);
     expect(textOf(container)).not.toMatch(/sk-[A-Za-z0-9]/);
     expect(textOf(container)).toContain('已配置（****1234）');
-    expect(textOf(container)).toContain('不回显');
+    expect(textOf(container)).toContain('不会显示完整 Key');
     expect(textOf(container)).not.toContain('本地模式');
     expect(shell.getState().keyStatus).toBe('configured');
     expect(container.querySelector('[data-testid="local-mode-badge"]')).toBeNull();
@@ -157,9 +157,9 @@ describe('API key entry and host status', () => {
       readonly expected: string;
       readonly key: string;
     }[] = [
-      { failure: failure('format', false), expected: '格式错误', key: 'sk-good-1234' },
-      { failure: failure('auth', false), expected: '鉴权失败', key: 'sk-good-1234' },
-      { failure: failure('network', true), expected: '网络失败', key: 'sk-good-1234' },
+      { failure: failure('format', false), expected: '格式不对', key: 'sk-good-1234' },
+      { failure: failure('auth', false), expected: 'Key 没有被接受', key: 'sk-good-1234' },
+      { failure: failure('network', true), expected: '没能连上本机服务', key: 'sk-good-1234' },
       { failure: failure('quota', true), expected: '配额不足', key: 'sk-good-1234' },
     ];
     for (const item of cases) {
@@ -174,7 +174,7 @@ describe('API key entry and host status', () => {
 
     const local = await mountShell(fixtureOptions('unconfigured-key', '/account'));
     await saveWith(local.container, 'sk-good-1234');
-    expect(textOf(local.container)).toContain('接口未实现');
+    expect(textOf(local.container)).toContain('接口还没准备好');
     expect(textOf(local.container)).toContain('没有保存');
     expect(local.shell.getState().keyStatus).toBe('missing');
   });
@@ -184,7 +184,7 @@ describe('API key entry and host status', () => {
     const { container } = await mountShell(fixtureOptions('unconfigured-key', '/account', { keyPort }));
     await saveWith(container, 'not-a-key');
     expect(keyPort.saveCalls).toBe(0);
-    expect(textOf(container)).toContain('格式错误');
+    expect(textOf(container)).toContain('格式不对');
     expect(textOf(container)).toContain('sk-');
 
     const setItem = localStorage.setItem.bind(localStorage);
@@ -213,8 +213,8 @@ describe('API key entry and host status', () => {
     });
     const { container } = await mountShell(fixtureOptions('unconfigured-key', '/account', { keyPort }));
     await saveWith(container, 'sk-good-1234');
-    expect(textOf(container)).toContain('接口未实现');
-    expect(textOf(container)).toContain('/edu/api/auth/key');
+    expect(textOf(container)).toContain('接口还没准备好');
+    expect(textOf(container)).not.toContain('/edu/api/auth/key');
     expect(textOf(container)).toContain('没有保存');
   });
 

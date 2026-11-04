@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   buttonByAction,
+  byTestId,
   cleanupStudies,
+  expectCleanStudentCopy,
   mountStudy,
   pageRoot,
   textOf,
@@ -39,19 +41,19 @@ async function prepareImage(scenario: 'image' | 'image-clarification' = 'image')
   return mounted;
 }
 
-describe('image answer entry', () => {
+describe('图片作答入口', () => {
   it('offers a file input, previews locally and requires an explicit preview + confirm', async () => {
     const { container, study } = await prepareImage();
     const input = container.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).not.toBeNull();
     expect(input?.accept).toBe('image/png,image/jpeg');
     expect(input?.getAttribute('aria-label')).toContain('拍照');
-    expect(textOf(pageRoot(container))).toContain('选择不等于发送');
+    expect(textOf(pageRoot(container))).toContain('选图不等于发送');
     expect(confirmButton(container).disabled).toBe(true);
 
     selectFile(container, pngFile());
     await tick(30);
-    expect(container.querySelector('[data-testid="image-file-meta"]')?.textContent).toContain('64×48');
+    expect(byTestId(container, 'image-file-meta').textContent).toContain('64×48');
     expect(container.querySelector('[data-testid="image-preview"]')).toBeNull();
     expect(confirmButton(container).disabled).toBe(true);
 
@@ -65,11 +67,17 @@ describe('image answer entry', () => {
     expect(confirmButton(container).disabled).toBe(false);
 
     confirmButton(container).click();
-    await tick(40);
+    await tick(50);
     expect(study.controller.getState().phase).toBe('feedback');
     expect(container.querySelector('[data-testid="study-feedback-grade"]')).not.toBeNull();
-    expect(textOf(container)).toContain('本次图片判分');
-    expect(textOf(container)).toContain('评分版本：fixture-rule-v1');
+    const text = textOf(container);
+    // 结论只在原地反馈区出现一次；图片区只说图片本身的状态
+    expect(textOf(byTestId(container, 'study-feedback-grade'))).toContain('说到了');
+    expect(textOf(byTestId(container, 'image-result'))).toContain('图片已保存');
+    // 学生界面不出现内部版本号
+    expect(text).not.toContain('评分版本');
+    expect(text).not.toContain('fixture-rule-v1');
+    expectCleanStudentCopy(container);
   });
 
   it('shows the quality-gate clarification as pending and never as a wrong answer', async () => {
@@ -79,24 +87,27 @@ describe('image answer entry', () => {
     container.querySelector<HTMLButtonElement>('button[data-image-action="preview"]')?.click();
     await tick(10);
     confirmButton(container).click();
-    await tick(40);
+    await tick(50);
 
     expect(study.controller.getState().phase).toBe('feedback');
     expect(study.controller.getState().feedback?.requiresClarification).toBe(true);
-    const result = container.querySelector('[data-testid="image-result"]');
-    expect(result).not.toBeNull();
-    expect(result?.textContent).toContain('模糊');
-    expect(result?.textContent).toContain('倾斜');
-    expect(result?.textContent).toContain('只记为待澄清');
-    expect(result?.textContent).toContain('不会写入成绩');
-    expect(result?.textContent).toContain('评分版本：fixture-rule-v1');
+    const result = byTestId(container, 'image-result');
+    const text = textOf(result);
+    expect(text).toContain('模糊');
+    expect(text).toContain('倾斜');
+    expect(text).toContain('只记为待澄清');
+    expect(text).toContain('不会写入成绩');
+    expect(text).not.toContain('评分版本');
+    // 原地反馈同时给出结论：待确认，而不是答错
+    expect(textOf(byTestId(container, 'study-feedback-grade'))).toContain('还需要再看看');
+    expectCleanStudentCopy(container);
   });
 
   it('rejects a non-image file with a Chinese error and allows a retake', async () => {
     const { container } = await prepareImage();
     selectFile(container, new File(['hello'], 'notes.txt', { type: 'text/plain' }));
     await tick(30);
-    expect(container.querySelector('[data-testid="image-file-error"]')?.textContent).toContain('只支持 PNG 或 JPEG');
+    expect(byTestId(container, 'image-file-error').textContent).toContain('只支持 PNG 或 JPEG');
 
     selectFile(container, pngFile());
     await tick(30);

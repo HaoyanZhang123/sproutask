@@ -53,6 +53,7 @@ import type {
   StudyDraft,
   StudyDraftKey,
   StudyFinishReceipt,
+  StudyGradeResult,
   StudyImageInfo,
   StudyImageSubmit,
   StudyReviewCandidate,
@@ -64,7 +65,7 @@ import type {
 } from './types.js';
 
 export const FIXTURE_STUDY_NOTICE =
-  '演示数据（fixture）：本页的教材、活动、教学回合、反馈与草稿均为合成样例，不是真实模型或真实 API 结果。';
+  '演示样例：这一页的课文、题目、反馈和草稿都是合成示例，不是真实的学习记录。';
 
 export type StudyScenario =
   | 'ready'
@@ -76,6 +77,8 @@ export type StudyScenario =
   | 'late'
   | 'clarify'
   | 'incompatible'
+  | 'draft-failed'
+  | 'model-dup'
   | 'image'
   | 'image-clarification';
 
@@ -258,6 +261,34 @@ function gradeFor(attemptId: string, correct: boolean, disclosure: boolean, requ
   );
 }
 
+/**
+ * 真实模型回合的反馈形状（2026-11-04 真机截图 12-study-feedback.png）：
+ * 一句话复述对错 + 两条一模一样的要点 + 同一页被引用多次 + 一条对不上页的引用。
+ * 用来回归「结论只出现一次 / 答案键翻译 / 出处按页去重」。
+ */
+function modelShapedGrade(correct: boolean): StudyGradeResult {
+  return {
+    criteria: [
+      {
+        criterionId: 'criterion.option.match',
+        met: correct ? 'yes' : 'no',
+        rationale: '选项与答案键完全一致。',
+      },
+      {
+        criterionId: 'criterion.option.match-duplicate',
+        met: correct ? 'yes' : 'no',
+        rationale: '选项与答案键完全一致。',
+      },
+    ],
+    feedback: correct ? '选择正确。' : '选择不正确。',
+    uncertainties: ['criterion.option.match 命中了 option.b。'],
+    evidenceCandidates: [],
+    requiresClarification: false,
+    sourceRefs: ['source.p18', 'source.p18', 'source.p26', 'source.p18', 'source.missing'],
+    graderVersion: 'model-grader-v1',
+  };
+}
+
 function attemptFor(
   input: TutorTurnInput,
   activity: Activity,
@@ -364,7 +395,7 @@ export class FixtureStudyDataSource implements StudyDataSource {
             ? {
                 previousPackVersion: '0.9.0',
                 currentPackVersion: PACK.version,
-                reason: '内容包修订了评分标准，旧证据不能直接沿用。',
+                reason: '这一版换了评分标准，以前的记录不能直接沿用。',
               }
             : null,
         imageFlow:
@@ -427,6 +458,9 @@ export class FixtureStudyDataSource implements StudyDataSource {
   }
 
   async saveDraft(_ctx: RequestContext, draft: StudyDraft): Promise<ServiceResult<{ readonly savedAt: string }>> {
+    if (this.scenario === 'draft-failed') {
+      return errResult('STORAGE_FAILED', '草稿没有写入本机；请重试。', true);
+    }
     this.drafts.set(this.draftKey(draft), draft);
     return okResult({ savedAt: draft.savedAt }, 2);
   }
@@ -541,12 +575,14 @@ export class FixtureStudyDataSource implements StudyDataSource {
     const attempt = hasAttempt ? attemptFor(input, this.currentActivity, this.session) : null;
     const grade = attempt === null
       ? null
-      : gradeFor(
-          attempt.id,
-          correct,
-          disclosure,
-          options.requiresClarification ?? this.scenario === 'clarify',
-        );
+      : this.scenario === 'model-dup'
+        ? modelShapedGrade(correct)
+        : gradeFor(
+            attempt.id,
+            correct,
+            disclosure,
+            options.requiresClarification ?? this.scenario === 'clarify',
+          );
     const helpKinds = helpRequest === null ? [] : [helpRequest];
     const consecutiveFailures = hasAttempt && !correct ? this.state.consecutiveFailures + 1 : this.state.consecutiveFailures;
     const decision: StudyDecision = {
@@ -628,7 +664,7 @@ export class FixtureStudyDataSource implements StudyDataSource {
     return okResult(
       {
         revision,
-        message: '已跳过本题；不会记为答错，也不会伪造活动完成。',
+        message: '已跳过本题；不会记为答错，也不会把没做的题记成做过。',
         decision: { action: 'skip', rationale: 'student skipped', disclosure: false, guidance: 'none', difficulty: 'same', sourceRefs: [] },
         state: nextState,
         attemptOutcome: null,

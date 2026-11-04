@@ -4,18 +4,17 @@ import { buttonByText, cleanupShells, fixtureOptions, mountShell, pageRoot, text
 afterEach(cleanupShells);
 
 describe('first use', () => {
-  it('explains local storage vs cloud feedback, local identity and current textbook', async () => {
+  it('explains local storage vs cloud feedback and the current textbook', async () => {
     const { container } = await mountShell(fixtureOptions('ready', '/first-run'));
     const text = textOf(pageRoot(container));
     expect(text).toContain('学习记录保存在这台电脑');
-    expect(text).toContain('可能发送到该服务');
-    expect(text).toContain('不能把全部数据说成从不离机');
-    expect(text).toContain('本地匿名档案：learner.local.default');
-    expect(text).toContain('这不是平台模型账号');
+    expect(text).toContain('会发给模型服务');
+    expect(text).toContain('不会上传整本教材');
+    expect(text).not.toContain('本地匿名档案');
     expect(text).toContain('当前教材');
-    expect(text).toContain('合成 fixture（非真实版本）');
-    expect(text).toContain('短诊断（可选）');
-    expect(text).toContain('个可用活动');
+    expect(text).toContain('内容按课本整理');
+    expect(text).toContain('短诊断');
+    expect(text).toContain('道题可用');
   });
 
   it('saves a self-reported range as a statement, not as understanding evidence', async () => {
@@ -28,8 +27,8 @@ describe('first use', () => {
     buttonByText(form as HTMLElement, '保存自述范围').click();
     await tick(10);
     const status = container.querySelector<HTMLElement>('[data-testid="first-run-save-status"]');
-    expect(textOf(status as HTMLElement)).toContain('自述范围已保存');
-    expect(textOf(status as HTMLElement)).toContain('不会自动标记为已理解');
+    expect(textOf(status as HTMLElement)).toContain('记下了');
+    expect(textOf(status as HTMLElement)).toContain('不会当作已经学会');
     const range = shell.getState().rangeClaim;
     expect(range?.scope).toBe('selected');
     expect(range?.conceptIds.length).toBe(1);
@@ -41,8 +40,8 @@ describe('first use', () => {
     const { shell, container } = await mountShell(fixtureOptions('ready', '/first-run'));
     buttonByText(pageRoot(container), '跳过诊断').click();
     const status = container.querySelector<HTMLElement>('[data-testid="first-run-diagnostic-status"]');
-    expect(textOf(status as HTMLElement)).toContain('已跳过诊断');
-    expect(textOf(status as HTMLElement)).toContain('不会生成理解判断');
+    expect(textOf(status as HTMLElement)).toContain('已跳过');
+    expect(textOf(status as HTMLElement)).toContain('不影响后面的学习');
     expect(textOf(status as HTMLElement)).not.toContain('已掌握');
     expect(shell.getState().diagnosticSkipped).toBe(true);
   });
@@ -68,14 +67,14 @@ describe('first use', () => {
     expect(buttonByText(alert as HTMLElement, '重试保存')).toBeDefined();
     expect(buttonByText(alert as HTMLElement, '先看地图')).toBeDefined();
     expect(checkbox?.checked).toBe(true);
-    expect(textOf(container)).toContain('尚未保存');
+    expect(textOf(container)).toContain('尚未写入本机');
   });
 
   it('states that local content stays readable when the API key is missing', async () => {
     const { container } = await mountShell(fixtureOptions('unconfigured-key', '/first-run'));
     const text = textOf(pageRoot(container));
-    expect(text).toContain('API Key 未配置');
-    expect(text).toContain('云推理不可用');
-    expect(text).toContain('可读本地内容');
+    expect(text).toContain('还没有连接');
+    expect(text).toContain('连上之后才有讲解和批改');
+    expect(text).toContain('现在可以读教材');
   });
 });

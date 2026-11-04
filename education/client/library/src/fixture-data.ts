@@ -45,7 +45,7 @@ import type {
 } from './types.js';
 
 export const FIXTURE_LIBRARY_NOTICE =
-  '演示数据（fixture）：教材、导入任务与来源均为合成样例，不是真实教材，也不代表真实 API 结果。';
+  '演示数据（fixture）：这里的课本、导入进度和来源都是合成样例，不是真实教材。';
 
 export type LibraryScenario =
   | 'running'
@@ -136,9 +136,9 @@ const BOOKS: readonly LibraryBook[] = [
   },
   {
     id: 'book.candidate.fixture',
-    title: '待核实候选教材（fixture）',
+    title: '候选生物教材（fixture）',
     publisher: '未知出版社（fixture）',
-    editionLabel: '版次无法辨认 · 候选样例',
+    editionLabel: '版次认不出来 · 样例',
     grade: 7,
     term: 1,
     subject: 'biology',
@@ -156,9 +156,9 @@ const BOOKS: readonly LibraryBook[] = [
   },
   {
     id: 'book.unavailable.fixture',
-    title: '不可用材料（fixture）',
+    title: '打不开的课本（fixture）',
     publisher: '未知出版社（fixture）',
-    editionLabel: '不可用样例',
+    editionLabel: '打不开的样例',
     grade: 7,
     term: 1,
     subject: 'biology',
@@ -172,7 +172,7 @@ const BOOKS: readonly LibraryBook[] = [
     editionVerification: 'rejected',
     fileState: 'corrupt',
     isCurrent: false,
-    unavailableReason: 'PDF 交叉引用损坏，未读到可读页面；没有发布空壳教材或伪造全册地图。',
+    unavailableReason: '这个 PDF 打不开，没有读到能用的页面；也没有凭空造一本空课本。',
   },
 ];
 
@@ -245,7 +245,7 @@ export class FixtureLibraryDataSource implements LibraryDataSource {
             sourceRefId: SOURCE_CANDIDATE.id,
             pdfPage: SOURCE_CANDIDATE.pdfPage,
             printedPage: null,
-            label: '候选段落（未核实）',
+            label: '候选段落',
             kind: 'block',
             reviewState: 'candidate',
             verification: 'unverified',
@@ -290,8 +290,8 @@ export class FixtureLibraryDataSource implements LibraryDataSource {
     if (sourceRefId === SOURCE_CANDIDATE.id) {
       return okResult(
         {
-          bookTitle: '待核实候选教材（fixture）',
-          editionLabel: '版次无法辨认 · 候选样例',
+          bookTitle: '候选生物教材（fixture）',
+          editionLabel: '版次认不出来 · 样例',
           pageCount: 200,
           bookSha256: '3333333333333333333333333333333333333333333333333333333333333333',
           sourceRef: SOURCE_CANDIDATE,
@@ -300,7 +300,7 @@ export class FixtureLibraryDataSource implements LibraryDataSource {
           pageImage: {
             assetId: 'asset.page.candidate.p18',
             bbox: { x: 0.1, y: 0.12, width: 0.6, height: 0.2 },
-            altText: '候选页图区域：PDF 第 18 页（未核实）',
+            altText: 'PDF 第 18 页上这段文字的位置（样例）',
             fixtureOnly: true,
           },
           candidate: true,
@@ -321,7 +321,7 @@ export class FixtureLibraryDataSource implements LibraryDataSource {
           pageImage: {
             assetId: 'asset.page.p26.fixture',
             bbox: { x: 0.2, y: 0.25, width: 0.4, height: 0.3 },
-            altText: '受控页图区域：PDF 第 26 页，图示位置',
+            altText: 'PDF 第 26 页上图示的位置',
             fixtureOnly: true,
           },
           candidate: false,
@@ -344,7 +344,7 @@ export class FixtureLibraryDataSource implements LibraryDataSource {
         pageImage: {
           assetId: 'asset.page.p18.fixture',
           bbox: { x: 0.12, y: 0.18, width: 0.55, height: 0.13 },
-          altText: '受控页图区域：PDF 第 18 页，段落在页面上的位置',
+          altText: 'PDF 第 18 页上这段文字的位置',
           fixtureOnly: true,
         },
         candidate: false,

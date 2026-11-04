@@ -129,3 +129,38 @@ export function submitAnswer(root: ParentNode): void {
 export function dispatchKey(target: EventTarget, key: string, options: KeyboardEventInit = {}): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...options }));
 }
+
+/** happy-dom 没有布局引擎，视口宽度要先写进 window 再做窄屏判断。 */
+export function setViewportWidth(width: number, height = 900): void {
+  Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
+  Object.defineProperty(window, 'innerHeight', { configurable: true, value: height });
+}
+
+export function byTestId<T extends HTMLElement = HTMLElement>(root: ParentNode, testId: string): T {
+  const found = root.querySelector<T>(`[data-testid="${testId}"]`);
+  if (found === null) throw new Error(`test id not found: ${testId}`);
+  return found;
+}
+
+/** 点开右下角「问小芽」，返回对话层。 */
+export function openSprout(container: HTMLElement): HTMLElement {
+  byTestId<HTMLButtonElement>(container, 'ask-sprout-pill').click();
+  return byTestId(container, 'sprout-sheet');
+}
+
+export function dispatchKeyOn(target: EventTarget, key: string, options: KeyboardEventInit = {}): void {
+  target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...options }));
+}
+
+/**
+ * 学生界面禁词（AGENTS.md 红线 + 学习台设计约定）。
+ * 只扫学生能看到的文字，不在测试里扫描源码。
+ */
+export const FORBIDDEN_STUDENT_WORDS =
+  /内容包|activity\.|source\.|step-|三轴|证据候选|基准|回环|受控|返回位置|本地保存|当前概念|掌握百分比|覆盖率|评分版本|答案键|系统证据|不替代|单独保存|criterion/;
+
+export function expectCleanStudentCopy(root: ParentNode): void {
+  const value = textOf(root);
+  const hit = value.match(FORBIDDEN_STUDENT_WORDS);
+  if (hit !== null) throw new Error(`student copy contains forbidden word: ${hit[0]}`);
+}

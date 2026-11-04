@@ -1,26 +1,26 @@
 /**
- * Education shell design tokens.
+ * 芽问设计 token：颜色、字号、间距、圆角、阴影、断点。
  *
- * One source for colour, type, spacing and focus. Sizes are expressed in
- * `rem` so the whole surface scales with the browser/system font setting: the
- * default base is 1.25rem (20px at the usual 16px root).
+ * 原则：暖纸底 + 白卡 + 深绿主色 + 琥珀提醒；正文 16px 基准（系统放大后仍可完成主旅程）；
+ * 状态永远"颜色 + 文字 + 形状"三重编码，不靠颜色单独承载信息。
  */
 
 export const DESIGN_TOKENS = {
-  /** 20px at a 16px root font. Deliberately larger than the browser default. */
-  baseFontSize: '1.25rem',
+  /** 16px 基准；阅读区正文用 1.0625–1.125rem。 */
+  baseFontSize: '1rem',
   fontSizes: {
-    xs: '0.75rem',
+    xs: '0.8125rem',
     sm: '0.875rem',
     md: '1rem',
     lg: '1.125rem',
     xl: '1.375rem',
     xxl: '1.75rem',
+    display: '2rem',
   },
   lineHeights: {
     tight: '1.25',
-    normal: '1.55',
-    relaxed: '1.7',
+    normal: '1.6',
+    relaxed: '1.85',
   },
   spacing: {
     xxs: '0.25rem',
@@ -32,38 +32,45 @@ export const DESIGN_TOKENS = {
     xxl: '3rem',
   },
   radii: {
-    sm: '0.35rem',
-    md: '0.65rem',
-    lg: '0.9rem',
+    sm: '0.5rem',
+    md: '0.75rem',
+    lg: '1.125rem',
+    xl: '1.5rem',
     pill: '999rem',
   },
+  shadows: {
+    card: '0 1px 2px rgba(31, 36, 33, 0.05), 0 10px 28px rgba(31, 36, 33, 0.06)',
+    pop: '0 16px 40px rgba(31, 36, 33, 0.14)',
+  },
   colors: {
-    canvas: '#f4f6f2',
+    canvas: '#faf7f0',
     surface: '#ffffff',
-    surfaceMuted: '#eef2ec',
-    ink: '#17211b',
-    inkMuted: '#465349',
-    inkFaint: '#5f6d63',
-    line: '#c7d1c8',
-    lineStrong: '#8d9c90',
-    accent: '#1f6b46',
-    accentStrong: '#124a2f',
-    accentSoft: '#e2f0e6',
-    focus: '#9a4b00',
-    info: '#1d4e89',
-    infoSoft: '#e7eff9',
-    warning: '#7a4600',
-    warningSoft: '#fdf1dc',
-    danger: '#9b1c1c',
-    dangerSoft: '#fbe9e7',
-    success: '#14603c',
-    successSoft: '#dff1e5',
-    neutralSoft: '#e9eeea',
+    surfaceMuted: '#f4efe4',
+    surfacePaper: '#fdfaf2',
+    ink: '#1f2421',
+    inkMuted: '#5a6259',
+    inkFaint: '#8b9187',
+    line: '#e6e1d6',
+    lineStrong: '#d6cfc0',
+    accent: '#2f6b4f',
+    accentStrong: '#1f4e38',
+    accentSoft: '#e6f0e8',
+    accentTint: '#f0f6f1',
+    focus: '#2f6b4f',
+    info: '#2f5d8a',
+    infoSoft: '#e8f0f7',
+    warning: '#a9661f',
+    warningSoft: '#fbf0df',
+    danger: '#a13a32',
+    dangerSoft: '#fbeae7',
+    success: '#2f6b4f',
+    successSoft: '#e6f0e8',
+    neutralSoft: '#f1ece1',
     onAccent: '#ffffff',
   },
-  focusRing: '3px solid #9a4b00',
+  focusRing: '3px solid #2f6b4f',
   breakpoints: {
-    /** Below this the sidebar collapses to a top navigation row. */
+    /** 低于该宽度时学习台从"对开"变"单页"，侧栏变抽屉。 */
     compact: 1100,
     standard: 1280,
     wide: 1440,
@@ -73,7 +80,9 @@ export const DESIGN_TOKENS = {
     gapRem: 1.5,
     pagePaddingRem: 2,
     minContentRem: 20,
-    maxContentRem: 72,
+    maxContentRem: 86,
+    /** 学习台右页最小可读宽度（rem）。 */
+    workPaneMinRem: 22,
   },
 } as const;
 

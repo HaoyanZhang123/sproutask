@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   buttonByAction,
   cleanupLibraries,
+  el,
   mountLibrary,
   setInput,
   textOf,
@@ -11,6 +12,7 @@ import { FixtureLibraryDataSource } from '../src/index.js';
 
 afterEach(cleanupLibraries);
 
+/** 导入入口：导入面板里的“选择本地 PDF”+“开始导入”。 */
 async function chooseAndStart(container: HTMLElement): Promise<void> {
   buttonByAction(container, 'choose-file').click();
   await tick(10);
@@ -18,22 +20,26 @@ async function chooseAndStart(container: HTMLElement): Promise<void> {
   await tick(20);
 }
 
-describe('library import flow', () => {
-  it('shows metadata confirmation, real stages/units, monotonic updates and cancel/resume', async () => {
+describe('导入新的课本：流程和真实进度', () => {
+  it('确认信息 → 真实阶段/页数 → 只前进不进倒退 → 取消后恢复', async () => {
     const mounted = await mountLibrary();
     const { container, library, data } = mounted;
-    buttonByAction(container, 'choose-file').click();
-    await tick(10);
-    const selected = container.querySelector<HTMLElement>('[data-testid="library-selected-file"]');
-    expect(selected).not.toBeNull();
-    expect(textOf(selected as HTMLElement)).toContain('合成教材.pdf');
-    expect(textOf(selected as HTMLElement)).toContain('不会上传整本');
+    // 从课本页的“导入新的”也能进入同一条流程
+    el<HTMLButtonElement>(pageFor(container), 'library-import').click();
+    await tick(20);
+    const selected = el(container, 'library-selected-file');
+    expect(textOf(selected)).toContain('合成教材.pdf');
+    expect(textOf(selected)).toContain('不会上传整本');
+    expect(textOf(selected)).not.toMatch(/指纹|sha256/i);
+
     buttonByAction(container, 'start-import').click();
     await tick(20);
-    expect(container.querySelector('[data-testid="library-import-job"]')).not.toBeNull();
+    expect(el(container, 'library-import-job')).not.toBeNull();
     expect(library.controller.getState().job?.stage).toBe('extract');
-    expect(textOf(container)).toContain('当前阶段：提取内容');
+    expect(textOf(container)).toContain('现在：读出页面文字');
     expect(textOf(container)).toContain('4 / 200');
+    // 进度条面板不出现工程字段
+    expect(textOf(container)).not.toMatch(/解析器|parserVersion|任务 job\./);
 
     const source = data as FixtureLibraryDataSource;
     const current = library.controller.getState().job;
@@ -48,7 +54,7 @@ describe('library import flow', () => {
       updatedAt: '2026-10-29T10:05:00Z',
     });
     await tick(10);
-    expect(textOf(container)).toContain('整理结构');
+    expect(textOf(container)).toContain('整理章节');
     expect(textOf(container)).toContain('5 / 200');
 
     const advanced = library.controller.getState().job;
@@ -73,51 +79,51 @@ describe('library import flow', () => {
     await tick(10);
     expect(container.querySelector('[data-testid="library-ready"]')).toBeNull();
     expect(library.controller.getState().job?.status).toBe('cancelled');
-    expect(textOf(container)).toContain('迟到结果不会写入');
+    expect(textOf(container)).toContain('取消之后才回来的结果');
 
     buttonByAction(container, 'resume-import').click();
     await tick(10);
     expect(library.controller.getState().job?.status).toBe('running');
-    expect(textOf(container)).toContain('已恢复同一导入任务');
+    expect(textOf(container)).toContain('已接着上次的导入继续');
   });
 
-  it('shows same-hash idempotency and does not duplicate the book', async () => {
+  it('同一个文件不会重复建课本', async () => {
     const { container } = await mountLibrary({ scenario: 'duplicate' });
     await chooseAndStart(container);
     expect(container.querySelector('[data-testid="library-duplicate-notice"]')).not.toBeNull();
-    expect(textOf(container)).toContain('同一文件已存在');
-    expect(textOf(container)).toContain('不会重复建书');
+    expect(textOf(container)).toContain('这本书之前导入过');
+    expect(textOf(container)).toContain('没有重复建课本');
   });
 
-  it('keeps await_review as pending review, never as import completion', async () => {
+  it('等确认不等于导入完成', async () => {
     const { container } = await mountLibrary({ scenario: 'await-review' });
     await chooseAndStart(container);
-    const pending = container.querySelector<HTMLElement>('[data-testid="library-await-review"]');
-    expect(pending).not.toBeNull();
-    expect(textOf(pending as HTMLElement)).toContain('待审核：不是导入完成');
+    const pending = el(container, 'library-await-review');
+    expect(textOf(pending)).toContain('还在核对，不算导入完成');
     expect(container.querySelector('[data-testid="library-ready"]')).toBeNull();
-    expect(textOf(container)).toContain('当前阶段：等待审校');
-    expect(textOf(pending as HTMLElement)).toContain('不显示“已完成”');
+    expect(textOf(container)).toContain('现在：等你确认');
+    expect(textOf(pending)).toContain('现在不会显示“完成”');
+    // 等确认时不给“接着导入”，避免看起来像还能一键完成
+    expect(container.querySelector('button[data-action="resume-import"]')).toBeNull();
   });
 
-  it('surfaces same-edition rescan as candidate/page-mapping review', async () => {
+  it('同一版的另一份扫描先当参考', async () => {
     const { container } = await mountLibrary({ scenario: 'same-edition-rescan' });
     await chooseAndStart(container);
-    const match = container.querySelector<HTMLElement>('[data-testid="library-match-notice"]');
-    expect(match).not.toBeNull();
-    expect(textOf(match as HTMLElement)).toContain('同版不同扫描');
-    expect(textOf(match as HTMLElement)).toContain('候选');
+    const match = el(container, 'library-match-notice');
+    expect(textOf(match)).toContain('同一版的另一份扫描');
+    expect(textOf(match)).toContain('先当参考');
   });
 
-  it('shows a ready state only for the declared scope', async () => {
+  it('只有真的做完才说“这本可以用了”', async () => {
     const { container } = await mountLibrary({ scenario: 'ready' });
     await chooseAndStart(container);
-    const ready = container.querySelector<HTMLElement>('[data-testid="library-ready"]');
-    expect(ready).not.toBeNull();
-    expect(textOf(ready as HTMLElement)).toContain('按包声明的范围');
+    const ready = el(container, 'library-ready');
+    expect(textOf(ready)).toContain('这本可以用了');
+    expect(textOf(ready)).toContain('一部分');
   });
 
-  it('keeps a long-running job visible across a page remount and re-subscribes to progress', async () => {
+  it('导入进行中离开再回来，进度还在并继续接收更新', async () => {
     const mounted = await mountLibrary();
     await chooseAndStart(mounted.container);
     const { shell, library, data } = mounted;
@@ -127,7 +133,7 @@ describe('library import flow', () => {
     await shell.navigate('/library');
     await tick(20);
     expect(library.controller.getState().job?.status).toBe('running');
-    expect(textOf(mounted.container)).toContain('导入任务');
+    expect(textOf(mounted.container)).toContain('导入进度');
     const source = data as FixtureLibraryDataSource;
     const current = library.controller.getState().job;
     if (current === null) return;
@@ -141,7 +147,7 @@ describe('library import flow', () => {
     expect(textOf(mounted.container)).toContain('6 / 200');
   });
 
-  it('rejects a metadata page count that does not match the file', async () => {
+  it('页数和文件对不上时不开始导入', async () => {
     const mounted = await mountLibrary();
     const { container } = mounted;
     buttonByAction(container, 'choose-file').click();
@@ -158,3 +164,9 @@ describe('library import flow', () => {
     expect(textOf(alert as HTMLElement)).toContain('这次操作被安全检查拒绝');
   });
 });
+
+function pageFor(container: HTMLElement): HTMLElement {
+  const page = container.querySelector<HTMLElement>('[data-page-id]');
+  if (page === null) throw new Error('page root not found');
+  return page;
+}

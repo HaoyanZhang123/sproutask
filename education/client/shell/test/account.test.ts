@@ -3,21 +3,16 @@ import { buttonsOf, cleanupShells, fixtureOptions, mountShell, pageRoot, textOf 
 
 afterEach(cleanupShells);
 
-describe('account and model-service status', () => {
-  it('shows model-account and API-key states separately without exposing credentials', async () => {
+describe('settings: key, font and about', () => {
+  it('shows the key state without exposing credentials', async () => {
     const { container } = await mountShell(fixtureOptions('ready', '/account'));
     const page = pageRoot(container);
-    const account = container.querySelector<HTMLElement>('[data-testid="account-model-account"]');
     const apiKey = container.querySelector<HTMLElement>('[data-testid="account-api-key"]');
-    expect(account).not.toBeNull();
     expect(apiKey).not.toBeNull();
-    expect(textOf(account as HTMLElement)).toContain('不可用');
-    expect(textOf(account as HTMLElement)).toContain('当前版本不需要平台账号');
     expect(textOf(apiKey as HTMLElement)).toContain('已配置');
-    expect(textOf(apiKey as HTMLElement)).toContain('不回显');
-    expect(textOf(page)).toContain('更换模型账号不会删除学情');
-    expect(textOf(page)).toContain('不会删除本机教材');
-    expect(textOf(page)).not.toMatch(/sk-[A-Za-z0-9]|Bearer\s+[A-Za-z0-9]|api[_-]?key\s*=|C:\\\\|E:\\\\/);
+    expect(textOf(apiKey as HTMLElement)).toContain('不会显示完整 Key');
+    expect(textOf(page)).toContain('学习记录只保存在这台电脑上');
+    expect(textOf(page)).not.toMatch(/sk-[A-Za-z0-9]|Bearer\s+[A-Za-z0-9]|api[_-]?key\s*=/);
     for (const control of buttonsOf(page)) {
       expect((control.textContent ?? '').trim()).not.toMatch(/登录|退出|授权/);
     }
@@ -26,22 +21,21 @@ describe('account and model-service status', () => {
   it('states that local content remains readable when the key is not configured', async () => {
     const { container } = await mountShell(fixtureOptions('unconfigured-key', '/account'));
     const text = textOf(container.querySelector('[data-testid="account-api-key"]') as HTMLElement);
-    expect(text).toContain('未配置');
-    expect(text).toContain('可读本地内容');
-    expect(text).toContain('云推理不可用');
-    expect(textOf(container)).toContain('API Key 未配置');
+    expect(text).toContain('还没有配置');
+    expect(text).toContain('读教材');
+    expect(text).toContain('智能反馈');
+    expect(textOf(container)).toContain('还没有配置模型 Key');
   });
 
-  it('reports runtime capabilities without offering tool or development controls', async () => {
+  it('shows technical state folded under about, without tool or development controls', async () => {
     const { container } = await mountShell(fixtureOptions('ready', '/account'));
-    const runtime = container.querySelector<HTMLElement>('[data-testid="account-runtime"]');
-    expect(runtime).not.toBeNull();
-    const text = textOf(runtime as HTMLElement);
-    expect(text).toContain('DSH 运行内核');
-    expect(text).toContain('未绑定');
-    expect(text).toContain('0 项');
-    expect(text).toContain('仅本机回环');
-    expect(text).toContain('系统级文件与命令能力不属于学生权限');
+    const about = container.querySelector<HTMLElement>('[data-testid="account-about"]');
+    expect(about).not.toBeNull();
+    const text = textOf(about as HTMLElement);
+    expect(text).toContain('DSH 内核');
+    expect(text).toContain('未连接');
+    expect(text).toContain('文字模型');
+    expect(text).not.toMatch(/工具调用|受控学习工具|回环/);
   });
 
   it('allows a larger display font without changing study state', async () => {
