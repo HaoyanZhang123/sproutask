@@ -12,13 +12,13 @@
 - 证据: education/packages/tutor/, education/content/biology-7a/source/
 
 ## 功能: 知识地图：先看全册，再看一章里的关系
-- 状态: 可用（重构中）
+- 状态: 可用
 - 简介: 全册按单元/章列出概念状态；点进一章看"先学→接着学→再学"的分层关系图，另有列表等价视图。
 - 证据: education/client/map/src/, education/content/biology-7a/fragments/relations-full.json
 - 依赖: 在真实 DSH 内核上对话，不是外观相似的聊天
 
 ## 功能: 学习台：读课本、作答、看反馈在一处
-- 状态: 可用（重构中）
+- 状态: 可用
 - 简介: 左边课本原文（可折叠易混点与出处），右边题目；提交后原地展开结论、依据、出处与下一题；小芽收成右下角浮起按钮。
 - 证据: education/client/study/src/controller.ts, education/client/study/src/page.ts
 - 依赖: 知识地图：先看全册，再看一章里的关系
@@ -47,7 +47,7 @@
 ## 功能: 本机学习记录：三轴 + 自评 + 导出删除
 - 状态: 可用
 - 简介: 学习进程、理解证据、复习活动分开记录；自评单独保存；记录可导出、可确认后删除。
-- 证据: education/packages/storage/, education/packages/learner/, education/client/shell/src/pages/records.ts（重构中）
+- 证据: education/packages/storage/, education/packages/learner/, education/client/shell/src/pages/records.ts
 
 ### 子项: 关掉再打开接着上次
 - 状态: 可用
@@ -72,7 +72,7 @@
 ## 功能: 装到自己电脑上就能用
 - 状态: 可用
 - 简介: 每用户安装版（免管理员、可卸载、保留数据）与便携版；未签名，附 SHA256。
-- 证据: education/scripts/packaging/, education/dist/student/version.txt
+- 证据: education/scripts/packaging/, docs/releases/v0.4.0.md
 - 依赖: 内容包与出处核对
 
 ## 功能: 界面改成学生能用的

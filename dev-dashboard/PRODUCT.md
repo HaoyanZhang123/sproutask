@@ -11,17 +11,17 @@
 
 ## 当前方向
 
-- 阶段：v0.3.1 已发布（2026-11-03），功能可用，界面还是工程版
-- 方向：把界面从"写给验收看的"改成"学生能直接用的"（今天 / 学习 / 进展 + 两级知识地图）
-- 下一步：界面重构完成后发布 v0.4.0（版本号待定）
+- 阶段：v0.4.0 已发布（2026-11-04），学生界面重构 A+B 完成；工作区已收拢并清理为单线
+- 方向：补live activityId 取下一题、自评落库、页码映射这几处接力缺口，并按人工走查反馈定下一轮范围
+- 下一步：先做一轮人工走查（docs/optimize/04-manual-test.md），再按反馈排下一轮开发
 
 ## 使用流程
 
 1. 从开始菜单或桌面打开 :: 免管理员安装；未签名，Windows 会提示未知发布者 :: 证据: education/desktop/README.md
 2. 在设置里填模型 Key :: 只在本机加密保存，界面只显示"已配置/未配置" :: 证据: education/client/shell/src/pages/account.ts
-3. 第一次打开先认识"今天" :: 继续上次、挑一个概念、或复习该复习的 :: 证据: education/client/shell/src/pages/home.ts（重构中）
-4. 在学习台读课本、作答 :: 左边课本原文，右边题目；提交后原地给结论、依据和出处 :: 证据: education/client/study/src/controller.ts（重构中）
-5. 在地图上找概念 :: 先看全册章节地图，再进章级关系图；关系只来自内容包 :: 证据: education/client/map/src/controller.ts（重构中）
+3. 第一次打开先认识"今天" :: 继续上次、挑一个概念、或复习该复习的 :: 证据: education/client/shell/src/pages/home.ts
+4. 在学习台读课本、作答 :: 左边课本原文，右边题目；提交后原地给结论、依据和出处 :: 证据: education/client/study/src/controller.ts
+5. 在地图上找概念 :: 先看全册章节地图，再进章级关系图；关系只来自内容包 :: 证据: education/client/map/src/controller.ts
 6. 关掉再打开，接着上次 :: 草稿与进度保存在本机，下次恢复到同一处 :: 证据: education/packages/storage/
 
 ## 不做什么

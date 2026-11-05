@@ -9,7 +9,7 @@
 ## 1. 一句话现状
 
 **v0.4.0（2026-11-04）已发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
-当前状态：工作区已收拢到单线；界面 A+B 重构与文案复检已完成；v0.4.0 版本号、README、封面与发布说明已更新。
+当前状态（2026-11-05）：工作区已清理（8,456MB → 873MB）；干净克隆可构建、GitHub CI 已转绿；本机旧版 0.2.0/0.3.0 已卸载并干净安装 0.4.0；下一步是人工走查与重新填 Key。
 
 ---
 
@@ -82,7 +82,34 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 ---
 
-## 5. 界面重构 A+B（已拍板，进行中）
+### 2026-11-05：清理与收口（本次）
+
+**做了什么**
+
+- **仓库 P0（丢文件）**：根 `.gitignore` 的 `data/` 是全局模式，把 `education/client/shell/src/data/`（`types.ts` + `fixture-data.ts`，被 contracts/shell-state/index 直接 import）和 `education/licenses/data/`（4 个许可证清单 JSON，被已跟踪的 licenses 工具读取）一起忽略了。v0.3.1 tag 里这两个目录还在，v0.4.0 线整条丢失 → main 干净克隆 typecheck 必红、CI 红、许可证流程 ENOENT。修复：`data/`→`/data/`、`notes/`→`/notes/`、`output/`→`/output/`，`education/.gitignore` 补 `output/`，同一提交补回 6 个文件（commit `e124a64`）。
+- **CI P0（环境差异）**：GitHub Actions Windows runner 的 TEMP 是 8.3 短名（`C:\Users\RUNNER~1\...`）。importer 的 `verifyManagedAsset` 用 `realpath` 得到长名候选，再与 `path.resolve` 的 `allowedRoots`（短名）比较 → 被判根外（`INVALID_INPUT`），CI 上 22 个用例失败。修复：比较前把 allowed roots 也 `realpath` 规范化，解析失败回退原值（commit `b3b4de9`）。本机把 TEMP 指向短名目录可稳定复现（修复前 failure-modes 6 failed/4 passed，与 CI 一致；修复后 importer 44 用例全绿）。
+- **工作区瘦身**：删 `output/`、`education/.local/cache`（保留 `T16/tools` 9MB NSIS）、`.local/evidence`、`.local/publish`、`dist/student`、`dist` 旧版本与重复 exe、`education/output`、`.tmp`。8,456.11MB / 287,698 文件 → **872.58MB / 36,879 文件（−89.7%）**，回收 7,583MB / 250,825 文件。保留：v0.4.0 三件套（与 Release 资产 SHA256 一致）、`.local/secrets`、`education/node_modules`、`probes/runtime/node_modules`、源码/docs/内容包/教材 PDF。
+- **本机收口**：停掉 11-04 遗留的开发服务（PID 41876 / 端口 30574）；卸载旧 Electron 0.2.0 与 education 0.3.0（0.3.0 数据根原本为空）；删 `%APPDATA%\SproutAsk`（13 条旧会话+旧配置，按用户决定不保留）、`sproutask-updater`、`E:\Downloads` 旧安装包、191 个空临时目录；静默干净安装 0.4.0（`%LOCALAPPDATA%\SproutAsk\current`，version=0.4.0）。快捷方式收口为 2 个（桌面 + 开始菜单，同指 launcher.cmd）。
+- **文档**：dev-dashboard 的 NOW / PRODUCT / FEATURES 与 PROGRESS 对齐（此前 NOW 写"待拍板"、PRODUCT 停在 v0.3.1）。
+
+**怎么验证的**
+
+- 干净克隆（GitHub 全新 clone）→ `pnpm --dir education install --frozen-lockfile` → `pnpm typecheck` / `pnpm test` / `pnpm content:validate` 全绿。
+- 本仓 `pnpm typecheck && pnpm test` 全绿（705 用例）；CI run 见下方"未做"说明。
+- 安装版无头冒烟：`--no-edge` 启动，HTTP 200、`status.ok=true`、`status=degraded`（无 Key，预期）、pack biology-7a@2.0.0、43 概念。
+- 工作区保留项逐项核对存在；`git status` 干净；tracked 924 → 930。
+
+**未做 / 未验证**
+
+- 安装版尚未重新填 API Key → 真实模型对话/工具调用未实测（无头冒烟只到 HTTP 与内容绑定）。
+- `pnpm contract:lock:verify` 仍红：契约锁停在 v0.3.0，v0.4.0 改了 map/study 源码后没有重生成；重生成属契约锁变更，需单独确认。
+- 未做"另一台干净机"验证；未做学习效果实验。
+
+
+
+---
+
+## 5. 界面重构 A+B（已拍板并完成）
 
 **目标**：把"写给验收和 AI 看"的界面改成"学生能直接用"的界面；功能与数据契约不变。
 
@@ -94,7 +121,7 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 地图：**两级**——全册章节地图（单元→章→概念胶囊）+ 章级分层关系图（先学→再学→连起来），带列表等价视图。
 - 文案：学生话，禁词自动扫描（`activity.*`、内容包、三轴、证据候选、回环、rem 等）。
 
-**设计稿**：`output/uishot/mockups/`（临时目录，不入库；定稿后截图归档到 `docs/images/ui/`）。
+**设计稿**：`output/uishot/mockups/`（临时目录，不入库；2026-11-05 清理时已删除；定稿截图归档到 `docs/images/ui/`）。
 **方案与实施记录**：`docs/rebuild/11-ui-redesign.md`（随实施创建）。
 
 **进度（2026-11-04）**：A+B 已实现并合入工作区，随后按用户逐条确认完成文案减法。
@@ -124,14 +151,17 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 图义视觉核对只完成抽样（8/73）；版次/印次/ISBN 行仍为 `unverified`。
 - 当前界面只有 DOM 级断言，没有真实浏览器视觉走查（重构中补三档截图）。
 - 学生包里裁掉了 `sharp`（图片附件走教育自有管线）、LibreOffice、语音、PTY。
+- **契约锁停在 v0.3.0**：v0.4.0 改了 map/study 源码后没有重生成，`pnpm contract:lock:verify` 目前是红的；重生成契约锁需单独确认。
+- 安装版缺少模型 Key，真实模型对话/工具调用尚未在 0.4.0 上实测。
 
 ---
 
 ## 7. 下一步（按顺序）
 
-1. 按 `docs/optimize/04-manual-test.md` 做人工走查并收集反馈。
-2. 用户按 `docs/optimize/04-manual-test.md` 走查并反馈。
-3. 后续补 live `activityId` 取下一题、self-report 持久化（需 host/契约变更，另行评估）。
+1. 在安装版「设置」里重新填模型 Key，重启应用，跑一轮真实对话。
+2. 按 `docs/optimize/04-manual-test.md` 做 15 分钟人工走查并收集反馈。
+3. 修 `contract:lock:verify`（重生成契约锁，需确认）。
+4. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
 
 ---
 
