@@ -27,6 +27,8 @@ const SKIP_DIRS = new Set([
   '.pnpm',
   '.vite-temp',
   '.vitest-cache',
+  // Rust 桌面壳的构建缓存（cargo target）；源码仍需跟踪。
+  'target',
 ]);
 
 /** 本机产物文件：同样不进 git、也不进契约锁。 */

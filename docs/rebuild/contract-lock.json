@@ -1985,7 +1985,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "e947f1b3bd74aea0388d1a27197a5511d13629b9f468d5514800bda3a07c6c9d"
+      "sha256": "85d819e9486a1e17763d8c0b0650584c54835e6ee057c9e355273c70ce2ca991"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2005,7 +2005,7 @@
     },
     {
       "path": "education/runtime/host-plugin/lib/index.js",
-      "sha256": "e56736d87ec53889068176241400159adc5f310754464c80ada2892c1b96ec79"
+      "sha256": "eab1d2e541bec9cdee06d73bb3bc9e53ec8575e565434c09a4a0f31dd3dd54ad"
     },
     {
       "path": "education/runtime/host-plugin/package.json",
@@ -2145,7 +2145,7 @@
     },
     {
       "path": "education/scripts/check-tracked-sources.mjs",
-      "sha256": "339a14662e09aac950dc6babdf4c210a981fc52457dba7aea51bcc48481181b4"
+      "sha256": "1aebe48c6caf9a7bd844ea53205e8775eb480dbbe96d79bd79c875071b010c7d"
     },
     {
       "path": "education/scripts/content-validate.mjs",
@@ -2248,5 +2248,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-05T14:34:02Z"
+  "generatedAt": "2026-11-05T14:39:46Z"
 }

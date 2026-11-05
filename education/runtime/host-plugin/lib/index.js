@@ -14720,7 +14720,7 @@ function createTutorService(options) {
         }
       };
       let bound = await bind(session);
-      if (!bound.ok && request.sessionId === void 0 && isSessionBindingFailure(bound.error)) {
+      if (!bound.ok && isSessionBindingFailure(bound.error)) {
         const retryId = ids.next("session");
         audit(
           "session.retry",
