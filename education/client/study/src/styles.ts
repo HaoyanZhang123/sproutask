@@ -560,6 +560,11 @@ export const studyStyles = `
 .sprout-msg[data-role="system"] { justify-self: center; background: var(--edu-color-surface-muted); color: var(--edu-color-ink-muted); }
 .sprout-msg__who { display: block; margin-bottom: var(--edu-space-xxs); font-size: var(--edu-font-xs); color: var(--edu-color-ink-faint); }
 .sprout-msg p { margin: 0; }
+.sprout-msg__text p { margin: 0 0 6px; }
+.sprout-msg__text p:last-child { margin-bottom: 0; }
+.sprout-msg__text ul { margin: 4px 0 6px; padding-left: 1.2em; }
+.sprout-msg__text li { margin: 2px 0; }
+.sprout-msg__text strong { font-weight: 650; }
 .sprout-quick { display: flex; flex-wrap: wrap; gap: var(--edu-space-xs); }
 .sprout-quick[hidden] { display: none; }
 .sprout-sheet__notice:empty,

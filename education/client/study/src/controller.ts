@@ -198,6 +198,59 @@ export interface StudyChromeElements {
   readonly materialSummary: HTMLElement;
 }
 
+/**
+ * 模型输出常带轻量 Markdown（`**加粗**`、短列表、`#` 标题）。聊天气泡直接
+ * 当纯文本显示会露出星号、挤成一坨。这里做最小、安全的渲染：段落、加粗、
+ * 列表；其余一律按纯文本，绝不解析 HTML。
+ */
+function richText(text: string): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+  let list: HTMLUListElement | null = null;
+
+  const appendInline = (target: HTMLElement, raw: string): void => {
+    const line = raw.replace(/^#{1,6}\s*/, '').trim();
+    if (line.length === 0) return;
+    for (const part of line.split(/(\*\*[^*]+\*\*)/g)) {
+      if (part.length === 0) continue;
+      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+        const strong = document.createElement('strong');
+        strong.textContent = part.slice(2, -2);
+        target.append(strong);
+        continue;
+      }
+      target.append(document.createTextNode(part.replace(/\*\*/g, '')));
+    }
+  };
+
+  for (const rawLine of text.replace(/\r\n/g, '\n').split('\n')) {
+    const line = rawLine.trim();
+    if (line.length === 0) {
+      if (list !== null) {
+        fragment.append(list);
+        list = null;
+      }
+      continue;
+    }
+    const bullet = /^(?:[-*•]|\d+[.、])\s+/.test(line);
+    if (bullet) {
+      if (list === null) list = document.createElement('ul');
+      const item = document.createElement('li');
+      appendInline(item, line.replace(/^(?:[-*•]|\d+[.、])\s+/, ''));
+      list.append(item);
+      continue;
+    }
+    if (list !== null) {
+      fragment.append(list);
+      list = null;
+    }
+    const paragraph = document.createElement('p');
+    appendInline(paragraph, line);
+    fragment.append(paragraph);
+  }
+  if (list !== null) fragment.append(list);
+  return fragment;
+}
+
 export class StudyController {
   private readonly options: StudyControllerOptions;
   private readonly machine = new ActivityStateMachine();
@@ -247,6 +300,8 @@ export class StudyController {
   private waitingNotice = '';
   private conflictRetryTimer: ReturnType<typeof setTimeout> | null = null;
   private conflictRetryCount = 0;
+  private waitingStartedAt = 0;
+  private waitingTimer: ReturnType<typeof setInterval> | null = null;
   private phase: StudyActivityPhase = 'draft';
   private form: AnswerFormController | null = null;
   private formActivityId: string | null = null;
@@ -336,6 +391,11 @@ export class StudyController {
   onPageUnmount(): void {
     this.submitGen += 1;
     this.clearConflictRetry();
+    if (this.waitingTimer !== null) {
+      clearInterval(this.waitingTimer);
+      this.waitingTimer = null;
+    }
+    this.waitingStartedAt = 0;
     if (this.currentToken !== null) this.currentToken.cancelled = true;
     this.pageContext = null;
     this.navigate = null;
@@ -500,6 +560,7 @@ export class StudyController {
   }
 
   private notify(): void {
+    this.ensureWaitingTimer();
     for (const renderer of this.renderers) renderer();
   }
 
@@ -610,6 +671,37 @@ export class StudyController {
     }
     this.conflictRetryCount = 0;
     this.waitingNotice = '';
+  }
+
+  /** 正在加载页面或等小芽回答：用秒数让"卡住"变成可感知的等待。 */
+  private isWaitingState(): boolean {
+    return this.loading || this.phase === 'submitted' || this.phase === 'grading';
+  }
+
+  private ensureWaitingTimer(): void {
+    if (this.isWaitingState()) {
+      if (this.waitingStartedAt === 0) this.waitingStartedAt = Date.now();
+      if (this.waitingTimer === null) {
+        this.waitingTimer = setInterval(() => this.notify(), 1000);
+      }
+      return;
+    }
+    if (this.waitingTimer !== null) {
+      clearInterval(this.waitingTimer);
+      this.waitingTimer = null;
+    }
+    this.waitingStartedAt = 0;
+  }
+
+  private waitingSeconds(): number {
+    return this.waitingStartedAt === 0
+      ? 0
+      : Math.max(0, Math.round((Date.now() - this.waitingStartedAt) / 1000));
+  }
+
+  private waitSuffix(): string {
+    const seconds = this.waitingSeconds();
+    return seconds >= 2 ? `（已等 ${seconds} 秒）` : '';
   }
 
   private async load(key: string, retrying = false): Promise<void> {
@@ -1394,7 +1486,10 @@ export class StudyController {
     if (this.loading) {
       container.append(
         loadingState({
-          title: this.waitingNotice.length > 0 ? this.waitingNotice : '正在打开这一节的课本…',
+          title:
+            this.waitingNotice.length > 0
+              ? this.waitingNotice
+              : `正在打开这一节的课本…${this.waitSuffix()}`,
         }),
       );
       return;
@@ -1595,7 +1690,7 @@ export class StudyController {
         { class: 'sprout-msg__who' },
         message.role === 'student' ? '你' : message.role === 'assistant' ? '小芽' : '提示',
       ),
-      h('p', {}, message.text),
+      h('div', { class: 'sprout-msg__text' }, richText(message.text)),
       message.disclosure ? statusChip('这次看过完整答案', 'attention') : null,
     );
   }
@@ -1611,7 +1706,10 @@ export class StudyController {
       clear(container);
       container.append(
         loadingState({
-          title: this.waitingNotice.length > 0 ? this.waitingNotice : '正在准备这一题…',
+          title:
+            this.waitingNotice.length > 0
+              ? this.waitingNotice
+              : `正在准备这一题…${this.waitSuffix()}`,
         }),
       );
       return;
@@ -1689,15 +1787,24 @@ export class StudyController {
       return;
     }
     if (this.phase === 'submitted' || this.phase === 'grading') {
+      const seconds = this.waitingSeconds();
       root.append(
         h(
           'div',
           { class: 'edu-study-pending', role: 'status' },
-          h('p', {}, this.phase === 'submitted' ? '原答已提交，正在保存…' : '原答已保存，正在等待反馈…'),
+          h(
+            'p',
+            {},
+            this.phase === 'submitted'
+              ? `原答已提交，正在保存…${this.waitSuffix()}`
+              : `小芽正在回答…${this.waitSuffix()}`,
+          ),
           h(
             'p',
             { class: 'edu-study-note' },
-            '反馈完成前不会显示为已掌握；可以取消，原答和草稿会保留。',
+            seconds >= 20
+              ? '比平时久一点，可以继续等；网络慢时也会这样。原答和草稿已经保存。'
+              : '反馈完成前不会显示为已掌握；可以取消，原答和草稿会保留。',
           ),
         ),
         button('取消本次反馈', () => this.cancelTurn(), {

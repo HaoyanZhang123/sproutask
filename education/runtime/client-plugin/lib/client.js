@@ -13038,6 +13038,51 @@ window.__ModuleLoader__.load({
         dataUrl: `data:${mime};base64,${base64}`
       };
     }
+    function richText(text) {
+      const fragment = document.createDocumentFragment();
+      let list = null;
+      const appendInline = (target, raw) => {
+        const line = raw.replace(/^#{1,6}\s*/, "").trim();
+        if (line.length === 0) return;
+        for (const part of line.split(/(\*\*[^*]+\*\*)/g)) {
+          if (part.length === 0) continue;
+          if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+            const strong = document.createElement("strong");
+            strong.textContent = part.slice(2, -2);
+            target.append(strong);
+            continue;
+          }
+          target.append(document.createTextNode(part.replace(/\*\*/g, "")));
+        }
+      };
+      for (const rawLine of text.replace(/\r\n/g, "\n").split("\n")) {
+        const line = rawLine.trim();
+        if (line.length === 0) {
+          if (list !== null) {
+            fragment.append(list);
+            list = null;
+          }
+          continue;
+        }
+        const bullet = /^(?:[-*•]|\d+[.、])\s+/.test(line);
+        if (bullet) {
+          if (list === null) list = document.createElement("ul");
+          const item = document.createElement("li");
+          appendInline(item, line.replace(/^(?:[-*•]|\d+[.、])\s+/, ""));
+          list.append(item);
+          continue;
+        }
+        if (list !== null) {
+          fragment.append(list);
+          list = null;
+        }
+        const paragraph = document.createElement("p");
+        appendInline(paragraph, line);
+        fragment.append(paragraph);
+      }
+      if (list !== null) fragment.append(list);
+      return fragment;
+    }
     var StudyController = class {
       options;
       machine = new ActivityStateMachine();
@@ -13086,6 +13131,8 @@ window.__ModuleLoader__.load({
       waitingNotice = "";
       conflictRetryTimer = null;
       conflictRetryCount = 0;
+      waitingStartedAt = 0;
+      waitingTimer = null;
       phase = "draft";
       form = null;
       formActivityId = null;
@@ -13157,6 +13204,11 @@ window.__ModuleLoader__.load({
       onPageUnmount() {
         this.submitGen += 1;
         this.clearConflictRetry();
+        if (this.waitingTimer !== null) {
+          clearInterval(this.waitingTimer);
+          this.waitingTimer = null;
+        }
+        this.waitingStartedAt = 0;
         if (this.currentToken !== null) this.currentToken.cancelled = true;
         this.pageContext = null;
         this.navigate = null;
@@ -13311,6 +13363,7 @@ window.__ModuleLoader__.load({
         this.renderFeedback();
       }
       notify() {
+        this.ensureWaitingTimer();
         for (const renderer of this.renderers) renderer();
       }
       /* --------------------------------------------------------------- intent */
@@ -13415,6 +13468,31 @@ window.__ModuleLoader__.load({
         }
         this.conflictRetryCount = 0;
         this.waitingNotice = "";
+      }
+      /** 正在加载页面或等小芽回答：用秒数让"卡住"变成可感知的等待。 */
+      isWaitingState() {
+        return this.loading || this.phase === "submitted" || this.phase === "grading";
+      }
+      ensureWaitingTimer() {
+        if (this.isWaitingState()) {
+          if (this.waitingStartedAt === 0) this.waitingStartedAt = Date.now();
+          if (this.waitingTimer === null) {
+            this.waitingTimer = setInterval(() => this.notify(), 1e3);
+          }
+          return;
+        }
+        if (this.waitingTimer !== null) {
+          clearInterval(this.waitingTimer);
+          this.waitingTimer = null;
+        }
+        this.waitingStartedAt = 0;
+      }
+      waitingSeconds() {
+        return this.waitingStartedAt === 0 ? 0 : Math.max(0, Math.round((Date.now() - this.waitingStartedAt) / 1e3));
+      }
+      waitSuffix() {
+        const seconds = this.waitingSeconds();
+        return seconds >= 2 ? `\uFF08\u5DF2\u7B49 ${seconds} \u79D2\uFF09` : "";
       }
       async load(key, retrying = false) {
         const token = ++this.loadToken;
@@ -14124,7 +14202,7 @@ window.__ModuleLoader__.load({
         if (this.loading) {
           container.append(
             loadingState({
-              title: this.waitingNotice.length > 0 ? this.waitingNotice : "\u6B63\u5728\u6253\u5F00\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\u2026"
+              title: this.waitingNotice.length > 0 ? this.waitingNotice : `\u6B63\u5728\u6253\u5F00\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\u2026${this.waitSuffix()}`
             })
           );
           return;
@@ -14306,7 +14384,7 @@ window.__ModuleLoader__.load({
             { class: "sprout-msg__who" },
             message.role === "student" ? "\u4F60" : message.role === "assistant" ? "\u5C0F\u82BD" : "\u63D0\u793A"
           ),
-          h("p", {}, message.text),
+          h("div", { class: "sprout-msg__text" }, richText(message.text)),
           message.disclosure ? statusChip("\u8FD9\u6B21\u770B\u8FC7\u5B8C\u6574\u7B54\u6848", "attention") : null
         );
       }
@@ -14321,7 +14399,7 @@ window.__ModuleLoader__.load({
           clear(container);
           container.append(
             loadingState({
-              title: this.waitingNotice.length > 0 ? this.waitingNotice : "\u6B63\u5728\u51C6\u5907\u8FD9\u4E00\u9898\u2026"
+              title: this.waitingNotice.length > 0 ? this.waitingNotice : `\u6B63\u5728\u51C6\u5907\u8FD9\u4E00\u9898\u2026${this.waitSuffix()}`
             })
           );
           return;
@@ -14398,15 +14476,20 @@ window.__ModuleLoader__.load({
           return;
         }
         if (this.phase === "submitted" || this.phase === "grading") {
+          const seconds = this.waitingSeconds();
           root.append(
             h(
               "div",
               { class: "edu-study-pending", role: "status" },
-              h("p", {}, this.phase === "submitted" ? "\u539F\u7B54\u5DF2\u63D0\u4EA4\uFF0C\u6B63\u5728\u4FDD\u5B58\u2026" : "\u539F\u7B54\u5DF2\u4FDD\u5B58\uFF0C\u6B63\u5728\u7B49\u5F85\u53CD\u9988\u2026"),
+              h(
+                "p",
+                {},
+                this.phase === "submitted" ? `\u539F\u7B54\u5DF2\u63D0\u4EA4\uFF0C\u6B63\u5728\u4FDD\u5B58\u2026${this.waitSuffix()}` : `\u5C0F\u82BD\u6B63\u5728\u56DE\u7B54\u2026${this.waitSuffix()}`
+              ),
               h(
                 "p",
                 { class: "edu-study-note" },
-                "\u53CD\u9988\u5B8C\u6210\u524D\u4E0D\u4F1A\u663E\u793A\u4E3A\u5DF2\u638C\u63E1\uFF1B\u53EF\u4EE5\u53D6\u6D88\uFF0C\u539F\u7B54\u548C\u8349\u7A3F\u4F1A\u4FDD\u7559\u3002"
+                seconds >= 20 ? "\u6BD4\u5E73\u65F6\u4E45\u4E00\u70B9\uFF0C\u53EF\u4EE5\u7EE7\u7EED\u7B49\uFF1B\u7F51\u7EDC\u6162\u65F6\u4E5F\u4F1A\u8FD9\u6837\u3002\u539F\u7B54\u548C\u8349\u7A3F\u5DF2\u7ECF\u4FDD\u5B58\u3002" : "\u53CD\u9988\u5B8C\u6210\u524D\u4E0D\u4F1A\u663E\u793A\u4E3A\u5DF2\u638C\u63E1\uFF1B\u53EF\u4EE5\u53D6\u6D88\uFF0C\u539F\u7B54\u548C\u8349\u7A3F\u4F1A\u4FDD\u7559\u3002"
               )
             ),
             button("\u53D6\u6D88\u672C\u6B21\u53CD\u9988", () => this.cancelTurn(), {
@@ -15813,6 +15896,11 @@ window.__ModuleLoader__.load({
     .sprout-msg[data-role="system"] { justify-self: center; background: var(--edu-color-surface-muted); color: var(--edu-color-ink-muted); }
     .sprout-msg__who { display: block; margin-bottom: var(--edu-space-xxs); font-size: var(--edu-font-xs); color: var(--edu-color-ink-faint); }
     .sprout-msg p { margin: 0; }
+    .sprout-msg__text p { margin: 0 0 6px; }
+    .sprout-msg__text p:last-child { margin-bottom: 0; }
+    .sprout-msg__text ul { margin: 4px 0 6px; padding-left: 1.2em; }
+    .sprout-msg__text li { margin: 2px 0; }
+    .sprout-msg__text strong { font-weight: 650; }
     .sprout-quick { display: flex; flex-wrap: wrap; gap: var(--edu-space-xs); }
     .sprout-quick[hidden] { display: none; }
     .sprout-sheet__notice:empty,

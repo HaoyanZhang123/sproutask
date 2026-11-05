@@ -601,19 +601,13 @@ export function composeStudentMessage(
 
   if (decision.factualClaims) {
     if (params.sourceRefs.length > 0) {
-      // Readable reference only: internal sourceRef ids belong to the evidence
-      // layer, not to what the student reads.
-      lines.push('参考：本节的出处（可在“查看出处”里查看页码与原文）。');
+      // 只给可读引用；内部 sourceRef id 属于证据层，不给学生看。
+      lines.push('参考：课本原文（点“查看出处”可看页码）。');
     } else if (params.sourceMissing) {
-      lines.push('参考：本概念目前没有可解析的来源记录，因此这里不给出事实性结论或页码。');
+      lines.push('这一点我还没有核对到课本原文，先不下结论。');
     }
   }
 
-  if (decision.disclosure) {
-    lines.push(
-      '（你已看到完整答案/步骤：本轮之后的作答会记为“有提示/已看答案”，不能充作独立掌握证据。）',
-    );
-  }
   if (params.evidenceNote !== null) {
     lines.push(params.evidenceNote);
   }
