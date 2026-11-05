@@ -9,7 +9,7 @@
 ## 1. 一句话现状
 
 **v0.4.0（2026-11-04）已发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
-当前状态（2026-11-05）：工作区已清理（8,456MB → 873MB）；干净克隆可构建、GitHub CI 已转绿；本机旧版 0.2.0/0.3.0 已卸载并干净安装 0.4.0；下一步是人工走查与重新填 Key。
+当前状态（2026-11-05）：工作区已清理（8,456MB → 873MB）；干净克隆可构建、GitHub CI 转绿并加了三道守卫；契约锁已重建（v0.3.0 起停更的问题解决）；本机旧版 0.2.0/0.3.0 已卸载并干净安装 0.4.0；下一步是人工走查与重新填 Key。
 
 ---
 
@@ -103,8 +103,32 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 **未做 / 未验证**
 
 - 安装版尚未重新填 API Key → 真实模型对话/工具调用未实测（无头冒烟只到 HTTP 与内容绑定）。
-- `pnpm contract:lock:verify` 仍红：契约锁停在 v0.3.0，v0.4.0 改了 map/study 源码后没有重生成；重生成属契约锁变更，需单独确认。
+- 契约锁问题已在同一会话后段解决（见 §4.2）。
 - 未做"另一台干净机"验证；未做学习效果实验。
+
+
+
+### 2026-11-05：契约锁重建 + CI 加固（新一轮第 1 件）
+
+**做了什么**
+
+- **契约锁重建**：`pnpm contract:lock:verify` 之前报 100 处漂移——v0.4.0 改了 `map`/`study`/`shell` 的源码与测试后没有重生成锁。重建后 `docs/rebuild/contract-lock.json`：files 456 → 467（+13 个新文件、−3 个改名、84 个哈希更新）；`contract` / `workspace` / `packages` / `dependencyDirection` / `commands` / `dependencies` 六段逐字节未变（契约版本仍 1.0.0），属于纯基线更新。
+- **锁生成器加固**：`education/scripts/lib/lock.mjs` 跳过 `output/` 与 `*.tsbuildinfo` / `*.log`，避免本机生成物被算进锁、换机器 verify 变红。
+- **tracked 守卫**：新增 `education/scripts/check-tracked-sources.mjs` 与 `pnpm check:tracked`；遍历 `education/`、跳过生成物目录与日志，任何未进 git 的文件即失败（背景：2026-11-05 根 `.gitignore` 全局 `data/` 误伤 `client/shell/src/data/`）。
+- **CI 加固**：`.github/workflows/ci.yml` 升到 `actions/checkout@v7` / `actions/setup-node@v7` / `pnpm/action-setup@v6`（消掉 Node 20 弃用告警）；新增四步：Tracked sources guard、Contract lock、Content pack、Build 后"构建产物必须与已提交文件一致"。
+- 根 `package.json` 补 `check:tracked` 与 `contract:lock:generate` 两个薄入口；`AGENTS.md` / `CONVENTIONS.md` 的命令与质量门同步。
+
+**怎么验证的**
+
+- 本机：`pnpm check:tracked` OK（733 个文件全部被跟踪）；`pnpm contract:lock:verify` OK（files=467）；`pnpm content:validate` / `typecheck` / `test` 全绿；`pnpm build` 后 `git status --porcelain --untracked-files=no` 为空（产物可复现）。
+- 守卫自检：未 `git add` 新脚本时，`check:tracked` 报 1 个未跟踪文件并退出 1；add 后转 OK。
+- CI：提交 `23b507c` 的 run 见 GitHub Actions（新增四步已在本机逐项预演通过）。
+
+**未做 / 未验证**
+
+- "Build 输出零漂移"依赖 esbuild 输出稳定（版本固定 0.28.2）；若将来升 esbuild，需要重跑 `pnpm build` 并提交 `runtime/*/lib`。
+- 未做另一台干净机验证（CI 的 windows-latest 已是最接近的替代）。
+
 
 
 
@@ -152,7 +176,6 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 图义视觉核对只完成抽样（8/73）；版次/印次/ISBN 行仍为 `unverified`。
 - 当前界面只有 DOM 级断言，没有真实浏览器视觉走查（重构中补三档截图）。
 - 学生包里裁掉了 `sharp`（图片附件走教育自有管线）、LibreOffice、语音、PTY。
-- **契约锁停在 v0.3.0**：v0.4.0 改了 map/study 源码后没有重生成，`pnpm contract:lock:verify` 目前是红的；重生成契约锁需单独确认。
 - 安装版缺少模型 Key，真实模型对话/工具调用尚未在 0.4.0 上实测。
 
 ---
@@ -161,8 +184,8 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 1. 在安装版「设置」里重新填模型 Key，重启应用，跑一轮真实对话。
 2. 按 `docs/optimize/04-manual-test.md` 做 15 分钟人工走查并收集反馈。
-3. 修 `contract:lock:verify`（重生成契约锁，需确认）。
-4. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
+3. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
+4. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
 
 ---
 

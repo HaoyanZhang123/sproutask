@@ -62,13 +62,17 @@
 |---|---|---|
 | 类型 | `pnpm typecheck` | 全部 TS 项目 |
 | 单元/组件 | `pnpm test` | 各包 vitest |
-| 契约 | `pnpm test:contracts` | 公共字段与锁 |
+| 契约 | `pnpm test:contracts` / `pnpm contract:lock:verify` | 公共字段与锁 |
 | 内容 | `pnpm content:validate` | 内容包完整性 |
+| 仓库完整性 | `pnpm check:tracked` | education/ 下文件是否全部被 git 跟踪 |
+| 构建产物 | `pnpm build` + `git status` 干净 | runtime/*/lib 与源码一致 |
 | 界面 | 截图走查 + 文案扫描 | 三档分辨率、禁词 |
 
 - 测试断言结构（`data-testid`、role、可见状态），**不要锁死文案里的内部 id**。
 - 新增界面行为要同时加：正常态、空态、失败态、窄屏。
 - 学生文案扫描必须覆盖所有页面渲染文本（`pnpm test` 中的守卫用例）。
+- 改了 `runtime/*/src` 或它 import 的代码，必须 `pnpm build` 并提交 `runtime/*/lib`；CI 的 Build 步骤会拦住"源码改了、产物没提交"。
+- 公共契约文件有任何改动，必须 `pnpm contract:lock:generate` 重建 `docs/rebuild/contract-lock.json` 并一起提交；CI 会跑 `pnpm contract:lock:verify`。
 
 ## 6. Git
 

@@ -19,11 +19,13 @@
 ```powershell
 pnpm --dir education install     # 只有 education 有依赖
 pnpm dev                         # 本机 DSH web + Edge 应用窗口
-pnpm build                       # 构建 host/client 插件
+pnpm build                       # 构建 host/client 插件（产物 runtime/*/lib 已提交）
 pnpm typecheck                   # 全 workspace 类型检查
 pnpm test                        # 全 workspace 单元测试
 pnpm test:task T08               # 单个任务卡的检查
+pnpm check:tracked               # education/ 下文件是否全部被 git 跟踪
 pnpm content:validate            # 内容包校验
+pnpm contract:lock:generate      # 契约变更后重建锁（与 verify 成对）
 pnpm contract:lock:verify        # 公共契约锁校验
 ```
 
@@ -35,7 +37,9 @@ pnpm contract:lock:verify        # 公共契约锁校验
 | 改动类型 | 必须通过 |
 |---|---|
 | 任何改动 | `pnpm typecheck && pnpm test` 全绿，不带红测试进下一件事 |
-| 内容包 / 公共契约 | 追加 `pnpm content:validate && pnpm contract:lock:verify` |
+| 新增/删除/移动文件 | 追加 `pnpm check:tracked`（防 `.gitignore` 误伤源文件） |
+| 内容包 / 公共契约 | 追加 `pnpm content:validate && pnpm contract:lock:verify`；改契约后先 `pnpm contract:lock:generate` 并一起提交 |
+| DSH 插件源码 | 追加 `pnpm build`，把 `runtime/*/lib` 的更新一起提交 |
 | 界面 | 追加三档截图走查（1440×900 / 1280×800 / 1024×768）+ 学生文案禁词扫描 |
 
 - 结论要**区分"实测"与"推断"**；没验证的必须明说，不允许拿"代码看起来对"冒充验证过。
