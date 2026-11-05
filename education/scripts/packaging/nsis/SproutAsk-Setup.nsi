@@ -25,6 +25,10 @@ Unicode true
 !ifndef BUILD_ID
   !define BUILD_ID "unknown"
 !endif
+; 安装器自身的 exe 图标（build-installer 传入 desktop/host/assets/sproutask.ico）。
+!ifdef ICON_FILE
+  Icon "${ICON_FILE}"
+!endif
 
 !define APP_NAME "SproutAsk"
 !define APP_DISPLAY "SproutAsk 生物学习"
@@ -57,9 +61,8 @@ VIAddVersionKey "LegalCopyright" "见安装目录 licenses/NOTICE.md"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN_TEXT "立即启动 SproutAsk"
-; 本版 payload 只带 launcher.cmd（VBS 会被本机 AV 拦，见下方注释）：
-; 完成页"立即启动"必须指向真实存在的 launcher.cmd，否则点了静默失败。
-!define MUI_FINISHPAGE_RUN "$INSTDIR\launcher.cmd"
+; payload 根目录带原生桌面壳 SproutAsk.exe（Rust + WebView2），完成页直接启动它。
+!define MUI_FINISHPAGE_RUN "$INSTDIR\SproutAsk.exe"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -70,23 +73,22 @@ VIAddVersionKey "LegalCopyright" "见安装目录 licenses/NOTICE.md"
 
 Section "Install"
   SetOutPath "$INSTDIR"
-  ; payload 结构：node/ app/ licenses/ launcher.cmd launcher.vbs.txt version.txt
+  ; payload 结构：SproutAsk.exe node/ app/ licenses/ launcher.cmd version.txt
   File /r "${PAYLOAD_DIR}\*.*"
-  ; 说明：.vbs 会被本机 AV 拦截 makensis 读取，且 FileWrite 转义在 3.10 上易错，
-  ; 因此本版不带 VBS，快捷方式直接指向 launcher.cmd（会短暂显示控制台窗口）。
+  ; launcher.cmd 只留作排障兜底；学生入口是原生桌面壳 SproutAsk.exe
+  ;（Rust + WebView2，单实例、自带图标、无控制台窗口）。
 
-
-  ; 快捷方式指向 launcher.cmd（本版不带 VBS）
-  CreateShortcut "$SMPROGRAMS\SproutAsk.lnk" "$INSTDIR\launcher.cmd" "" "$INSTDIR\launcher.cmd" 0
-  CreateShortcut "$DESKTOP\SproutAsk.lnk" "$INSTDIR\launcher.cmd" "" "$INSTDIR\launcher.cmd" 0
+  ; 快捷方式指向原生桌面壳（图标由 exe 内嵌资源提供）
+  CreateShortcut "$SMPROGRAMS\SproutAsk.lnk" "$INSTDIR\SproutAsk.exe" "" "$INSTDIR\SproutAsk.exe" 0
+  CreateShortcut "$DESKTOP\SproutAsk.lnk" "$INSTDIR\SproutAsk.exe" "" "$INSTDIR\SproutAsk.exe" 0
 
   ; 卸载信息（控制面板 → 程序和功能）
   WriteRegStr HKCU "${APP_KEY}" "DisplayName" "${APP_DISPLAY}"
   WriteRegStr HKCU "${APP_KEY}" "DisplayVersion" "${VERSION}"
   WriteRegStr HKCU "${APP_KEY}" "Publisher" "${APP_PUBLISHER}"
   WriteRegStr HKCU "${APP_KEY}" "InstallLocation" "$INSTDIR"
-  ; 图标必须指向真实存在的文件；launcher.vbs 不在包内，指向它会让"应用和功能"里没有图标。
-  WriteRegStr HKCU "${APP_KEY}" "DisplayIcon" "$INSTDIR\launcher.cmd"
+  ; 图标来自原生桌面壳内嵌资源
+  WriteRegStr HKCU "${APP_KEY}" "DisplayIcon" "$INSTDIR\SproutAsk.exe"
   WriteRegStr HKCU "${APP_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegStr HKCU "${APP_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
   WriteRegStr HKCU "${APP_KEY}" "InstallDir" "$INSTDIR"
@@ -117,6 +119,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\node"
   RMDir /r "$INSTDIR\app"
   RMDir /r "$INSTDIR\licenses"
+  Delete "$INSTDIR\SproutAsk.exe"
   Delete "$INSTDIR\launcher.cmd"
   Delete "$INSTDIR\launcher.vbs"
   Delete "$INSTDIR\version.txt"

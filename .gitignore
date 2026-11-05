@@ -4,6 +4,8 @@ node_modules/
 /release/
 /dist/
 /education/dist/
+# NSIS 构建期临时文件（每次 makensis 前重新生成）
+/education/scripts/packaging/nsis/.SproutAsk-Setup.bom.nsi
 
 # 本地运行数据、密钥、证据与调研笔记（绝不进 git）
 # 注意：data/ 与 notes/ 一律用根锚定（/data/、/notes/）。早期写成 data/ 时，

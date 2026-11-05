@@ -128,10 +128,32 @@
     },
     {
       "script": "build:win",
-      "entry": "node scripts/not-implemented.mjs build:win",
-      "stage": "not_implemented",
+      "entry": "node scripts/build-windows.mjs",
+      "stage": "implemented",
       "owner": "T16",
-      "implemented": false
+      "implemented": true,
+      "note": "plugins → Rust/WebView2 桌面壳 → payload → NSIS 一条龙"
+    },
+    {
+      "script": "build:host",
+      "entry": "node scripts/packaging/build-desktop-host.mjs",
+      "stage": "implemented",
+      "owner": "T16",
+      "implemented": true
+    },
+    {
+      "script": "build:payload",
+      "entry": "node scripts/packaging/build-student-payload.mjs",
+      "stage": "implemented",
+      "owner": "T16",
+      "implemented": true
+    },
+    {
+      "script": "build:installer",
+      "entry": "node scripts/packaging/build-installer.mjs",
+      "stage": "implemented",
+      "owner": "T16",
+      "implemented": true
     },
     {
       "script": "smoke:packaged",

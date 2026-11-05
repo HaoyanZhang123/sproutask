@@ -220,12 +220,39 @@
     },
     {
       "script": "build:win",
-      "entry": "node scripts/not-implemented.mjs build:win",
-      "packageScript": "node scripts/not-implemented.mjs build:win",
+      "entry": "node scripts/build-windows.mjs",
+      "packageScript": "node scripts/build-windows.mjs",
       "matchesPackageJson": true,
-      "stage": "not_implemented",
+      "stage": "implemented",
       "owner": "T16",
-      "implemented": false
+      "implemented": true
+    },
+    {
+      "script": "build:host",
+      "entry": "node scripts/packaging/build-desktop-host.mjs",
+      "packageScript": "node scripts/packaging/build-desktop-host.mjs",
+      "matchesPackageJson": true,
+      "stage": "implemented",
+      "owner": "T16",
+      "implemented": true
+    },
+    {
+      "script": "build:payload",
+      "entry": "node scripts/packaging/build-student-payload.mjs",
+      "packageScript": "node scripts/packaging/build-student-payload.mjs",
+      "matchesPackageJson": true,
+      "stage": "implemented",
+      "owner": "T16",
+      "implemented": true
+    },
+    {
+      "script": "build:installer",
+      "entry": "node scripts/packaging/build-installer.mjs",
+      "packageScript": "node scripts/packaging/build-installer.mjs",
+      "matchesPackageJson": true,
+      "stage": "implemented",
+      "owner": "T16",
+      "implemented": true
     },
     {
       "script": "smoke:packaged",
@@ -921,7 +948,7 @@
     },
     {
       "path": "education/config/commands.json",
-      "sha256": "838ba8c8e52c6af4f6f58a1d061749817979d4e8a8f5866814a777640432ed33"
+      "sha256": "93425b84ede07547f7bb535377f834cb239dae4dd2a515241d5fe721cde115de"
     },
     {
       "path": "education/config/task-routes.json",
@@ -929,7 +956,7 @@
     },
     {
       "path": "education/package.json",
-      "sha256": "0159472773f5e1d08c4519192dcabfd9521948ae41051e88618fc18e3a92b9d1"
+      "sha256": "e1e512f129bff0fadd91137c321bbef2057da4134e054d4167c91b6fda3e7cbc"
     },
     {
       "path": "education/packages/domain/fixtures/assessments/candidate-supported.json",
@@ -2017,7 +2044,7 @@
     },
     {
       "path": "education/runtime/scripts/setup-education-home.mjs",
-      "sha256": "71508edc2d39d9bfc1c1585154204147b1bd2167ece62140de1bf48308b61746"
+      "sha256": "2c25ea3b7830bf55a47e07799b271ebc25a2841fb28e3300edcbd5504d72d687"
     },
     {
       "path": "education/runtime/scripts/start-education-web.mjs",
@@ -2144,6 +2171,10 @@
       "sha256": "8daccf7cb6a1711d8485390d3e954be37ea6068fd911a60b16ac655b91073892"
     },
     {
+      "path": "education/scripts/build-windows.mjs",
+      "sha256": "6f8e6df6d50fd5adcb96b5e440858149115cc4b160994e874d9110df8e0080cd"
+    },
+    {
       "path": "education/scripts/check-tracked-sources.mjs",
       "sha256": "1aebe48c6caf9a7bd844ea53205e8775eb480dbbe96d79bd79c875071b010c7d"
     },
@@ -2161,7 +2192,7 @@
     },
     {
       "path": "education/scripts/lib/lock.mjs",
-      "sha256": "9fb28ddd712b2290ba51032a291fd5881460627272c3b4d4d978108d9475c2a1"
+      "sha256": "6ea8d6a23f5a6d923fd9b72bdd8d8b539c9ae3cbd74cce624079efeaa0107fb3"
     },
     {
       "path": "education/scripts/lib/workspace.mjs",
@@ -2172,20 +2203,20 @@
       "sha256": "bcfad7ade9d8c2cc6e4d952920e38364845084736beecd37de8aa04404524086"
     },
     {
+      "path": "education/scripts/packaging/build-desktop-host.mjs",
+      "sha256": "e095c4e19e9a96aa0e931c821115f479cc2f604211cc9526f9408994dcd389a8"
+    },
+    {
       "path": "education/scripts/packaging/build-installer.mjs",
-      "sha256": "a92330705fb4ef53fab4d744ff2f981f8c9c0f4244dcfacffd175ddd4fcf6503"
+      "sha256": "ca87396e4c66c2f79e2e08b95424b4375fb641e73b10d973f2aad8545c6ebee1"
     },
     {
       "path": "education/scripts/packaging/build-student-payload.mjs",
-      "sha256": "9d0cb80342fd83d99694e44af73ab891d326778af7e98eb496c31c668a4d506f"
-    },
-    {
-      "path": "education/scripts/packaging/nsis/.SproutAsk-Setup.bom.nsi",
-      "sha256": "b741d2cf3a2b4253d8e5545da656b40b9ffc3d95858f943d1bf70fc9564718a6"
+      "sha256": "e34b86a35eb536503b309c84fbe94245d4025c953d730582c872c499b5d7de26"
     },
     {
       "path": "education/scripts/packaging/nsis/SproutAsk-Setup.nsi",
-      "sha256": "1d1b625a5ae566808911ceafb01dc69b93e27f492b0b5159ffa7a1e919c0e201"
+      "sha256": "39273eb971226f003773e2193a44293826f4832fe4c0297d326a010be1e42142"
     },
     {
       "path": "education/scripts/packaging/scan-payload.mjs",
@@ -2248,5 +2279,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-05T14:39:46Z"
+  "generatedAt": "2026-11-05T15:38:38Z"
 }

@@ -1,6 +1,6 @@
 {
   "name": "sproutask",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "芽问 SproutAsk —— 运行在 DSH 内核上、本地优先的初中生物学习 Agent",
   "author": "HaoyanZhang123",
@@ -12,6 +12,10 @@
   "scripts": {
     "dev": "pnpm --dir education dev",
     "build": "pnpm --dir education build",
+    "build:host": "pnpm --dir education build:host",
+    "build:payload": "pnpm --dir education build:payload",
+    "build:installer": "pnpm --dir education build:installer",
+    "build:win": "pnpm --dir education build:win",
     "check:tracked": "pnpm --dir education check:tracked",
     "typecheck": "pnpm --dir education typecheck",
     "test": "pnpm --dir education test",

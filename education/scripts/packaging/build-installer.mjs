@@ -29,7 +29,10 @@ const flag = (name, fallback) => {
 };
 
 const payloadDir = path.resolve(workspaceRoot, flag('--payload', 'education/dist/student'));
-const outFile = path.resolve(workspaceRoot, flag('--out', 'education/dist/SproutAsk-Setup-x64.exe'));
+const outFile = path.resolve(
+  workspaceRoot,
+  flag('--out', `education/dist/SproutAsk-Setup-${productVersion}-x64.exe`),
+);
 const nsiPath = path.join(here, 'nsis', 'SproutAsk-Setup.nsi');
 
 function fail(message, code = 2) {
@@ -62,6 +65,11 @@ function findMakensis(explicit) {
 
 if (!existsSync(payloadDir)) fail(`payload not found: ${payloadDir} (run build-student-payload.mjs first)`);
 if (!existsSync(path.join(payloadDir, 'launcher.cmd'))) fail(`payload missing launcher.cmd: ${payloadDir}`);
+if (!existsSync(path.join(payloadDir, 'SproutAsk.exe'))) {
+  fail(
+    `payload missing SproutAsk.exe: ${payloadDir} (run build-desktop-host.mjs, then rebuild the payload)`,
+  );
+}
 if (!existsSync(nsiPath)) fail(`NSIS script not found: ${nsiPath}`);
 
 const makensis = findMakensis(flag('--nsis', null));
@@ -94,6 +102,10 @@ const defines = [
   `/DVERSION=${version}`,
   `/DBUILD_ID=${buildId}`,
 ];
+// 安装器自身的 exe 图标（与桌面壳同一份）。缺省时只用 NSIS 默认图标，不阻断构建。
+const iconFile = path.join(educationRoot, 'desktop', 'host', 'assets', 'sproutask.ico');
+if (existsSync(iconFile)) defines.push(`/DICON_FILE=${iconFile}`);
+else console.warn(`build-installer: icon not found, using default: ${iconFile}`);
 console.log(`makensis: ${makensis}`);
 console.log(`payload : ${payloadDir}`);
 console.log(`output  : ${outFile}`);

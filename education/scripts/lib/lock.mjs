@@ -6,7 +6,8 @@ import { EDUCATION_ROOT, WORKSPACE_ROOT, educationPath, readJson, workspacePath 
 // 生成物目录不参与契约锁：它们由脚本产出、可能只存在于本机，锁一旦算进去，
 // 换台机器/干净克隆上 contract:lock:verify 就会红。
 const SKIP_DIRS = new Set(['node_modules', '.local', 'dist', 'coverage', 'output', '.git', '.pnpm']);
-const SKIP_FILES = new Set(['contract-lock.json']);
+// 构建期临时文件不进锁：它们每次构建重新生成（内容含时间/机器差异）。
+const SKIP_FILES = new Set(['contract-lock.json', '.SproutAsk-Setup.bom.nsi']);
 
 // 本机类型检查/运行日志同样不进锁（gitignore 忽略、内容因机器而异）。
 function isSkippedFile(name) {

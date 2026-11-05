@@ -65,6 +65,7 @@ const skillsRoot = path.resolve(args.skills ?? path.join(educationRoot, 'skills'
 const licensesRoot = path.resolve(args.licenses ?? path.join(educationRoot, 'licenses'));
 const runtimeRoot = path.join(educationRoot, 'runtime');
 const launcherRoot = path.join(educationRoot, 'desktop', 'launcher');
+const hostExe = path.join(educationRoot, 'desktop', 'host', 'dist', 'SproutAsk.exe');
 
 function fail(message) {
   console.error(`build-student-payload: ${message}`);
@@ -151,6 +152,7 @@ for (const required of [
   path.join(skillsRoot, 'SKILL.md'),
   path.join(launcherRoot, 'launcher.cmd'),
   path.join(launcherRoot, 'launcher.vbs'),
+  hostExe,
   nodeExe,
   nodeLicense,
 ]) {
@@ -215,6 +217,8 @@ if (existsSync(licensesRoot)) {
 }
 
 copyFile(path.join(launcherRoot, 'launcher.cmd'), path.join(out, 'launcher.cmd'));
+// 原生桌面壳（Rust + WebView2）：学生双击的就是它；launcher.cmd 仅留作排障兜底。
+copyFile(hostExe, path.join(out, 'SproutAsk.exe'));
 // 不把任何 VBS 放进 payload：本机 AV 会拦截 makensis 读取含 VBS 内容的文件（实测）。
 // 安装器的快捷方式直接指向 launcher.cmd。
 

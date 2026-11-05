@@ -12,6 +12,7 @@
 import {
   existsSync,
   mkdirSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -245,7 +246,24 @@ export function setupEducationHome(home) {
   return { home: resolved, profiles: { web, headless } };
 }
 
-if (process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+/**
+ * 是否被直接执行（而不是被 import）。
+ *
+ * 安装目录可能是 junction / 符号链接（联调根、便携部署），也可能带 8.3 短名；
+ * 直接比较 argv[1] 与 import.meta.url 会不等，脚本静默 no-op。这里比较 realpath。
+ */
+function isDirectInvocation() {
+  if (process.argv[1] === undefined) return false;
+  try {
+    return (
+      realpathSync(path.resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))
+    );
+  } catch {
+    return path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  }
+}
+
+if (isDirectInvocation()) {
   const args = parseArgs();
   if (typeof args.home !== 'string' || !path.isAbsolute(args.home)) {
     console.error('usage: node scripts/setup-education-home.mjs --home <absolute DSH_HOME>');
