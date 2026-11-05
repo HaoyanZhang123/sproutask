@@ -54,6 +54,27 @@ export function isInsideRoots(candidate: string, allowedRoots: readonly string[]
   });
 }
 
+/**
+ * 把 allowed roots 与候选文件放到同一套真实路径上比较。
+ *
+ * 候选路径已经过 `realpath()`（会展开 8.3 短名、符号链接与 junction），但
+ * `allowedRoots` 通常只是 `path.resolve()` 的结果。Windows 上 TEMP/用户目录
+ * 可能带 8.3 短名（如 GitHub Actions 的 `C:\Users\RUNNER~1\...`），
+ * 短名根 / 长名候选会被判成"根外"，导入直接失败（INVALID_INPUT）。
+ * 根不存在或不可解析时退回原值，不改变原有语义。
+ */
+async function canonicalRoots(roots: readonly string[]): Promise<readonly string[]> {
+  const canonical: string[] = [];
+  for (const root of roots) {
+    try {
+      canonical.push(await realpath(root));
+    } catch {
+      canonical.push(root);
+    }
+  }
+  return canonical;
+}
+
 export interface VerifyAssetInput {
   readonly store: ManagedAssetStore;
   readonly handle: ManagedFileHandle;
@@ -82,7 +103,9 @@ export async function verifyManagedAsset(input: VerifyAssetInput): Promise<Impor
   } catch {
     return fail(importerError('ASSET_NOT_FOUND'));
   }
-  if (!isInsideRoots(real, store.allowedRoots)) return fail(importerError('ASSET_PATH_OUTSIDE_ROOT'));
+  if (!isInsideRoots(real, await canonicalRoots(store.allowedRoots))) {
+    return fail(importerError('ASSET_PATH_OUTSIDE_ROOT'));
+  }
 
   let stats;
   try {
