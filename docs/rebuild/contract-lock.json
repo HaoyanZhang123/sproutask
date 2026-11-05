@@ -653,7 +653,7 @@
     },
     {
       "path": "education/client/shell/src/errors.ts",
-      "sha256": "7a318b0db2254df0b6c95e0c57380c6fa163df3c1b71336ed569e537bb7ddaad"
+      "sha256": "80f93373f3713f7941dc3af7cfd16b5604f93577992f898cb3ffcff9b91a455f"
     },
     {
       "path": "education/client/shell/src/index.ts",
@@ -1745,7 +1745,7 @@
     },
     {
       "path": "education/packages/tutor/src/tutor-service.ts",
-      "sha256": "9137731946ab51a233c9b6f0e6e7d1d8ea51ec4313395c7a9aa99f981cbacc7c"
+      "sha256": "54ee5bc615d1f5768320f468461f0db0bd2806e70c30991457f167207303ccc2"
     },
     {
       "path": "education/packages/tutor/src/types.ts",
@@ -2125,7 +2125,7 @@
     },
     {
       "path": "education/runtime/test/session-id-collision.test.ts",
-      "sha256": "1425e2ef29864fdee018c3f4338b754ddd9dff8965f2614b1736621a4df2a330"
+      "sha256": "5cd03eac51f55774ccc06f2dfba05b73ad4d7cd3321d6642391f67709bb6566c"
     },
     {
       "path": "education/runtime/tsconfig.json",
@@ -2185,7 +2185,7 @@
     },
     {
       "path": "education/scripts/packaging/nsis/SproutAsk-Setup.nsi",
-      "sha256": "1814732c5401e51fb4ffa64c13cd4c4e11a36cd081ac9a9a12761da71ecb4034"
+      "sha256": "1d1b625a5ae566808911ceafb01dc69b93e27f492b0b5159ffa7a1e919c0e201"
     },
     {
       "path": "education/scripts/packaging/scan-payload.mjs",
@@ -2248,5 +2248,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-05T09:23:34Z"
+  "generatedAt": "2026-11-05T14:34:02Z"
 }

@@ -227,6 +227,49 @@ describe('DSH-store-aware session ids (F5)', () => {
     }
   });
 
+  it('retries with a fresh id when the caller supplied a colliding session id', async () => {
+    const root = tempRoot('supplied');
+    // The caller supplies session.3; the retry allocates the next store-aware id.
+    const ids = sessionFirstIds(['session.4']);
+    const agents = fakeAgents({ dshHome: null, persisted: ['session.3'] });
+    const composed = await composeEducationRuntime({
+      workspaceRoot: educationRoot,
+      dataRoot: path.join(root, 'data'),
+      env: {} as NodeJS.ProcessEnv,
+      dshHome: null,
+      ids,
+      agents,
+      sessions: { get: () => emptySession },
+    });
+    expect(composed.ok).toBe(true);
+    if (!composed.ok) return;
+    const composition = composed.data;
+    try {
+      const started = await composition.tutor.startSession(
+        {
+          requestId: 'f5.start.supplied',
+          learnerId: 'learner.local.default',
+          now: composition.clock.now(),
+        },
+        {
+          conceptId: await firstConceptId(),
+          mode: 'learn',
+          sessionId: 'session.3' as Id,
+        },
+      );
+      expect(started.ok, started.ok ? '' : `${started.error.code}: ${started.error.message}`).toBe(
+        true,
+      );
+      if (!started.ok) return;
+      expect(started.data.session.id).toBe('session.4');
+      expect(agents.createdIds).toEqual(['session.3', 'session.4']);
+      // The retry only re-binds the DSH session: no model turn was made.
+      expect(composition.tutor.getState(started.data.session.id)?.turnCount).toBe(0);
+    } finally {
+      composition.close();
+    }
+  });
+
   it('converts a persistent TypeError into a structured SESSION_RESUME_FAILED error', async () => {
     const root = tempRoot('structured');
     const agents = fakeAgents({ dshHome: null, persisted: ['session.3', 'session.4'] });

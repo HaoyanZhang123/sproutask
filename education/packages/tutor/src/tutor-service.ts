@@ -1044,7 +1044,13 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
         }
       };
       let bound = await bind(session);
-      if (!bound.ok && request.sessionId === undefined && isSessionBindingFailure(bound.error)) {
+      // A failed bind made zero model calls, so one retry with a fresh id is
+      // always safe. Callers can also pass an id (page reload / resume hands us
+      // `session.resume.<ts>`): DSH may still hit the restore TypeError for that
+      // id, and failing the whole page there is what students see as a dead end.
+      // Retry with the store-aware next id instead; the education layer
+      // re-injects its own context on every turn, so no model context is lost.
+      if (!bound.ok && isSessionBindingFailure(bound.error)) {
         // T15 F5: a session id that already exists in the DSH store makes the
         // agent restore path throw before any model call. Allocate the next
         // (store-aware) id and retry exactly once; still 0 model calls.

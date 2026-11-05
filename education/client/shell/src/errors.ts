@@ -52,9 +52,9 @@ export const SERVICE_ERROR_COPY: Record<string, ErrorCopy> = {
     action: '刷新后重试',
   },
   CONFLICT: {
-    title: '暂时不能同时进行',
-    detail: '另一个操作正在写入本地记录，请稍后再试。',
-    action: '重试',
+    title: '上一轮还没结束',
+    detail: '小芽还在回答上一题；等它说完再试。草稿和已经保存的记录都不会丢。',
+    action: '再试一次',
   },
   CANCELLED: {
     title: '操作已取消',
@@ -68,7 +68,7 @@ export const SERVICE_ERROR_COPY: Record<string, ErrorCopy> = {
   },
   UNAVAILABLE: {
     title: '服务暂时不可用',
-    detail: '本地已有材料与记录仍可查看；云服务恢复后可再试。',
+    detail: '这次没接上小芽。如果刚在设置里填过 Key，重启芽问后才生效；本地材料与记录仍可查看。',
     action: '稍后重试',
   },
   UNAUTHORIZED: {
