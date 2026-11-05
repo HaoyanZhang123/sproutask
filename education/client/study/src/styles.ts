@@ -539,14 +539,28 @@ export const studyStyles = `
   cursor: pointer;
 }
 .sprout-sheet__body {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--edu-space-sm);
   padding: var(--edu-space-md);
-  overflow: auto;
   min-height: 0;
+  overflow: hidden;
+}
+.sprout-thread {
+  list-style: none;
+  margin: 0;
+  padding: 0 4px 0 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: var(--edu-space-xs);
   align-content: start;
 }
-.sprout-thread { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--edu-space-xs); }
+.sprout-quick,
+.sprout-sheet__notice,
+.sprout-sheet__error,
+.sprout-sheet__low { flex: 0 0 auto; }
 .sprout-msg {
   max-width: 92%;
   padding: var(--edu-space-xs) var(--edu-space-sm);
@@ -570,7 +584,13 @@ export const studyStyles = `
 .sprout-sheet__notice:empty,
 .sprout-sheet__error:empty,
 .sprout-sheet__low:empty { display: none; }
-.sprout-compose { display: grid; gap: var(--edu-space-xs); }
+.sprout-compose {
+  flex: 0 0 auto;
+  display: grid;
+  gap: var(--edu-space-xs);
+  border-top: 1px solid var(--edu-color-line);
+  padding-top: var(--edu-space-sm);
+}
 .sprout-compose textarea { width: 100%; min-height: 4.5rem; }
 .sprout-compose .edu-button { justify-self: end; }
 @media ${STUDY_COMPACT_QUERY} {

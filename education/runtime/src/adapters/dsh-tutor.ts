@@ -374,6 +374,29 @@ function sessionResumeFailure(error: unknown): ServiceResult<TutorSessionBinding
   );
 }
 
+/** DSH 的恢复路径实测会卡 ~60s 才抛错；超时就当作绑定失败，交给上层换新 id。 */
+const SESSION_START_TIMEOUT_MS = 12_000;
+
+function withTimeout<T>(work: Promise<T>, timeoutMs: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`SESSION_START_TIMEOUT after ${timeoutMs}ms`)),
+      timeoutMs,
+    );
+    timer.unref?.();
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 export function createDshTutorGateway(options: DshTutorGatewayOptions): TutorGateway {
   const model: ModelDescriptor = {
     provider: options.model.provider,
@@ -393,29 +416,43 @@ export function createDshTutorGateway(options: DshTutorGatewayOptions): TutorGat
     if (existing === undefined) {
       let handle: DshAgentHandleLike | null = null;
       try {
-        handle = await options.agents.create({
-          sessionId: session.id,
-          agentOptions: {
-            provider: options.model.provider,
-            model: options.model.model,
-            maxTokens: options.model.maxTokens,
-          },
-        });
+        handle = await withTimeout(
+          options.agents.create({
+            sessionId: session.id,
+            agentOptions: {
+              provider: options.model.provider,
+              model: options.model.model,
+              maxTokens: options.model.maxTokens,
+            },
+          }),
+          SESSION_START_TIMEOUT_MS,
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+        if (message.includes('SESSION_START_TIMEOUT')) {
+          options.onDebug?.({
+            event: 'dsh.session.create-timeout',
+            sessionId: session.id,
+            message,
+          });
+          return sessionResumeFailure(error);
+        }
         // A page reload or a second browser tab can ask for the same education
         // session while the DSH agent is still alive. Resume it instead of
         // failing the whole turn with "session already exists".
         if (options.agents.resume !== undefined && message.includes('already exists')) {
           try {
-            handle = await options.agents.resume({
-              sessionId: session.id,
-              agentOptions: {
-                provider: options.model.provider,
-                model: options.model.model,
-                maxTokens: options.model.maxTokens,
-              },
-            });
+            handle = await withTimeout(
+              options.agents.resume({
+                sessionId: session.id,
+                agentOptions: {
+                  provider: options.model.provider,
+                  model: options.model.model,
+                  maxTokens: options.model.maxTokens,
+                },
+              }),
+              SESSION_START_TIMEOUT_MS,
+            );
           } catch (resumeError) {
             options.onDebug?.({
               event: 'dsh.session.resume-failed',
@@ -509,20 +546,24 @@ export function createDshTutorGateway(options: DshTutorGatewayOptions): TutorGat
       }
       let handle: DshAgentHandleLike;
       try {
-        handle = await options.agents.resume({
-          sessionId: request.sessionId,
-          agentOptions: {
-            provider: options.model.provider,
-            model: options.model.model,
-            maxTokens: options.model.maxTokens,
-          },
-        });
+        handle = await withTimeout(
+          options.agents.resume({
+            sessionId: request.sessionId,
+            agentOptions: {
+              provider: options.model.provider,
+              model: options.model.model,
+              maxTokens: options.model.maxTokens,
+            },
+          }),
+          SESSION_START_TIMEOUT_MS,
+        );
       } catch (error) {
-        if (isSessionBindingTypeError(error)) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (isSessionBindingTypeError(error) || message.includes('SESSION_START_TIMEOUT')) {
           options.onDebug?.({
             event: 'dsh.session.resume-failed',
             sessionId: request.sessionId,
-            message: error instanceof Error ? error.message : String(error),
+            message,
           });
           return sessionResumeFailure(error);
         }

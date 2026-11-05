@@ -13477,7 +13477,7 @@ window.__ModuleLoader__.load({
         if (this.isWaitingState()) {
           if (this.waitingStartedAt === 0) this.waitingStartedAt = Date.now();
           if (this.waitingTimer === null) {
-            this.waitingTimer = setInterval(() => this.notify(), 1e3);
+            this.waitingTimer = setInterval(() => this.tickWaiting(), 1e3);
           }
           return;
         }
@@ -13486,6 +13486,18 @@ window.__ModuleLoader__.load({
           this.waitingTimer = null;
         }
         this.waitingStartedAt = 0;
+      }
+      /** 只改等待文案里的秒数，不重渲染整页——每秒重渲染会吞掉点击、打断滚动。 */
+      tickWaiting() {
+        if (!this.isWaitingState()) {
+          this.ensureWaitingTimer();
+          return;
+        }
+        const suffix = this.waitSuffix();
+        for (const node of document.querySelectorAll("[data-wait-base]")) {
+          if (!node.isConnected) continue;
+          node.textContent = `${node.dataset["waitBase"] ?? ""}${suffix}`;
+        }
       }
       waitingSeconds() {
         return this.waitingStartedAt === 0 ? 0 : Math.max(0, Math.round((Date.now() - this.waitingStartedAt) / 1e3));
@@ -14200,11 +14212,11 @@ window.__ModuleLoader__.load({
         if (container === null) return;
         clear(container);
         if (this.loading) {
-          container.append(
-            loadingState({
-              title: this.waitingNotice.length > 0 ? this.waitingNotice : `\u6B63\u5728\u6253\u5F00\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\u2026${this.waitSuffix()}`
-            })
-          );
+          const base = this.waitingNotice.length > 0 ? this.waitingNotice : "\u6B63\u5728\u6253\u5F00\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\u2026";
+          const state = loadingState({ title: `${base}${this.waitSuffix()}` });
+          const title = state.querySelector(".edu-state__title");
+          if (title !== null) title.dataset["waitBase"] = base;
+          container.append(state);
           return;
         }
         if (this.error !== null) {
@@ -14397,11 +14409,11 @@ window.__ModuleLoader__.load({
         }
         if (this.loading) {
           clear(container);
-          container.append(
-            loadingState({
-              title: this.waitingNotice.length > 0 ? this.waitingNotice : `\u6B63\u5728\u51C6\u5907\u8FD9\u4E00\u9898\u2026${this.waitSuffix()}`
-            })
-          );
+          const base = this.waitingNotice.length > 0 ? this.waitingNotice : "\u6B63\u5728\u51C6\u5907\u8FD9\u4E00\u9898\u2026";
+          const state = loadingState({ title: `${base}${this.waitSuffix()}` });
+          const title = state.querySelector(".edu-state__title");
+          if (title !== null) title.dataset["waitBase"] = base;
+          container.append(state);
           return;
         }
         if (this.error !== null) {
@@ -14477,15 +14489,12 @@ window.__ModuleLoader__.load({
         }
         if (this.phase === "submitted" || this.phase === "grading") {
           const seconds = this.waitingSeconds();
+          const pendingBase = this.phase === "submitted" ? "\u539F\u7B54\u5DF2\u63D0\u4EA4\uFF0C\u6B63\u5728\u4FDD\u5B58\u2026" : "\u5C0F\u82BD\u6B63\u5728\u56DE\u7B54\u2026";
           root.append(
             h(
               "div",
               { class: "edu-study-pending", role: "status" },
-              h(
-                "p",
-                {},
-                this.phase === "submitted" ? `\u539F\u7B54\u5DF2\u63D0\u4EA4\uFF0C\u6B63\u5728\u4FDD\u5B58\u2026${this.waitSuffix()}` : `\u5C0F\u82BD\u6B63\u5728\u56DE\u7B54\u2026${this.waitSuffix()}`
-              ),
+              h("p", { "data-wait-base": pendingBase }, `${pendingBase}${this.waitSuffix()}`),
               h(
                 "p",
                 { class: "edu-study-note" },
@@ -15875,14 +15884,28 @@ window.__ModuleLoader__.load({
       cursor: pointer;
     }
     .sprout-sheet__body {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: var(--edu-space-sm);
       padding: var(--edu-space-md);
-      overflow: auto;
       min-height: 0;
+      overflow: hidden;
+    }
+    .sprout-thread {
+      list-style: none;
+      margin: 0;
+      padding: 0 4px 0 0;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      display: grid;
+      gap: var(--edu-space-xs);
       align-content: start;
     }
-    .sprout-thread { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--edu-space-xs); }
+    .sprout-quick,
+    .sprout-sheet__notice,
+    .sprout-sheet__error,
+    .sprout-sheet__low { flex: 0 0 auto; }
     .sprout-msg {
       max-width: 92%;
       padding: var(--edu-space-xs) var(--edu-space-sm);
@@ -15906,7 +15929,13 @@ window.__ModuleLoader__.load({
     .sprout-sheet__notice:empty,
     .sprout-sheet__error:empty,
     .sprout-sheet__low:empty { display: none; }
-    .sprout-compose { display: grid; gap: var(--edu-space-xs); }
+    .sprout-compose {
+      flex: 0 0 auto;
+      display: grid;
+      gap: var(--edu-space-xs);
+      border-top: 1px solid var(--edu-color-line);
+      padding-top: var(--edu-space-sm);
+    }
     .sprout-compose textarea { width: 100%; min-height: 4.5rem; }
     .sprout-compose .edu-button { justify-self: end; }
     @media ${STUDY_COMPACT_QUERY} {

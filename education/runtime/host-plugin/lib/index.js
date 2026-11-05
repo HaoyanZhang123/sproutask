@@ -15378,6 +15378,26 @@ function sessionResumeFailure(error) {
     true
   );
 }
+var SESSION_START_TIMEOUT_MS = 12e3;
+function withTimeout(work, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`SESSION_START_TIMEOUT after ${timeoutMs}ms`)),
+      timeoutMs
+    );
+    timer.unref?.();
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
 function createDshTutorGateway(options) {
   const model = {
     provider: options.model.provider,
@@ -15395,26 +15415,40 @@ function createDshTutorGateway(options) {
     if (existing === void 0) {
       let handle = null;
       try {
-        handle = await options.agents.create({
-          sessionId: session.id,
-          agentOptions: {
-            provider: options.model.provider,
-            model: options.model.model,
-            maxTokens: options.model.maxTokens
-          }
-        });
+        handle = await withTimeout(
+          options.agents.create({
+            sessionId: session.id,
+            agentOptions: {
+              provider: options.model.provider,
+              model: options.model.model,
+              maxTokens: options.model.maxTokens
+            }
+          }),
+          SESSION_START_TIMEOUT_MS
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+        if (message.includes("SESSION_START_TIMEOUT")) {
+          options.onDebug?.({
+            event: "dsh.session.create-timeout",
+            sessionId: session.id,
+            message
+          });
+          return sessionResumeFailure(error);
+        }
         if (options.agents.resume !== void 0 && message.includes("already exists")) {
           try {
-            handle = await options.agents.resume({
-              sessionId: session.id,
-              agentOptions: {
-                provider: options.model.provider,
-                model: options.model.model,
-                maxTokens: options.model.maxTokens
-              }
-            });
+            handle = await withTimeout(
+              options.agents.resume({
+                sessionId: session.id,
+                agentOptions: {
+                  provider: options.model.provider,
+                  model: options.model.model,
+                  maxTokens: options.model.maxTokens
+                }
+              }),
+              SESSION_START_TIMEOUT_MS
+            );
           } catch (resumeError) {
             options.onDebug?.({
               event: "dsh.session.resume-failed",
@@ -15502,20 +15536,24 @@ function createDshTutorGateway(options) {
       }
       let handle;
       try {
-        handle = await options.agents.resume({
-          sessionId: request.sessionId,
-          agentOptions: {
-            provider: options.model.provider,
-            model: options.model.model,
-            maxTokens: options.model.maxTokens
-          }
-        });
+        handle = await withTimeout(
+          options.agents.resume({
+            sessionId: request.sessionId,
+            agentOptions: {
+              provider: options.model.provider,
+              model: options.model.model,
+              maxTokens: options.model.maxTokens
+            }
+          }),
+          SESSION_START_TIMEOUT_MS
+        );
       } catch (error) {
-        if (isSessionBindingTypeError(error)) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (isSessionBindingTypeError(error) || message.includes("SESSION_START_TIMEOUT")) {
           options.onDebug?.({
             event: "dsh.session.resume-failed",
             sessionId: request.sessionId,
-            message: error instanceof Error ? error.message : String(error)
+            message
           });
           return sessionResumeFailure(error);
         }
@@ -16756,14 +16794,40 @@ var G1Service = class {
     );
   }
   async startTutor(requestId, input) {
-    const started = await this.composition.tutor.startSession(this.ctx(requestId), input);
+    let effective = input;
+    if (typeof input.sessionId === "string" && input.sessionId.length > 0) {
+      const journal = await this.journalSessions();
+      const known = journal.sessions.some((entry) => entry.session.id === input.sessionId);
+      if (known) {
+        const resumed = await this.resumeSession(input.sessionId);
+        if (resumed.ok) {
+          const data = resumed.data;
+          const session = data.session;
+          if (typeof session?.id === "string" && typeof session.conceptId === "string" && (session.mode === "learn" || session.mode === "review")) {
+            effective = {
+              conceptId: session.conceptId,
+              mode: session.mode,
+              activityId: input.activityId ?? data.activityId ?? null,
+              sessionId: session.id
+            };
+            this.composition.audit?.({
+              kind: "session.rebound",
+              at: this.ctx(requestId).now,
+              from: input.sessionId,
+              to: session.id
+            });
+          }
+        }
+      }
+    }
+    const started = await this.composition.tutor.startSession(this.ctx(requestId), effective);
     if (started.ok) {
       const sessionId = started.data.session?.id;
       if (typeof sessionId === "string") {
         this.localSessions.set(sessionId, {
-          conceptId: input.conceptId,
-          mode: input.mode,
-          activityId: input.activityId ?? null
+          conceptId: effective.conceptId,
+          mode: effective.mode,
+          activityId: effective.activityId ?? null
         });
       }
     }

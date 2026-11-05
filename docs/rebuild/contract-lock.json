@@ -816,7 +816,7 @@
     },
     {
       "path": "education/client/study/src/controller.ts",
-      "sha256": "4e5c44bffa77089ce9e897b529ba9567f5dced448b1279647d01e04b5c363a6a"
+      "sha256": "4bcd70930deeb3718f92c57c54f130bd0f9ae395724daa77906b3cb220cf7d4a"
     },
     {
       "path": "education/client/study/src/fixture.ts",
@@ -848,7 +848,7 @@
     },
     {
       "path": "education/client/study/src/styles.ts",
-      "sha256": "70ef5954c78f184e96a5dc330f58948ed919c4b8d2803269fc8028c919497f8b"
+      "sha256": "7f32c66079d82475cb925ce47b83e5e588ded7ed89c59223b537e6dfead4b53a"
     },
     {
       "path": "education/client/study/src/types.ts",
@@ -2012,7 +2012,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "ae4ffe511a226ce8238ccfcfdc581d8ae60b9986e715f8ddbcdde295818e16f1"
+      "sha256": "886e96dadcb13427e333d45a7023cc5d186643b35ee19a89f595363334d79f39"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2032,7 +2032,7 @@
     },
     {
       "path": "education/runtime/host-plugin/lib/index.js",
-      "sha256": "903ef8d41e0526588bea08e83ae44b610433f66bfafa127e01ced4c539899121"
+      "sha256": "dad9841a75dcb90f25efec5097dd0310cf141a1acb01cb89f89e42e9eba157cf"
     },
     {
       "path": "education/runtime/host-plugin/package.json",
@@ -2060,7 +2060,7 @@
     },
     {
       "path": "education/runtime/src/adapters/dsh-tutor.ts",
-      "sha256": "d0e68328776b30f8d432116d714603c6440393fb85e150d88030015b37aa7f1b"
+      "sha256": "c2883599f9703a71f4bea1064aebab6d024f0f7d963d7359c325f6a52b20d79d"
     },
     {
       "path": "education/runtime/src/adapters/mock-tutor.ts",
@@ -2092,7 +2092,7 @@
     },
     {
       "path": "education/runtime/src/g1-service.ts",
-      "sha256": "145d9774051211ff58cbf26663998647a2e07eecd7088e7d19c4cbed01d8321a"
+      "sha256": "1aa1aa2aef170976f921c0968ec27e12cbea89b1813201f603523185341d4ea9"
     },
     {
       "path": "education/runtime/src/index.ts",
@@ -2279,5 +2279,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-05T16:49:24Z"
+  "generatedAt": "2026-11-05T17:48:49Z"
 }

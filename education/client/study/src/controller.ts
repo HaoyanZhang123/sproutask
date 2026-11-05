@@ -682,7 +682,7 @@ export class StudyController {
     if (this.isWaitingState()) {
       if (this.waitingStartedAt === 0) this.waitingStartedAt = Date.now();
       if (this.waitingTimer === null) {
-        this.waitingTimer = setInterval(() => this.notify(), 1000);
+        this.waitingTimer = setInterval(() => this.tickWaiting(), 1000);
       }
       return;
     }
@@ -691,6 +691,19 @@ export class StudyController {
       this.waitingTimer = null;
     }
     this.waitingStartedAt = 0;
+  }
+
+  /** 只改等待文案里的秒数，不重渲染整页——每秒重渲染会吞掉点击、打断滚动。 */
+  private tickWaiting(): void {
+    if (!this.isWaitingState()) {
+      this.ensureWaitingTimer();
+      return;
+    }
+    const suffix = this.waitSuffix();
+    for (const node of document.querySelectorAll<HTMLElement>('[data-wait-base]')) {
+      if (!node.isConnected) continue;
+      node.textContent = `${node.dataset['waitBase'] ?? ''}${suffix}`;
+    }
   }
 
   private waitingSeconds(): number {
@@ -1484,14 +1497,11 @@ export class StudyController {
     if (container === null) return;
     clear(container);
     if (this.loading) {
-      container.append(
-        loadingState({
-          title:
-            this.waitingNotice.length > 0
-              ? this.waitingNotice
-              : `正在打开这一节的课本…${this.waitSuffix()}`,
-        }),
-      );
+      const base = this.waitingNotice.length > 0 ? this.waitingNotice : '正在打开这一节的课本…';
+      const state = loadingState({ title: `${base}${this.waitSuffix()}` });
+      const title = state.querySelector<HTMLElement>('.edu-state__title');
+      if (title !== null) title.dataset['waitBase'] = base;
+      container.append(state);
       return;
     }
     if (this.error !== null) {
@@ -1704,14 +1714,11 @@ export class StudyController {
     }
     if (this.loading) {
       clear(container);
-      container.append(
-        loadingState({
-          title:
-            this.waitingNotice.length > 0
-              ? this.waitingNotice
-              : `正在准备这一题…${this.waitSuffix()}`,
-        }),
-      );
+      const base = this.waitingNotice.length > 0 ? this.waitingNotice : '正在准备这一题…';
+      const state = loadingState({ title: `${base}${this.waitSuffix()}` });
+      const title = state.querySelector<HTMLElement>('.edu-state__title');
+      if (title !== null) title.dataset['waitBase'] = base;
+      container.append(state);
       return;
     }
     if (this.error !== null) {
@@ -1788,17 +1795,12 @@ export class StudyController {
     }
     if (this.phase === 'submitted' || this.phase === 'grading') {
       const seconds = this.waitingSeconds();
+      const pendingBase = this.phase === 'submitted' ? '原答已提交，正在保存…' : '小芽正在回答…';
       root.append(
         h(
           'div',
           { class: 'edu-study-pending', role: 'status' },
-          h(
-            'p',
-            {},
-            this.phase === 'submitted'
-              ? `原答已提交，正在保存…${this.waitSuffix()}`
-              : `小芽正在回答…${this.waitSuffix()}`,
-          ),
+          h('p', { 'data-wait-base': pendingBase }, `${pendingBase}${this.waitSuffix()}`),
           h(
             'p',
             { class: 'edu-study-note' },

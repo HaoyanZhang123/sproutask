@@ -748,14 +748,51 @@ export class G1Service {
     requestId: string,
     input: { conceptId: string; mode: 'learn' | 'review'; activityId?: string | null; sessionId?: string },
   ): Promise<ServiceResult<unknown>> {
-    const started = await this.composition.tutor.startSession(this.ctx(requestId), input);
+    let effective = input;
+    // 「继续上次」会把一个已经开过的 session id 再传回来。直接用它去 create，
+    // DSH 会走恢复路径：实测能卡 ~60s 再抛 TypeError，最后才靠重试换新 id。
+    // 这里先用 resume 语义换一个全新的 id（概念/模式/活动沿用原会话），
+    // 避免任何一次打开学习台先等一分钟。
+    if (typeof input.sessionId === 'string' && input.sessionId.length > 0) {
+      const journal = await this.journalSessions();
+      const known = journal.sessions.some((entry) => entry.session.id === input.sessionId);
+      if (known) {
+        const resumed = await this.resumeSession(input.sessionId);
+        if (resumed.ok) {
+          const data = resumed.data as {
+            readonly session?: { readonly id?: string; readonly conceptId?: string; readonly mode?: 'learn' | 'review' };
+            readonly activityId?: string | null;
+          };
+          const session = data.session;
+          if (
+            typeof session?.id === 'string' &&
+            typeof session.conceptId === 'string' &&
+            (session.mode === 'learn' || session.mode === 'review')
+          ) {
+            effective = {
+              conceptId: session.conceptId,
+              mode: session.mode,
+              activityId: input.activityId ?? data.activityId ?? null,
+              sessionId: session.id,
+            };
+            this.composition.audit?.({
+              kind: 'session.rebound',
+              at: this.ctx(requestId).now,
+              from: input.sessionId,
+              to: session.id,
+            });
+          }
+        }
+      }
+    }
+    const started = await this.composition.tutor.startSession(this.ctx(requestId), effective);
     if (started.ok) {
       const sessionId = (started.data as { session?: { id?: string } }).session?.id;
       if (typeof sessionId === 'string') {
         this.localSessions.set(sessionId, {
-          conceptId: input.conceptId,
-          mode: input.mode,
-          activityId: input.activityId ?? null,
+          conceptId: effective.conceptId,
+          mode: effective.mode,
+          activityId: effective.activityId ?? null,
         });
       }
     }
