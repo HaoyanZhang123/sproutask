@@ -57,7 +57,9 @@ VIAddVersionKey "LegalCopyright" "见安装目录 licenses/NOTICE.md"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN_TEXT "立即启动 SproutAsk"
-!define MUI_FINISHPAGE_RUN "$INSTDIR\launcher.vbs"
+; 本版 payload 只带 launcher.cmd（VBS 会被本机 AV 拦，见下方注释）：
+; 完成页"立即启动"必须指向真实存在的 launcher.cmd，否则点了静默失败。
+!define MUI_FINISHPAGE_RUN "$INSTDIR\launcher.cmd"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -83,7 +85,8 @@ Section "Install"
   WriteRegStr HKCU "${APP_KEY}" "DisplayVersion" "${VERSION}"
   WriteRegStr HKCU "${APP_KEY}" "Publisher" "${APP_PUBLISHER}"
   WriteRegStr HKCU "${APP_KEY}" "InstallLocation" "$INSTDIR"
-  WriteRegStr HKCU "${APP_KEY}" "DisplayIcon" "$INSTDIR\launcher.vbs"
+  ; 图标必须指向真实存在的文件；launcher.vbs 不在包内，指向它会让"应用和功能"里没有图标。
+  WriteRegStr HKCU "${APP_KEY}" "DisplayIcon" "$INSTDIR\launcher.cmd"
   WriteRegStr HKCU "${APP_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegStr HKCU "${APP_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
   WriteRegStr HKCU "${APP_KEY}" "InstallDir" "$INSTDIR"
