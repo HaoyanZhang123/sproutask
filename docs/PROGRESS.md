@@ -113,6 +113,7 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 **做了什么**
 
 - **契约锁重建**：`pnpm contract:lock:verify` 之前报 100 处漂移——v0.4.0 改了 `map`/`study`/`shell` 的源码与测试后没有重生成锁。重建后 `docs/rebuild/contract-lock.json`：files 456 → 467（+13 个新文件、−3 个改名、84 个哈希更新）；`contract` / `workspace` / `packages` / `dependencyDirection` / `commands` / `dependencies` 六段逐字节未变（契约版本仍 1.0.0），属于纯基线更新。
+- **行尾坑（CI 首跑暴露）**：本机有 57 个文件的工作区副本是 CRLF（旧克隆早于 `.gitattributes` 的 `eol=lf`），第一次重建把 CRLF 字节算进了锁；CI 全新检出是 LF → Contract lock 步骤 33 处 hash mismatch（run `42001511682`）。处理：把工作区 57 个文件的行尾一次性归一到 LF（与 `.gitattributes`、git 索引一致），再重建锁（`5f6e71d`，仅 33 个哈希与 generatedAt 变化），并在本地全新 clone 里先预验。
 - **锁生成器加固**：`education/scripts/lib/lock.mjs` 跳过 `output/` 与 `*.tsbuildinfo` / `*.log`，避免本机生成物被算进锁、换机器 verify 变红。
 - **tracked 守卫**：新增 `education/scripts/check-tracked-sources.mjs` 与 `pnpm check:tracked`；遍历 `education/`、跳过生成物目录与日志，任何未进 git 的文件即失败（背景：2026-11-05 根 `.gitignore` 全局 `data/` 误伤 `client/shell/src/data/`）。
 - **CI 加固**：`.github/workflows/ci.yml` 升到 `actions/checkout@v7` / `actions/setup-node@v7` / `pnpm/action-setup@v6`（消掉 Node 20 弃用告警）；新增四步：Tracked sources guard、Contract lock、Content pack、Build 后"构建产物必须与已提交文件一致"。
@@ -122,7 +123,8 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 - 本机：`pnpm check:tracked` OK（733 个文件全部被跟踪）；`pnpm contract:lock:verify` OK（files=467）；`pnpm content:validate` / `typecheck` / `test` 全绿；`pnpm build` 后 `git status --porcelain --untracked-files=no` 为空（产物可复现）。
 - 守卫自检：未 `git add` 新脚本时，`check:tracked` 报 1 个未跟踪文件并退出 1；add 后转 OK。
-- CI：提交 `23b507c` 的 run 见 GitHub Actions（新增四步已在本机逐项预演通过）。
+- 模拟 CI 检出：本地全新 clone（LF 检出）→ `install` → `contract:lock:verify` OK、`check:tracked` OK。
+- CI：`23b507c` 首跑在 Contract lock 失败（上述 CRLF 假哈希）；`e4b578a` 的 run `42002107337` **全绿**——Tracked sources guard / Contract lock / Content pack / Typecheck / Test / Build / Build output matches committed files 七步全部通过。
 
 **未做 / 未验证**
 
