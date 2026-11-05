@@ -95,7 +95,8 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 **怎么验证的**
 
 - 干净克隆（GitHub 全新 clone）→ `pnpm --dir education install --frozen-lockfile` → `pnpm typecheck` / `pnpm test` / `pnpm content:validate` 全绿。
-- 本仓 `pnpm typecheck && pnpm test` 全绿（705 用例）；CI run 见下方"未做"说明。
+- 本仓 `pnpm typecheck && pnpm test` 全绿（705 用例）；`pnpm dev` 构建并起服务，HTTP 200（12,522 B）。
+- GitHub Actions：`e124a64` 上 typecheck 通过、test 因 8.3 短名失败（importer 22 用例）；`b3b4de9`（修复）对应 run 41999686580 全绿；`7469306`（文档）对应 run 41999969745 全绿。
 - 安装版无头冒烟：`--no-edge` 启动，HTTP 200、`status.ok=true`、`status=degraded`（无 Key，预期）、pack biology-7a@2.0.0、43 概念。
 - 工作区保留项逐项核对存在；`git status` 干净；tracked 924 → 930。
 
