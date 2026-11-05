@@ -19,7 +19,7 @@ use std::{
     process::{Command, Stdio},
     sync::{
         atomic::{AtomicBool, AtomicU32, Ordering},
-        Arc,
+        Arc, OnceLock,
     },
     thread,
     time::{Duration, Instant},
@@ -35,9 +35,20 @@ use windows::{
     core::{BOOL, PCWSTR},
     Win32::{
         Foundation::{
-            GetLastError, SetLastError, ERROR_ALREADY_EXISTS, HANDLE, HWND, LPARAM, WIN32_ERROR,
+            CloseHandle, GetLastError, SetLastError, ERROR_ALREADY_EXISTS, HANDLE, HWND, LPARAM,
+            WIN32_ERROR,
         },
-        System::Threading::{AttachThreadInput, CreateMutexW, GetCurrentThreadId},
+        System::{
+            JobObjects::{
+                AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+                SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+                JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+            },
+            Threading::{
+                AttachThreadInput, CreateMutexW, GetCurrentThreadId, OpenProcess, PROCESS_SET_QUOTA,
+                PROCESS_TERMINATE,
+            },
+        },
         UI::{
             Shell::SetCurrentProcessExplicitAppUserModelID,
             WindowsAndMessaging::{
@@ -334,6 +345,9 @@ fn run() -> Result<(), AppError> {
         let app_id = to_wide(APP_USER_MODEL_ID);
         let _ = SetCurrentProcessExplicitAppUserModelID(PCWSTR(app_id.as_ptr()));
     }
+    // 进程级 Job Object：宿主哪怕被任务管理器/崩溃强杀，node 子进程也会随句柄关闭被杀，
+    // 不会再留下占着日志锁的孤儿进程（那会让下一次启动白屏）。
+    init_service_job();
 
     let instance = acquire_instance_mutex();
     if instance.already_running {
@@ -541,6 +555,7 @@ fn run_service(
         .map_err(|error| format!("无法启动本地服务进程：{error}"))?;
     let pid = child.id();
     pid_slot.store(pid, Ordering::SeqCst);
+    assign_service_job(pid);
 
     if closing.load(Ordering::SeqCst) {
         kill_process_tree(pid);
@@ -740,6 +755,47 @@ fn tail_text(path: &Path) -> String {
     let chars: Vec<char> = text.chars().collect();
     let start = chars.len().saturating_sub(MAX_LOG_TAIL_CHARS);
     chars[start..].iter().collect::<String>().trim().to_string()
+}
+
+// ---------------------------------------------------------------------------
+// 子进程兜底：Job Object（宿主被强杀时一起杀掉 node）
+// ---------------------------------------------------------------------------
+
+static SERVICE_JOB: OnceLock<isize> = OnceLock::new();
+
+/// Job Object 的 KILL_ON_JOB_CLOSE 只在最后一个句柄关闭时生效；句柄挂在静态里，
+/// 进程无论怎么退出（正常关窗、崩溃、任务管理器强杀）都会关闭它并杀掉 node 子树。
+fn init_service_job() {
+    unsafe {
+        let Ok(job) = CreateJobObjectW(None, PCWSTR::null()) else {
+            return;
+        };
+        let mut info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION::default();
+        info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        let configured = SetInformationJobObject(
+            job,
+            JobObjectExtendedLimitInformation,
+            &info as *const _ as *const core::ffi::c_void,
+            std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+        );
+        if configured.is_ok() {
+            let _ = SERVICE_JOB.set(job.0 as isize);
+        }
+    }
+}
+
+fn assign_service_job(pid: u32) {
+    let Some(raw) = SERVICE_JOB.get().copied() else {
+        return;
+    };
+    let job = HANDLE(raw as *mut core::ffi::c_void);
+    unsafe {
+        let Ok(process) = OpenProcess(PROCESS_SET_QUOTA | PROCESS_TERMINATE, false, pid) else {
+            return;
+        };
+        let _ = AssignProcessToJobObject(job, process);
+        let _ = CloseHandle(process);
+    }
 }
 
 fn kill_process_tree(pid: u32) {

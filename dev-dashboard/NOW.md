@@ -2,6 +2,7 @@
 
 ## 时间线
 
+- 2026-11-06 | **修「上一轮还没结束」卡页 + 强杀留孤儿**：学习台遇到进行中的回合改为自动等待重试（不再整页报错）；桌面壳加 Job Object，强杀宿主后 node 一起结束（实测 6 秒内归零）；0.4.1 重新打包并重装 | 证据: docs/PROGRESS.md §4.3 补记 2
 - 2026-11-05 | **修 0.4.1 首启白屏**：旧 DSH profile 的插件链接还指向已删除的 C 盘安装 → 重建 profile（指向 E:\芽问），status 200、页面正常 | 证据: docs/PROGRESS.md §4.3 补记、output/capture/sproutask-native-0.4.1.png
 - 2026-11-05 | **v0.4.1 原生桌面壳**：`SproutAsk.exe`（Rust + WebView2）替代 Edge 窗口——单实例/自带图标/无控制台/窗口记忆；同时修掉会话重绑 TypeError 与安装器「立即启动」失效 | 证据: docs/PROGRESS.md §4.3、`education/desktop/host/`、`SproutAsk-Setup-0.4.1-x64.exe`
 - 2026-11-05 | **契约锁重建 + CI 加固**：契约锁从 v0.3.0 状态重建（files 456→467，契约版本未变；顺带修掉本机 CRLF 造成的假哈希）；新增 `pnpm check:tracked` 守卫；CI 升级 action 版本并加入 tracked / 契约锁 / 内容包 / 构建漂移四道门，run 42002107337 全绿 | 证据: docs/PROGRESS.md §4.2、`.github/workflows/ci.yml`

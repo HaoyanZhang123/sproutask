@@ -816,7 +816,7 @@
     },
     {
       "path": "education/client/study/src/controller.ts",
-      "sha256": "e67f65647df56209e290257c2e8a35fb97f7461908ba70190d2035b031d6e5d6"
+      "sha256": "b890b484437e9a81b4d4e7cf1f906396974678697a6176602c5e32a6234167d5"
     },
     {
       "path": "education/client/study/src/fixture.ts",
@@ -2012,7 +2012,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "85d819e9486a1e17763d8c0b0650584c54835e6ee057c9e355273c70ce2ca991"
+      "sha256": "4c2e96ceb7d6cf149aae86fee89d541eaf4f9d11f0f4fea7aeea687940727240"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2279,5 +2279,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-05T15:38:38Z"
+  "generatedAt": "2026-11-05T16:20:04Z"
 }

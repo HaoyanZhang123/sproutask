@@ -13083,6 +13083,9 @@ window.__ModuleLoader__.load({
       error = null;
       loadToken = 0;
       loadedKey = "";
+      waitingNotice = "";
+      conflictRetryTimer = null;
+      conflictRetryCount = 0;
       phase = "draft";
       form = null;
       formActivityId = null;
@@ -13153,6 +13156,7 @@ window.__ModuleLoader__.load({
       }
       onPageUnmount() {
         this.submitGen += 1;
+        this.clearConflictRetry();
         if (this.currentToken !== null) this.currentToken.cancelled = true;
         this.pageContext = null;
         this.navigate = null;
@@ -13383,8 +13387,45 @@ window.__ModuleLoader__.load({
         this.loading = true;
         this.error = null;
       }
-      async load(key) {
+      /**
+       * 上一轮还在回答时打开/刷新学习台，服务会返回 CONFLICT；这不是错误页，而是
+       * "稍等一下就好"。这里自动重试，并把课本/题目区显示成等待状态，而不是整页报错。
+       * 最多重试约 36 秒，之后才把真实错误交给错误卡。
+       */
+      scheduleIfTurnBusy(error, run) {
+        const busy = error.code === "CONFLICT" && /TURN_IN_PROGRESS|already exists/i.test(error.message);
+        if (!busy) return false;
+        this.conflictRetryCount += 1;
+        if (this.conflictRetryCount > 24) return false;
+        if (this.conflictRetryTimer !== null) clearTimeout(this.conflictRetryTimer);
+        this.loading = true;
+        this.error = null;
+        this.waitingNotice = "\u5C0F\u82BD\u8FD8\u5728\u56DE\u7B54\u4E0A\u4E00\u9898\uFF0C\u7A0D\u7B49\u2026";
+        this.notify();
+        this.conflictRetryTimer = setTimeout(() => {
+          this.conflictRetryTimer = null;
+          run();
+        }, 1500);
+        return true;
+      }
+      clearConflictRetry() {
+        if (this.conflictRetryTimer !== null) {
+          clearTimeout(this.conflictRetryTimer);
+          this.conflictRetryTimer = null;
+        }
+        this.conflictRetryCount = 0;
+        this.waitingNotice = "";
+      }
+      async load(key, retrying = false) {
         const token = ++this.loadToken;
+        if (!retrying) {
+          if (this.conflictRetryTimer !== null) {
+            clearTimeout(this.conflictRetryTimer);
+            this.conflictRetryTimer = null;
+          }
+          this.conflictRetryCount = 0;
+          this.waitingNotice = "";
+        }
         this.loading = true;
         this.error = null;
         this.notify();
@@ -13393,8 +13434,10 @@ window.__ModuleLoader__.load({
             const range = await this.options.dataSource.loadReviewRange(this.request());
             if (token !== this.loadToken) return;
             this.loading = false;
-            if (!range.ok) this.error = range.error;
-            else {
+            if (!range.ok) {
+              if (this.scheduleIfTurnBusy(range.error, () => void this.load(key, true))) return;
+              this.error = range.error;
+            } else {
               this.reviewRange = range.data;
               this.reviewSelected = new Set(range.data.candidates.slice(0, 1).map((entry) => entry.conceptId));
               this.reviewNotice = "\u8BF7\u9009\u62E9\u63A8\u8350\u8303\u56F4\uFF0C\u6216\u8DF3\u8FC7\u63A8\u8350\u81EA\u9009\u8303\u56F4\u3002";
@@ -13416,12 +13459,14 @@ window.__ModuleLoader__.load({
         });
         if (token !== this.loadToken) return;
         if (!result.ok) {
+          if (this.scheduleIfTurnBusy(result.error, () => void this.load(key, true))) return;
           this.loading = false;
           this.error = result.error;
           this.loadedKey = key;
           this.notify();
           return;
         }
+        this.clearConflictRetry();
         this.workspace = result.data;
         this.progress = result.data.progress;
         this.selfReport = result.data.selfReport;
@@ -13437,8 +13482,16 @@ window.__ModuleLoader__.load({
         }
         await this.startSession();
       }
-      async startSession() {
+      async startSession(retrying = false) {
         if (this.workspace === null) return;
+        if (!retrying) {
+          if (this.conflictRetryTimer !== null) {
+            clearTimeout(this.conflictRetryTimer);
+            this.conflictRetryTimer = null;
+          }
+          this.conflictRetryCount = 0;
+          this.waitingNotice = "";
+        }
         const result = await this.options.dataSource.startSession(this.request(), {
           conceptId: this.workspace.concept.id,
           mode: this.intent.mode,
@@ -13446,10 +13499,12 @@ window.__ModuleLoader__.load({
           activityId: this.workspace.activity.id
         });
         if (!result.ok) {
+          if (this.scheduleIfTurnBusy(result.error, () => void this.startSession(true))) return;
           this.error = result.error;
           this.notify();
           return;
         }
+        this.clearConflictRetry();
         this.session = result.data;
         this.tutorState = result.data.state;
         this.activity = this.workspace.activity;
@@ -14067,7 +14122,11 @@ window.__ModuleLoader__.load({
         if (container === null) return;
         clear(container);
         if (this.loading) {
-          container.append(loadingState({ title: "\u6B63\u5728\u6253\u5F00\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\u2026" }));
+          container.append(
+            loadingState({
+              title: this.waitingNotice.length > 0 ? this.waitingNotice : "\u6B63\u5728\u6253\u5F00\u8FD9\u4E00\u8282\u7684\u8BFE\u672C\u2026"
+            })
+          );
           return;
         }
         if (this.error !== null) {
@@ -14260,7 +14319,11 @@ window.__ModuleLoader__.load({
         }
         if (this.loading) {
           clear(container);
-          container.append(loadingState({ title: "\u6B63\u5728\u51C6\u5907\u8FD9\u4E00\u9898\u2026" }));
+          container.append(
+            loadingState({
+              title: this.waitingNotice.length > 0 ? this.waitingNotice : "\u6B63\u5728\u51C6\u5907\u8FD9\u4E00\u9898\u2026"
+            })
+          );
           return;
         }
         if (this.error !== null) {

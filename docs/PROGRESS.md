@@ -153,11 +153,18 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 隔离根联调（`E:\DSH\tmp\host-test`，junction + 独立 SPROUTASK_DATA_ROOT）：单实例聚焦、失败路径中文 MessageBox、`window.json` 尺寸/位置恢复均实测；`cargo test --release` 2 passed。
 - 本机 `pnpm typecheck` / `pnpm test` / `pnpm check:tracked` / `pnpm contract:lock:verify` 全绿。
 
+**补记 2：学习台等待重试 + 宿主 Job Object（2026-11-06 00:1x）**
+
+- 二次白屏：强杀桌面壳（`Stop-Process -Force` / 任务管理器）只杀了宿主，node 子进程成了孤儿并占着 `learner-data/journal/events.lock`；新实例拿不到写锁 → host 插件报 `journal is locked by pid …` → 404 → 白屏。清理孤儿后恢复正常。
+- 修复：桌面壳创建 **Job Object**（`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`）并把 node 子进程放入；宿主无论正常退出、崩溃还是被强杀，node 都会随句柄关闭被杀，不再留孤儿。
+- 学习台：打开/刷新时遇到「上一轮还在回答」（`CONFLICT: TURN_IN_PROGRESS`）不再整页报错，改为显示「小芽还在回答上一题，稍等…」并每 1.5s 自动重试（约 36s 后仍失败才显示错误卡）。
+- 0.4.1 安装包用新 host + 新 client bundle 重新构建并重装验证（`cargo build --release` exit 0；host 999,936 B；安装包 59,816,899 B）。
+- 实测：只 `/F` 杀宿主（不带 `/T`，模拟任务管理器/崩溃）→ 6 秒内 node 归零（job object 生效）；重启后 `statusHttp=200`、窗口正常。
+
 **未做 / 未验证**
 
 - 真实对话走查（Key 已配置，需用户操作一次）。
 - 另一台干净机安装验证（本机已装过 0.4.0，不是干净机）。
-- 强杀宿主（任务管理器结束进程）可能留下孤儿 node：当前只在关窗时 `taskkill /T /F`，Job Object 兜底列为后续。
 - 便携版 zip 未在 0.4.1 重新构建（安装版已验证）。
 
 **补记：0.4.1 首次启动白屏（2026-11-05 23:45，已修复）**

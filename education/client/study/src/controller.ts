@@ -244,6 +244,9 @@ export class StudyController {
   private error: ServiceError | null = null;
   private loadToken = 0;
   private loadedKey = '';
+  private waitingNotice = '';
+  private conflictRetryTimer: ReturnType<typeof setTimeout> | null = null;
+  private conflictRetryCount = 0;
   private phase: StudyActivityPhase = 'draft';
   private form: AnswerFormController | null = null;
   private formActivityId: string | null = null;
@@ -332,6 +335,7 @@ export class StudyController {
 
   onPageUnmount(): void {
     this.submitGen += 1;
+    this.clearConflictRetry();
     if (this.currentToken !== null) this.currentToken.cancelled = true;
     this.pageContext = null;
     this.navigate = null;
@@ -576,8 +580,48 @@ export class StudyController {
     this.error = null;
   }
 
-  private async load(key: string): Promise<void> {
+  /**
+   * 上一轮还在回答时打开/刷新学习台，服务会返回 CONFLICT；这不是错误页，而是
+   * "稍等一下就好"。这里自动重试，并把课本/题目区显示成等待状态，而不是整页报错。
+   * 最多重试约 36 秒，之后才把真实错误交给错误卡。
+   */
+  private scheduleIfTurnBusy(error: ServiceError, run: () => void): boolean {
+    const busy =
+      error.code === 'CONFLICT' && /TURN_IN_PROGRESS|already exists/i.test(error.message);
+    if (!busy) return false;
+    this.conflictRetryCount += 1;
+    if (this.conflictRetryCount > 24) return false;
+    if (this.conflictRetryTimer !== null) clearTimeout(this.conflictRetryTimer);
+    this.loading = true;
+    this.error = null;
+    this.waitingNotice = '小芽还在回答上一题，稍等…';
+    this.notify();
+    this.conflictRetryTimer = setTimeout(() => {
+      this.conflictRetryTimer = null;
+      run();
+    }, 1500);
+    return true;
+  }
+
+  private clearConflictRetry(): void {
+    if (this.conflictRetryTimer !== null) {
+      clearTimeout(this.conflictRetryTimer);
+      this.conflictRetryTimer = null;
+    }
+    this.conflictRetryCount = 0;
+    this.waitingNotice = '';
+  }
+
+  private async load(key: string, retrying = false): Promise<void> {
     const token = ++this.loadToken;
+    if (!retrying) {
+      if (this.conflictRetryTimer !== null) {
+        clearTimeout(this.conflictRetryTimer);
+        this.conflictRetryTimer = null;
+      }
+      this.conflictRetryCount = 0;
+      this.waitingNotice = '';
+    }
     this.loading = true;
     this.error = null;
     this.notify();
@@ -586,8 +630,10 @@ export class StudyController {
         const range = await this.options.dataSource.loadReviewRange(this.request());
         if (token !== this.loadToken) return;
         this.loading = false;
-        if (!range.ok) this.error = range.error;
-        else {
+        if (!range.ok) {
+          if (this.scheduleIfTurnBusy(range.error, () => void this.load(key, true))) return;
+          this.error = range.error;
+        } else {
           this.reviewRange = range.data;
           this.reviewSelected = new Set(range.data.candidates.slice(0, 1).map((entry) => entry.conceptId));
           this.reviewNotice = '请选择推荐范围，或跳过推荐自选范围。';
@@ -609,12 +655,14 @@ export class StudyController {
     });
     if (token !== this.loadToken) return;
     if (!result.ok) {
+      if (this.scheduleIfTurnBusy(result.error, () => void this.load(key, true))) return;
       this.loading = false;
       this.error = result.error;
       this.loadedKey = key;
       this.notify();
       return;
     }
+    this.clearConflictRetry();
     this.workspace = result.data;
     this.progress = result.data.progress;
     this.selfReport = result.data.selfReport;
@@ -633,8 +681,16 @@ export class StudyController {
     await this.startSession();
   }
 
-  private async startSession(): Promise<void> {
+  private async startSession(retrying = false): Promise<void> {
     if (this.workspace === null) return;
+    if (!retrying) {
+      if (this.conflictRetryTimer !== null) {
+        clearTimeout(this.conflictRetryTimer);
+        this.conflictRetryTimer = null;
+      }
+      this.conflictRetryCount = 0;
+      this.waitingNotice = '';
+    }
     const result = await this.options.dataSource.startSession(this.request(), {
       conceptId: this.workspace.concept.id,
       mode: this.intent.mode,
@@ -642,10 +698,12 @@ export class StudyController {
       activityId: this.workspace.activity.id,
     });
     if (!result.ok) {
+      if (this.scheduleIfTurnBusy(result.error, () => void this.startSession(true))) return;
       this.error = result.error;
       this.notify();
       return;
     }
+    this.clearConflictRetry();
     this.session = result.data;
     this.tutorState = result.data.state;
     this.activity = this.workspace.activity;
@@ -1334,7 +1392,11 @@ export class StudyController {
     if (container === null) return;
     clear(container);
     if (this.loading) {
-      container.append(loadingState({ title: '正在打开这一节的课本…' }));
+      container.append(
+        loadingState({
+          title: this.waitingNotice.length > 0 ? this.waitingNotice : '正在打开这一节的课本…',
+        }),
+      );
       return;
     }
     if (this.error !== null) {
@@ -1547,7 +1609,11 @@ export class StudyController {
     }
     if (this.loading) {
       clear(container);
-      container.append(loadingState({ title: '正在准备这一题…' }));
+      container.append(
+        loadingState({
+          title: this.waitingNotice.length > 0 ? this.waitingNotice : '正在准备这一题…',
+        }),
+      );
       return;
     }
     if (this.error !== null) {
