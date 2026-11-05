@@ -1,0 +1,1931 @@
+[
+  {
+    "file": "licenses/texts/0194571d45a06ea2.txt",
+    "localFile": "texts/0194571d45a06ea2.txt",
+    "sha256": "0194571d45a06ea2a22ceb51f981e3be92525966d28847dbc0d9982603bf90de",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/http2-wrapper/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/01ad164273e8e095.txt",
+    "localFile": "texts/01ad164273e8e095.txt",
+    "sha256": "01ad164273e8e095abc9dbd1c21e194594a671af7d528cb43ee7b4c903ba7da3",
+    "bytes": 1139,
+    "sources": [
+      "node_modules/retry/License"
+    ]
+  },
+  {
+    "file": "licenses/texts/0212e9ffd60f4c2e.txt",
+    "localFile": "texts/0212e9ffd60f4c2e.txt",
+    "sha256": "0212e9ffd60f4c2e05426ac172b91266256b9ff4c0f0156e85b761a1d6f5e17f",
+    "bytes": 1560,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/intl-messageformat/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/034fb52b1d57360e.txt",
+    "localFile": "texts/034fb52b1d57360e.txt",
+    "sha256": "034fb52b1d57360ecbae6cb1632a88f86fd7c3d3f5631a5f082710203dda0be7",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/@deepseek-ai/cordis/LICENSE",
+      "node_modules/@deepseek-ai/cordis-plugin-group/LICENSE",
+      "node_modules/@deepseek-ai/cordis-plugin-include/LICENSE",
+      "node_modules/@deepseek-ai/cordis-plugin-loader/LICENSE",
+      "node_modules/@deepseek-ai/cordis-plugin-timer/LICENSE",
+      "node_modules/@deepseek-ai/cosmokit/LICENSE",
+      "node_modules/@deepseek-ai/dsh-hmr/LICENSE",
+      "node_modules/@deepseek-ai/schemastery/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/0382b0057770ca05.txt",
+    "localFile": "texts/0382b0057770ca05.txt",
+    "sha256": "0382b0057770ca05e9c350a50aa3b1c1fea84da0bc81d723bf00b9aa841be58a",
+    "bytes": 12227,
+    "sources": [
+      "node_modules/@modelcontextprotocol/client/LICENSE",
+      "node_modules/@modelcontextprotocol/core/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/03b347a3d13b0e5b.txt",
+    "localFile": "texts/03b347a3d13b0e5b.txt",
+    "sha256": "03b347a3d13b0e5bdb8fc5edeed0286b1be51441c6490a90710692d227136e0d",
+    "bytes": 1072,
+    "sources": [
+      "node_modules/resolve-alpn/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/04512a63dce4d2d5.txt",
+    "localFile": "texts/04512a63dce4d2d5.txt",
+    "sha256": "04512a63dce4d2d506ad612dc0bd7681ccf6e3655f7b6eaef7dfac8323d1ec0b",
+    "bytes": 1098,
+    "sources": [
+      "node_modules/commander/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/07364a5f7d0177a5.txt",
+    "localFile": "texts/07364a5f7d0177a5.txt",
+    "sha256": "07364a5f7d0177a59a05a0002187431f8f899320983c0dc049d72df015e8064c",
+    "bytes": 11385,
+    "sources": [
+      "node_modules/@aws-sdk/eventstream-handler-node/LICENSE",
+      "node_modules/@aws-sdk/middleware-websocket/LICENSE",
+      "node_modules/@aws-sdk/signature-v4-multi-region/LICENSE",
+      "node_modules/@smithy/core/LICENSE",
+      "node_modules/@smithy/types/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/09e8a9bcec806710.txt",
+    "localFile": "texts/09e8a9bcec806710.txt",
+    "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b",
+    "bytes": 10142,
+    "sources": [
+      "node_modules/@aws/lambda-invoke-store/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/0d542e0c8804e39a.txt",
+    "localFile": "texts/0d542e0c8804e39a.txt",
+    "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+    "bytes": 10174,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/wasmparser/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/0e8b5a28ec714310.txt",
+    "localFile": "texts/0e8b5a28ec714310.txt",
+    "sha256": "0e8b5a28ec71431042097d3e8984e4e3113b11e0a587abc5fd0a08b569a6a095",
+    "bytes": 2749,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-spill-policy/lib/types/notice.js"
+    ]
+  },
+  {
+    "file": "licenses/texts/117da2af0d4ce0fe.txt",
+    "localFile": "texts/117da2af0d4ce0fe.txt",
+    "sha256": "117da2af0d4ce0fe1c8e19b5cff9dcd806adf973d328d27b11d4448c4ff24f76",
+    "bytes": 1106,
+    "sources": [
+      "node_modules/@babel/code-frame/LICENSE",
+      "node_modules/@babel/helper-validator-identifier/LICENSE",
+      "node_modules/@babel/runtime/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/11d017c3b9f1ee3f.txt",
+    "localFile": "texts/11d017c3b9f1ee3f.txt",
+    "sha256": "11d017c3b9f1ee3f44caf7203035f0461d5b57e0db8ce1bc03a9af34fa7d3f6b",
+    "bytes": 1173,
+    "sources": [
+      "node_modules/parseurl/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/1605b77bebe018db.txt",
+    "localFile": "texts/1605b77bebe018db.txt",
+    "sha256": "1605b77bebe018db1fc27bd22fbcdeed1335c617937a124299a8b042b42b0fb6",
+    "bytes": 1110,
+    "sources": [
+      "node_modules/@stablelib/base64/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/1662fae9b5314d11.txt",
+    "localFile": "texts/1662fae9b5314d11.txt",
+    "sha256": "1662fae9b5314d11cf51284e2dcd1f006a354f7343f08712a730fcff9a359801",
+    "bytes": 1079,
+    "sources": [
+      "node_modules/ms/license.md",
+      "node_modules/ms/license.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/18a2bfd070b08bd1.txt",
+    "localFile": "texts/18a2bfd070b08bd1.txt",
+    "sha256": "18a2bfd070b08bd1cc538c90f59989a9523e070e72fe9a9068593c3e82f44fa7",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/json-schema-to-ts/LICENSE",
+      "node_modules/ts-algebra/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/18c295fdd68d4f68.txt",
+    "localFile": "texts/18c295fdd68d4f68.txt",
+    "sha256": "18c295fdd68d4f68418b0209829f241481e93549d9e7b9fcd4b4c029322c8a45",
+    "bytes": 11390,
+    "sources": [
+      "node_modules/@aws-sdk/client-bedrock-runtime/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/1f256ecad1928805.txt",
+    "localFile": "texts/1f256ecad1928805.txt",
+    "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+    "bytes": 16725,
+    "sources": [
+      "node_modules/@deepseek-ai/libreoffice-kit/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/1f7dca26d2d328c3.txt",
+    "localFile": "texts/1f7dca26d2d328c3.txt",
+    "sha256": "1f7dca26d2d328c3dbb9b6fe3b15ec3cda08ffe2288e47b73d617454b256f959",
+    "bytes": 1108,
+    "sources": [
+      "node_modules/@keyv/serialize/LICENSE",
+      "node_modules/keyv/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/210b19e543130388.txt",
+    "localFile": "texts/210b19e543130388.txt",
+    "sha256": "210b19e543130388c68654b7497e967119ce17145f66ab7d85688fbd70f08751",
+    "bytes": 655,
+    "sources": [
+      "node_modules/tslib/LICENSE.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/2213d91c606205c7.txt",
+    "localFile": "texts/2213d91c606205c7.txt",
+    "sha256": "2213d91c606205c71eb051a199478cdc2adde945893404d7f1421436dd6d5cc1",
+    "bytes": 1103,
+    "sources": [
+      "node_modules/js-tokens/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/22bcbbbacd739b02.txt",
+    "localFile": "texts/22bcbbbacd739b02.txt",
+    "sha256": "22bcbbbacd739b026a8dc484f62a31484ce4c4e31f3408b60b29b4e41d62b290",
+    "bytes": 1117,
+    "sources": [
+      "node_modules/koffi/LICENSE.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/23d466b1b134b415.txt",
+    "localFile": "texts/23d466b1b134b415.txt",
+    "sha256": "23d466b1b134b415b66fa50c6526b4cf3e7b9258554da88d3abb371721e7ce68",
+    "bytes": 1172,
+    "sources": [
+      "node_modules/compression/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/255aa557a1f55224.txt",
+    "localFile": "texts/255aa557a1f55224.txt",
+    "sha256": "255aa557a1f55224ce522f311629c0bf20854740a67955cefd798fbd1d3d1ded",
+    "bytes": 1157,
+    "sources": [
+      "node_modules/escape-html/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/257aed98914108e9.txt",
+    "localFile": "texts/257aed98914108e9.txt",
+    "sha256": "257aed98914108e91a337912727b6a802eef218248507f74b76faffaff517a38",
+    "bytes": 1089,
+    "sources": [
+      "node_modules/content-type/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/25a328069fe771f8.txt",
+    "localFile": "texts/25a328069fe771f8.txt",
+    "sha256": "25a328069fe771f8ed5b6f983ed4b0e6c84b3312ac0f69b28c3d52dc277962c9",
+    "bytes": 1128,
+    "sources": [
+      "node_modules/send/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/2b29dcfe0d6471f7.txt",
+    "localFile": "texts/2b29dcfe0d6471f7.txt",
+    "sha256": "2b29dcfe0d6471f7e8c92c5fb38c9f93edee10330937055440192f1832b1ecef",
+    "bytes": 1183,
+    "sources": [
+      "node_modules/ws/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/2ef1e48ea743d9c8.txt",
+    "localFile": "texts/2ef1e48ea743d9c8.txt",
+    "sha256": "2ef1e48ea743d9c82313e6887858f7c1feaddd636f5a3f43926aab0143e67ebd",
+    "bytes": 11352,
+    "sources": [
+      "node_modules/@aws-sdk/credential-provider-process/LICENSE",
+      "node_modules/@aws-sdk/credential-provider-sso/LICENSE",
+      "node_modules/@aws-sdk/credential-provider-web-identity/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/306fa513e39b23a6.txt",
+    "localFile": "texts/306fa513e39b23a6.txt",
+    "sha256": "306fa513e39b23a6e8747520de761809d206b99800ef41907b530226574c59ae",
+    "bytes": 1114,
+    "sources": [
+      "node_modules/resolve.exports/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/3320319f8a5f42bc.txt",
+    "localFile": "texts/3320319f8a5f42bc.txt",
+    "sha256": "3320319f8a5f42bc4254e65471eca7a5ea4dc8c883c4c24b4868e36b14890bcf",
+    "bytes": 1068,
+    "sources": [
+      "node_modules/jwa/LICENSE",
+      "node_modules/jws/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/3a61c6c96caf5c1d.txt",
+    "localFile": "texts/3a61c6c96caf5c1d.txt",
+    "sha256": "3a61c6c96caf5c1d9b623fb9b04c822b783dfcb78aa7e49c76a3f643e6ed7f95",
+    "bytes": 1139,
+    "sources": [
+      "node_modules/debug/LICENSE",
+      "node_modules/debug/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/3bc404ffa7888053.txt",
+    "localFile": "texts/3bc404ffa7888053.txt",
+    "sha256": "3bc404ffa7888053253eedcc5a667619aa08dc1be0bea400e5ff28c51602180f",
+    "bytes": 1084,
+    "sources": [
+      "node_modules/pako/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/3e2c11dcf3f17ab5.txt",
+    "localFile": "texts/3e2c11dcf3f17ab5.txt",
+    "sha256": "3e2c11dcf3f17ab585baab8faba54772d7872f1c6e026022acd4b4006665efb0",
+    "bytes": 1090,
+    "sources": [
+      "node_modules/node-fetch/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/3f1189b28e3866e0.txt",
+    "localFile": "texts/3f1189b28e3866e0.txt",
+    "sha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8",
+    "bytes": 1072,
+    "sources": [
+      "node_modules/zod/LICENSE",
+      "node_modules/zod/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/3fb0857ef0133928.txt",
+    "localFile": "texts/3fb0857ef0133928.txt",
+    "sha256": "3fb0857ef0133928cf72c88dfc464e931486e88778961eedec25585e2321507f",
+    "bytes": 1070,
+    "sources": [
+      "node_modules/clone/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/43439dbd4f43837a.txt",
+    "localFile": "texts/43439dbd4f43837a.txt",
+    "sha256": "43439dbd4f43837aadab215cdbe5a422cc6323a50c4ea84d8d6bbc3671666a1d",
+    "bytes": 1040,
+    "sources": [
+      "node_modules/unicode-properties/LICENSE",
+      "node_modules/unicode-trie/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/435a6437e47e5e47.txt",
+    "localFile": "texts/435a6437e47e5e47.txt",
+    "sha256": "435a6437e47e5e479942255680e7fbe5f333d55234ada1c35f6115ca641d5bb4",
+    "bytes": 1083,
+    "sources": [
+      "node_modules/formdata-polyfill/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/45d196313c2647d3.txt",
+    "localFile": "texts/45d196313c2647d3.txt",
+    "sha256": "45d196313c2647d313cc65ca9b093d2d6974b64d35ee7346f2c60c9d518dff2c",
+    "bytes": 1086,
+    "sources": [
+      "node_modules/xmlchars/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/45d31799d0db956c.txt",
+    "localFile": "texts/45d31799d0db956c.txt",
+    "sha256": "45d31799d0db956cc3eb5469346abbd9b7025babc5ff29fab10d7095da992ef1",
+    "bytes": 1517,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/lit/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/465e8da349d50d85.txt",
+    "localFile": "texts/465e8da349d50d85.txt",
+    "sha256": "465e8da349d50d8512e4a0e9b26d2bee50392c394f17edaa3be6e0df7c2b27ad",
+    "bytes": 1053,
+    "sources": [
+      "node_modules/cacheable-request/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/4687b3b5b6eb3af1.txt",
+    "localFile": "texts/4687b3b5b6eb3af1.txt",
+    "sha256": "4687b3b5b6eb3af13be50891dd67dab9e85bdca3f41c63d3e33b3364d6a717b5",
+    "bytes": 1068,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/puppeteer/third_party/mitt/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/48da2f39e100d408.txt",
+    "localFile": "texts/48da2f39e100d408.txt",
+    "sha256": "48da2f39e100d4085767e94966b43f4fa95ff6a0698fba57ed460914e35f94a0",
+    "bytes": 1109,
+    "sources": [
+      "node_modules/p-retry/license",
+      "node_modules/path-key/license",
+      "node_modules/path-key/license",
+      "node_modules/quick-lru/license",
+      "node_modules/shebang-regex/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/49d6a1c9a623784c.txt",
+    "localFile": "texts/49d6a1c9a623784c.txt",
+    "sha256": "49d6a1c9a623784c61c6cb70f773f3457faceb1914a13c8560a9823b7631950c",
+    "bytes": 1937,
+    "sources": [
+      "node_modules/protobufjs/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/4ab87e6e3c0c0b78.txt",
+    "localFile": "texts/4ab87e6e3c0c0b78.txt",
+    "sha256": "4ab87e6e3c0c0b78e47c77d49ec10c048f8a519fb8062e6e3217e3e6e9b0c6e9",
+    "bytes": 1476,
+    "sources": [
+      "node_modules/protobufjs/google/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/4ec3d4c66cd87f5c.txt",
+    "localFile": "texts/4ec3d4c66cd87f5c.txt",
+    "sha256": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+    "bytes": 765,
+    "sources": [
+      "node_modules/isexe/LICENSE",
+      "node_modules/semver/LICENSE",
+      "node_modules/which/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/50a6b24f8defc31a.txt",
+    "localFile": "texts/50a6b24f8defc31a.txt",
+    "sha256": "50a6b24f8defc31a078aa9799a91d776f83948071574854f12473362aee74d0d",
+    "bytes": 11312,
+    "sources": [
+      "node_modules/ecdsa-sig-formatter/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/512cfa4d5e7a7569.txt",
+    "localFile": "texts/512cfa4d5e7a7569.txt",
+    "sha256": "512cfa4d5e7a7569c7ae4dd95241cb6ae2aaf648ef9ebd080c01bd24868d26e9",
+    "bytes": 1172,
+    "sources": [
+      "node_modules/statuses/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/53b4475d1cda8c46.txt",
+    "localFile": "texts/53b4475d1cda8c46.txt",
+    "sha256": "53b4475d1cda8c46465bbaff85432631f0830cc2c0a4b28234b7e4d12d862e7b",
+    "bytes": 1479,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/source-map-scopes-codec/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/source-map-scopes-codec/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/53e59feb13058722.txt",
+    "localFile": "texts/53e59feb13058722.txt",
+    "sha256": "53e59feb13058722d977c699eb0407c7bce2f93c949b681bbd2ff31698535927",
+    "bytes": 1145,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/json5/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/553d4d20029a24e3.txt",
+    "localFile": "texts/553d4d20029a24e3.txt",
+    "sha256": "553d4d20029a24e315b428a1a54a9e109eaa340f2e958a4f50a92362c2c4070b",
+    "bytes": 1177,
+    "sources": [
+      "node_modules/negotiator/LICENSE",
+      "node_modules/negotiator/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/58d1e17ffe5109a7.txt",
+    "localFile": "texts/58d1e17ffe5109a7.txt",
+    "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+    "bytes": 11357,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/csp_evaluator/package/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/diff/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/5b37224c080cdcc9.txt",
+    "localFile": "texts/5b37224c080cdcc9.txt",
+    "sha256": "5b37224c080cdcc97c871ada971c224e9926370fe74f11b539aa1cf9f3b1aca1",
+    "bytes": 1081,
+    "sources": [
+      "node_modules/base64-js/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/5bba27375d93e911.txt",
+    "localFile": "texts/5bba27375d93e911.txt",
+    "sha256": "5bba27375d93e9119f76c1015f7672cf9ad5f70952296e0842fb2243d6376869",
+    "bytes": 738,
+    "sources": [
+      "node_modules/yaml/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/5c932d88256b4ab9.txt",
+    "localFile": "texts/5c932d88256b4ab9.txt",
+    "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3",
+    "bytes": 1117,
+    "sources": [
+      "node_modules/@sindresorhus/is/license",
+      "node_modules/@sindresorhus/merge-streams/license",
+      "node_modules/bundle-name/license",
+      "node_modules/byte-counter/license",
+      "node_modules/decompress-response/license",
+      "node_modules/default-browser/license",
+      "node_modules/default-browser-id/license",
+      "node_modules/define-lazy-prop/license",
+      "node_modules/execa/license",
+      "node_modules/figures/license",
+      "node_modules/get-stream/license",
+      "node_modules/got/license",
+      "node_modules/is-docker/license",
+      "node_modules/is-in-ssh/license",
+      "node_modules/is-inside-container/license",
+      "node_modules/is-plain-obj/license",
+      "node_modules/is-stream/license",
+      "node_modules/is-unicode-supported/license",
+      "node_modules/is-wsl/license",
+      "node_modules/lowercase-keys/license",
+      "node_modules/mimic-response/license",
+      "node_modules/normalize-url/license",
+      "node_modules/npm-run-path/license",
+      "node_modules/open/license",
+      "node_modules/p-cancelable/license",
+      "node_modules/p-limit/license",
+      "node_modules/parse-ms/license",
+      "node_modules/powershell-utils/license",
+      "node_modules/pretty-ms/license",
+      "node_modules/run-applescript/license",
+      "node_modules/strip-final-newline/license",
+      "licenses/texts/supplemented/type-fest@4.41.0/package/license-mit",
+      "node_modules/unicorn-magic/license",
+      "node_modules/which-command/license",
+      "node_modules/wsl-utils/license",
+      "node_modules/yocto-queue/license",
+      "node_modules/yoctocolors/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/5ffe28e7ade7d8f1.txt",
+    "localFile": "texts/5ffe28e7ade7d8f1.txt",
+    "sha256": "5ffe28e7ade7d8f10d85d5337a73fd793dac5c462fb9a28fbf8c5046c7fbca3b",
+    "bytes": 749,
+    "sources": [
+      "node_modules/inherits/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/62568a2d1337b771.txt",
+    "localFile": "texts/62568a2d1337b771.txt",
+    "sha256": "62568a2d1337b77171ecca9db10579163446de1ba6151678e81f06cdc199971b",
+    "bytes": 1087,
+    "sources": [
+      "node_modules/ipaddr.js/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/636eb7d79da9bb6d.txt",
+    "localFile": "texts/636eb7d79da9bb6d.txt",
+    "sha256": "636eb7d79da9bb6d515a4b3fd417aa26679eb3cf16396ddab4bc55fa74e616e4",
+    "bytes": 11336,
+    "sources": [
+      "node_modules/openai/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/63b9a188d7d43e64.txt",
+    "localFile": "texts/63b9a188d7d43e64.txt",
+    "sha256": "63b9a188d7d43e64b0558b7115255045b9fe20a5fc3ff483421cb899e7f52bcb",
+    "bytes": 1189,
+    "sources": [
+      "node_modules/serve-static/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/653b779005a3a4d6.txt",
+    "localFile": "texts/653b779005a3a4d6.txt",
+    "sha256": "653b779005a3a4d64a7288c940f7b9a0e8f0b1e0375f6aa6af9473caf131e564",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/@standard-schema/spec/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/6582629e29794668.txt",
+    "localFile": "texts/6582629e29794668.txt",
+    "sha256": "6582629e2979466878f6014313dcc2f3756c9616148682227ce3063dde310750",
+    "bytes": 787,
+    "sources": [
+      "node_modules/picocolors/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/69dee148a2cc4705.txt",
+    "localFile": "texts/69dee148a2cc4705.txt",
+    "sha256": "69dee148a2cc470554dfa7142e830662062394d0fe67cddd379aba90dc60d6b3",
+    "bytes": 1116,
+    "sources": [
+      "node_modules/shebang-command/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/6ed4f049cce59e05.txt",
+    "localFile": "texts/6ed4f049cce59e05.txt",
+    "sha256": "6ed4f049cce59e05197d585bdf8a39980b45d546d6ea718ee344555f3a867c3a",
+    "bytes": 10783,
+    "sources": [
+      "node_modules/@agentclientprotocol/sdk/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/6ee0feb1f6ef996f.txt",
+    "localFile": "texts/6ee0feb1f6ef996f.txt",
+    "sha256": "6ee0feb1f6ef996ff5a68600f8cf98909cf412d39ef3cdceaefd87d636fa1b7f",
+    "bytes": 1128,
+    "sources": [
+      "node_modules/require-from-string/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/70d37354d6395629.txt",
+    "localFile": "texts/70d37354d6395629.txt",
+    "sha256": "70d37354d6395629fb99edb28cb37a5d356ffa24a48cd02a5def5b83a300a899",
+    "bytes": 1051,
+    "sources": [
+      "node_modules/minisearch/LICENSE.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/71368fd0f5b41291.txt",
+    "localFile": "texts/71368fd0f5b41291.txt",
+    "sha256": "71368fd0f5b4129191e9afcd1e1ef2dc89a9090d3e4d80bbab92dafd032b3bef",
+    "bytes": 1102,
+    "sources": [
+      "node_modules/http-proxy-agent/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/71f83c4c0621102a.txt",
+    "localFile": "texts/71f83c4c0621102a.txt",
+    "sha256": "71f83c4c0621102a56d9853812777b85751bce7e9726f686f5b056c1f8a4b0e6",
+    "bytes": 1167,
+    "sources": [
+      "node_modules/mime-types/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/73ba74dfaa520b49.txt",
+    "localFile": "texts/73ba74dfaa520b49.txt",
+    "sha256": "73ba74dfaa520b49a401b5d21459a8523a146f3b7518a833eea5efa85130bf68",
+    "bytes": 10273,
+    "sources": [
+      "node_modules/sharp/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/74d8054d56d522bd.txt",
+    "localFile": "texts/74d8054d56d522bd.txt",
+    "sha256": "74d8054d56d522bdaa340d3d71130cb204997d523a5292c85ac1264dd77c8d06",
+    "bytes": 1089,
+    "sources": [
+      "node_modules/on-headers/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/751d0e80fb5c828f.txt",
+    "localFile": "texts/751d0e80fb5c828f.txt",
+    "sha256": "751d0e80fb5c828f8c3de198cc760e1e05377e47c8263ab6ee2f10cdc19ba658",
+    "bytes": 1518,
+    "sources": [
+      "node_modules/buffer-equal-constant-time/LICENSE.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/7585ea7bba616ccb.txt",
+    "localFile": "texts/7585ea7bba616ccb.txt",
+    "sha256": "7585ea7bba616ccbbe43cb54ecb67956688c3c5641bb84f3099a652a73193afe",
+    "bytes": 1089,
+    "sources": [
+      "node_modules/encodeurl/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/75bd0a6d6b9f9f0a.txt",
+    "localFile": "texts/75bd0a6d6b9f9f0a.txt",
+    "sha256": "75bd0a6d6b9f9f0a6c792ca89832360b19749ebe16af0222e34387f262baa95e",
+    "bytes": 1096,
+    "sources": [
+      "node_modules/node-addon-native-custom-loader/LICENSE",
+      "node_modules/node-addon-require-builtin/LICENSE",
+      "node_modules/node-addon-require-builtin-win32-x64-msvc/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/766ccc1f306c885a.txt",
+    "localFile": "texts/766ccc1f306c885a.txt",
+    "sha256": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3",
+    "bytes": 1107,
+    "sources": [
+      "licenses/texts/supplemented/katex@0.19.1/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/76a876cf886ff9be.txt",
+    "localFile": "texts/76a876cf886ff9be.txt",
+    "sha256": "76a876cf886ff9be2a8b5e2e86514fed06223c8c9f0c1e9ee9606e93841e00b7",
+    "bytes": 1099,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/acorn/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/76d6d1ea0c268da3.txt",
+    "localFile": "texts/76d6d1ea0c268da3.txt",
+    "sha256": "76d6d1ea0c268da37dd3c961b4fcfb23dee8417fff9e8786d4d44c585b781b69",
+    "bytes": 727,
+    "sources": [
+      "node_modules/setprototypeof/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/7beaa85b57d7211f.txt",
+    "localFile": "texts/7beaa85b57d7211f.txt",
+    "sha256": "7beaa85b57d7211f6684af6c1d97e6d9ef7ec1851f779152043a47a8700306a9",
+    "bytes": 746,
+    "sources": [
+      "node_modules/openai/src/_vendor/zod-to-json-schema/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/7bf9b2de73a6b356.txt",
+    "localFile": "texts/7bf9b2de73a6b356.txt",
+    "sha256": "7bf9b2de73a6b356761c948d0e9eeb4be6c1270bd04c79cd489c1e400ffdfc1a",
+    "bytes": 1074,
+    "sources": [
+      "node_modules/fast-deep-equal/LICENSE",
+      "node_modules/json-schema-traverse/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/7e32638e170fa734.txt",
+    "localFile": "texts/7e32638e170fa734.txt",
+    "sha256": "7e32638e170fa7342000a703a8ed950e05095b2f73fc689992a82776a3c3bd3c",
+    "bytes": 1068,
+    "sources": [
+      "node_modules/@sec-ant/readable-stream/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/7ec9661a8afafab1.txt",
+    "localFile": "texts/7ec9661a8afafab1.txt",
+    "sha256": "7ec9661a8afafab1eee3523d6f1a193eff76314a5ab10b4ce96aefd87621b0c3",
+    "bytes": 11342,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/i18n/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/lighthouse/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/805f6cb28bb8b6d3.txt",
+    "localFile": "texts/805f6cb28bb8b6d3.txt",
+    "sha256": "805f6cb28bb8b6d3a0badd83c93bccd9671fa01a3b4b92b7042b0743325ac243",
+    "bytes": 1069,
+    "sources": [
+      "node_modules/fflate/LICENSE",
+      "node_modules/fflate/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/8078b0829d6c3e9e.txt",
+    "localFile": "texts/8078b0829d6c3e9e.txt",
+    "sha256": "8078b0829d6c3e9ecde2f003e1966e4cad3efc6e7a640efbab0313cc166b1af1",
+    "bytes": 1079,
+    "sources": [
+      "node_modules/jose/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/8089bcc08845ec14.txt",
+    "localFile": "texts/8089bcc08845ec14.txt",
+    "sha256": "8089bcc08845ec143e5761f4a101a65b8c792a0dedbfeeb90a15560c0b77f768",
+    "bytes": 1167,
+    "sources": [
+      "node_modules/on-finished/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/81008a3fb78f69f3.txt",
+    "localFile": "texts/81008a3fb78f69f3.txt",
+    "sha256": "81008a3fb78f69f3c4a72a9e005c8582342ab62864371b3ab8e1b6af9041e080",
+    "bytes": 1120,
+    "sources": [
+      "node_modules/web-streams-polyfill/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/835eb611a23301b2.txt",
+    "localFile": "texts/835eb611a23301b2.txt",
+    "sha256": "835eb611a23301b27115ca1be9f754c876e643ceb7fe63049c6b50609a1cafeb",
+    "bytes": 1098,
+    "sources": [
+      "node_modules/eventsource-parser/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/861d64229728cd65.txt",
+    "localFile": "texts/861d64229728cd65.txt",
+    "sha256": "861d64229728cd65a98d119612c12769582574d1a092f0b63c8b0fd474e7065f",
+    "bytes": 4400,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-client-ui-theme/lib/styles/Montserrat-OFL.txt",
+      "node_modules/@deepseek-ai/dsh-web-frontend/dist/assets/fonts/Montserrat-OFL.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/88d9b4eb60579c19.txt",
+    "localFile": "texts/88d9b4eb60579c19.txt",
+    "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd",
+    "bytes": 1210,
+    "sources": [
+      "node_modules/fast-sha256/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/89024017b88a9f2b.txt",
+    "localFile": "texts/89024017b88a9f2b.txt",
+    "sha256": "89024017b88a9f2b763f79b941a4f2db3b4428edfcacdc0b23866b2da633ad0c",
+    "bytes": 1150,
+    "sources": [
+      "node_modules/koffi/vendor/node-addon-api/LICENSE.md",
+      "node_modules/node-addon-api/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/8bf96984ff8bcfae.txt",
+    "localFile": "texts/8bf96984ff8bcfae.txt",
+    "sha256": "8bf96984ff8bcfae7e48cae76a529e8a25317ba9e02abf7fd3cc64fdf95657a6",
+    "bytes": 1056,
+    "sources": [
+      "node_modules/@anthropic-ai/sdk/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/8d34210ebbfaee4b.txt",
+    "localFile": "texts/8d34210ebbfaee4b.txt",
+    "sha256": "8d34210ebbfaee4ba258ef7b30c3044170f356ab82c8259c81b53860bcdeef7b",
+    "bytes": 1859,
+    "sources": [
+      "node_modules/@deepseek-ai/libreoffice-kit-win32-x64/program/NOTICE"
+    ]
+  },
+  {
+    "file": "licenses/texts/8d8c55319c7729d5.txt",
+    "localFile": "texts/8d8c55319c7729d5.txt",
+    "sha256": "8d8c55319c7729d57be811c747452636688d54f19701ee0752b6b15ad3771d9a",
+    "bytes": 1101,
+    "sources": [
+      "node_modules/agent-base/LICENSE",
+      "node_modules/agent-base/LICENSE",
+      "node_modules/https-proxy-agent/LICENSE",
+      "node_modules/https-proxy-agent/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/8e3a3f82f59a6095.txt",
+    "localFile": "texts/8e3a3f82f59a6095.txt",
+    "sha256": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "bytes": 2942,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/marked/package/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/8ec1386f7f078b0c.txt",
+    "localFile": "texts/8ec1386f7f078b0c.txt",
+    "sha256": "8ec1386f7f078b0c7cd25341cd80f332df902371cda9f40c10ec2b4007b420b7",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/node-domexception/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/8f2bee9bda101e73.txt",
+    "localFile": "texts/8f2bee9bda101e73.txt",
+    "sha256": "8f2bee9bda101e73f4aaca1deb63e80028ac5d1b989509ffcb8d585a049fdabd",
+    "bytes": 1082,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-spill-policy/lib/types/notice.d.ts"
+    ]
+  },
+  {
+    "file": "licenses/texts/91968bf678e8c3d9.txt",
+    "localFile": "texts/91968bf678e8c3d9.txt",
+    "sha256": "91968bf678e8c3d94ebf8596e98ca9cb5fca1c6555b53f721a940cb50f1b3d66",
+    "bytes": 2618,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/marked/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/9568a2b155e66ac3.txt",
+    "localFile": "texts/9568a2b155e66ac3.txt",
+    "sha256": "9568a2b155e66ac3e0ba1fd80b52b827b9460e6cf6f233125e7cbca8e206ddc3",
+    "bytes": 10174,
+    "sources": [
+      "node_modules/jsbi/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/965ef284f7f4c176.txt",
+    "localFile": "texts/965ef284f7f4c176.txt",
+    "sha256": "965ef284f7f4c176842ec2e87fa13e79feed777d56d7a21a5a3b38f1bb6dc288",
+    "bytes": 1099,
+    "sources": [
+      "node_modules/ee-first/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/9672b5ea831c3604.txt",
+    "localFile": "texts/9672b5ea831c3604.txt",
+    "sha256": "9672b5ea831c360425e95b806b302e502582dd9718b056f29c40cf241daecb68",
+    "bytes": 1340,
+    "sources": [
+      "node_modules/@mixmark-io/domino/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/97af7428f93afbab.txt",
+    "localFile": "texts/97af7428f93afbab.txt",
+    "sha256": "97af7428f93afbab9bf79cd09254da1357161794f4255eb1b4599f04dd2d2e7c",
+    "bytes": 1081,
+    "sources": [
+      "node_modules/extend/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/9a7e34fbf3903507.txt",
+    "localFile": "texts/9a7e34fbf3903507.txt",
+    "sha256": "9a7e34fbf3903507665e3ec7ca8b3d0c11f73bf2d5a0d754a079ab9f505bafef",
+    "bytes": 316506,
+    "sources": [
+      "node_modules/@deepseek-ai/libreoffice-kit-win32-x64/program/license.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/a05350a88e318e4f.txt",
+    "localFile": "texts/a05350a88e318e4f.txt",
+    "sha256": "a05350a88e318e4f5f2c2a1ff1e2e88daa4dd38e6e78b71cccae422bdc762cc3",
+    "bytes": 1090,
+    "sources": [
+      "node_modules/ajv/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a055e3a15db4b4cb.txt",
+    "localFile": "texts/a055e3a15db4b4cb.txt",
+    "sha256": "a055e3a15db4b4cbb5af381230eba085603126d7d5d8c4dae45ee85b877a9729",
+    "bytes": 1069,
+    "sources": [
+      "node_modules/@joplin/turndown-plugin-gfm/LICENSE",
+      "node_modules/turndown/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a07bc24468b9654c.txt",
+    "localFile": "texts/a07bc24468b9654c.txt",
+    "sha256": "a07bc24468b9654ce76a547d47a2db282d07733b715db4c73a98bd63961f9550",
+    "bytes": 1084,
+    "sources": [
+      "node_modules/js-yaml/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a0ec0dab16b3666f.txt",
+    "localFile": "texts/a0ec0dab16b3666f.txt",
+    "sha256": "a0ec0dab16b3666f24950f86d257930ac2ad475557b4bfe245620e0817d8a45d",
+    "bytes": 1174,
+    "sources": [
+      "node_modules/fresh/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a2010f343487d3f7.txt",
+    "localFile": "texts/a2010f343487d3f7.txt",
+    "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+    "bytes": 7048,
+    "sources": [
+      "licenses/texts/supplemented/type-fest@4.41.0/package/license-cc0"
+    ]
+  },
+  {
+    "file": "licenses/texts/a21d6c8d3fc63119.txt",
+    "localFile": "texts/a21d6c8d3fc63119.txt",
+    "sha256": "a21d6c8d3fc631198b97e57584697f7f9c37805c71c6cf9a12e4442b40394b88",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/undici/lib/web/fetch/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a27ca07269b35185.txt",
+    "localFile": "texts/a27ca07269b35185.txt",
+    "sha256": "a27ca07269b3518550b2e83aed13eadd7d14d924b5864e14889b40cf227530ca",
+    "bytes": 11344,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/puppeteer/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a368f64e3edd0af4.txt",
+    "localFile": "texts/a368f64e3edd0af4.txt",
+    "sha256": "a368f64e3edd0af447556fc119ea6e8171795e3dd50ff50dc03e824be363e837",
+    "bytes": 1196,
+    "sources": [
+      "node_modules/responselike/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/a3d60eaf32d2fb09.txt",
+    "localFile": "texts/a3d60eaf32d2fb09.txt",
+    "sha256": "a3d60eaf32d2fb09c9d82ef39f14bd6e2c0f3ca7de30daa827486c0d6f8b6e9f",
+    "bytes": 3326,
+    "sources": [
+      "node_modules/node-pty/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a3f2fe2ac6b471aa.txt",
+    "localFile": "texts/a3f2fe2ac6b471aa.txt",
+    "sha256": "a3f2fe2ac6b471aa80c737c5d283dd049bdc903a73835ee6d4d2cac02fdd53bf",
+    "bytes": 1107,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/codemirror/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a553508f516031c9.txt",
+    "localFile": "texts/a553508f516031c9.txt",
+    "sha256": "a553508f516031c91f3af1148d44970cb81bbae6c4f091be6835d39cc252238c",
+    "bytes": 1064,
+    "sources": [
+      "node_modules/koffi/vendor/node-api-headers/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a5edccac92c3aa84.txt",
+    "localFile": "texts/a5edccac92c3aa84.txt",
+    "sha256": "a5edccac92c3aa845694dcfaa72a0c098c1ae40d5ca6a37e4e59d778cf8e29bd",
+    "bytes": 1068,
+    "sources": [
+      "node_modules/fetch-blob/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a67b34a24a5daddc.txt",
+    "localFile": "texts/a67b34a24a5daddc.txt",
+    "sha256": "a67b34a24a5daddcce46aea68c5004e4442bbfb63690329fa607bf4de4269794",
+    "bytes": 1505,
+    "sources": [
+      "node_modules/@protobufjs/aspromise/LICENSE",
+      "node_modules/@protobufjs/base64/LICENSE",
+      "node_modules/@protobufjs/codegen/LICENSE",
+      "node_modules/@protobufjs/eventemitter/LICENSE",
+      "node_modules/@protobufjs/fetch/LICENSE",
+      "node_modules/@protobufjs/float/LICENSE",
+      "node_modules/@protobufjs/path/LICENSE",
+      "node_modules/@protobufjs/pool/LICENSE",
+      "node_modules/@protobufjs/utf8/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a6db8096b2707bc0.txt",
+    "localFile": "texts/a6db8096b2707bc0.txt",
+    "sha256": "a6db8096b2707bc0102d256917d4d33f298ba36d8c3f25de067a2b5bb379db27",
+    "bytes": 1090,
+    "sources": [
+      "node_modules/undici/LICENSE",
+      "node_modules/undici-types/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a7996721249a136f.txt",
+    "localFile": "texts/a7996721249a136f.txt",
+    "sha256": "a7996721249a136fbcfc1c201bcb5f414f38a701d4a24f28abe65e16cfcce813",
+    "bytes": 1094,
+    "sources": [
+      "node_modules/etag/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a832d679750e49ab.txt",
+    "localFile": "texts/a832d679750e49ab.txt",
+    "sha256": "a832d679750e49ab433626ab196350b89964b60eb0d3edd3341887c7d5f4c128",
+    "bytes": 1108,
+    "sources": [
+      "node_modules/toidentifier/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/a8d80f63116de4ec.txt",
+    "localFile": "texts/a8d80f63116de4ec.txt",
+    "sha256": "a8d80f63116de4ec1abd3800ec98f68e0acba524f12db62518868649a722f631",
+    "bytes": 11061,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/puppeteer/third_party/rxjs/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/aa8f65819a471c1a.txt",
+    "localFile": "texts/aa8f65819a471c1a.txt",
+    "sha256": "aa8f65819a471c1a25fb3c0816c5a75e45f009b7899d292ee3cc70d9dbdd8f7e",
+    "bytes": 1112,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/codemirror.next/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/aaa78451b6fecd1b.txt",
+    "localFile": "texts/aaa78451b6fecd1b.txt",
+    "sha256": "aaa78451b6fecd1b9c4594c796c133c0e90cad100372ff8bc6de615e9ef9adf1",
+    "bytes": 1105,
+    "sources": [
+      "node_modules/cross-spawn/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ab868ad5a2ef5068.txt",
+    "localFile": "texts/ab868ad5a2ef5068.txt",
+    "sha256": "ab868ad5a2ef5068560d9cd3b2180ec63c140bb4c5cae1ba779d300a0ac74fa3",
+    "bytes": 1274,
+    "sources": [
+      "node_modules/http-cache-semantics/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/af175b9d96ee93c2.txt",
+    "localFile": "texts/af175b9d96ee93c2.txt",
+    "sha256": "af175b9d96ee93c21a036152e1b905b0b95304d4ae8c2c921c7609100ba8df7e",
+    "bytes": 15921,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/axe-core/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/b010b0dfdfdb23d7.txt",
+    "localFile": "texts/b010b0dfdfdb23d7.txt",
+    "sha256": "b010b0dfdfdb23d7396e03b82cd4621fc9bb8f95d6b0aea70b9c24e12074c786",
+    "bytes": 1813,
+    "sources": [
+      "node_modules/fast-uri/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/b173e19b9a78df30.txt",
+    "localFile": "texts/b173e19b9a78df30.txt",
+    "sha256": "b173e19b9a78df305577ace0e52ef45a4bcc915ea28b47b256dc3b68dcb1f7e7",
+    "bytes": 790,
+    "sources": [
+      "node_modules/signal-exit/LICENSE.txt"
+    ]
+  },
+  {
+    "file": "licenses/texts/b35de79efc88b23c.txt",
+    "localFile": "texts/b35de79efc88b23c.txt",
+    "sha256": "b35de79efc88b23c73dd431df6075bed0890db0db1544ee3d57b046aa7a8e72b",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/cacheable-lookup/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/b40930bbcf80744c.txt",
+    "localFile": "texts/b40930bbcf80744c.txt",
+    "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+    "bytes": 11357,
+    "sources": [
+      "node_modules/detect-libc/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/b6be1b6c4e8c0441.txt",
+    "localFile": "texts/b6be1b6c4e8c0441.txt",
+    "sha256": "b6be1b6c4e8c0441448a70fc6517c8d1ad62ad6a614b1fd049f74aa86c8b9820",
+    "bytes": 1233,
+    "sources": [
+      "node_modules/compressible/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/b8841df06ad9243a.txt",
+    "localFile": "texts/b8841df06ad9243a.txt",
+    "sha256": "b8841df06ad9243a1fe973f35943c68a076675829680847bc2f506e9080e8737",
+    "bytes": 1791,
+    "sources": [
+      "node_modules/@deepseek-ai/libreoffice-kit/NOTICE"
+    ]
+  },
+  {
+    "file": "licenses/texts/bd134b41da59e452.txt",
+    "localFile": "texts/bd134b41da59e452.txt",
+    "sha256": "bd134b41da59e452fb5a1d366b660886f741c87c2bf9428e93764c419fbc40f5",
+    "bytes": 1094,
+    "sources": [
+      "node_modules/depd/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/bd47ce7b88c77596.txt",
+    "localFile": "texts/bd47ce7b88c77596.txt",
+    "sha256": "bd47ce7b88c7759630d1e2b9fcfa170a0f1fde522be09e13fb1581a79d090400",
+    "bytes": 1094,
+    "sources": [
+      "node_modules/vary/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/bdfd5e0edb6089e6.txt",
+    "localFile": "texts/bdfd5e0edb6089e6.txt",
+    "sha256": "bdfd5e0edb6089e6586c8f15e6a86fab83ffbeeda3b3b7b33734ccb8c5906965",
+    "bytes": 1124,
+    "sources": [
+      "node_modules/chokidar/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/bfdeded4040e05da.txt",
+    "localFile": "texts/bfdeded4040e05da.txt",
+    "sha256": "bfdeded4040e05da31ca9b6239dc83bd23fa26ac8db87342a7ca4363f68916ff",
+    "bytes": 11342,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/web-vitals/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/c0df7f551401f8f8.txt",
+    "localFile": "texts/c0df7f551401f8f8.txt",
+    "sha256": "c0df7f551401f8f80197ff31bf69b8cd23727d127423403282514d242a3ab132",
+    "bytes": 1077,
+    "sources": [
+      "node_modules/restructure/LICENSE",
+      "node_modules/tiny-inflate/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/c2cfccb812fe4821.txt",
+    "localFile": "texts/c2cfccb812fe4821.txt",
+    "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+    "bytes": 1141,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/vscode.web-custom-data/package/LICENSE.md",
+      "node_modules/@types/http-cache-semantics/LICENSE",
+      "node_modules/@types/node/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/c71d239df91726fc.txt",
+    "localFile": "texts/c71d239df91726fc.txt",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "bytes": 11357,
+    "sources": [
+      "node_modules/@opentelemetry/api/LICENSE",
+      "node_modules/@opentelemetry/api-logs/LICENSE",
+      "node_modules/@opentelemetry/core/LICENSE",
+      "node_modules/@opentelemetry/otlp-exporter-base/LICENSE",
+      "node_modules/@opentelemetry/otlp-transformer/LICENSE",
+      "node_modules/@opentelemetry/resources/LICENSE",
+      "node_modules/@opentelemetry/sdk-logs/LICENSE",
+      "node_modules/@opentelemetry/sdk-metrics/LICENSE",
+      "node_modules/@opentelemetry/sdk-trace/LICENSE",
+      "node_modules/@opentelemetry/semantic-conventions/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/c7cc929b57080f4b.txt",
+    "localFile": "texts/c7cc929b57080f4b.txt",
+    "sha256": "c7cc929b57080f4b9d0c6cf57669f0463fc5b39906344dfc8d3bc43426b30eac",
+    "bytes": 1081,
+    "sources": [
+      "node_modules/safe-buffer/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/cc1dfd4dafa27271.txt",
+    "localFile": "texts/cc1dfd4dafa27271.txt",
+    "sha256": "cc1dfd4dafa27271e8212cd3b274eeb3f262e40a6fdab36ddc3f9696f706f58b",
+    "bytes": 1172,
+    "sources": [
+      "node_modules/mime-db/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ccf06b70760761ae.txt",
+    "localFile": "texts/ccf06b70760761ae.txt",
+    "sha256": "ccf06b70760761ae1437395117bcf911501e3dc85385d84c7eba20d5dfab55dd",
+    "bytes": 1113,
+    "sources": [
+      "node_modules/@vscode/ripgrep/LICENSE",
+      "node_modules/@vscode/ripgrep-win32-x64/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/cd1dfbe6a9f582a5.txt",
+    "localFile": "texts/cd1dfbe6a9f582a5.txt",
+    "sha256": "cd1dfbe6a9f582a5a9417cc42ca369cfb333ba5f914b1f40faad4222bf57f380",
+    "bytes": 1082,
+    "sources": [
+      "node_modules/form-data-encoder/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/cd519ad3d7e01242.txt",
+    "localFile": "texts/cd519ad3d7e01242.txt",
+    "sha256": "cd519ad3d7e012427f978dfb2e3b92ee403d189d7b859ba6bf68fd7e12ca456f",
+    "bytes": 1075,
+    "sources": [
+      "node_modules/openai/src/_vendor/partial-json-parser/LICENSE",
+      "node_modules/partial-json/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/cfc7749b96f63bd3.txt",
+    "localFile": "texts/cfc7749b96f63bd3.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "bytes": 11358,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/legacy-javascript/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/puppeteer-replay/package/LICENSE",
+      "node_modules/@google/genai/LICENSE",
+      "node_modules/gaxios/LICENSE",
+      "node_modules/gcp-metadata/LICENSE",
+      "node_modules/google-auth-library/LICENSE",
+      "node_modules/google-logging-utils/LICENSE",
+      "node_modules/long/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/d0cd141b0c322fde.txt",
+    "localFile": "texts/d0cd141b0c322fde.txt",
+    "sha256": "d0cd141b0c322fded5dfad1d4645bb2fedfc05b7321fe1009469638190d59ef9",
+    "bytes": 1091,
+    "sources": [
+      "node_modules/picomatch/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/d82ceb8cbd004a2d.txt",
+    "localFile": "texts/d82ceb8cbd004a2d.txt",
+    "sha256": "d82ceb8cbd004a2d4834085c557d55459f528e30268d95159ee1e4030a693a6e",
+    "bytes": 11357,
+    "sources": [
+      "node_modules/@aws-sdk/credential-provider-env/LICENSE",
+      "node_modules/@aws-sdk/credential-provider-ini/LICENSE",
+      "node_modules/@aws-sdk/credential-provider-node/LICENSE",
+      "node_modules/@aws-sdk/token-providers/LICENSE",
+      "node_modules/@aws-sdk/token-providers/LICENSE",
+      "node_modules/@aws-sdk/types/LICENSE",
+      "node_modules/@aws-sdk/xml-builder/LICENSE",
+      "node_modules/@smithy/credential-provider-imds/LICENSE",
+      "node_modules/@smithy/fetch-http-handler/LICENSE",
+      "node_modules/@smithy/node-http-handler/LICENSE",
+      "node_modules/@smithy/node-http-handler/LICENSE",
+      "node_modules/@smithy/signature-v4/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/d8c77eaffed7f1f8.txt",
+    "localFile": "texts/d8c77eaffed7f1f8.txt",
+    "sha256": "d8c77eaffed7f1f874b97f66ee47a557ae24fd59bae8ae14f9b1b84f26a94d2f",
+    "bytes": 1588,
+    "sources": [
+      "node_modules/@anthropic-ai/sdk/src/internal/qs/LICENSE.md",
+      "node_modules/openai/src/internal/qs/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/d96eba1f1881334d.txt",
+    "localFile": "texts/d96eba1f1881334d.txt",
+    "sha256": "d96eba1f1881334d50ffc144276dfa98e147a415e7c591ecdfcb81680361dc91",
+    "bytes": 10836,
+    "sources": [
+      "node_modules/@swc/helpers/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/dc1f5d2d43c5531d.txt",
+    "localFile": "texts/dc1f5d2d43c5531d.txt",
+    "sha256": "dc1f5d2d43c5531dfe0acaf4e950ea5dbe3e61e1850cf0e983bda7efc10d6693",
+    "bytes": 10464,
+    "sources": [
+      "node_modules/@img/sharp-win32-x64/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/dcb94ff9b1e037a8.txt",
+    "localFile": "texts/dcb94ff9b1e037a8.txt",
+    "sha256": "dcb94ff9b1e037a847bc20589dc81a1066d041fd4c16deb18b0fa968c66cf395",
+    "bytes": 1168,
+    "sources": [
+      "node_modules/http-errors/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/de4d1f2d2ad5ad0c.txt",
+    "localFile": "texts/de4d1f2d2ad5ad0c.txt",
+    "sha256": "de4d1f2d2ad5ad0cfd1657a106476b31cb5db5ef9d1ff842b237c0c81f0c8a23",
+    "bytes": 12775,
+    "sources": [
+      "node_modules/argparse/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/dea9265341829002.txt",
+    "localFile": "texts/dea9265341829002.txt",
+    "sha256": "dea9265341829002e2c23a7372393eb2ed6e26085fb623f38a4ba0af833f30a6",
+    "bytes": 1183,
+    "sources": [
+      "node_modules/@types/retry/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/def75ba75d6426f1.txt",
+    "localFile": "texts/def75ba75d6426f1.txt",
+    "sha256": "def75ba75d6426f1c3f02addf8e175fbe6e0d8a82e541cbdffc16d2bd8fd7d6a",
+    "bytes": 1147,
+    "sources": [
+      "node_modules/bignumber.js/LICENCE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/def82c085d05e795.txt",
+    "localFile": "texts/def82c085d05e795.txt",
+    "sha256": "def82c085d05e795fe6a9cb5b70c48e022212355afc0e91d4de047cade28df06",
+    "bytes": 1081,
+    "sources": [
+      "node_modules/json-bigint/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/dfde54fedc270c2a.txt",
+    "localFile": "texts/dfde54fedc270c2a.txt",
+    "sha256": "dfde54fedc270c2a305d9a9f993d93f706d34624455a2fd2d2a05ca34d8ae8c3",
+    "bytes": 1797,
+    "sources": [
+      "node_modules/bowser/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/dffec71d93f273d2.txt",
+    "localFile": "texts/dffec71d93f273d2.txt",
+    "sha256": "dffec71d93f273d2af7b54c6c7e7e70b3289c632ec0d7253210ec21ac336d5ac",
+    "bytes": 1114,
+    "sources": [
+      "node_modules/readdirp/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/e1f2a92813d0a716.txt",
+    "localFile": "texts/e1f2a92813d0a716.txt",
+    "sha256": "e1f2a92813d0a7160c8bb0e27da66ec2f6599f2832ae5b4d9f95c108e60af5e6",
+    "bytes": 1079,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/third-party-web/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/third-party-web/package/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/e2eaa4603c14cb26.txt",
+    "localFile": "texts/e2eaa4603c14cb26.txt",
+    "sha256": "e2eaa4603c14cb26f301e88648c12a853fa3f0f5da6d4b0972958c666e7f2ab8",
+    "bytes": 4433,
+    "sources": [
+      "node_modules/@img/colour/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/e345c2ee7df4446e.txt",
+    "localFile": "texts/e345c2ee7df4446e.txt",
+    "sha256": "e345c2ee7df4446e739de7b91535f0c10ddcd909b9753889e943ee637b05db8c",
+    "bytes": 11390,
+    "sources": [
+      "node_modules/@aws-sdk/middleware-eventstream/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/e3b44af066615de2.txt",
+    "localFile": "texts/e3b44af066615de2.txt",
+    "sha256": "e3b44af066615de2ea48d18d852d0762f18c0b2efcea714fa48a6f729d405b85",
+    "bytes": 1153,
+    "sources": [
+      "node_modules/bytes/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/e8a7cc256941a26b.txt",
+    "localFile": "texts/e8a7cc256941a26b.txt",
+    "sha256": "e8a7cc256941a26ba8234f04390165243a4d42f74fd6491934140605bf7eae2d",
+    "bytes": 1094,
+    "sources": [
+      "node_modules/typebox/license"
+    ]
+  },
+  {
+    "file": "licenses/texts/eb0fa16c74523410.txt",
+    "localFile": "texts/eb0fa16c74523410.txt",
+    "sha256": "eb0fa16c7452341017d97ac695c737cd19a8a47e8a87edd66db9493017c0d077",
+    "bytes": 1065,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/puppeteer/third_party/parsel/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ebb4f09972aee860.txt",
+    "localFile": "texts/ebb4f09972aee860.txt",
+    "sha256": "ebb4f09972aee8608be255debaf78451a68e95c290f55c240dec2ecfa16ea6be",
+    "bytes": 1065,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh/LICENSE",
+      "node_modules/@deepseek-ai/dsh-acp/LICENSE",
+      "node_modules/@deepseek-ai/dsh-acp-app/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent-default-model/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent-instructions/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent-loop/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent-preset/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent-preset-registry/LICENSE",
+      "node_modules/@deepseek-ai/dsh-agent-tool-presentation/LICENSE",
+      "node_modules/@deepseek-ai/dsh-anonymous-user-id/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-account-controller/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-gateway/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-job-controller/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-remote-access/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-remotes/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-session-controller/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-settings-controller/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-terminal-controller/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-workspace-controller/LICENSE",
+      "node_modules/@deepseek-ai/dsh-api-workspace-files/LICENSE",
+      "node_modules/@deepseek-ai/dsh-app-boot/LICENSE",
+      "node_modules/@deepseek-ai/dsh-atomic-write/LICENSE",
+      "node_modules/@deepseek-ai/dsh-attachment/LICENSE",
+      "node_modules/@deepseek-ai/dsh-attachment-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-authorization/LICENSE",
+      "node_modules/@deepseek-ai/dsh-base/LICENSE",
+      "node_modules/@deepseek-ai/dsh-bash-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-bash-sandbox/LICENSE",
+      "node_modules/@deepseek-ai/dsh-brand/LICENSE",
+      "node_modules/@deepseek-ai/dsh-chunked-list/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-connection/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-file-upload/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-hmr/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-locale/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-modules/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-product-analytics/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-resources/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-shortcuts/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-agent-preset/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-approval/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-attachment/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-brand-official/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-chat/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-commands/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-conversation/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-cordis/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-deepseek-model-label-1017/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-deliverables/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-directory-picker-browse/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-directory-picker-native/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-entry-customization/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-goal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-input-trigger/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-jobs/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-layout/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-message-feedback/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-model-selection/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-open-in-app/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-permission-presets/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-plan/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-plugin-manager/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-plugin-market/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-reference/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-renderer/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-schedule/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-secret-mask/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-session/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-account/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-agent-loop/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-general/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-models/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-plugin-inventory/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-plugins/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-session-log/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-shell/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-subagent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-settings-web-search/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-shortcuts/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-sidebar/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-sidebar-browser/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-sidebar-documentpreview/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-sidebar-files/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-sidebar-right/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-sidebar-terminal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-skill/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-subagent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-theme/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-tool/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-trajectory/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-user-questions/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-workflow-run/LICENSE",
+      "node_modules/@deepseek-ai/dsh-client-ui-workspace/LICENSE",
+      "node_modules/@deepseek-ai/dsh-cmdline/LICENSE",
+      "node_modules/@deepseek-ai/dsh-command-compact/LICENSE",
+      "node_modules/@deepseek-ai/dsh-command-feedback/LICENSE",
+      "node_modules/@deepseek-ai/dsh-command-goal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-commands/LICENSE",
+      "node_modules/@deepseek-ai/dsh-compaction/LICENSE",
+      "node_modules/@deepseek-ai/dsh-compaction-basic/LICENSE",
+      "node_modules/@deepseek-ai/dsh-compaction-image-offload/LICENSE",
+      "node_modules/@deepseek-ai/dsh-compaction-tool-result-pruner/LICENSE",
+      "node_modules/@deepseek-ai/dsh-config-editor/LICENSE",
+      "node_modules/@deepseek-ai/dsh-cordis-client-runner/LICENSE",
+      "node_modules/@deepseek-ai/dsh-cordis-host-runner/LICENSE",
+      "node_modules/@deepseek-ai/dsh-credentials/LICENSE",
+      "node_modules/@deepseek-ai/dsh-credentials-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-deepseek-account/LICENSE",
+      "node_modules/@deepseek-ai/dsh-deepseek-account-platform/LICENSE",
+      "node_modules/@deepseek-ai/dsh-deepseek-llm-api-extensions/LICENSE",
+      "node_modules/@deepseek-ai/dsh-deque/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-agent-team/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-agent-team-profile/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-api-speech-to-text/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-auto-review/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-badge-skill-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-client-ui-agent-team/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-client-ui-cot-translation/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-client-ui-voice-input/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-cot-translation-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector-profile/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-plugin-market-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-ralph-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-session-inspector/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-session-search/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-session-titles-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-speech-to-text/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-speech-to-text-sensevoice/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-terminal-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-tool-agent-team/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-tool-worktree/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-translator/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-voice-input-bundle/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-worktree/LICENSE",
+      "node_modules/@deepseek-ai/dsh-file-reference/LICENSE",
+      "node_modules/@deepseek-ai/dsh-file-reference-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-fs/LICENSE",
+      "node_modules/@deepseek-ai/dsh-fs-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-fs-observation-policy/LICENSE",
+      "node_modules/@deepseek-ai/dsh-fs-sandbox/LICENSE",
+      "node_modules/@deepseek-ai/dsh-goal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-goal-round-driver/LICENSE",
+      "node_modules/@deepseek-ai/dsh-harness-dev-context/LICENSE",
+      "node_modules/@deepseek-ai/dsh-headless/LICENSE",
+      "node_modules/@deepseek-ai/dsh-home-paths/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-directory-picker/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-directory-picker-auto/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-directory-picker-browse/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-directory-picker-native/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-frontend-static/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-open-in-app/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-plugin-inventory/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-product-telemetry-otel/LICENSE",
+      "node_modules/@deepseek-ai/dsh-host-webserver/LICENSE",
+      "node_modules/@deepseek-ai/dsh-http-proxy/LICENSE",
+      "node_modules/@deepseek-ai/dsh-jobs/LICENSE",
+      "node_modules/@deepseek-ai/dsh-jobs-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-launch-environment/LICENSE",
+      "node_modules/@deepseek-ai/dsh-lazy-require/LICENSE",
+      "node_modules/@deepseek-ai/dsh-llm/LICENSE",
+      "node_modules/@deepseek-ai/dsh-llm-deepseek/LICENSE",
+      "node_modules/@deepseek-ai/dsh-llm-deepseek-account/LICENSE",
+      "node_modules/@deepseek-ai/dsh-llm-deepseek-api-key/LICENSE",
+      "node_modules/@deepseek-ai/dsh-llm-pi-ai/LICENSE",
+      "node_modules/@deepseek-ai/dsh-llm-retry/LICENSE",
+      "node_modules/@deepseek-ai/dsh-mcp-client/LICENSE",
+      "node_modules/@deepseek-ai/dsh-mcp-resources/LICENSE",
+      "node_modules/@deepseek-ai/dsh-message-feedback/LICENSE",
+      "node_modules/@deepseek-ai/dsh-native-command/LICENSE",
+      "node_modules/@deepseek-ai/dsh-office-to-pdf/LICENSE",
+      "node_modules/@deepseek-ai/dsh-otel/LICENSE",
+      "node_modules/@deepseek-ai/dsh-output-retention/LICENSE",
+      "node_modules/@deepseek-ai/dsh-package-manifest/LICENSE",
+      "node_modules/@deepseek-ai/dsh-permission-presets/LICENSE",
+      "node_modules/@deepseek-ai/dsh-persona/LICENSE",
+      "node_modules/@deepseek-ai/dsh-plan-mode/LICENSE",
+      "node_modules/@deepseek-ai/dsh-plugin-manager/LICENSE",
+      "node_modules/@deepseek-ai/dsh-plugin-market/LICENSE",
+      "node_modules/@deepseek-ai/dsh-plugin-market-index/LICENSE",
+      "node_modules/@deepseek-ai/dsh-plugin-package-inventory-deepseek/LICENSE",
+      "node_modules/@deepseek-ai/dsh-ptc-runtime/LICENSE",
+      "node_modules/@deepseek-ai/dsh-ptc-runtime-node/LICENSE",
+      "node_modules/@deepseek-ai/dsh-pwsh-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-pwsh-sandbox/LICENSE",
+      "node_modules/@deepseek-ai/dsh-repeat-tool-reminder/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sandbox/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sandbox-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sandbox-policy/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sandbox-windows-acl/LICENSE",
+      "node_modules/@deepseek-ai/dsh-schedule/LICENSE",
+      "node_modules/@deepseek-ai/dsh-scope/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sdk-app/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sdk-minimal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-sdk-protocol/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-checkpoint-policy/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-format/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-format-catalog/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-format-v0-to-v1/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-format-v1-to-v2/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-format-v2-to-v3/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-format-v3-to-v4/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-log-deepseek/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-log-export/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-persistence/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-persistence-jsonl/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-projection/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-projection-cache/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-query/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-query-sqlite/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-reference/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-stats/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-telemetry/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-telemetry-otel/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-title/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-title-all-prompts-llm/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-title-first-prompt-llm/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-title-llm/LICENSE",
+      "node_modules/@deepseek-ai/dsh-session-turn-outline/LICENSE",
+      "node_modules/@deepseek-ai/dsh-settings/LICENSE",
+      "node_modules/@deepseek-ai/dsh-shell/LICENSE",
+      "node_modules/@deepseek-ai/dsh-shell-env/LICENSE",
+      "node_modules/@deepseek-ai/dsh-skill/LICENSE",
+      "node_modules/@deepseek-ai/dsh-skill-badge/LICENSE",
+      "node_modules/@deepseek-ai/dsh-skill-filesystem/LICENSE",
+      "node_modules/@deepseek-ai/dsh-skill-office/LICENSE",
+      "node_modules/@deepseek-ai/dsh-spill/LICENSE",
+      "node_modules/@deepseek-ai/dsh-spill-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-spill-policy/LICENSE",
+      "node_modules/@deepseek-ai/dsh-storage/LICENSE",
+      "node_modules/@deepseek-ai/dsh-storage-domain/LICENSE",
+      "node_modules/@deepseek-ai/dsh-storage-json/LICENSE",
+      "node_modules/@deepseek-ai/dsh-subagent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-subagent-fork-in-process/LICENSE",
+      "node_modules/@deepseek-ai/dsh-subagent-spawn-in-process/LICENSE",
+      "node_modules/@deepseek-ai/dsh-subprocess/LICENSE",
+      "node_modules/@deepseek-ai/dsh-subprocess-local/LICENSE",
+      "node_modules/@deepseek-ai/dsh-system-prompt/LICENSE",
+      "node_modules/@deepseek-ai/dsh-terminal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-terminal-bash/LICENSE",
+      "node_modules/@deepseek-ai/dsh-time-context/LICENSE",
+      "node_modules/@deepseek-ai/dsh-timeout/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tmux-context/LICENSE",
+      "node_modules/@deepseek-ai/dsh-token-meter/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-ask-user/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-bash/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-bash-persistent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-call-timeout-policy/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-cordis/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-fs/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-fs-search/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-goal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-jobs/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-present/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-pwsh/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-pwsh-persistent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-ralph/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-schedule/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-session-query/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-skill/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-str-replace-editor/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-subagent/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-subagent-control/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-terminal/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-todo/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-web/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-workflow/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-working-directory/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tool-workspace-dependencies/LICENSE",
+      "node_modules/@deepseek-ai/dsh-tools/LICENSE",
+      "node_modules/@deepseek-ai/dsh-typert-loader/LICENSE",
+      "node_modules/@deepseek-ai/dsh-typert-protocol/LICENSE",
+      "node_modules/@deepseek-ai/dsh-typert-registry/LICENSE",
+      "node_modules/@deepseek-ai/dsh-user-approval/LICENSE",
+      "node_modules/@deepseek-ai/dsh-user-questions/LICENSE",
+      "node_modules/@deepseek-ai/dsh-util-code-language/LICENSE",
+      "node_modules/@deepseek-ai/dsh-util-crypto/LICENSE",
+      "node_modules/@deepseek-ai/dsh-util-time/LICENSE",
+      "node_modules/@deepseek-ai/dsh-util-values/LICENSE",
+      "node_modules/@deepseek-ai/dsh-util-workspace-path/LICENSE",
+      "node_modules/@deepseek-ai/dsh-web/LICENSE",
+      "node_modules/@deepseek-ai/dsh-web-app/LICENSE",
+      "node_modules/@deepseek-ai/dsh-web-deepseek-api/LICENSE",
+      "node_modules/@deepseek-ai/dsh-web-fetch-http/LICENSE",
+      "node_modules/@deepseek-ai/dsh-web-frontend/LICENSE",
+      "node_modules/@deepseek-ai/dsh-web-search-deepseek/LICENSE",
+      "node_modules/@deepseek-ai/dsh-win32-process/LICENSE",
+      "node_modules/@deepseek-ai/dsh-workflow/LICENSE",
+      "node_modules/@deepseek-ai/dsh-workflow-ptc/LICENSE",
+      "node_modules/@deepseek-ai/dsh-working-directory/LICENSE",
+      "node_modules/@deepseek-ai/dsh-workspace/LICENSE",
+      "node_modules/@deepseek-ai/dsh-workspace-changes/LICENSE",
+      "node_modules/@deepseek-ai/node-addon-system/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/eda81a415869e678.txt",
+    "localFile": "texts/eda81a415869e678.txt",
+    "sha256": "eda81a415869e67809f6a9f3fd6056062cb83a462118e07eec5e92b2e0c40ce9",
+    "bytes": 1546,
+    "sources": [
+      "node_modules/diff/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/edea91454b811f12.txt",
+    "localFile": "texts/edea91454b811f12.txt",
+    "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+    "bytes": 11352,
+    "sources": [
+      "node_modules/@aws-sdk/core/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ef3882f3b2cf9e1c.txt",
+    "localFile": "texts/ef3882f3b2cf9e1c.txt",
+    "sha256": "ef3882f3b2cf9e1c07172adbf49b7c72a5c75d8a01f3b3ed4777117364ca43fa",
+    "bytes": 1560,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/intl-messageformat/package/LICENSE.md"
+    ]
+  },
+  {
+    "file": "licenses/texts/f4ff0f211345d249.txt",
+    "localFile": "texts/f4ff0f211345d249.txt",
+    "sha256": "f4ff0f211345d2496a6e9dc56d6f13f4ee52c0223ab718bfe7ebc77945af3942",
+    "bytes": 11357,
+    "sources": [
+      "node_modules/human-signals/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/f655e6291356ec0d.txt",
+    "localFile": "texts/f655e6291356ec0d.txt",
+    "sha256": "f655e6291356ec0de7a8f0e69f294961a2cea86678ec94588be1e6a492e278ab",
+    "bytes": 1178,
+    "sources": [
+      "node_modules/range-parser/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/f683a72ffe6a9675.txt",
+    "localFile": "texts/f683a72ffe6a9675.txt",
+    "sha256": "f683a72ffe6a9675b5507af22fe0f448d8c8de3da1e14f139d370a7e6a54a23e",
+    "bytes": 1087,
+    "sources": [
+      "node_modules/eventsource/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/fcf6eabf68ca9698.txt",
+    "localFile": "texts/fcf6eabf68ca9698.txt",
+    "sha256": "fcf6eabf68ca96988a6b506b4fdc6cc32535d80eb2e11c79724af5ac6f50262b",
+    "bytes": 1071,
+    "sources": [
+      "node_modules/@eslint-community/regexpp/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/feb87a2e0c305de3.txt",
+    "localFile": "texts/feb87a2e0c305de3.txt",
+    "sha256": "feb87a2e0c305de3464cc44077da5393c52d8ca6362d37427157d04ec6f4510d",
+    "bytes": 1057,
+    "sources": [
+      "node_modules/pkce-challenge/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ff11d445fb41a108.txt",
+    "localFile": "texts/ff11d445fb41a108.txt",
+    "sha256": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e",
+    "bytes": 1537,
+    "sources": [
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/LICENSE",
+      "node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/third_party/chromium/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ffc4aee7f1279fc0.txt",
+    "localFile": "texts/ffc4aee7f1279fc0.txt",
+    "sha256": "ffc4aee7f1279fc0494ff2b27f6829e6b4d16c20aa93aa008c3bd8d8af176387",
+    "bytes": 750,
+    "sources": [
+      "node_modules/@js-temporal/polyfill/LICENSE"
+    ]
+  },
+  {
+    "file": "licenses/texts/ffe370c8785b0b68.txt",
+    "localFile": "texts/ffe370c8785b0b68.txt",
+    "sha256": "ffe370c8785b0b688d954977ce8dc52e19e5f17962cc5f80009c85eba4925d56",
+    "bytes": 1173,
+    "sources": [
+      "node_modules/destroy/LICENSE"
+    ]
+  }
+]

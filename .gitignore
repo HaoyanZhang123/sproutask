@@ -6,9 +6,11 @@ node_modules/
 /education/dist/
 
 # 本地运行数据、密钥、证据与调研笔记（绝不进 git）
+# 注意：data/ 与 notes/ 一律用根锚定（/data/、/notes/）。早期写成 data/ 时，
+# 把 education/client/shell/src/data/ 这类源码目录也误伤了，干净克隆因此缺文件、CI 红。
 /education/.local/
-data/
-notes/
+/data/
+/notes/
 .env
 .env.*
 *.log
@@ -19,7 +21,8 @@ notes/
 /content/curriculum/
 
 # 设计与截图工作目录（成品截图另行归档到 docs/images/ui/）
-output/
+/output/
+/education/output/
 /tmp/
 *.tmp
 
