@@ -29,6 +29,7 @@
     "vitest": "5.0.5"
   },
   "scripts": {
+    "check:tracked": "node scripts/check-tracked-sources.mjs",
     "typecheck": "node scripts/typecheck-all.mjs",
     "typecheck:task": "node scripts/typecheck-task.mjs",
     "test": "node scripts/test-all.mjs",

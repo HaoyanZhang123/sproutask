@@ -12,11 +12,13 @@
   "scripts": {
     "dev": "pnpm --dir education dev",
     "build": "pnpm --dir education build",
+    "check:tracked": "pnpm --dir education check:tracked",
     "typecheck": "pnpm --dir education typecheck",
     "test": "pnpm --dir education test",
     "test:task": "pnpm --dir education test:task",
     "test:contracts": "pnpm --dir education test:contracts",
     "content:validate": "pnpm --dir education content:validate",
+    "contract:lock:generate": "pnpm --dir education contract:lock:generate",
     "contract:lock:verify": "pnpm --dir education contract:lock:verify"
   }
 }

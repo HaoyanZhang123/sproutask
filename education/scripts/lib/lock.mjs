@@ -3,8 +3,15 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { EDUCATION_ROOT, WORKSPACE_ROOT, educationPath, readJson, workspacePath } from './workspace.mjs';
 
-const SKIP_DIRS = new Set(['node_modules', '.local', 'dist', 'coverage', '.git', '.pnpm']);
+// 生成物目录不参与契约锁：它们由脚本产出、可能只存在于本机，锁一旦算进去，
+// 换台机器/干净克隆上 contract:lock:verify 就会红。
+const SKIP_DIRS = new Set(['node_modules', '.local', 'dist', 'coverage', 'output', '.git', '.pnpm']);
 const SKIP_FILES = new Set(['contract-lock.json']);
+
+// 本机类型检查/运行日志同样不进锁（gitignore 忽略、内容因机器而异）。
+function isSkippedFile(name) {
+  return SKIP_FILES.has(name) || name.endsWith('.tsbuildinfo') || name.endsWith('.log');
+}
 
 const CONTRACT_DOCS = [
   'docs/rebuild/00-START.md',
@@ -43,7 +50,7 @@ function walk(workspaceRelativeDir, output) {
   if (!existsSync(absolute)) return;
   const entries = readdirSync(absolute).sort();
   for (const entry of entries) {
-    if (SKIP_DIRS.has(entry) || SKIP_FILES.has(entry)) continue;
+    if (SKIP_DIRS.has(entry) || isSkippedFile(entry)) continue;
     const full = path.join(absolute, entry);
     const relative = path.relative(WORKSPACE_ROOT, full).split(path.sep).join('/');
     if (statSync(full).isDirectory()) walk(relative, output);
