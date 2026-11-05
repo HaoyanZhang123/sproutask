@@ -9,7 +9,7 @@
 ## 1. 一句话现状
 
 **v0.4.0（2026-11-04）已发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
-当前状态（2026-11-05）：工作区已清理（8,456MB → 873MB）；干净克隆可构建、GitHub CI 转绿并加了三道守卫；契约锁已重建（v0.3.0 起停更的问题解决）；本机旧版 0.2.0/0.3.0 已卸载并干净安装 0.4.0；下一步是人工走查与重新填 Key。
+当前状态（2026-11-05）：**v0.4.1 已可用**——原生桌面壳 `SproutAsk.exe`（Rust + WebView2）替代 Edge 窗口，会话卡死与安装器问题已修；工作区已清理（8,456MB → 873MB）；干净克隆可构建、CI 有三道守卫；契约锁已重建。本机已覆盖安装 0.4.1 并实测通过；下一步是人工走查。
 
 ---
 
@@ -136,6 +136,34 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 ---
 
+### 2026-11-05：v0.4.1 原生桌面壳（方案 B）与卡死修复
+
+**做了什么**
+
+- **原生桌面壳**：新增 `education/desktop/host/`（Rust + WebView2，~900 行）：单实例互斥量 + 聚焦已有窗口、首启初始化、隐藏启动 node 服务（`--no-edge`）、WebView2 原生窗口、窗口位置/大小记忆、关窗清理子进程、失败时中文 MessageBox。产物 `SproutAsk.exe` 997,888 B，版本 0.4.1（**版本唯一来源 `education/package.json`**），内嵌芽问图标（窗口/任务栏/安装器/快捷方式同一份）。
+- **打包链**：新增 `pnpm build:win` 一条龙（插件 → 桌面壳 `cargo build --release` → payload → NSIS）；payload 根新增 `SproutAsk.exe`；NSIS 快捷方式、完成页「立即启动」、`DisplayIcon` 全部指向 `SproutAsk.exe`；安装包默认文件名带版本号。
+- **会话卡死修复**：`tutor` 在**调用方给定 session id** 绑定失败时也会换新 id 重试一次（此前只在未指定 id 时重试；页面重载/重试会因 DSH restore TypeError 把整页替换成错误卡）；`CONFLICT` / `UNAVAILABLE` 文案改成学生话。
+- **安装器修复**：完成页启动与「应用和功能」图标不再指向从未随包的 `launcher.vbs`。
+- **本机收口**：覆盖安装 0.4.1 到 `E:\芽问\current`（旧 0.4.0 被替换），版本、快捷方式、卸载项、学习数据均已核对；`C:\Users\18149\AppData\Local\SproutAsk\current` 孤儿早前已删。
+
+**怎么验证的**
+
+- 本机静默安装 `SproutAsk-Setup-0.4.1-x64.exe`（59,820,103 B，`/S`，exit 0）→ `version.txt` 0.4.1、host exe FileVersion 0.4.1、桌面/开始菜单快捷方式指向 `SproutAsk.exe`、卸载项 `SproutAsk 生物学习 0.4.1`。
+- 原生壳实跑：窗口标题「芽问」、无控制台黑窗；学生页 HTTP 200（12,291 B）；单实例（第二次启动 exit 0、宿主仍 1 个、node 不新增）；关窗后数秒内 node 全部退出；学习记录 `learner-data/journal/events.jsonl` 11,277 B 原样保留。
+- 隔离根联调（`E:\DSH\tmp\host-test`，junction + 独立 SPROUTASK_DATA_ROOT）：单实例聚焦、失败路径中文 MessageBox、`window.json` 尺寸/位置恢复均实测；`cargo test --release` 2 passed。
+- 本机 `pnpm typecheck` / `pnpm test` / `pnpm check:tracked` / `pnpm contract:lock:verify` 全绿。
+
+**未做 / 未验证**
+
+- 真实对话走查（Key 已配置，需用户操作一次）。
+- 另一台干净机安装验证（本机已装过 0.4.0，不是干净机）。
+- 强杀宿主（任务管理器结束进程）可能留下孤儿 node：当前只在关窗时 `taskkill /T /F`，Job Object 兜底列为后续。
+- 便携版 zip 未在 0.4.1 重新构建（安装版已验证）。
+
+
+
+---
+
 ## 5. 界面重构 A+B（已拍板并完成）
 
 **目标**：把"写给验收和 AI 看"的界面改成"学生能直接用"的界面；功能与数据契约不变。
@@ -174,20 +202,23 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 ## 6. 已知限制（诚实清单）
 
 - 安装包**未签名**，Windows 会提示"未知发布者"。
-- 未做干净机验证、未做学习效果实验——不声称提升理解或成绩。
+- 未做另一台干净机验证、未做学习效果实验——不声称提升理解或成绩。
 - 图义视觉核对只完成抽样（8/73）；版次/印次/ISBN 行仍为 `unverified`。
-- 当前界面只有 DOM 级断言，没有真实浏览器视觉走查（重构中补三档截图）。
-- 学生包里裁掉了 `sharp`（图片附件走教育自有管线）、LibreOffice、语音、PTY。
-- 安装版缺少模型 Key，真实模型对话/工具调用尚未在 0.4.0 上实测。
+- 当前界面只有 DOM 级断言，没有真实浏览器视觉走查（三档截图在 `docs/images/ui/`，但不是连续走查）。
+- 学生包里裁掉了 LibreOffice、语音、PTY；`sharp` 随包（`--keep-sharp`，libvips LGPL-3.0）。
+- 原生桌面壳需要 **WebView2 Runtime**（Windows 11 自带；Windows 10 多数已随 Edge 安装）。
+- 强杀桌面壳（任务管理器）可能留下孤儿 node；当前只在关窗时 `taskkill /T /F`，Job Object 兜底未做。
+- 0.4.1 安装后真实对话走查尚未完成（Key 已配置）。
 
 ---
 
 ## 7. 下一步（按顺序）
 
-1. 在安装版「设置」里重新填模型 Key，重启应用，跑一轮真实对话。
+1. 用桌面的「SproutAsk」启动 0.4.1，跑一轮真实对话（提交作答 → 反馈 → 下一题）。
 2. 按 `docs/optimize/04-manual-test.md` 做 15 分钟人工走查并收集反馈。
-3. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
-4. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
+3. 视情况补：Job Object 清理兜底、强杀恢复、便携版 zip、0.4.1 Release 发布。
+4. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
+5. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
 
 ---
 

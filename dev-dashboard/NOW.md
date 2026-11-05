@@ -2,6 +2,7 @@
 
 ## 时间线
 
+- 2026-11-05 | **v0.4.1 原生桌面壳**：`SproutAsk.exe`（Rust + WebView2）替代 Edge 窗口——单实例/自带图标/无控制台/窗口记忆；同时修掉会话重绑 TypeError 与安装器「立即启动」失效 | 证据: docs/PROGRESS.md §4.3、`education/desktop/host/`、`SproutAsk-Setup-0.4.1-x64.exe`
 - 2026-11-05 | **契约锁重建 + CI 加固**：契约锁从 v0.3.0 状态重建（files 456→467，契约版本未变；顺带修掉本机 CRLF 造成的假哈希）；新增 `pnpm check:tracked` 守卫；CI 升级 action 版本并加入 tracked / 契约锁 / 内容包 / 构建漂移四道门，run 42002107337 全绿 | 证据: docs/PROGRESS.md §4.2、`.github/workflows/ci.yml`
 - 2026-11-05 | **清理与收口**：工作区 8,456MB → 873MB（−89.7%）；修好误伤源码的 `.gitignore` 并补回 6 个文件（干净克隆恢复可构建）；修 importer 在 8.3 短名路径下的根判定（CI 转绿）；本机卸载 0.2.0/0.3.0 并干净安装 0.4.0 | 证据: docs/PROGRESS.md §4.1、E:\DSH\tmp\cleanup-2026-11-05\
 - 2026-11-04 | **v0.4.0 已发布**：学生界面重构 + 文案减法定稿；README/封面/发布说明按规范更新 | 证据: https://github.com/HaoyanZhang123/sproutask/releases/tag/v0.4.0

@@ -11,18 +11,21 @@
 
 - **不做**教师端（班级聚合 / 教师查看对话）、网页版、多租户、学生姓名档案。
 - 云端只承担推理（DeepSeek API）；教材、学情、对话只在本机。
-- 交互形态：本机后台服务 + 一个 Edge `--app` 窗口（不是 Electron）。
+- 交互形态：本机后台服务 + 一个**原生桌面壳**（`SproutAsk.exe`：Rust + WebView2，不是 Electron、也不开浏览器窗口）。
 
 ## 2. 形态与运行
 
 ```
-launcher.vbs → launcher.cmd → node app/runtime/scripts/start-student-web.mjs
+SproutAsk.exe（Rust + WebView2 桌面壳：单实例、自带图标）
+   → node app/runtime/scripts/start-student-web.mjs --no-edge（隐藏控制台）
    → 固定版本 DSH web（仅 127.0.0.1 回环，随机端口）
    → 教育 host 插件（/edu/api/*）
    → 教育 client 插件接管根渲染（学生界面）
-   → Edge --app 打开窗口；Edge 退出时结束 DSH 子进程
+   → 壳把该页面装进自己的 WebView2 窗口；关窗时结束 DSH 子进程
 ```
 
+- 桌面壳（`education/desktop/host/`）负责：单实例互斥量与聚焦、首启 setup、启动/回收 node 子进程、失败时中文提示、窗口位置记忆。
+- `launcher.cmd` 仍随包保留，仅作排障兜底（启动同一 node 服务，开 Edge 窗口）。
 - 首次运行生成隔离的 `DSH_HOME/profiles/edu-web`，本地插件用 junction 链接，不碰用户已有 DSH 配置。
 - 模型 Key 由宿主侧保存（DPAPI），进程启动时加载；**渲染层永远拿不到 Key**。
 - 无 Key 时 `status=degraded`：教材、地图、记录可读，模型调用明确不可用。
@@ -52,7 +55,7 @@ ai4edu/
 │  │  ├─ client-plugin/        Client 根占用方（装载学生界面）
 │  │  └─ scripts/              隔离 home 的生成 / 启停
 │  ├─ content/biology-7a/      内容包（概念、活动、评分、关系、出处）
-│  ├─ desktop/                 学生包启动器（cmd / vbs / node）
+│  ├─ desktop/                 学生包外壳：host/（Rust + WebView2 桌面壳）与 launcher/（cmd 兜底）
 │  ├─ skills/biology/          教学 Skill
 │  ├─ scripts/                 构建、校验、打包、任务检查
 │  ├─ licenses/                第三方许可清单
@@ -105,8 +108,10 @@ packages/* ──禁止──▶ DSH / React / Electron / client / runtime
 
 ## 8. 打包与分发
 
-- `education/scripts/packaging/build-student-payload.mjs` → `education/dist/student/`（node、app、content、skills、licenses、launcher）。
-- `build-installer.mjs` → 安装版（per-user，免管理员，写 `%LOCALAPPDATA%\SproutAsk\current`，卸载保留 `data/`）。
+- `pnpm build:win` = 一条龙：插件 bundle → Rust/WebView2 桌面壳 → payload → NSIS 安装包。
+- `build-desktop-host.mjs`：`cargo build --release` 产出 `desktop/host/dist/SproutAsk.exe`（需要 Rust MSVC 工具链；运行需要 WebView2 Runtime）。
+- `build-student-payload.mjs` → `education/dist/student/`（`SproutAsk.exe`、node、app、content、skills、licenses、launcher.cmd 兜底）。
+- `build-installer.mjs` → 安装版（per-user，免管理员，写 `%LOCALAPPDATA%\SproutAsk\current`，卸载保留 `data/`；快捷方式与完成页都指向 `SproutAsk.exe`）。
 - 便携版为 zip；两者都未签名，附 `SHA256SUMS`。
 - 裁剪：LibreOffice、语音、PTY、`sharp` 默认不带（图片走教育自有管线）。
 

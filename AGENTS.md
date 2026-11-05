@@ -20,6 +20,7 @@
 pnpm --dir education install     # 只有 education 有依赖
 pnpm dev                         # 本机 DSH web + Edge 应用窗口
 pnpm build                       # 构建 host/client 插件（产物 runtime/*/lib 已提交）
+pnpm build:win                   # 一条龙：插件 + 原生桌面壳 + payload + NSIS 安装包
 pnpm typecheck                   # 全 workspace 类型检查
 pnpm test                        # 全 workspace 单元测试
 pnpm test:task T08               # 单个任务卡的检查

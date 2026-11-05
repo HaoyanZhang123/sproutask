@@ -1,5 +1,11 @@
 # 功能地图
 
+## 功能: 原生桌面程序
+- 状态: 可用
+- 简介: 双击「SproutAsk」打开自己的窗口（Rust + WebView2）：单实例、自带图标、无控制台黑窗、记住窗口位置与大小，关窗后本地服务自动结束。
+- 证据: education/desktop/host/, education/scripts/packaging/build-desktop-host.mjs
+- 依赖: 无
+
 ## 功能: 在真实 DSH 内核上对话，不是外观相似的聊天
 - 状态: 可用
 - 简介: 每次提问都走本机 DSH 会话与受限工具；模型只负责推理，教材与记录不离开本机。
@@ -72,7 +78,7 @@
 ## 功能: 装到自己电脑上就能用
 - 状态: 可用
 - 简介: 每用户安装版（免管理员、可卸载、保留数据）与便携版；未签名，附 SHA256。
-- 证据: education/scripts/packaging/, docs/releases/v0.4.0.md
+- 证据: education/scripts/packaging/, docs/releases/v0.4.1.md
 - 依赖: 内容包与出处核对
 
 ## 功能: 界面改成学生能用的
