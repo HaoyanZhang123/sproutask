@@ -16494,7 +16494,7 @@ var G1Service = class {
       pack.revision
     );
   }
-  async study(conceptId) {
+  async study(conceptId, activityId) {
     const ctx = this.ctx("g1.study");
     const pack = await this.composition.knowledge.getPack(ctx, this.composition.packKey);
     if (!pack.ok) return pack;
@@ -16503,6 +16503,8 @@ var G1Service = class {
     const activities = pack.data.activities.filter(
       (activity) => activity.conceptIds.includes(conceptId)
     );
+    const requested = typeof activityId === "string" && activityId.length > 0 ? activities.find((activity) => activity.id === activityId) ?? null : null;
+    const currentActivity = requested ?? activities[0] ?? null;
     const rubricIds = new Set(concept.rubricIds);
     const rubrics = pack.data.rubrics.filter((rubric) => rubricIds.has(rubric.id));
     const progress = await this.composition.learner.get(ctx, {
@@ -16535,7 +16537,7 @@ var G1Service = class {
         coverageStatus: pack.data.coverageStatus,
         concept,
         activities,
-        activity: activities[0] ?? null,
+        activity: currentActivity,
         rubrics,
         progress: progress.ok ? progress.data : null,
         selfReport: replay.selfReports.find((report) => report.conceptId === conceptId) ?? null,
@@ -18087,7 +18089,7 @@ function registerRoutes(ctx, composition) {
           json(res, 400, { ok: false, error: "conceptId required" });
           return;
         }
-        json(res, 200, await g1.study(conceptId));
+        json(res, 200, await g1.study(conceptId, url.searchParams.get("activityId")));
         return;
       }
       if (pathname === "/edu/api/g1/progress" && req.method === "GET") {

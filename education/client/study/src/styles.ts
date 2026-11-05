@@ -592,6 +592,14 @@ export const studyStyles = `
   padding-top: var(--edu-space-sm);
 }
 .sprout-compose textarea { width: 100%; min-height: 4.5rem; }
+.sprout-sheet__note {
+  margin: 0;
+  padding: var(--edu-space-xxs) var(--edu-space-xs);
+  border-radius: var(--edu-radius-sm);
+  background: var(--edu-color-surface-muted);
+  font-size: var(--edu-font-xs);
+  color: var(--edu-color-ink-muted);
+}
 .sprout-compose .edu-button { justify-self: end; }
 @media ${STUDY_COMPACT_QUERY} {
   .ask-sprout-pill { right: var(--edu-space-md); bottom: var(--edu-space-md); }

@@ -383,7 +383,10 @@ export class G1Service {
     );
   }
 
-  async study(conceptId: string): Promise<ServiceResult<Record<string, unknown>>> {
+  async study(
+    conceptId: string,
+    activityId?: string | null,
+  ): Promise<ServiceResult<Record<string, unknown>>> {
     const ctx = this.ctx('g1.study');
     const pack = await this.composition.knowledge.getPack(ctx, this.composition.packKey);
     if (!pack.ok) return pack;
@@ -392,6 +395,13 @@ export class G1Service {
     const activities = pack.data.activities.filter((activity) =>
       activity.conceptIds.includes(conceptId),
     );
+    // 「下一题 / 跳过」靠 activityId 指定要打开哪道题；之前这里恒取 activities[0]，
+    // 真机上点下一题就永远停在第 1 题。找不到就退回第一题，不让页面挂掉。
+    const requested =
+      typeof activityId === 'string' && activityId.length > 0
+        ? activities.find((activity) => activity.id === activityId) ?? null
+        : null;
+    const currentActivity = requested ?? activities[0] ?? null;
     const rubricIds = new Set(concept.rubricIds);
     const rubrics = pack.data.rubrics.filter((rubric) => rubricIds.has(rubric.id));
     const progress = await this.composition.learner.get(ctx, {
@@ -424,7 +434,7 @@ export class G1Service {
         coverageStatus: pack.data.coverageStatus,
         concept,
         activities,
-        activity: activities[0] ?? null,
+        activity: currentActivity,
         rubrics,
         progress: progress.ok ? progress.data : null,
         selfReport:

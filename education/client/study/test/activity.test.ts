@@ -139,14 +139,16 @@ describe('题目、草稿与原地反馈', () => {
     expect(shell.getState().currentPath).toContain('/workspace');
   });
 
-  it('keeps a skip as a non-punitive state and does not fake completion', async () => {
+  it('keeps a skip as a non-punitive state and moves to the next question', async () => {
     const { container, study } = await mountStudy();
+    const firstActivity = study.controller.getState().workspace?.activity.id;
     buttonByAction(pageRoot(container), 'skip-question').click();
-    await tick(20);
-    expect(study.controller.getState().phase).toBe('draft');
-    expect(textOf(pageRoot(container))).toContain('已跳过本题');
-    expect(textOf(pageRoot(container))).toContain('不会记为答错');
-    expect(study.controller.getState().finishReceipt).toBeNull();
+    await tick(60);
+    const state = study.controller.getState();
+    expect(state.phase).toBe('draft');
+    expect(state.finishReceipt).toBeNull();
+    // 跳过不等于完成，但要能换到下一题；学习记录里不会记成答错。
+    expect(state.workspace?.activity.id).not.toBe(firstActivity);
   });
 
   it('shows clarification actions and does not judge an unclear answer as wrong', async () => {

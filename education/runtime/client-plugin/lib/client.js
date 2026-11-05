@@ -13327,6 +13327,7 @@ window.__ModuleLoader__.load({
         const input = h("textarea", {
           class: "edu-input",
           rows: 3,
+          placeholder: "\u95EE\u5C0F\u82BD\u4E00\u53E5\uFF0C\u6BD4\u5982\u201C\u8FD9\u4E00\u6B65\u4E3A\u4EC0\u4E48\u201D\u201C\u7ED9\u6211\u4E00\u70B9\u63D0\u793A\u201D",
           "aria-label": "\u7ED9\u5C0F\u82BD\u53D1\u6D88\u606F",
           "data-testid": "sprout-input",
           oninput: (event) => {
@@ -13839,6 +13840,10 @@ window.__ModuleLoader__.load({
         this.tutorState = result.data.state;
         this.skipNotice = result.data.message || "\u5DF2\u8DF3\u8FC7\u3002";
         this.messages = [...this.messages, system(this.skipNotice)];
+        if (this.nextActivityId() !== null) {
+          await this.nextQuestion();
+          return;
+        }
         this.notify();
       }
       async finishRound() {
@@ -14354,7 +14359,7 @@ window.__ModuleLoader__.load({
           this.chatNoticeHost.replaceChildren();
           if (this.helpNotice.length > 0) {
             this.chatNoticeHost.append(
-              h("p", { class: "edu-notice edu-notice--warning", role: "status" }, this.helpNotice)
+              h("p", { class: "edu-study-note sprout-sheet__note", role: "status" }, this.helpNotice)
             );
           }
         }
@@ -15937,6 +15942,14 @@ window.__ModuleLoader__.load({
       padding-top: var(--edu-space-sm);
     }
     .sprout-compose textarea { width: 100%; min-height: 4.5rem; }
+    .sprout-sheet__note {
+      margin: 0;
+      padding: var(--edu-space-xxs) var(--edu-space-xs);
+      border-radius: var(--edu-radius-sm);
+      background: var(--edu-color-surface-muted);
+      font-size: var(--edu-font-xs);
+      color: var(--edu-color-ink-muted);
+    }
     .sprout-compose .edu-button { justify-self: end; }
     @media ${STUDY_COMPACT_QUERY} {
       .ask-sprout-pill { right: var(--edu-space-md); bottom: var(--edu-space-md); }
@@ -17173,7 +17186,10 @@ window.__ModuleLoader__.load({
         kind: "live",
         notice: null,
         async loadWorkspace(_ctx, input) {
-          return api(`/edu/api/g1/study?conceptId=${encodeURIComponent(input.conceptId)}`);
+          const activityId = typeof input.activityId === "string" && input.activityId.length > 0 ? `&activityId=${encodeURIComponent(input.activityId)}` : "";
+          return api(
+            `/edu/api/g1/study?conceptId=${encodeURIComponent(input.conceptId)}${activityId}`
+          );
         },
         async startSession(_ctx, input) {
           return api("/edu/api/g1/tutor/start", body(input));

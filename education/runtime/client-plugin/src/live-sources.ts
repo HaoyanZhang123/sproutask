@@ -257,7 +257,13 @@ export function createLiveStudyDataSource(): any {
     kind: 'live',
     notice: null,
     async loadWorkspace(_ctx: unknown, input: any) {
-      return api(`/edu/api/g1/study?conceptId=${encodeURIComponent(input.conceptId)}`);
+      const activityId =
+        typeof input.activityId === 'string' && input.activityId.length > 0
+          ? `&activityId=${encodeURIComponent(input.activityId)}`
+          : '';
+      return api(
+        `/edu/api/g1/study?conceptId=${encodeURIComponent(input.conceptId)}${activityId}`,
+      );
     },
     async startSession(_ctx: unknown, input: any) {
       return api('/edu/api/g1/tutor/start', body(input));

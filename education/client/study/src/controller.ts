@@ -521,6 +521,7 @@ export class StudyController {
     const input = h('textarea', {
       class: 'edu-input',
       rows: 3,
+      placeholder: '问小芽一句，比如“这一步为什么”“给我一点提示”',
       'aria-label': '给小芽发消息',
       'data-testid': 'sprout-input',
       oninput: (event: Event) => {
@@ -1079,6 +1080,11 @@ export class StudyController {
     this.tutorState = result.data.state;
     this.skipNotice = result.data.message || '已跳过。';
     this.messages = [...this.messages, system(this.skipNotice)];
+    // 跳过 = 进入下一题；后面还有题就换过去，没题了就留在原地并说明。
+    if (this.nextActivityId() !== null) {
+      await this.nextQuestion();
+      return;
+    }
     this.notify();
   }
 
@@ -1657,7 +1663,7 @@ export class StudyController {
       this.chatNoticeHost.replaceChildren();
       if (this.helpNotice.length > 0) {
         this.chatNoticeHost.append(
-          h('p', { class: 'edu-notice edu-notice--warning', role: 'status' }, this.helpNotice),
+          h('p', { class: 'edu-study-note sprout-sheet__note', role: 'status' }, this.helpNotice),
         );
       }
     }

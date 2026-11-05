@@ -749,7 +749,7 @@ function registerRoutes(ctx: HostContextLike, composition: EducationRuntimeCompo
           json(res, 400, { ok: false, error: 'conceptId required' });
           return;
         }
-        json(res, 200, await g1.study(conceptId));
+        json(res, 200, await g1.study(conceptId, url.searchParams.get('activityId')));
         return;
       }
       if (pathname === '/edu/api/g1/progress' && req.method === 'GET') {

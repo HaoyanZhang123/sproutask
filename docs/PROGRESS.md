@@ -177,6 +177,13 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 小芽对话框：面板改成 flex 布局——消息区独立滚动、快捷按钮/提示在输入框上方、输入框固定在底部；气泡宽度与间距按聊天气泡收口。
 - 验证：`pnpm typecheck` / `pnpm test` 全绿；重建并重装 0.4.1（59,829,046 B，SHA256 `8a747ad3…`），`statusHttp=200`。
 
+**补记 5：下一题/跳过真正能换题；小芽面板再收口（2026-11-06 02:1x）**
+
+- 「跳过点不动」「做完点下一题还是这题」根因：真机的学习台数据源只把 `conceptId` 发给宿主，`activityId` 被丢掉；宿主 `g1.study` 也恒取 `activities[0]`。所以跳过只记了一条 `session.skipped`、下一题永远回到第 1 题。
+- 修复：`live-sources.loadWorkspace` 带上 `activityId`；宿主 `/edu/api/g1/study` 读取并传给 `g1.study(conceptId, activityId)`；`g1.study` 按 id 选中题目（找不到才退回第一题）。「跳过」成功后自动进入下一题（没有下一题才留在原地）。
+- 小芽面板：帮助提示从整条黄色警告改成灰色小字（不再抢注意力）；输入框加占位提示「问小芽一句，比如…」。
+- 验证：`pnpm typecheck` / `pnpm test` 全绿（同步更新「跳过」单测为「跳过不完成、但会换到下一题」）；重建 client/host bundle 并部署，`statusHttp=200`。
+
 **未做 / 未验证**
 
 - 真实对话走查（Key 已配置，需用户操作一次）。
