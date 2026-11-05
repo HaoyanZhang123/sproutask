@@ -160,6 +160,13 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 强杀宿主（任务管理器结束进程）可能留下孤儿 node：当前只在关窗时 `taskkill /T /F`，Job Object 兜底列为后续。
 - 便携版 zip 未在 0.4.1 重新构建（安装版已验证）。
 
+**补记：0.4.1 首次启动白屏（2026-11-05 23:45，已修复）**
+
+- 现象：原生窗口打开后内容区一直白屏；服务日志 `statusHttp=404`，stderr 报 `Cannot find package '@edu/education-host'` / `@edu/client-root`。
+- 根因：`%LOCALAPPDATA%\SproutAsk\data\dsh-home\profiles\edu-web` 是 17:01 用 **C 盘旧安装**生成的，profile 的 `node_modules/@edu/*` junction 与 `package.json` 依赖都指向 `C:\...\SproutAsk\current`；该旧安装在当天清理孤儿副本时被删，链接悬空 → host 插件与 client root 都加载失败。（此前进程能跑是因为模块已加载进内存；一旦重启就白屏。）
+- 处理：删掉旧 profile（备份在 `E:\DSH\tmp\cleanup-2026-11-05\stale-profiles`），重启桌面壳；壳检测到 profile 缺失后重跑 setup，链接指向 `E:\芽问\current`。实测 `statusHttp=200`、`statusBody.ok=true`、stderr 无异常，页面正常渲染（截图 `output/capture/sproutask-native-0.4.1.png`）。
+- **待加固**（下一版）：桌面壳每次启动前校验 profile 链接是否指向当前安装，失效则重建；`status != 200` 时直接弹错误而不是继续导航白屏。
+
 
 
 ---
@@ -216,9 +223,10 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 1. 用桌面的「SproutAsk」启动 0.4.1，跑一轮真实对话（提交作答 → 反馈 → 下一题）。
 2. 按 `docs/optimize/04-manual-test.md` 做 15 分钟人工走查并收集反馈。
-3. 视情况补：Job Object 清理兜底、强杀恢复、便携版 zip、0.4.1 Release 发布。
-4. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
-5. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
+3. 桌面壳加固：启动自检并重建失效 profile；`status != 200` 时给错误提示而不是白窗；Job Object 清理兜底。
+4. 视情况补：便携版 zip、0.4.1 Release 发布。
+5. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
+6. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
 
 ---
 
