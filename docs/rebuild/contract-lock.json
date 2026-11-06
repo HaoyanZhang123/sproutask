@@ -2180,7 +2180,7 @@
     },
     {
       "path": "education/scripts/check-tracked-sources.mjs",
-      "sha256": "1aebe48c6caf9a7bd844ea53205e8775eb480dbbe96d79bd79c875071b010c7d"
+      "sha256": "dbda0874740ee341670416e91a66ee5540e6e370e9521770102480ef2035825a"
     },
     {
       "path": "education/scripts/content-validate.mjs",
@@ -2192,7 +2192,7 @@
     },
     {
       "path": "education/scripts/debug/e2e.mjs",
-      "sha256": "6455bf65fd01fdb17c21066c8b568914112b74668aa32aa4be8581ea7b33b1a0"
+      "sha256": "efc4139db729050c3063eaafa06b5009f2b23e01c8bfb276159a9a45f82d4451"
     },
     {
       "path": "education/scripts/debug/scenarios.mjs",
@@ -2295,5 +2295,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-06T13:05:35Z"
+  "generatedAt": "2026-11-06T13:12:31Z"
 }
