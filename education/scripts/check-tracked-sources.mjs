@@ -33,7 +33,12 @@ const SKIP_DIRS = new Set([
 
 /** 本机产物文件：同样不进 git、也不进契约锁。 */
 function isSkippedFile(name) {
-  return name.endsWith('.tsbuildinfo') || name.endsWith('.log');
+  return (
+    name.endsWith('.tsbuildinfo') ||
+    name.endsWith('.log') ||
+    // makensis 每次构建前重新生成的 BOM 清单（不进 git，见根 .gitignore）
+    name.endsWith('.bom.nsi')
+  );
 }
 
 function walk(dir, output) {
