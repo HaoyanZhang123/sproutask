@@ -143,6 +143,30 @@ export function detectAnswerDisclosure(text: string): boolean {
   return DISCLOSURE_TEXT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+/**
+ * 学生是否明确要答案（"直接告诉我选哪个""答案是什么"）。
+ *
+ * 披露与否不能交给模型自觉：线上同一句话三次里只稳定触发一次。命中这条规则
+ * 时直接按 answer_disclosure 处理，保证"学生要答案就给答案 + 披露标记"。
+ */
+const EXPLICIT_ANSWER_REQUEST_PATTERNS: readonly RegExp[] = [
+  // "直接告诉我""干脆说吧"：后面必须紧跟答案类词，避免把"直接给我个提示"误判成要答案。
+  /(?:直接|干脆)(?:告诉我|给我说|说|讲|告诉|给)(?:一下|我)?(?=[^。！？\n]{0,12}(?:答案|选项|选|正确|结论|哪个)|[。！？\s吧啊呀嘛]*$)/,
+  /(?:告诉|给|说)(?:我)?(?:答案|正确选项|正确做法)/,
+  // "选哪个""该选什么""选哪一个吧"
+  /(?:选|该选|要选|应该选).{0,4}(?:哪|什么)/,
+  /答案(?:是|应该)?(?:什么|哪个|呢)/,
+  /(?:看|公布|给|要|要个)(?:一下)?答案/,
+  /别(?:问|绕)了[，,。]?(?:直接)?(?:说|告诉)我/,
+];
+
+export function detectExplicitAnswerRequest(text: string | null | undefined): boolean {
+  if (typeof text !== 'string') return false;
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return false;
+  return EXPLICIT_ANSWER_REQUEST_PATTERNS.some((pattern) => pattern.test(trimmed));
+}
+
 const SOURCE_ID_RUN = /source\.[a-z0-9][a-z0-9._-]*(?:\s*[、,，]\s*source\.[a-z0-9][a-z0-9._-]*)*/gi;
 const ACTIVITY_ID = /activity\.[a-z0-9][a-z0-9._-]*/gi;
 

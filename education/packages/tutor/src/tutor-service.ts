@@ -33,13 +33,15 @@ import type {
 import { errResult, okResult } from '@edu/domain';
 import { roundIndependence } from '@edu/learner';
 import type { UnderstandingExplanation } from '@edu/learner';
-import { buildReferenceAnswer, buildTutorContext } from './context.js';
+import { buildAttemptDigest, buildReferenceAnswer, buildTutorContext } from './context.js';
+import type { TutorAttemptDigest } from './context.js';
 import { errorFromThrown, fromServiceError, isCancelled, tutorError, TutorException } from './errors.js';
 import { createEducationToolRegistry, type EducationToolRegistry } from './tools.js';
 import {
   activityTypesForStage,
   composeStudentMessage,
   decidePedagogy,
+  detectExplicitAnswerRequest,
   helpKindsForAction,
   readTutorSignals,
   reviewStageOfAction,
@@ -137,6 +139,8 @@ interface InternalSession {
   pendingRetry: PendingRetry | null;
   /** Terminal operation receipt for retry idempotency (finish/skip/end). */
   lastCompletion: { readonly requestId: string; readonly data: unknown } | null;
+  /** 最近一次作答摘要：聊天轮里让模型知道"学生刚选了什么/判得怎么样"。 */
+  lastAttempt: TutorAttemptDigest | null;
   readonly auditStart: number;
 }
 
@@ -735,6 +739,8 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
       readonly prerequisites: readonly Concept[];
       readonly attemptNote: string | null;
       readonly rejected: string | null;
+      /** 最近一次作答（聊天轮也要带上，模型才知道学生刚选了什么）。 */
+      readonly attempt: TutorAttemptDigest | null;
     },
   ): Promise<
     ServiceResult<{
@@ -761,6 +767,7 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
         toolNames: [...registry.names],
         maxPrerequisites: 2,
         maxEvidenceItems: 5,
+        attempt: input.attempt,
       },
     );
     if (!contextResult.ok) return { ok: false, error: contextResult.error };
@@ -819,7 +826,7 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
       });
     }
 
-    const decision = decisionFor(session, {
+    let decision = decisionFor(session, {
       signals,
       summary,
       helpRequest: input.helpRequest,
@@ -828,6 +835,20 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
       concept: input.concept,
       activity: input.activity,
     });
+    // 学生明确要答案时，不赌模型是否自觉披露：直接切到 answer_disclosure。
+    if (
+      decision.action !== 'answer_disclosure' &&
+      input.activity !== null &&
+      detectExplicitAnswerRequest(input.message)
+    ) {
+      decision = {
+        ...decision,
+        action: 'answer_disclosure',
+        disclosure: true,
+        rationale: `${decision.rationale}; explicit answer request → deterministic disclosure`,
+      };
+      audit('answer.disclosed', session.session.id, 'student explicitly asked for the answer (rule)');
+    }
     const message = renderedMessage(session, decision, turn.text, {
       concept: input.concept,
       activity: input.activity,
@@ -1133,6 +1154,7 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
         disclosure: false,
         pendingRetry: null,
         lastCompletion: null,
+        lastAttempt: null,
         auditStart: auditLog.length,
       };
       sessions.set(boundSession.id, internal);
@@ -1201,6 +1223,18 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
           }
           const attemptOutcome = ran.result.outcome;
           const answeredActivity = findActivity(ran.pack, attemptOutcome.attempt.activityId) ?? null;
+          // 把这次"选了什么/判得怎么样"存下来：本轮反馈要用，下一轮聊天也要用。
+          const attemptDigest =
+            answeredActivity === null
+              ? null
+              : buildAttemptDigest({
+                  activity: answeredActivity,
+                  rubric: findRubric(ran.pack, answeredActivity) ?? null,
+                  answerText: attemptOutcome.attempt.answerText,
+                  answerAssetId: attemptOutcome.attempt.answerAssetId,
+                  grade: attemptOutcome.grade,
+                });
+          if (attemptDigest !== null) session.lastAttempt = attemptDigest;
           const prerequisites = await contextPrerequisites(ctx, session.state.conceptId);
           const decisions = await emitModelAndDecide(ctx, session, {
             requestId: input.requestId,
@@ -1214,6 +1248,7 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
             prerequisites,
             attemptNote: independenceNote(attemptOutcome.attempt),
             rejected: rejectedNote(attemptOutcome),
+            attempt: attemptDigest,
           });
           if (!decisions.ok) return decisions;
           const decision = decisions.data.decision;
@@ -1260,6 +1295,8 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
           prerequisites,
           attemptNote: null,
           rejected: null,
+          // 聊天轮沿用上一题的作答摘要：学生说"这一步为什么"，指的是他刚选的那一项。
+          attempt: session.lastAttempt,
         });
         if (!decisions.ok) return decisions;
         const decision = decisions.data.decision;

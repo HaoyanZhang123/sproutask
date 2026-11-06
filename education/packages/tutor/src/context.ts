@@ -13,6 +13,7 @@ import type {
   Concept,
   ConceptView,
   ContentPack,
+  GradeResult,
   Id,
   PackKey,
   RequestContext,
@@ -47,6 +48,127 @@ export interface TutorContextRequest {
   readonly toolNames: readonly string[];
   readonly maxPrerequisites?: number;
   readonly maxEvidenceItems?: number;
+  /**
+   * 学生这道题最近一次作答 + 判定。没有它，模型在聊天轮里会答"我这边没看到
+   * 你选了哪一项"（线上实测），讲解也就只能泛泛而谈。
+   */
+  readonly attempt?: TutorAttemptDigest | null;
+}
+
+export interface TutorAttemptDigest {
+  readonly activityId: Id;
+  readonly activityStem: string;
+  readonly kind: string;
+  readonly studentAnswer: string;
+  readonly verdict: 'correct' | 'partly' | 'incorrect' | 'unclear';
+  readonly criteria: readonly {
+    readonly label: string;
+    readonly met: 'yes' | 'no' | 'unclear';
+  }[];
+  readonly feedback: string | null;
+}
+
+const VERDICT_LABEL: Readonly<Record<TutorAttemptDigest['verdict'], string>> = {
+  correct: '正确',
+  partly: '不完全正确',
+  incorrect: '不正确',
+  unclear: '还看不准',
+};
+
+const MET_LABEL: Readonly<Record<'yes' | 'no' | 'unclear', string>> = {
+  yes: '达成',
+  no: '未达成',
+  unclear: '不清楚',
+};
+
+/** 把学生这次写的/选的答案还原成学生话（选项 id 换成选项文字）。 */
+function renderStudentAnswer(
+  activity: Activity,
+  answerText: string | null,
+  answerAssetId: string | null,
+): string {
+  if (answerAssetId !== null) return '（图片作答）';
+  const raw = answerText?.trim() ?? '';
+  if (raw.length === 0) return '（空）';
+  if (activity.answerSchema.kind === 'choice') {
+    try {
+      const parsed = JSON.parse(raw) as { optionIds?: unknown };
+      const ids = Array.isArray(parsed.optionIds) ? parsed.optionIds : [];
+      const labels = ids.map((id) => {
+        const option = activity.answerSchema.kind === 'choice'
+          ? activity.answerSchema.options.find((item) => item.id === id)
+          : undefined;
+        return option?.label ?? String(id);
+      });
+      if (labels.length > 0) return labels.join('、');
+    } catch {
+      /* 不是 JSON 就按纯文本处理 */
+    }
+  }
+  return raw.length > 240 ? `${raw.slice(0, 240)}…` : raw;
+}
+
+/**
+ * 从这次提交的原始答案 + 评分结果里抽出一份"学生能听懂"的摘要。
+ * 只做陈述，不判断对错以外的教学决策；判分本身仍由 rubric/规则负责。
+ */
+export function buildAttemptDigest(input: {
+  readonly activity: Activity;
+  readonly rubric: Rubric | null;
+  readonly answerText: string | null;
+  readonly answerAssetId: string | null;
+  readonly grade: GradeResult | null;
+}): TutorAttemptDigest {
+  const { activity, rubric, grade } = input;
+  const criteria = (grade?.criteria ?? []).slice(0, 5).map((criterion) => {
+    const source = rubric?.criteria.find((item) => item.criterionId === criterion.criterionId);
+    const label = (source?.description ?? criterion.criterionId).trim();
+    return {
+      label: label.length > 60 ? `${label.slice(0, 60)}…` : label,
+      met: criterion.met,
+    };
+  });
+  const anyNo = criteria.some((criterion) => criterion.met === 'no');
+  const allYes = criteria.length > 0 && criteria.every((criterion) => criterion.met === 'yes');
+  const anyUnclear = criteria.some((criterion) => criterion.met === 'unclear');
+  const verdict: TutorAttemptDigest['verdict'] = anyNo
+    ? 'incorrect'
+    : allYes
+      ? 'correct'
+      : anyUnclear
+        ? 'unclear'
+        : 'partly';
+  const feedback = (grade?.feedback ?? '').trim();
+  return {
+    activityId: activity.id,
+    activityStem: activity.stem,
+    kind: activity.answerSchema.kind,
+    studentAnswer: renderStudentAnswer(activity, input.answerText, input.answerAssetId),
+    verdict,
+    criteria,
+    feedback: feedback.length > 0 ? (feedback.length > 300 ? `${feedback.slice(0, 300)}…` : feedback) : null,
+  };
+}
+
+/** 渲染上下文区块：模型据此针对"这一次的选择"讲话，而不是空谈。 */
+export function attemptDigestLines(digest: TutorAttemptDigest): readonly string[] {
+  const lines = [
+    `- 题目：${digest.activityStem}`,
+    `- 学生这次选/写的是：${digest.studentAnswer}`,
+    `- 判定：${VERDICT_LABEL[digest.verdict]}`,
+  ];
+  if (digest.criteria.length > 0) {
+    lines.push(
+      `- 评分要点：${digest.criteria
+        .map((criterion) => `${criterion.label}（${MET_LABEL[criterion.met]}）`)
+        .join('；')}`,
+    );
+  }
+  if (digest.feedback !== null) {
+    lines.push(`- 离线规则给出的反馈（只作参考，不要照抄，也不要提"规则"二字）：${digest.feedback}`);
+  }
+  lines.push('- 你已经知道学生选了什么：不要再问"你选的是哪一项"，直接针对这一项讲。');
+  return lines;
 }
 
 export interface TutorContextResult {
@@ -196,6 +318,17 @@ export async function buildTutorContext(
       trust: 'untrusted_data',
       label: '学生本轮输入（数据处理）',
       content: request.studentMessage,
+      sourceRefs: [],
+    });
+  }
+
+  // 学生刚提交的这道题：选择/判定/要点。没有它，模型会把"你选了什么"重新问一遍。
+  if (request.attempt !== undefined && request.attempt !== null) {
+    blocks.push({
+      kind: 'current_attempt',
+      trust: 'untrusted_data',
+      label: `学生这道题的最近一次作答：${request.attempt.activityStem}`,
+      content: attemptDigestLines(request.attempt).join('\n'),
       sourceRefs: [],
     });
   }

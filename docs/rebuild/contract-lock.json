@@ -816,7 +816,7 @@
     },
     {
       "path": "education/client/study/src/controller.ts",
-      "sha256": "cf5998a7accd88920ccd9c833ab66ddf0da36bf7f273e60d1eb5c0ca9251a2f9"
+      "sha256": "928b563c58bf0402ddac48dfeb8c27ec438beded6f5739b6e70bcf67598f04b6"
     },
     {
       "path": "education/client/study/src/fixture.ts",
@@ -1728,7 +1728,7 @@
     },
     {
       "path": "education/packages/tutor/src/context.ts",
-      "sha256": "caa507624bf4eda4d5b962a841fcf81ac90ab4b2699559193b71250473edf924"
+      "sha256": "7521bd9e87b5cf8821613942dffb585d82ae12479d858a60cb276510aaf4f084"
     },
     {
       "path": "education/packages/tutor/src/coverage.ts",
@@ -1756,7 +1756,7 @@
     },
     {
       "path": "education/packages/tutor/src/pedagogy.ts",
-      "sha256": "eca0a6cd28332017b6e960d803f27825a58dcb304800ec69de858e799c55d982"
+      "sha256": "8652ed1a9aa70d53f56d76451b4b900d81d3f4f777bd85dc09514b38743ed2e0"
     },
     {
       "path": "education/packages/tutor/src/schema.ts",
@@ -1772,11 +1772,15 @@
     },
     {
       "path": "education/packages/tutor/src/tutor-service.ts",
-      "sha256": "68361d38e82fd052dccf383dad2f7c60c9977cbc35a31c64212450a9c124a83a"
+      "sha256": "8a09c797735614ae8968ad18de509bd7c665bad80ded88583d346349978c2a4d"
     },
     {
       "path": "education/packages/tutor/src/types.ts",
-      "sha256": "931da84aadc8f6b4ff75c55c582d5765a3a53583c42db8d7720ab1074a622049"
+      "sha256": "f592703f83b701f62477a379cd416f0dc1e226bb32525aedde94bd9ad21c4543"
+    },
+    {
+      "path": "education/packages/tutor/test/attempt-context.test.ts",
+      "sha256": "01fd1e9cab1d6c91fa201455a22c15f67ba7e27b7e8d7f9dcd568c2124a95b22"
     },
     {
       "path": "education/packages/tutor/test/coverage.test.ts",
@@ -1784,7 +1788,7 @@
     },
     {
       "path": "education/packages/tutor/test/disclosure-signals.test.ts",
-      "sha256": "240fa1a7c1e03a7ed3b8faf73a2cfcde499378ab62aaa4eae54b9c6bd87d51c1"
+      "sha256": "582a37bd2db47dc771a8eb84a8ad043c0bcc9626fa7cf6abd2ba3c661e5086f0"
     },
     {
       "path": "education/packages/tutor/test/error-taxonomy.test.ts",
@@ -2016,7 +2020,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "f6372704bccd84e747f0ecb17af43c267dcbddf3ca99d9bb0c19057de440b80a"
+      "sha256": "d3af7a88a1c61261158bb561ad7537fc7ee341cd8a3b856a6652b8e89eda3813"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2036,7 +2040,7 @@
     },
     {
       "path": "education/runtime/host-plugin/lib/index.js",
-      "sha256": "a1761ff809264ab6e2f3d12d38381d75e728ab62daf47d8fb8d5540638281cef"
+      "sha256": "318f98baba3a3236d7fa828a6eeeb2f924908cce4f93c7f66a429e733a8aa939"
     },
     {
       "path": "education/runtime/host-plugin/package.json",
@@ -2188,15 +2192,15 @@
     },
     {
       "path": "education/scripts/debug/cdp.mjs",
-      "sha256": "3444574a145551e8ee4c666757f924a84b20cc4395a533585b4ba48df0556887"
+      "sha256": "2b0901efe640bc940207985b5bbe473b55e781500bc5daf33216dfcd5650191f"
     },
     {
       "path": "education/scripts/debug/e2e.mjs",
-      "sha256": "efc4139db729050c3063eaafa06b5009f2b23e01c8bfb276159a9a45f82d4451"
+      "sha256": "838f2a530b0801ef6710eea13c1613c2e4b5b296b0e7b234bce755258ec9deb2"
     },
     {
       "path": "education/scripts/debug/scenarios.mjs",
-      "sha256": "62b6c30b416bf88073033029d00fb41b4eb1ec380be6885403b43f8fb2f79ac1"
+      "sha256": "4977da4e96367a2a6707e2799b5d8434803808f69739f24e29597825cca07a04"
     },
     {
       "path": "education/scripts/dev-education.mjs",
@@ -2295,5 +2299,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-06T13:12:31Z"
+  "generatedAt": "2026-11-06T16:46:03Z"
 }

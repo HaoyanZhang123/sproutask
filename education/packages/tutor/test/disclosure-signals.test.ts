@@ -157,4 +157,60 @@ describe('disclosure signals (F6)', () => {
     // The next attempt in this round must be recorded as assisted, not independent.
     expect(result.data.state.helpKinds.length).toBeGreaterThanOrEqual(0);
   });
+
+  it('discloses deterministically when the student explicitly asks for the answer', async () => {
+    const { service, session } = await startHarness({
+      turns: [{ text: EXPLANATION }],
+    });
+    const result = await service.submitTurn(
+      requestContext('f6.turn.explicit', { now: '2026-10-29T08:00:02Z' }),
+      {
+        requestId: 'f6.turn.explicit',
+        sessionId: session.id,
+        revision: 0,
+        message: '直接告诉我选哪个吧',
+      },
+    );
+    expect(result.ok, result.ok ? '' : `${result.error.code}: ${result.error.message}`).toBe(true);
+    if (!result.ok) return;
+    // 不依赖模型自觉：命中"学生明确要答案"规则时必须走披露。
+    expect(result.data.decision.action).toBe('answer_disclosure');
+    expect(result.data.decision.disclosure).toBe(true);
+    expect(result.data.state.disclosure).toBe(true);
+  });
+
+  it('recognises the phrasings students actually use when they want the answer', async () => {
+    const { detectExplicitAnswerRequest } = await import('../src/pedagogy.js');
+    for (const phrase of [
+      '直接告诉我选哪个吧',
+      '直接告诉我这道题选哪个吧',
+      '答案是什么',
+      '好吧你直接说吧',
+      '选哪个',
+      '公布答案吧',
+      '告诉我正确选项',
+    ]) {
+      expect(detectExplicitAnswerRequest(phrase), phrase).toBe(true);
+    }
+    for (const phrase of ['这一步我有点没想明白，能提示一下吗', '为什么观察要有目的', '我想自己再试一次', '直接给我个提示吧', '先剧透一点方向']) {
+      expect(detectExplicitAnswerRequest(phrase), phrase).toBe(false);
+    }
+  });
+  it('does not force disclosure for an ordinary question', async () => {
+    const { service, session } = await startHarness({
+      turns: [{ text: EXPLANATION }],
+    });
+    const result = await service.submitTurn(
+      requestContext('f6.turn.ordinary', { now: '2026-10-29T08:00:03Z' }),
+      {
+        requestId: 'f6.turn.ordinary',
+        sessionId: session.id,
+        revision: 0,
+        message: '这一步我有点没想明白，能提示一下吗',
+      },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.decision.action).not.toBe('answer_disclosure');
+  });
 });

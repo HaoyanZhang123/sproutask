@@ -90,7 +90,7 @@ try {
       process.exit(2);
     }
     const report = createReport(outDir);
-    const context = { cdp, outDir, app, dataRoot, stamp };
+    const context = { cdp, outDir, app, dataRoot, stamp, imageFile: options.image };
     let failure = null;
     try {
       await scenario(context, report);

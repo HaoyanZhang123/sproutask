@@ -211,6 +211,21 @@ export class CdpPage {
     return this.evaluate('document.body.innerText').then((value) => String(value ?? ''));
   }
 
+  /** 给 <input type="file"> 设置真实文件（走 CDP DOM，不伪造 File 对象）。 */
+  async setFileInput(selector, filePath) {
+    await this.send('DOM.enable');
+    const document = await this.send('DOM.getDocument', { depth: 1 });
+    const found = await this.send('DOM.querySelector', {
+      nodeId: document.root.nodeId,
+      selector,
+    });
+    if (!found?.nodeId) throw new Error(`没有找到文件输入框：${selector}`);
+    await this.send('DOM.setFileInputFiles', {
+      nodeId: found.nodeId,
+      files: [filePath],
+    });
+  }
+
   /** 截图（物理像素：按显示器缩放比放大）。 */
   async screenshot(path, { scale = 2 } = {}) {
     const size = await this.evaluate(

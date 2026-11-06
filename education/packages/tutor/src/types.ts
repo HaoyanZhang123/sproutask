@@ -473,6 +473,7 @@ export interface TutorContextBlock {
     | 'activity'
     | 'prior_evidence'
     | 'student_input'
+    | 'current_attempt'
     | 'content_warning';
   /** Content and student text are data, never instructions. */
   readonly trust: 'untrusted_data';

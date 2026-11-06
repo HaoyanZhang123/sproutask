@@ -387,6 +387,13 @@ export const SCENARIOS = {
         `[...document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg')].map((el) => el.textContent || '').join('\\n')`,
       );
       if (String(chatText).includes('没能连上模型')) throw new Error('小芽走了本地降级路径（模型未参与）');
+      // 回归：模型必须知道自己刚看的是哪份作答，不能再问"你选的是哪一项"。
+      if (/没看到你选|没看到.*选项|请告诉我你选/.test(String(chatText))) {
+        throw new Error(`聊天轮仍然不知道学生选了什么：${String(chatText).slice(-200)}`);
+      }
+      if (!/选了|选的是|你选|正确|答对|答错|先明确观察目的/.test(String(chatText))) {
+        throw new Error(`聊天回复没有针对学生的选择：${String(chatText).slice(-200)}`);
+      }
       await assertStudentCopy('小芽回复', String(chatText));
       checks.push({ step: 'chat', excerpt: String(chatText).slice(-400) });
     });
@@ -402,6 +409,92 @@ export const SCENARIOS = {
     });
   },
 
+  /** 图片作答链路：选图 → 预览 → 确认发送 → 澄清或反馈（真实视觉调用 1 次）。 */
+  async live3(context, report) {
+    const { cdp, outDir } = context;
+    const imagePath = String(context.imageFile ?? 'E:\\DSH\\tmp\\e2e\\cell-diagram.png');
+    const assertClean = async (where, text) => {
+      const leaked = findForbiddenCopy(text);
+      if (leaked.length > 0) throw new Error(`${where} 出现内部术语：${leaked.join('、')}`);
+      if (/\*\*/.test(text)) throw new Error(`${where} 出现 Markdown 星号`);
+    };
+
+    await report.step('进入学习页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('去目录挑一个');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"map-page\\"]")', { label: '知识地图' });
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').includes('观察的目的与对象'))`,
+        { label: '概念按钮' },
+      );
+      await cdp.clickText('观察的目的与对象');
+      await new Promise((done) => setTimeout(done, 1200));
+      await cdp.clickText('开始学习');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"study-question\\"]") !== null', {
+        label: '题目',
+        timeoutMs: 40_000,
+      });
+    });
+
+    await report.step('切到图片作答并选图', async () => {
+      // 表单/底栏是异步挂载的：等"提交作答"或"改用图片作答"出现再判断。
+      await cdp.waitFor(
+        `Boolean(document.querySelector('[data-action="submit-answer"]') || document.querySelector('[data-action="image-answer"]'))`,
+        { label: '作答底栏', timeoutMs: 30_000 },
+      );
+      const hasImageMode = await cdp.evaluate(
+        `Boolean(document.querySelector('[data-action="image-answer"]'))`,
+      );
+      if (!hasImageMode) throw new Error('当前题目没有"改用图片作答"入口');
+      await cdp.click('[data-action="image-answer"]');
+      await cdp.waitFor('document.querySelector("input[type=file]") !== null', {
+        label: '文件输入框',
+        timeoutMs: 20_000,
+      });
+      await cdp.setFileInput('input[type=file]', imagePath);
+      await cdp.waitFor('document.querySelector("[data-testid=\\"image-file-meta\\"]") !== null', {
+        label: '图片信息',
+        timeoutMs: 30_000,
+      });
+      await new Promise((done) => setTimeout(done, 1500));
+      await snapshot(context, '01-image-picked');
+    });
+
+    await report.step('确认发送并拿到识别结果', async () => {
+      // 先点预览（若需要），再点"确认发送给模型识别"。
+      for (const label of ['预览图片', '看一下图片', '预览']) {
+        try {
+          await cdp.clickText(label);
+          break;
+        } catch {
+          /* 没有预览按钮就直接发 */
+        }
+      }
+      const send = await cdp.evaluate(`(() => {
+        const nodes = [...document.querySelectorAll('button')];
+        const target = nodes.find((el) => (el.textContent || '').includes('确认发送'));
+        if (!target) return { ok: false, all: nodes.map((el) => (el.textContent || '').trim()).filter(Boolean) };
+        if (target.disabled) return { ok: false, reason: 'disabled' };
+        target.click();
+        return { ok: true };
+      })()`);
+      if (!send?.ok) throw new Error(`无法发送图片：${send?.reason ?? ''} ${JSON.stringify(send?.all ?? []).slice(0, 200)}`);
+      await new Promise((done) => setTimeout(done, 2000));
+      await cdp.waitFor(
+        '!document.querySelector("[data-testid=\\"image-busy\\"]")',
+        { label: '识别结束', timeoutMs: 120_000 },
+      );
+      await new Promise((done) => setTimeout(done, 1500));
+      await snapshot(context, '02-image-result');
+      const text = await cdp.text();
+      if (/UNAVAILABLE|NETWORK|Error:/i.test(text)) throw new Error('图片链路出现内部错误码');
+      if (!/识别|看清|图片|再拍|文字/.test(text)) throw new Error('识别结束后没有可读结果');
+      await assertClean('图片结果', text);
+      console.log(`\n[图片结果] ${text.slice(-600)}`);
+    });
+
+    await report.step('整体无报错', () => expectNoErrors(context));
+  },
   /** 真实模型走查 2：答错后的反馈 + 直接要答案的披露路径。 */
   async live2(context, report) {
     const { cdp, outDir } = context;
@@ -478,15 +571,19 @@ export const SCENARIOS = {
         `document.body.innerText.includes('看过完整答案') || document.body.innerText.includes('看过答案')`,
       );
       const gaveAnswer = /先明确观察目的|先多拍照片|先跟随同学|先凭印象/.test(String(chat));
-      // 模型是否走披露路径存在波动（同一句"直接告诉我选哪个"两次结果不同）；
-      // 这里记录事实、不把波动当崩溃。格式/术语问题仍然必须为 0。
-      if (!disclosed && !gaveAnswer) {
-        console.log('  ⚠ 本轮模型没有披露答案（波动，记录待跟进）');
+      // 规则保证：学生明确要答案 → answer_disclosure（不再依赖模型自觉）。
+      if (!disclosed) {
+        throw new Error(`明确要答案却没有披露提示；回复：${String(chat).slice(-200)}`);
       }
-      if (disclosed && String(chat).includes('不用急着答完整')) {
-        throw new Error('披露答案的回复还带着"给你一个提示"的前缀');
+      if (!gaveAnswer) console.log('  ⚠ 有披露提示，但回复里没有逐字列出选项（可接受）');
+      const lastReply = await cdp.evaluate(
+        `(() => { const nodes = [...document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg[data-role="assistant"]')]; const last = nodes[nodes.length - 1]; return last ? (last.textContent || '').trim() : ''; })()`,
+      );
+      // 模板前缀必须换成披露口径；回复正文里出现"提示"这类自然语言不算问题。
+      if (String(lastReply).startsWith('给你一个提示')) {
+        throw new Error(`披露答案的回复仍用提示前缀：${String(lastReply).slice(0, 80)}`);
       }
-      console.log(`\n[披露回复] disclosed=${disclosed} gaveAnswer=${gaveAnswer}\n${String(chat).slice(-600)}`);
+      console.log(`\n[披露回复] disclosed=${disclosed} gaveAnswer=${gaveAnswer}\n开头：${String(lastReply).slice(0, 120)}\n${String(chat).slice(-500)}`);
     });
 
     await report.step('结束本轮', async () => {
