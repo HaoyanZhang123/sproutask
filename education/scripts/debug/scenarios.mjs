@@ -1,0 +1,500 @@
+// @ts-check
+/**
+ * 端到端场景。每个场景接收 { cdp, outDir } 和 report 收集器。
+ *
+ * 原则：只断言学生能看见/能点到的东西；不靠内部状态猜测。
+ * 阶段 2 的场景一律不触发模型调用（隔离数据根里没有 Key），因此不消耗额度。
+ */
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { findForbiddenCopy } from './cdp.mjs';
+
+/** @typedef {{cdp: import('./cdp.mjs').CdpPage, outDir: string}} Context */
+
+/** 断言：页面文字不含内部标识/开发术语。 */
+export async function expectCleanCopy({ cdp }, where = '') {
+  const text = await cdp.text();
+  const leaked = findForbiddenCopy(text);
+  if (leaked.length > 0) {
+    throw new Error(`${where} 学生界面出现内部术语：${leaked.join('、')}`);
+  }
+}
+
+/** 断言：没有 JS 异常/控制台错误（可放宽到指定条数）。 */
+export function expectNoErrors({ cdp }, tolerance = 0) {
+  const errors = cdp.exceptions.length + cdp.consoleErrors.length;
+  if (errors > tolerance) {
+    const detail = cdp.exceptions[0] ?? cdp.consoleErrors[0]?.text ?? '';
+    throw new Error(`页面报错 ${errors} 条：${String(detail).slice(0, 160)}`);
+  }
+}
+
+/**
+ * 把当前页面结构（testids / data-action / 可见按钮）写到 outDir，方便排查。
+ * @param {Context} context
+ * @param {string} name
+ */
+export async function snapshot(context, name) {
+  const { cdp, outDir } = context;
+  const structure = await cdp.evaluate(`(() => {
+    const visible = (el) => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+    };
+    return {
+      title: document.title,
+      path: location.pathname + location.search,
+      testids: [...new Set([...document.querySelectorAll('[data-testid]')].map((el) => el.dataset.testid))],
+      actions: [...document.querySelectorAll('[data-action]')]
+        .filter(visible)
+        .map((el) => ({ action: el.dataset.action, text: (el.textContent || '').trim().slice(0, 24), tag: el.tagName })),
+      buttons: [...document.querySelectorAll('button')]
+        .filter(visible)
+        .map((el) => ({
+          text: (el.textContent || '').trim().slice(0, 24),
+          action: el.dataset.action ?? null,
+          disabled: el.disabled,
+        })),
+      inputs: [...document.querySelectorAll('input, textarea, select')].filter(visible).map((el) => ({
+        tag: el.tagName,
+        type: el.getAttribute('type'),
+        name: el.getAttribute('name') ?? el.getAttribute('aria-label') ?? el.dataset.testid ?? null,
+      })),
+    };
+  })()`);
+  const text = await cdp.text();
+  writeFileSync(join(outDir, `${name}.json`), `${JSON.stringify({ structure, text }, null, 2)}\n`);
+  await cdp.screenshot(join(outDir, `${name}.png`));
+  return structure;
+}
+
+/** 点导航栏的某一项（今天 / 学习 / 进展）。 */
+export async function goNav({ cdp }, label) {
+  const clicked = await cdp.evaluate(`(() => {
+    const nodes = [...document.querySelectorAll('[data-testid="edu-nav"] a, [data-testid="edu-nav"] button')];
+    const target = nodes.find((el) => (el.textContent || '').trim() === ${JSON.stringify(label)});
+    if (!target) return false;
+    target.click();
+    return true;
+  })()`);
+  if (!clicked) throw new Error(`导航里没有「${label}」`);
+}
+
+/** 等页面标题变成期望值（应用用内存路由，location 不变，标题会变）。 */
+export async function waitTitle({ cdp }, keyword, timeoutMs = 20_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const title = await cdp.evaluate('document.title').catch(() => '');
+    if (String(title).includes(keyword)) return String(title);
+    await new Promise((done) => setTimeout(done, 200));
+  }
+  const actual = await cdp.evaluate('document.title').catch(() => '?');
+  throw new Error(`等待标题含「${keyword}」超时，当前是「${actual}」`);
+}
+
+export const SCENARIOS = {
+  /** 最小可用性：能打开、无报错、无内部术语泄漏。 */
+  async smoke(context, report) {
+    const { cdp, outDir } = context;
+    await report.step('首页渲染', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.screenshot(join(outDir, '01-home.png'));
+    });
+    await report.step('首页无内部术语', () => expectCleanCopy(context, '首页'));
+    await report.step('首页无报错', () => expectNoErrors(context));
+  },
+
+  /** 全路径静态走查：不触发模型调用。 */
+  async walkthrough(context, report) {
+    const { cdp, outDir } = context;
+    const titles = /** @type {Record<string,string>} */ ({});
+
+    await report.step('首页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await snapshot(context, '01-home');
+      titles['home'] = await cdp.evaluate('document.title');
+      await expectCleanCopy(context, '首页');
+    });
+
+    await report.step('目录（学习）', async () => {
+      await goNav(context, '学习');
+      await new Promise((done) => setTimeout(done, 1500));
+      titles['learn'] = await cdp.evaluate('document.title');
+      await snapshot(context, '02-learn');
+      await expectCleanCopy(context, '学习页');
+    });
+
+    await report.step('进展', async () => {
+      await goNav(context, '进展');
+      await new Promise((done) => setTimeout(done, 1500));
+      titles['progress'] = await cdp.evaluate('document.title');
+      await snapshot(context, '03-progress');
+      await expectCleanCopy(context, '进展页');
+    });
+
+    await report.step('设置', async () => {
+      await cdp.clickText('设置');
+      await new Promise((done) => setTimeout(done, 1500));
+      titles['settings'] = await cdp.evaluate('document.title');
+      await snapshot(context, '04-settings');
+      await expectCleanCopy(context, '设置页');
+    });
+
+    await report.step('回到今天', async () => {
+      await goNav(context, '今天');
+      await new Promise((done) => setTimeout(done, 1200));
+      titles['home2'] = await cdp.evaluate('document.title');
+      await snapshot(context, '05-home-again');
+    });
+
+    await report.step('整体无报错', () => expectNoErrors(context));
+    console.log(`页面标题：${JSON.stringify(titles)}`);
+  },
+
+  /** 探索：从首页进入目录并 dump 结构，供后续场景编写选择器。 */
+  async explore(context, report) {
+    const { cdp } = context;
+    await report.step('首页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await snapshot(context, '01-home');
+    });
+    await report.step('去目录', async () => {
+      await cdp.clickText('去目录挑一个');
+      await new Promise((done) => setTimeout(done, 2000));
+      await snapshot(context, '02-library');
+    });
+    await report.step('选第一个概念', async () => {
+      const picked = await cdp.evaluate(`(() => {
+        const candidates = [...document.querySelectorAll('button, a, [role="button"]')].filter((el) => {
+          const rect = el.getBoundingClientRect();
+          const style = getComputedStyle(el);
+          return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden';
+        });
+        const target = candidates.find((el) => {
+          const text = (el.textContent || '').trim();
+          return text.length > 2 && !['芽问生物学习','今天','学习','进展','设置'].includes(text);
+        });
+        if (!target) return { ok: false, all: candidates.map((el) => (el.textContent || '').trim().slice(0, 20)) };
+        target.click();
+        return { ok: true, text: (target.textContent || '').trim().slice(0, 40) };
+      })()`);
+      if (!picked?.ok) throw new Error(`目录里没有可点的概念：${JSON.stringify(picked?.all ?? []).slice(0, 300)}`);
+      await new Promise((done) => setTimeout(done, 3000));
+      await snapshot(context, '03-study');
+    });
+  },
+
+  /** 探索 2：目录 → 概念 → 学习页。 */
+  async explore2(context, report) {
+    const { cdp } = context;
+    await report.step('首页→目录', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('去目录挑一个');
+      await new Promise((done) => setTimeout(done, 2000));
+    });
+    await report.step('点概念', async () => {
+      await cdp.clickText('观察的目的与对象');
+      await new Promise((done) => setTimeout(done, 2000));
+      await snapshot(context, '02-concept');
+    });
+    await report.step('开始学习', async () => {
+      const candidates = await cdp.evaluate(`[...document.querySelectorAll('button')].map((el) => (el.textContent || '').trim()).filter((t) => t.length > 0)`);
+      console.log(`概念页按钮：${JSON.stringify(candidates).slice(0, 400)}`);
+      for (const label of ['开始学习', '学习这一节', '开始', '学这一节']) {
+        try {
+          await cdp.clickText(label);
+          await new Promise((done) => setTimeout(done, 3000));
+          break;
+        } catch {
+          /* 试下一个 */
+        }
+      }
+      await snapshot(context, '03-study');
+    });
+  },
+
+  /** 学习主路径（无模型 Key，不花钱）：进题、作答、跳过、问小芽、结束本轮。 */
+  async study(context, report) {
+    const { cdp, outDir } = context;
+    const title = () => cdp.evaluate('document.title');
+
+    await report.step('进入学习页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('去目录挑一个');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"map-page\\"]")', {
+        label: '知识地图内容',
+        timeoutMs: 20_000,
+      });
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').includes('观察的目的与对象'))`,
+        { label: '概念按钮', timeoutMs: 20_000 },
+      );
+      await cdp.clickText('观察的目的与对象');
+      await new Promise((done) => setTimeout(done, 1500));
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').trim() === '开始学习')`,
+        { label: '开始学习按钮', timeoutMs: 20_000 },
+      );
+      await cdp.clickText('开始学习');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"study-question\\"]") !== null', {
+        label: '题目',
+        timeoutMs: 30_000,
+      });
+      await snapshot(context, '01-question');
+    });
+
+    await report.step('题目完整（题干 + 选项 + 主要按钮）', async () => {
+      const info = await cdp.evaluate(`(() => ({
+        stem: (document.querySelector('[data-testid="study-stem"]')?.textContent || '').trim(),
+        options: document.querySelectorAll('input[type="radio"]').length,
+        submit: Boolean(document.querySelector('[data-action="submit-answer"]')),
+        skip: Boolean(document.querySelector('[data-action="skip-question"]')),
+        hint: Boolean(document.querySelector('[data-action="hint"]')),
+      }))()`);
+      if (!info?.stem || info.stem.length < 6) throw new Error(`题干异常：「${info?.stem ?? ''}」`);
+      if ((info?.options ?? 0) < 2) throw new Error(`选项过少：${info?.options}`);
+      if (!info.submit || !info.skip) throw new Error('缺少提交/跳过按钮');
+      await expectCleanCopy(context, '题目页');
+    });
+
+    await report.step('选一个答案并提交（无 Key，应优雅失败）', async () => {
+      const picked = await cdp.evaluate(`(() => {
+        const radios = [...document.querySelectorAll('input[type="radio"]')];
+        if (!radios.length) return false;
+        radios[0].click();
+        return true;
+      })()`);
+      if (!picked) throw new Error('没有可选项');
+      await cdp.click('[data-action="submit-answer"]', { label: '提交作答' });
+      await new Promise((done) => setTimeout(done, 6000));
+      await snapshot(context, '02-after-submit');
+      const text = await cdp.text();
+      // 没有 Key 时应给出学生话的"暂时不可用"，而不是内部错误码。
+      if (/UNAVAILABLE|NETWORK|service_error|Error:/i.test(text)) {
+        throw new Error('失败提示里出现内部错误码');
+      }
+      await expectCleanCopy(context, '提交后');
+    });
+
+    await report.step('跳过进入下一题', async () => {
+      const before = await cdp.evaluate(
+        `(document.querySelector('[data-testid="study-stem"]')?.textContent || '').trim()`,
+      );
+      await cdp.click('[data-action="skip-question"]', { label: '先跳过' });
+      await new Promise((done) => setTimeout(done, 5000));
+      const after = await cdp.evaluate(
+        `(document.querySelector('[data-testid="study-stem"]')?.textContent || '').trim()`,
+      );
+      await snapshot(context, '03-after-skip');
+      if (after === before) throw new Error(`跳过之后题目没变：「${String(before).slice(0, 40)}」`);
+    });
+
+    await report.step('问小芽：发一条消息（无 Key，应优雅失败）', async () => {
+      await cdp.click('[data-action="open-sprout"]', { label: '问小芽' });
+      await new Promise((done) => setTimeout(done, 600));
+      await cdp.fill('[data-testid="sprout-input"]', '给我一点提示');
+      await cdp.click('[data-testid="sprout-send"]', { label: '发送' });
+      await new Promise((done) => setTimeout(done, 6000));
+      await snapshot(context, '04-chat');
+      const text = await cdp.text();
+      if (/UNAVAILABLE|NETWORK|Error:/i.test(text)) throw new Error('聊天失败提示里出现内部错误码');
+      await expectCleanCopy(context, '小芽对话');
+    });
+
+    await report.step('结束本轮', async () => {
+      await cdp.click('[data-action="finish-round"]', { label: '结束本轮' });
+      await new Promise((done) => setTimeout(done, 4000));
+      await snapshot(context, '05-finish');
+      const text = await cdp.text();
+      if (!/本轮|完成|结果/.test(text)) throw new Error('结束本轮后没有结果区域');
+      await expectCleanCopy(context, '结束本轮');
+    });
+
+    await report.step('进展页有记录', async () => {
+      await goNav(context, '进展');
+      await new Promise((done) => setTimeout(done, 1500));
+      await snapshot(context, '06-progress');
+      const text = await cdp.text();
+      if (/还没有学习记录/.test(text)) throw new Error('刚学完但进展页仍显示"还没有学习记录"');
+    });
+
+    await report.step('整体无报错', () => expectNoErrors(context));
+    console.log(`结束状态标题：${await title()}`);
+  },
+
+  /** 真实模型走查（会花钱）：只在 --secrets 指向真实 Key 时运行。 */
+  async live(context, report) {
+    const { cdp, outDir } = context;
+    const checks = [];
+    const assertStudentCopy = async (where, text) => {
+      const leaked = findForbiddenCopy(text);
+      if (leaked.length > 0) throw new Error(`${where} 出现内部术语：${leaked.join('、')}`);
+      if (/\*\*/.test(text)) throw new Error(`${where} 出现 Markdown 星号：${text.slice(0, 120)}`);
+    };
+
+    await report.step('进入学习页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('去目录挑一个');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"map-page\\"]")', { label: '知识地图' });
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').includes('观察的目的与对象'))`,
+        { label: '概念按钮' },
+      );
+      await cdp.clickText('观察的目的与对象');
+      await new Promise((done) => setTimeout(done, 1200));
+      await cdp.clickText('开始学习');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"study-question\\"]") !== null', {
+        label: '题目',
+        timeoutMs: 40_000,
+      });
+      await snapshot(context, '01-question');
+    });
+
+    await report.step('提交作答并拿到模型反馈', async () => {
+      await cdp.evaluate(`(() => { const r = document.querySelectorAll('input[type="radio"]')[0]; r?.click(); return true; })()`);
+      await cdp.click('[data-action="submit-answer"]', { label: '提交作答' });
+      await cdp.waitFor(
+        'document.querySelector("[data-testid=\\"study-feedback\\"]") !== null && !document.querySelector(\'[data-wait-base]\')',
+        { label: '反馈出现', timeoutMs: 90_000 },
+      );
+      await new Promise((done) => setTimeout(done, 1500));
+      await snapshot(context, '02-feedback');
+      const text = await cdp.text();
+      if (/没能连上模型|本地规则|规则批改/.test(text)) {
+        throw new Error('反馈走了本地降级路径（模型未参与）');
+      }
+      await assertStudentCopy('反馈', text);
+      checks.push({ step: 'feedback', excerpt: text.slice(0, 400) });
+    });
+
+    await report.step('问小芽：要提示并拿到模型回复', async () => {
+      const before = await cdp.evaluate(
+        `document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg').length`,
+      );
+      await cdp.click('[data-action="open-sprout"]', { label: '问小芽' });
+      await new Promise((done) => setTimeout(done, 700));
+      await cdp.fill('[data-testid="sprout-input"]', '给我一点提示，我自己再想想');
+      await cdp.click('[data-testid="sprout-send"]', { label: '发送' });
+      await cdp.waitFor(
+        `document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg').length >= ${Number(before) + 2}`,
+        { label: '小芽回复', timeoutMs: 90_000 },
+      );
+      await new Promise((done) => setTimeout(done, 1200));
+      await snapshot(context, '03-chat');
+      const chatText = await cdp.evaluate(
+        `[...document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg')].map((el) => el.textContent || '').join('\\n')`,
+      );
+      if (String(chatText).includes('没能连上模型')) throw new Error('小芽走了本地降级路径（模型未参与）');
+      await assertStudentCopy('小芽回复', String(chatText));
+      checks.push({ step: 'chat', excerpt: String(chatText).slice(-400) });
+    });
+
+    await report.step('结束本轮并回进展页', async () => {
+      await cdp.click('[data-action="finish-round"]', { label: '结束本轮' });
+      await new Promise((done) => setTimeout(done, 4000));
+      await snapshot(context, '04-finish');
+      await goNav(context, '进展');
+      await new Promise((done) => setTimeout(done, 1500));
+      await snapshot(context, '05-progress');
+      await expectCleanCopy(context, '进展页');
+    });
+  },
+
+  /** 真实模型走查 2：答错后的反馈 + 直接要答案的披露路径。 */
+  async live2(context, report) {
+    const { cdp, outDir } = context;
+    const assertStudentCopy = async (where, text) => {
+      const leaked = findForbiddenCopy(text);
+      if (leaked.length > 0) throw new Error(`${where} 出现内部术语：${leaked.join('、')}`);
+      if (/\*\*/.test(text)) throw new Error(`${where} 出现 Markdown 星号：${text.slice(0, 120)}`);
+    };
+
+    await report.step('进入学习页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('去目录挑一个');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"map-page\\"]")', { label: '知识地图' });
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').includes('观察的目的与对象'))`,
+        { label: '概念按钮' },
+      );
+      await cdp.clickText('观察的目的与对象');
+      await new Promise((done) => setTimeout(done, 1200));
+      await cdp.clickText('开始学习');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"study-question\\"]") !== null', {
+        label: '题目',
+        timeoutMs: 40_000,
+      });
+    });
+
+    await report.step('选一个错答案，看反馈是否讲清楚', async () => {
+      await cdp.waitFor('document.querySelectorAll("input[type=\\"radio\\"]").length >= 2', {
+        label: '选项渲染',
+        timeoutMs: 30_000,
+      });
+      const picked = await cdp.evaluate(`(() => {
+        const radios = [...document.querySelectorAll('input[type="radio"]')];
+        if (radios.length < 2) return false;
+        radios[1].click();
+        return true;
+      })()`);
+      if (!picked) throw new Error('选项不足');
+      await cdp.click('[data-action="submit-answer"]', { label: '提交作答' });
+      await new Promise((done) => setTimeout(done, 800));
+      // 反馈容器先出现、评分后到；等"评分结果"本身，而不是容器。
+      await cdp.waitFor(
+        'document.querySelector("[data-testid=\\"study-feedback-grade\\"]") !== null && !document.querySelector("[data-wait-base]")',
+        { label: '评分结果', timeoutMs: 90_000 },
+      );
+      await new Promise((done) => setTimeout(done, 1200));
+      await snapshot(context, '02-wrong-feedback');
+      const text = await cdp.text();
+      if (/没能连上模型/.test(text)) throw new Error('反馈走了本地降级路径');
+      await assertStudentCopy('答错反馈', text);
+      // 讲清楚：至少说明"为什么不对/该看什么"，而不是只报对错。
+      if (!/目的|对象|第一步/.test(text)) throw new Error('答错反馈没有解释关键概念');
+      console.log(`\n[答错反馈] ${text.slice(0, 500)}`);
+    });
+
+    await report.step('直接要答案：出现披露提示', async () => {
+      await cdp.click('[data-action="open-sprout"]', { label: '问小芽' });
+      await new Promise((done) => setTimeout(done, 700));
+      await cdp.fill('[data-testid="sprout-input"]', '直接告诉我这道题选哪个吧');
+      await cdp.click('[data-testid="sprout-send"]', { label: '发送' });
+      await new Promise((done) => setTimeout(done, 1000));
+      await cdp.waitFor(
+        `[...document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg')].length >= 2`,
+        { label: '小芽回复', timeoutMs: 90_000 },
+      );
+      await new Promise((done) => setTimeout(done, 1500));
+      await snapshot(context, '03-disclosure');
+      const chat = await cdp.evaluate(
+        `[...document.querySelectorAll('[data-testid="sprout-thread"] .sprout-msg')].map((el) => el.textContent || '').join('\\n')`,
+      );
+      await assertStudentCopy('披露回复', String(chat));
+      // 披露由教学决策决定：要么出现"看过完整答案"徽标，要么回复里直接给出正确选项。
+      const disclosed = await cdp.evaluate(
+        `document.body.innerText.includes('看过完整答案') || document.body.innerText.includes('看过答案')`,
+      );
+      const gaveAnswer = /先明确观察目的|先多拍照片|先跟随同学|先凭印象/.test(String(chat));
+      // 模型是否走披露路径存在波动（同一句"直接告诉我选哪个"两次结果不同）；
+      // 这里记录事实、不把波动当崩溃。格式/术语问题仍然必须为 0。
+      if (!disclosed && !gaveAnswer) {
+        console.log('  ⚠ 本轮模型没有披露答案（波动，记录待跟进）');
+      }
+      if (disclosed && String(chat).includes('不用急着答完整')) {
+        throw new Error('披露答案的回复还带着"给你一个提示"的前缀');
+      }
+      console.log(`\n[披露回复] disclosed=${disclosed} gaveAnswer=${gaveAnswer}\n${String(chat).slice(-600)}`);
+    });
+
+    await report.step('结束本轮', async () => {
+      await cdp.click('[data-action="finish-round"]', { label: '结束本轮' });
+      await new Promise((done) => setTimeout(done, 4000));
+      await snapshot(context, '04-finish');
+    });
+
+    await report.step('整体无报错', () => expectNoErrors(context));
+  },
+};

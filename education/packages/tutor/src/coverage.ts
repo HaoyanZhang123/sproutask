@@ -83,7 +83,11 @@ export function buildCoverageBriefing(
   const emitConcept = (concept: Concept, indent: string): void => {
     if (conceptCount >= maxConcepts) return;
     conceptCount += 1;
-    lines.push(`${indent}· ${concept.title}${concept.id === currentConceptId ? '（当前）' : ''}`);
+    // 模型只能用这里出现过的 id 调工具；只给标题它就会自己编 id（线上实测
+    // 编出过 concept.bio7a.c2.purpose 这种不存在的标识）。
+    lines.push(
+      `${indent}· ${concept.title}${concept.id === currentConceptId ? '（当前）' : ''} · ${concept.id}`,
+    );
   };
 
   const walk = (parentId: Id | null, depth: number): void => {
@@ -106,6 +110,21 @@ export function buildCoverageBriefing(
 
   lines.push('', '回答问题时的规则：');
   for (const [index, rule] of COVERAGE_RULES.entries()) lines.push(`${index + 1}. ${rule}`);
+
+  // 当前概念可用题目：模型要代学生提交作答时，必须有真实 id 和题干。
+  const current = currentConceptId === null ? null : pack.concepts.find((item) => item.id === currentConceptId) ?? null;
+  if (current !== null) {
+    lines.push('', `当前概念：${current.title} · ${current.id}`);
+    const activities = pack.activities.filter((item) => item.conceptIds.includes(current.id));
+    if (activities.length === 0) {
+      lines.push('  当前概念没有配题目。');
+    } else {
+      lines.push('  当前概念可作答的题目（id 只能从这里取）：');
+      for (const activity of activities) {
+        lines.push(`  · ${activity.stem} · ${activity.id}（${activity.answerSchema.kind}）`);
+      }
+    }
+  }
   return lines.join('\n');
 }
 

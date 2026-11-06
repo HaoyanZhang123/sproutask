@@ -758,11 +758,29 @@ export class G1Service {
     requestId: string,
     input: { conceptId: string; mode: 'learn' | 'review'; activityId?: string | null; sessionId?: string },
   ): Promise<ServiceResult<unknown>> {
+    const ctx = this.ctx(requestId);
+    const remember = (result: ServiceResult<unknown>, source: typeof input): void => {
+      const sessionId = (result.ok ? (result.data as { session?: { id?: string } }).session?.id : undefined);
+      if (typeof sessionId === 'string') {
+        this.localSessions.set(sessionId, {
+          conceptId: source.conceptId,
+          mode: source.mode,
+          activityId: source.activityId ?? null,
+        });
+      }
+    };
+
+    // 1) 先原样启动：会话还在内存里就是"继续同一把学习"（换题也只换当前活动），
+    //    不新建 session，学习记录不会被拆成碎片。
     let effective = input;
-    // 「继续上次」会把一个已经开过的 session id 再传回来。直接用它去 create，
-    // DSH 会走恢复路径：实测能卡 ~60s 再抛 TypeError，最后才靠重试换新 id。
-    // 这里先用 resume 语义换一个全新的 id（概念/模式/活动沿用原会话），
-    // 避免任何一次打开学习台先等一分钟。
+    let started = await this.composition.tutor.startSession(ctx, effective);
+    if (started.ok) {
+      remember(started, effective);
+      return started;
+    }
+
+    // 2) 内存里没有（换进程/隔天再来）：日志里有这条会话时，用 resume 语义换一个
+    //    新 id 重新绑定，绕开 DSH 旧的恢复路径（那条路径实测会卡 ~60s 再抛错）。
     if (typeof input.sessionId === 'string' && input.sessionId.length > 0) {
       const journal = await this.journalSessions();
       const known = journal.sessions.some((entry) => entry.session.id === input.sessionId);
@@ -787,25 +805,16 @@ export class G1Service {
             };
             this.composition.audit?.({
               kind: 'session.rebound',
-              at: this.ctx(requestId).now,
+              at: ctx.now,
               from: input.sessionId,
               to: session.id,
             });
+            started = await this.composition.tutor.startSession(ctx, effective);
           }
         }
       }
     }
-    const started = await this.composition.tutor.startSession(this.ctx(requestId), effective);
-    if (started.ok) {
-      const sessionId = (started.data as { session?: { id?: string } }).session?.id;
-      if (typeof sessionId === 'string') {
-        this.localSessions.set(sessionId, {
-          conceptId: effective.conceptId,
-          mode: effective.mode,
-          activityId: effective.activityId ?? null,
-        });
-      }
-    }
+    if (started.ok) remember(started, effective);
     return started;
   }
 
@@ -889,8 +898,8 @@ export class G1Service {
     if (attemptInput === null || attemptInput === undefined) {
       const message =
         helpRequest === null
-          ? '当前模型通道不可用；本地材料与规则批改仍可使用。请先阅读材料并提交答案。'
-          : '当前模型通道不可用，无法生成新的解释；请先阅读材料，或用规则批改查看答案要点。';
+          ? '现在连不上模型，暂时没法生成新的讲解。材料、草稿和规则批改仍然可用；可以先读材料再提交答案。'
+          : '现在连不上模型，暂时没法生成新的解释。可以先读材料，或者提交答案看看规则批改的要点。';
       return okResult(
         {
           sessionId,
@@ -968,7 +977,7 @@ export class G1Service {
       payload: { attempt, grade: graded.data, local: true },
       effects: [],
     });
-    const message = graded.data.feedback;
+    const message = `这次没能连上模型，我先按规则帮你核对（讲解可能不如平时细）。\n\n${graded.data.feedback}`;
     return okResult(
       {
         sessionId,

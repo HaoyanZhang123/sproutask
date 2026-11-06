@@ -300,6 +300,7 @@ export class StudyController {
   private waitingNotice = '';
   private conflictRetryTimer: ReturnType<typeof setTimeout> | null = null;
   private conflictRetryCount = 0;
+  private activeSessionId: string | null = null;
   private waitingStartedAt = 0;
   private waitingTimer: ReturnType<typeof setInterval> | null = null;
   private phase: StudyActivityPhase = 'draft';
@@ -800,7 +801,7 @@ export class StudyController {
     const result = await this.options.dataSource.startSession(this.request(), {
       conceptId: this.workspace.concept.id,
       mode: this.intent.mode,
-      sessionId: this.intent.sessionId ?? undefined,
+      sessionId: this.intent.sessionId ?? this.activeSessionId ?? undefined,
       activityId: this.workspace.activity.id,
     });
     if (!result.ok) {
@@ -811,6 +812,8 @@ export class StudyController {
     }
     this.clearConflictRetry();
     this.session = result.data;
+    // 记住这把学习用的是哪条会话：换题/重进时继续用它，而不是每次新开一条。
+    this.activeSessionId = result.data.session.id;
     this.tutorState = result.data.state;
     this.activity = this.workspace.activity;
     this.phase = 'draft';
@@ -1064,23 +1067,16 @@ export class StudyController {
     this.notify();
   }
 
+  /**
+   * 「先跳过」= 放过这一题、直接做下一题，不是结束本轮。
+   *
+   * 旧实现调了 tutor skip——那会把整条 session 标成 abandoned（等于放弃本轮），
+   * 于是每跳一题就多一条 session，学习记录被拆成碎片。结束本轮/先不学了另有入口。
+   */
   async skip(): Promise<void> {
     if (this.session === null) return;
-    const request = this.request();
-    const result = await this.options.dataSource.skip(request, {
-      requestId: request.requestId,
-      sessionId: this.session.session.id,
-      revision: this.tutorState?.revision ?? this.session.state.revision,
-    });
-    if (!result.ok) {
-      this.chatError = result.error;
-      this.notify();
-      return;
-    }
-    this.tutorState = result.data.state;
-    this.skipNotice = result.data.message || '已跳过。';
+    this.skipNotice = '这道先放过，不记为答对也不记为答错。';
     this.messages = [...this.messages, system(this.skipNotice)];
-    // 跳过 = 进入下一题；后面还有题就换过去，没题了就留在原地并说明。
     if (this.nextActivityId() !== null) {
       await this.nextQuestion();
       return;

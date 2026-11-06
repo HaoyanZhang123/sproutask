@@ -37,6 +37,7 @@
     "test:contracts": "node scripts/test-contracts.mjs",
     "test:integration": "node scripts/test-integration.mjs",
     "test:e2e": "node scripts/not-implemented.mjs test:e2e",
+    "debug:e2e": "node scripts/debug/e2e.mjs",
     "content:validate": "node scripts/content-validate.mjs",
     "eval:offline": "node scripts/not-implemented.mjs eval:offline",
     "eval:live": "node scripts/not-implemented.mjs eval:live",

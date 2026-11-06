@@ -274,16 +274,16 @@ export function createLiveStudyDataSource(): any {
         attempt !== null && attempt !== undefined && typeof attempt.answerText === 'string'
           ? attempt.answerText
           : null;
+      // 学生看到的是对话，模型也应当收到"学生话"，而不是带内部 id 的日志行。
+      // 作答本身走结构化输入（attempt），这里只描述学生做了什么。
       const fallbackMessage =
         attempt !== null && attempt !== undefined
-          ? `我提交了活动 ${String(attempt.activityId ?? '')} 的作答（${String(
-              attempt.inputType ?? 'text',
-            )}）：${answerText ?? '(图片作答)'}。sessionId=${String(
-              input.sessionId ?? '',
-            )}。请根据这次真实提交的评分结果给出教学反馈，不要要求我重复提供 sessionId。`
+          ? answerText === null
+            ? '我刚提交了这道题的作答（图片），请根据评分结果给我反馈。'
+            : '我刚提交了这道题的作答，请根据评分结果给我反馈，指出最关键的一处，再告诉我下一步。'
           : input.helpRequest !== null && input.helpRequest !== undefined
-            ? '请根据当前概念和活动给我帮助。'
-            : '继续';
+            ? '我想先要一点提示，再自己试试。'
+            : '继续。';
       const message =
         typeof input.message === 'string' && input.message.trim().length > 0
           ? input.message

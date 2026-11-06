@@ -23,6 +23,7 @@
     "test:contracts": "pnpm --dir education test:contracts",
     "content:validate": "pnpm --dir education content:validate",
     "contract:lock:generate": "pnpm --dir education contract:lock:generate",
-    "contract:lock:verify": "pnpm --dir education contract:lock:verify"
+    "contract:lock:verify": "pnpm --dir education contract:lock:verify",
+    "debug:e2e": "node education/scripts/debug/e2e.mjs"
   }
 }

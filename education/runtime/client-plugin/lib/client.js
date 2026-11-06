@@ -13131,6 +13131,7 @@ window.__ModuleLoader__.load({
       waitingNotice = "";
       conflictRetryTimer = null;
       conflictRetryCount = 0;
+      activeSessionId = null;
       waitingStartedAt = 0;
       waitingTimer = null;
       phase = "draft";
@@ -13586,7 +13587,7 @@ window.__ModuleLoader__.load({
         const result = await this.options.dataSource.startSession(this.request(), {
           conceptId: this.workspace.concept.id,
           mode: this.intent.mode,
-          sessionId: this.intent.sessionId ?? void 0,
+          sessionId: this.intent.sessionId ?? this.activeSessionId ?? void 0,
           activityId: this.workspace.activity.id
         });
         if (!result.ok) {
@@ -13597,6 +13598,7 @@ window.__ModuleLoader__.load({
         }
         this.clearConflictRetry();
         this.session = result.data;
+        this.activeSessionId = result.data.session.id;
         this.tutorState = result.data.state;
         this.activity = this.workspace.activity;
         this.phase = "draft";
@@ -13824,21 +13826,15 @@ window.__ModuleLoader__.load({
         this.form = null;
         this.notify();
       }
+      /**
+       * 「先跳过」= 放过这一题、直接做下一题，不是结束本轮。
+       *
+       * 旧实现调了 tutor skip——那会把整条 session 标成 abandoned（等于放弃本轮），
+       * 于是每跳一题就多一条 session，学习记录被拆成碎片。结束本轮/先不学了另有入口。
+       */
       async skip() {
         if (this.session === null) return;
-        const request = this.request();
-        const result = await this.options.dataSource.skip(request, {
-          requestId: request.requestId,
-          sessionId: this.session.session.id,
-          revision: this.tutorState?.revision ?? this.session.state.revision
-        });
-        if (!result.ok) {
-          this.chatError = result.error;
-          this.notify();
-          return;
-        }
-        this.tutorState = result.data.state;
-        this.skipNotice = result.data.message || "\u5DF2\u8DF3\u8FC7\u3002";
+        this.skipNotice = "\u8FD9\u9053\u5148\u653E\u8FC7\uFF0C\u4E0D\u8BB0\u4E3A\u7B54\u5BF9\u4E5F\u4E0D\u8BB0\u4E3A\u7B54\u9519\u3002";
         this.messages = [...this.messages, system(this.skipNotice)];
         if (this.nextActivityId() !== null) {
           await this.nextQuestion();
@@ -17197,11 +17193,7 @@ window.__ModuleLoader__.load({
         async submitTurn(_ctx, input) {
           const attempt = input.attempt;
           const answerText = attempt !== null && attempt !== void 0 && typeof attempt.answerText === "string" ? attempt.answerText : null;
-          const fallbackMessage = attempt !== null && attempt !== void 0 ? `\u6211\u63D0\u4EA4\u4E86\u6D3B\u52A8 ${String(attempt.activityId ?? "")} \u7684\u4F5C\u7B54\uFF08${String(
-            attempt.inputType ?? "text"
-          )}\uFF09\uFF1A${answerText ?? "(\u56FE\u7247\u4F5C\u7B54)"}\u3002sessionId=${String(
-            input.sessionId ?? ""
-          )}\u3002\u8BF7\u6839\u636E\u8FD9\u6B21\u771F\u5B9E\u63D0\u4EA4\u7684\u8BC4\u5206\u7ED3\u679C\u7ED9\u51FA\u6559\u5B66\u53CD\u9988\uFF0C\u4E0D\u8981\u8981\u6C42\u6211\u91CD\u590D\u63D0\u4F9B sessionId\u3002` : input.helpRequest !== null && input.helpRequest !== void 0 ? "\u8BF7\u6839\u636E\u5F53\u524D\u6982\u5FF5\u548C\u6D3B\u52A8\u7ED9\u6211\u5E2E\u52A9\u3002" : "\u7EE7\u7EED";
+          const fallbackMessage = attempt !== null && attempt !== void 0 ? answerText === null ? "\u6211\u521A\u63D0\u4EA4\u4E86\u8FD9\u9053\u9898\u7684\u4F5C\u7B54\uFF08\u56FE\u7247\uFF09\uFF0C\u8BF7\u6839\u636E\u8BC4\u5206\u7ED3\u679C\u7ED9\u6211\u53CD\u9988\u3002" : "\u6211\u521A\u63D0\u4EA4\u4E86\u8FD9\u9053\u9898\u7684\u4F5C\u7B54\uFF0C\u8BF7\u6839\u636E\u8BC4\u5206\u7ED3\u679C\u7ED9\u6211\u53CD\u9988\uFF0C\u6307\u51FA\u6700\u5173\u952E\u7684\u4E00\u5904\uFF0C\u518D\u544A\u8BC9\u6211\u4E0B\u4E00\u6B65\u3002" : input.helpRequest !== null && input.helpRequest !== void 0 ? "\u6211\u60F3\u5148\u8981\u4E00\u70B9\u63D0\u793A\uFF0C\u518D\u81EA\u5DF1\u8BD5\u8BD5\u3002" : "\u7EE7\u7EED\u3002";
           const message = typeof input.message === "string" && input.message.trim().length > 0 ? input.message : fallbackMessage;
           return api("/edu/api/g1/tutor/turn", body({ ...input, message }));
         },

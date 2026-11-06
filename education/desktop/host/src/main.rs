@@ -616,13 +616,19 @@ fn ensure_profile(
     pid_slot: &AtomicU32,
     closing: &AtomicBool,
 ) -> Result<(), String> {
-    let marker = config
-        .dsh_home
-        .join("profiles")
-        .join("edu-web")
-        .join("package.json");
+    let profile_dir = config.dsh_home.join("profiles").join("edu-web");
+    let marker = profile_dir.join("package.json");
+    let fingerprint_file = profile_dir.join(".sproutask-setup");
+
+    // 初始化脚本（以及随包版本）变了，就把 profile 重新生成一遍：
+    // 老用户的 profile 可能是旧模板写的（例如 DSH 自带聊天 UI 没被禁用，会把
+    // 状态栏/token 指标漏进学生界面）。只认"文件在"会永远不更新。
+    let fingerprint = profile_fingerprint(config);
     if marker.is_file() {
-        return Ok(());
+        let stored = fs::read_to_string(&fingerprint_file).unwrap_or_default();
+        if stored.trim() == fingerprint {
+            return Ok(());
+        }
     }
 
     fs::create_dir_all(&config.dsh_home).map_err(|error| {
@@ -700,7 +706,27 @@ fn ensure_profile(
         ));
     }
 
+    // 记住这次 profile 是用哪版模板生成的；下次启动模板变了会自动重跑。
+    let _ = fs::write(&fingerprint_file, format!("{fingerprint}\n"));
+
     Ok(())
+}
+
+/// 初始化模板指纹：setup 脚本内容 + 随包版本号。只看"package.json 存在"
+/// 会让旧模板生成的 profile 永远不更新（漏禁用的 UI 插件就一直在）。
+fn profile_fingerprint(config: &Config) -> String {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+
+    let mut hasher = DefaultHasher::new();
+    if let Ok(bytes) = fs::read(&config.setup_script) {
+        bytes.hash(&mut hasher);
+    }
+    let version_file = config.install_root.join("version.txt");
+    if let Ok(text) = fs::read_to_string(&version_file) {
+        text.hash(&mut hasher);
+    }
+    format!("{:016x}", hasher.finish())
 }
 
 /// 和 `launcher.cmd` 对齐：清理开发环境里的内部变量，并显式注入产品需要的环境。

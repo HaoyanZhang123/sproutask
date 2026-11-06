@@ -991,6 +991,34 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
       if (request.mode !== 'learn' && request.mode !== 'review') {
         return fail(tutorError('INVALID_INPUT', 'mode must be learn or review'));
       }
+      // 复用同一把学习：会话与 DSH 绑定都还在内存里时直接沿用，只把"当前题"
+      // 指到学生要看的那道。否则每次换题/重进都新开一条 session，学习记录会
+      // 被拆成一堆碎片（线上实测 14 条 session / 1 次完成）。
+      if (request.sessionId !== undefined && request.sessionId !== null) {
+        const existing = sessions.get(request.sessionId);
+        if (existing !== undefined) {
+          if (existing.state.status !== 'active') {
+            return fail(tutorError('CONFLICT', 'the session is not active', false));
+          }
+          const nextActivityId =
+            request.activityId === undefined || request.activityId === null
+              ? existing.state.currentActivityId
+              : request.activityId;
+          if (nextActivityId !== existing.state.currentActivityId) {
+            existing.state = { ...existing.state, currentActivityId: nextActivityId };
+          }
+          return okResult(
+            {
+              session: { ...existing.session, dshSessionId: existing.dshSessionId },
+              state: snapshotOf(existing),
+              model: existing.model,
+              gateway: gateway.kind,
+              dshSessionId: existing.dshSessionId,
+            },
+            existing.state.revision,
+          );
+        }
+      }
       let concept: Concept;
       let pack: ContentPack;
       try {

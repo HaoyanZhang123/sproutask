@@ -567,7 +567,14 @@ export function composeStudentMessage(
   params: MessageParams,
 ): string {
   const lines: string[] = [];
-  const prefix = ACTION_PREFIX[decision.action];
+  // 披露答案时不能还挂着"只给你提示，不用急着答完整"的前缀：学生要的是答案，
+  // 这句话会自相矛盾（线上实测：要答案的回复开头仍是"给你一个提示"）。
+  // 分层讲解等动作本身的引导语已经贴合，保持不变。
+  const discloseOverride =
+    decision.disclosure && (decision.action === 'hint' || decision.action === 'probe_question');
+  const prefix = discloseOverride
+    ? '这次直接说给你听（已标记为看过答案）：'
+    : ACTION_PREFIX[decision.action];
   const body = modelText.trim();
   if (decision.action === 'answer_disclosure') {
     const reference =

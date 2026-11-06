@@ -126,4 +126,21 @@ describe('coverage briefing', () => {
     // a briefing should not be wider than a few thousand characters
     expect(text.length).toBeLessThan(12000);
   });
+
+  it('prints concept ids and current activities so tools never guess an id', () => {
+    const pack = loadPack();
+    const current = pack.concepts[0];
+    if (current === undefined) return;
+    const text = buildCoverageBriefing(pack, { currentConceptId: current.id });
+
+    // 每个概念行都带真实 id：模型编 id 会被工具拒（线上实测）。
+    expect(text).toContain(`· ${current.id}`);
+    expect(text).toContain(`当前概念：${current.title} · ${current.id}`);
+
+    const activity = pack.activities.find((entry) => entry.conceptIds.includes(current.id));
+    if (activity !== undefined) {
+      expect(text).toContain(activity.id);
+      expect(text).toContain(activity.stem);
+    }
+  });
 });

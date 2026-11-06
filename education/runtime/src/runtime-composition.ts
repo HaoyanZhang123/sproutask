@@ -395,6 +395,10 @@ export async function composeEducationRuntime(
     ids,
     learnerId,
     packKey,
+    // 让模型可见的 edu_submit_attempt 真正能提交：它需要 tutor 服务的
+    // snapshot/commitAttempt（会话投影 + 确定性判分），否则永远报
+    // "requires the tutor service binding"，模型每轮白试一次。
+    sessions: tutor,
     onAudit: (event) => options.onAudit?.(event),
   };
   const tools = createEducationToolRegistry(toolsDeps);
