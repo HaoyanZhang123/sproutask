@@ -32,7 +32,9 @@ describe('settings: key, font and about', () => {
     const about = container.querySelector<HTMLElement>('[data-testid="account-about"]');
     expect(about).not.toBeNull();
     const text = textOf(about as HTMLElement);
-    expect(text).toContain('DSH 内核');
+    // 「DSH 内核」是内部术语，学生界面不该出现（红线）；技术信息里只留学生能懂的说法。
+    expect(text).not.toContain('DSH');
+    expect(text).toContain('学习服务');
     expect(text).toContain('未连接');
     expect(text).toContain('文字模型');
     expect(text).not.toMatch(/工具调用|受控学习工具|回环/);

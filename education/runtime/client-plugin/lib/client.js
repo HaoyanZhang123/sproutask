@@ -1694,7 +1694,9 @@ window.__ModuleLoader__.load({
                 h(
                   "dl",
                   { class: "edu-kv" },
-                  h("dt", {}, "DSH \u5185\u6838"),
+                  // 「DSH 内核」是内部术语，学生界面不出现（红线）。改成学生能懂的
+                  // 说法：学习服务是否已就绪。
+                  h("dt", {}, "\u5B66\u4E60\u670D\u52A1"),
                   h("dd", {}, capabilities.dsh.bound ? "\u5DF2\u8FDE\u63A5" : "\u672A\u8FDE\u63A5"),
                   h("dt", {}, "\u6587\u5B57\u6A21\u578B"),
                   h("dd", {}, capabilities.model.text ? "\u53EF\u7528" : "\u4E0D\u53EF\u7528"),
@@ -13584,6 +13586,26 @@ window.__ModuleLoader__.load({
         }
         await this.startSession();
       }
+      /**
+       * 可以复用的会话 id；概念不一致时必须返回 null，让服务端为本节新开一条。
+       *
+       * 复用会话能保住「同一把学习」的记录，但前提是它属于同一个概念。跨概念复用
+       * 会让批改找不到该概念的投影条目（CONTRACT_REJECTED），学生只看到
+       * 「这次操作被安全检查拒绝」。
+       */
+      reusableSessionId() {
+        const sessionConcept = this.session?.session.conceptId ?? null;
+        const currentConcept = this.workspace?.concept.id ?? this.intent.conceptId ?? null;
+        if (sessionConcept !== null && currentConcept !== null && sessionConcept !== currentConcept) {
+          return null;
+        }
+        const id = this.intent.sessionId ?? this.activeSessionId ?? null;
+        if (id === null) return null;
+        if (this.intent.fromResume && sessionConcept === null) {
+          return id;
+        }
+        return id;
+      }
       async startSession(retrying = false) {
         if (this.workspace === null) return;
         if (!retrying) {
@@ -13597,7 +13619,10 @@ window.__ModuleLoader__.load({
         const result = await this.options.dataSource.startSession(this.request(), {
           conceptId: this.workspace.concept.id,
           mode: this.intent.mode,
-          sessionId: this.intent.sessionId ?? this.activeSessionId ?? void 0,
+          // 只在本节内复用会话：会话绑定的概念和当前题目不是同一节时，复用会让
+          // 批改按"题目所属概念"去找进度记录却找不到，直接 CONTRACT_REJECTED
+          // （线上实测：观察的顺序与记录 的会话里提交了 显微镜的使用 的题）。
+          sessionId: this.reusableSessionId() ?? void 0,
           activityId: this.workspace.activity.id
         });
         if (!result.ok) {
@@ -15057,7 +15082,7 @@ window.__ModuleLoader__.load({
         }
         const hasNext = this.nextActivityId() !== null;
         const needsAnotherTry = verdict.tone === "attention";
-        const primary = hasNext ? button("\u4E0B\u4E00\u9898", () => void this.nextQuestion(), { tone: "primary", dataAction: "next-question" }) : button("\u518D\u7B54\u4E00\u6B21", () => this.editAnswer(), { tone: "primary", dataAction: "edit-answer" });
+        const primary = hasNext ? button("\u4E0B\u4E00\u9898", () => void this.nextQuestion(), { tone: "primary", dataAction: "next-question" }) : needsAnotherTry ? button("\u518D\u7B54\u4E00\u6B21", () => this.editAnswer(), { tone: "primary", dataAction: "edit-answer" }) : button("\u5B66\u5B8C\u8FD9\u4E00\u8282", () => void this.finishRound(), { tone: "primary", dataAction: "finish-round" });
         wrap.append(
           h(
             "div",
@@ -15066,6 +15091,15 @@ window.__ModuleLoader__.load({
             button("\u518D\u770B\u770B\u6750\u6599", () => this.showMaterial(), { tone: "ghost", dataAction: "review-material" })
           )
         );
+        if (!hasNext && !needsAnotherTry) {
+          wrap.append(
+            h(
+              "p",
+              { class: "edu-study-result__note", "data-testid": "study-section-done" },
+              "\u8FD9\u4E00\u8282\u7684\u9898\u90FD\u505A\u5B8C\u4E86\u3002\u5B66\u5B8C\u8FD9\u4E00\u8282\uFF0C\u53EF\u4EE5\u53BB\u76EE\u5F55\u6311\u4E0B\u4E00\u8282\u3002"
+            )
+          );
+        }
         if (hasNext && needsAnotherTry) {
           wrap.append(
             h(

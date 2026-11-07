@@ -252,7 +252,9 @@ export function createAccountPage(): EducationPage {
             h(
               'dl',
               { class: 'edu-kv' },
-              h('dt', {}, 'DSH 内核'),
+              // 「DSH 内核」是内部术语，学生界面不出现（红线）。改成学生能懂的
+              // 说法：学习服务是否已就绪。
+              h('dt', {}, '学习服务'),
               h('dd', {}, capabilities.dsh.bound ? '已连接' : '未连接'),
               h('dt', {}, '文字模型'),
               h('dd', {}, capabilities.model.text ? '可用' : '不可用'),

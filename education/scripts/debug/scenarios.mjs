@@ -9,6 +9,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { findForbiddenCopy } from './cdp.mjs';
+import { survey } from './survey-scenario.mjs';
 
 /** @typedef {{cdp: import('./cdp.mjs').CdpPage, outDir: string}} Context */
 
@@ -394,103 +395,44 @@ export const SCENARIOS = {
    */
   async resubmit(context, report) {
     const { cdp } = context;
-    const openStudy = async () => {
-      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
-      await cdp.clickText('去目录挑一个');
-      await cdp.waitFor('document.querySelector("[data-testid=\\"map-page\\"]")', { label: '知识地图' });
-      await cdp.waitFor(
-        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').includes('观察的目的与对象'))`,
-        { label: '概念按钮' },
-      );
-      await cdp.clickText('观察的目的与对象');
-      await new Promise((done) => setTimeout(done, 1000));
-      await cdp.waitFor(
-        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').trim() === '开始学习')`,
-        { label: '开始学习' },
-      );
-      await cdp.clickText('开始学习');
-      await cdp.waitFor('document.querySelector("[data-testid=\\"study-question\\"]") !== null', {
-        label: '题目',
-        timeoutMs: 40_000,
-      });
-    };
-    const submitFirst = async () => {
-      await cdp.waitFor('document.querySelectorAll("input[type=\\"radio\\"]").length >= 1', {
-        label: '选项',
-        timeoutMs: 20_000,
-      });
-      await cdp.evaluate(`(() => { document.querySelectorAll('input[type="radio"]')[0].click(); return true; })()`);
-      await cdp.click('[data-action="submit-answer"]', { label: '提交作答' });
-      await cdp.waitFor('!document.querySelector("[data-wait-base]")', {
-        label: '反馈完成',
-        timeoutMs: 120_000,
-      });
-      await new Promise((done) => setTimeout(done, 1500));
-    };
+    const problems = results.filter((entry) => entry.found && !entry.ok);
+    const missing = results.filter((entry) => !entry.found);
+    const hints = results.filter((entry) => entry.notes.some((note) => note.startsWith('页面提示')));
+    writeFileSync(
+      join(outDir, 'survey.json'),
+      `${JSON.stringify({ results, problems, missing, hints, renderedActions, untested }, null, 2)}\n`,
+      'utf8',
+    );
+    console.log(
+      `走查 ${results.length} 个动作：找到 ${results.filter((e) => e.found).length}、` +
+        `有问题 ${problems.length}、当前页没有 ${missing.length}、页面给了失败提示 ${hints.length}`,
+    );
+    if (untested.length > 0) {
+      console.log(`未测（点击后已离开本页）：${untested.join('、')}`);
+    }
+    for (const [page, actions] of Object.entries(renderedActions)) {
+      console.log(`  ${page} 渲染动作：${actions.join('、')}`);
+    }
+    for (const entry of problems) {
+      console.log(`  ✗ ${entry.page}/${entry.action}：${entry.notes.join('；')}`);
+    }
+    for (const entry of hints) {
+      console.log(`  ! ${entry.page}/${entry.action}：${entry.notes.join('；')}`);
+    }
 
-    await report.step('第一次提交', async () => {
-      await openStudy();
-      await submitFirst();
-      await snapshot(context, '01-first');
-    });
-
-    await report.step('重新打开（模拟刷新）再提交', async () => {
-      await cdp.evaluate('location.reload()');
-      await new Promise((done) => setTimeout(done, 4000));
-      await openStudy();
-      await submitFirst();
-      await snapshot(context, '02-second');
-    });
-
-    await report.step('两次提交都应有反馈', async () => {
-      const text = await cdp.text();
-      if (/提交没有完成|找不到这项内容/.test(text)) {
-        throw new Error('重进后再次提交仍然失败');
-      }
-      await expectCleanCopy(context, '重进提交');
-    });
-    await report.step('整体无报错', () => expectNoErrors(context));
-  },
-  /**
-   * 导出学习记录的完整 UI 路径：进展页 → 导出 → 选择保存位置。
-   * 系统文件夹选择框会阻塞请求，所以本场景由外部（UIA）点「取消」，
-   * 用来验证"取消后如实告诉学生没有写入任何文件"。
-   */
-  async 'export-ui'(context, report) {
-    const { cdp } = context;
-    await report.step('打开进展页', async () => {
-      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
-      await cdp.clickText('进展');
-      await cdp.waitFor('document.querySelector("[data-action=\\"export-records\\"]")', {
-        label: '导出按钮',
-        timeoutMs: 20_000,
-      });
-    });
-    await report.step('点导出并确认（会弹出系统文件夹选择框）', async () => {
-      await cdp.click('[data-action="export-records"]', { label: '导出学习记录' });
-      await cdp.waitFor('document.querySelector("[data-edu-dialog=\\"default\\"]")', { label: '导出确认框' });
-      await cdp.click('[data-action="confirm"]', { label: '选择保存位置' });
-      await snapshot(context, '01-picker-open');
-    });
-    await report.step('选择框返回后如实提示结果', async () => {
-      // 外部会点「确定」或关掉选择框；两种结果都必须给出真实反馈。
-      const deadline = Date.now() + 120_000;
-      let status = '';
-      while (Date.now() < deadline) {
-        status = await cdp.evaluate(
-          `(document.querySelector('[data-testid="records-action-status"]')?.textContent || '').trim()`,
+    await report.step('可点动作不炸', async () => {
+      if (problems.length > 0) {
+        throw new Error(
+          `${problems.length} 个动作有问题：` +
+            problems.map((entry) => `${entry.page}/${entry.action}（${entry.notes.join('；')}）`).join(' | '),
         );
-        if (status.length > 0) break;
-        await new Promise((done) => setTimeout(done, 1000));
       }
-      await snapshot(context, '02-after-picker');
-      if (!/已取消导出|已导出/.test(status)) {
-        throw new Error(`选择框返回后提示不对：「${status}」`);
-      }
-      console.log(`导出结果提示：${status}`);
     });
     await report.step('整体无报错', () => expectNoErrors(context));
   },
+  /** 全链路自动走查：把每个页面真实渲染的可点动作逐个点过去。 */
+  survey,
+
   /** 真实模型走查（会花钱）：只在 --secrets 指向真实 Key 时运行。 */
   async live(context, report) {
     const { cdp, outDir } = context;

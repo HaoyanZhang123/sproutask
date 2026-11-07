@@ -700,7 +700,7 @@
     },
     {
       "path": "education/client/shell/src/pages/account.ts",
-      "sha256": "ac576765173ab786002c6192740c6f351206d64605a35b596696f80115a52b89"
+      "sha256": "6762ac224cc7307252af9b0f5f5b9893bb000157ee549af11463a2a5eafd3742"
     },
     {
       "path": "education/client/shell/src/pages/common.ts",
@@ -764,7 +764,7 @@
     },
     {
       "path": "education/client/shell/test/account.test.ts",
-      "sha256": "92f328f96903189ef489273a456fbd65127fb9c99ce85c9e1e7346d259161c7e"
+      "sha256": "d3c0615d6d45b0626e7609816a3f1fcaee1c02a9fc2730cb129dccb2779e5843"
     },
     {
       "path": "education/client/shell/test/copy-guard.test.ts",
@@ -820,7 +820,7 @@
     },
     {
       "path": "education/client/study/src/controller.ts",
-      "sha256": "59993558f6397ebeca9ecf57b41fd485b52ca6d4bb924a394e3bab5e0cdab207"
+      "sha256": "4ec7781d0dbaf56ae2c39a394fdaa95a6ad2c73fa8728af01696e102708a6ca6"
     },
     {
       "path": "education/client/study/src/fixture.ts",
@@ -1776,7 +1776,7 @@
     },
     {
       "path": "education/packages/tutor/src/tutor-service.ts",
-      "sha256": "8a09c797735614ae8968ad18de509bd7c665bad80ded88583d346349978c2a4d"
+      "sha256": "085320ddbaa7de41dd7701cf200d84ec72782195226e615250af7b025b4d182e"
     },
     {
       "path": "education/packages/tutor/src/types.ts",
@@ -1816,7 +1816,7 @@
     },
     {
       "path": "education/packages/tutor/test/session-reuse.test.ts",
-      "sha256": "5c68a335aaa53053ed54a456d8462ed7d88d1f70f2a60776d38d2e374f226ce6"
+      "sha256": "fc1fdb84a2d376d38b400825c27d4864b9d7d3d6c59960dfdfcddb418bbc28c3"
     },
     {
       "path": "education/packages/tutor/test/session-streaming.test.ts",
@@ -2024,7 +2024,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "d85efefe4d925c7b09bbb2082499abb0d91073c234d28dbd54f7f4a94e70f1f4"
+      "sha256": "44f428615df8d024d29a391013868f74fa4ce514bcb7dd9c52f62c93b75c26b6"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2044,7 +2044,7 @@
     },
     {
       "path": "education/runtime/host-plugin/lib/index.js",
-      "sha256": "71d8432677899cfa4d473d918f34aaf0c3c94cc744a582a8a34adbf4aef4dbbf"
+      "sha256": "384c3386344bdfc0a28d887f09ede547e55c95f471569196db469291b21336be"
     },
     {
       "path": "education/runtime/host-plugin/package.json",
@@ -2204,7 +2204,11 @@
     },
     {
       "path": "education/scripts/debug/scenarios.mjs",
-      "sha256": "6f515e82e4dbe151e56c94172117d520c364d7860fe0cde7699097656af52bed"
+      "sha256": "c5956bef75329b1bc87a1db864d14e0d12e2ff5a284ba28f0c41941cc2656796"
+    },
+    {
+      "path": "education/scripts/debug/survey-scenario.mjs",
+      "sha256": "2d681a794c3a39d676cc03b070379f6611c6c08364f0eef7b2db5618d9e6dd37"
     },
     {
       "path": "education/scripts/dev-education.mjs",
@@ -2303,5 +2307,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-07T10:02:05Z"
+  "generatedAt": "2026-11-07T12:14:48Z"
 }

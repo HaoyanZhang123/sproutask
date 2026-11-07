@@ -14837,7 +14837,31 @@ function createTutorService(options) {
           if (existing.state.status !== "active") {
             return fail2(tutorError("CONFLICT", "the session is not active", false));
           }
+          if (existing.session.conceptId !== request.conceptId) {
+            return fail2(
+              tutorError(
+                "CONFLICT",
+                `session ${existing.session.id} belongs to concept ${existing.session.conceptId}, not ${request.conceptId}; start a session for that concept`,
+                false
+              )
+            );
+          }
           const nextActivityId = request.activityId === void 0 || request.activityId === null ? existing.state.currentActivityId : request.activityId;
+          if (nextActivityId !== null) {
+            const bound2 = findActivity(await loadPack2(ctx), nextActivityId);
+            if (bound2 === void 0) {
+              return fail2(tutorError("NOT_FOUND", `activity ${nextActivityId} is not in this content pack`));
+            }
+            if (!bound2.conceptIds.includes(existing.session.conceptId)) {
+              return fail2(
+                tutorError(
+                  "CONFLICT",
+                  `activity ${nextActivityId} does not belong to concept ${existing.session.conceptId}`,
+                  false
+                )
+              );
+            }
+          }
           if (nextActivityId !== existing.state.currentActivityId) {
             existing.state = { ...existing.state, currentActivityId: nextActivityId };
           }

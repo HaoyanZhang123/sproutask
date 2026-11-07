@@ -1021,10 +1021,39 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
           if (existing.state.status !== 'active') {
             return fail(tutorError('CONFLICT', 'the session is not active', false));
           }
+          // 会话只能服务它自己那一节内容。跨概念复用时批改会按题目所属概念去找
+          // 进度投影，而那条记录从没为这一节建立过 → CONTRACT_REJECTED，
+          // 学生看到「这次操作被安全检查拒绝」。这里直接拒绝复用，让调用方
+          // 为新概念开一条会话（客户端已按同规则处理，这里是服务端兜底）。
+          if (existing.session.conceptId !== request.conceptId) {
+            return fail(
+              tutorError(
+                'CONFLICT',
+                `session ${existing.session.id} belongs to concept ${existing.session.conceptId}, not ${request.conceptId}; start a session for that concept`,
+                false,
+              ),
+            );
+          }
           const nextActivityId =
             request.activityId === undefined || request.activityId === null
               ? existing.state.currentActivityId
               : request.activityId;
+          // 题目必须属于本会话的概念，否则同样会在批改时炸。
+          if (nextActivityId !== null) {
+            const bound = findActivity(await loadPack(ctx), nextActivityId);
+            if (bound === undefined) {
+              return fail(tutorError('NOT_FOUND', `activity ${nextActivityId} is not in this content pack`));
+            }
+            if (!bound.conceptIds.includes(existing.session.conceptId)) {
+              return fail(
+                tutorError(
+                  'CONFLICT',
+                  `activity ${nextActivityId} does not belong to concept ${existing.session.conceptId}`,
+                  false,
+                ),
+              );
+            }
+          }
           if (nextActivityId !== existing.state.currentActivityId) {
             existing.state = { ...existing.state, currentActivityId: nextActivityId };
           }

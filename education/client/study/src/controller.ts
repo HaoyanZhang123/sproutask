@@ -788,8 +788,29 @@ export class StudyController {
     await this.startSession();
   }
 
-  private async startSession(retrying = false): Promise<void> {
-    if (this.workspace === null) return;
+  /**
+   * 可以复用的会话 id；概念不一致时必须返回 null，让服务端为本节新开一条。
+   *
+   * 复用会话能保住「同一把学习」的记录，但前提是它属于同一个概念。跨概念复用
+   * 会让批改找不到该概念的投影条目（CONTRACT_REJECTED），学生只看到
+   * 「这次操作被安全检查拒绝」。
+   */
+  private reusableSessionId(): string | null {
+    const sessionConcept = this.session?.session.conceptId ?? null;
+    const currentConcept = this.workspace?.concept.id ?? this.intent.conceptId ?? null;
+    if (sessionConcept !== null && currentConcept !== null && sessionConcept !== currentConcept) {
+      return null;
+    }
+    const id = this.intent.sessionId ?? this.activeSessionId ?? null;
+    if (id === null) return null;
+    if (this.intent.fromResume && sessionConcept === null) {
+      // 从「继续上次」进来但还没有本进程会话对象：交给服务端按日志判断。
+      return id;
+    }
+    return id;
+  }
+
+  private async startSession(retrying = false): Promise<void> {    if (this.workspace === null) return;
     if (!retrying) {
       if (this.conflictRetryTimer !== null) {
         clearTimeout(this.conflictRetryTimer);
@@ -801,7 +822,10 @@ export class StudyController {
     const result = await this.options.dataSource.startSession(this.request(), {
       conceptId: this.workspace.concept.id,
       mode: this.intent.mode,
-      sessionId: this.intent.sessionId ?? this.activeSessionId ?? undefined,
+      // 只在本节内复用会话：会话绑定的概念和当前题目不是同一节时，复用会让
+      // 批改按"题目所属概念"去找进度记录却找不到，直接 CONTRACT_REJECTED
+      // （线上实测：观察的顺序与记录 的会话里提交了 显微镜的使用 的题）。
+      sessionId: this.reusableSessionId() ?? undefined,
       activityId: this.workspace.activity.id,
     });
     if (!result.ok) {
@@ -2405,9 +2429,14 @@ export class StudyController {
 
     const hasNext = this.nextActivityId() !== null;
     const needsAnotherTry = verdict.tone === 'attention';
+    // 本节最后一题答完：不再「再答一次」（那会让人以为没做完），改为提示
+    // 这一节学完了、可以去下一节。跨节换题会让会话与题目概念对不上（批改必失败），
+    // 所以这里明确交给学生决定，不自动跳。
     const primary = hasNext
       ? button('下一题', () => void this.nextQuestion(), { tone: 'primary', dataAction: 'next-question' })
-      : button('再答一次', () => this.editAnswer(), { tone: 'primary', dataAction: 'edit-answer' });
+      : needsAnotherTry
+        ? button('再答一次', () => this.editAnswer(), { tone: 'primary', dataAction: 'edit-answer' })
+        : button('学完这一节', () => void this.finishRound(), { tone: 'primary', dataAction: 'finish-round' });
     wrap.append(
       h(
         'div',
@@ -2416,6 +2445,15 @@ export class StudyController {
         button('再看看材料', () => this.showMaterial(), { tone: 'ghost', dataAction: 'review-material' }),
       ),
     );
+    if (!hasNext && !needsAnotherTry) {
+      wrap.append(
+        h(
+          'p',
+          { class: 'edu-study-result__note', 'data-testid': 'study-section-done' },
+          '这一节的题都做完了。学完这一节，可以去目录挑下一节。',
+        ),
+      );
+    }
     // 只有还需要重答时才给「改文字再试」；答对时只留「下一题 / 再看看材料」。
     if (hasNext && needsAnotherTry) {
       wrap.append(
