@@ -1021,6 +1021,21 @@ export class StudyController {
         this.notify();
         return;
       }
+      // 有成绩但没写成"证据"时，成绩本身仍然有效：规则批改认为这次作答
+      // 不足以判定对错，但反馈里可能已经有完整讲评（尤其是模型反馈）。
+      // 丢弃它去显示"提交没有完成"会让学生以为作答白交了。
+      if (attempt.grade !== null) {
+        this.lastAnswer = this.answer ?? this.lastAnswer;
+        this.feedback = attempt.grade;
+        this.phase = 'feedback';
+        this.machine.transition('feedback');
+        this.form?.unmount();
+        this.form = null;
+        this.failureNotice = '';
+        this.notify();
+        this.focusFeedback();
+        return;
+      }
       this.phase = 'failed';
       this.machine.transition('failed');
       this.failureNotice = '原答已经保存，反馈暂时没有完成；可以重试批改，不需要重新作答。';

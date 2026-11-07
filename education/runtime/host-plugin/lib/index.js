@@ -4042,6 +4042,9 @@ function textTokens(text2) {
   }
   return tokens;
 }
+function stripCriterionNotes(text2) {
+  return text2.replace(/（[^）]*）/g, "").replace(/\([^)]*\)/g, "").replace(/中的至少[一二三四五六七八九十\d]+[项条个]/g, "").replace(/\s+/g, "");
+}
 function tokenOverlap(needle, haystack) {
   const tokens = textTokens(needle);
   if (tokens.size === 0) return 0;
@@ -4272,7 +4275,7 @@ function definiteWrongCount(results) {
 init_errors();
 var TEXT_GRADER_VERSION = "rule-text-v1";
 var MIN_SUBSTANTIVE_LENGTH = 12;
-var ACCEPTABLE_OVERLAP = 0.5;
+var ACCEPTABLE_OVERLAP = 0.35;
 var TOKEN_UNCERTAINTY = 0.4;
 function decideCriterion(criterion, tokens, normalizedAnswerText) {
   for (const misconception of criterion.commonMisconceptions) {
@@ -4284,7 +4287,7 @@ function decideCriterion(criterion, tokens, normalizedAnswerText) {
   let best = 0;
   let bestEvidence = null;
   for (const evidence of criterion.acceptableEvidence) {
-    const overlap = tokenOverlap(evidence, tokens);
+    const overlap = tokenOverlap(stripCriterionNotes(evidence), tokens);
     if (overlap > best) {
       best = overlap;
       bestEvidence = evidence;

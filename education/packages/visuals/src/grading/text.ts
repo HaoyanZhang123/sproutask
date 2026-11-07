@@ -10,7 +10,7 @@
 import type { GradeResult, RubricCriterion } from '@edu/domain';
 
 import { fail, ok, visualsError, type VisualsResult } from '../errors.js';
-import { normalizeText, textTokens, tokenOverlap, visibleLength } from '../text/normalize.js';
+import { normalizeText, stripCriterionNotes, textTokens, tokenOverlap, visibleLength } from '../text/normalize.js';
 import {
   attemptAssistance,
   buildCriteria,
@@ -25,7 +25,16 @@ import type { GradingContext } from './types.js';
 export const TEXT_GRADER_VERSION = 'rule-text-v1';
 
 const MIN_SUBSTANTIVE_LENGTH = 12;
-const ACCEPTABLE_OVERLAP = 0.5;
+/**
+ * 覆盖阈值：评分要点有多少比例的字词出现在作答里就算"说到这条要点"。
+ *
+ * 定为 0.35 是实测出来的，不是拍的：用七上原始 rubric 对比四类作答，
+ * 正确回答的覆盖落在 0.42~0.73，误解与离题都 ≤0.13。原来用 0.5 会把
+ * "先确定观察目的，再明确对象，然后按顺序观察并记录…"这种正常表达判成
+ * 判不清（0.42），反而"把词罗列一遍"能过 0.54——等于奖励罗列、惩罚表达。
+ * 0.35 既接住自然表达，又和误解/离题保持足够间隔。
+ */
+const ACCEPTABLE_OVERLAP = 0.35;
 const TOKEN_UNCERTAINTY = 0.4;
 
 interface CriterionDecision {
@@ -48,7 +57,9 @@ function decideCriterion(
   let best = 0;
   let bestEvidence: string | null = null;
   for (const evidence of criterion.acceptableEvidence) {
-    const overlap = tokenOverlap(evidence, tokens);
+    // 括注是给内容审核看的说明，学生作答里不会出现；比之前先去掉，
+    // 否则"（措辞可不同）"这类字样会把覆盖率整体压低。
+    const overlap = tokenOverlap(stripCriterionNotes(evidence), tokens);
     if (overlap > best) {
       best = overlap;
       bestEvidence = evidence;

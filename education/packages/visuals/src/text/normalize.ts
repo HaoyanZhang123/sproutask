@@ -30,6 +30,21 @@ export function textTokens(text: string): Set<string> {
   return tokens;
 }
 
+/**
+ * 去掉评分要点里的括注说明。
+ *
+ * `acceptableEvidence` 常写成 "…四个环节（措辞可不同）"、"…至少三项" 这种带说明
+ * 的句子；括注是给内容审核看的，学生作答里不会出现，留着会把覆盖率整体压低，
+ * 让写得好的回答也判不清。
+ */
+export function stripCriterionNotes(text: string): string {
+  return text
+    .replace(/（[^）]*）/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/中的至少[一二三四五六七八九十\d]+[项条个]/g, '')
+    .replace(/\s+/g, '');
+}
+
 export function tokenOverlap(needle: string, haystack: Set<string>): number {
   const tokens = textTokens(needle);
   if (tokens.size === 0) return 0;

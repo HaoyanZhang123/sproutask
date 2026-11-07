@@ -284,6 +284,92 @@ describe('deterministic rule grading (A21)', () => {
     expect(empty.error.code).toBe('ANSWER_EMPTY');
   });
 
+  /**
+   * 线上事故回归：学生写得自然但用词和评分要点不完全一样时，规则批改曾经
+   * 判不清（阈值 0.5 偏高），而"把词罗列一遍"反而能过——等于奖励罗列、
+   * 惩罚表达。这条用例锁住两个方向：正常表达要判对，误解与离题不能判对。
+   */
+  it('accepts 自然表达 while still refusing 误解 and 离题', () => {
+    const activity = makeActivity({
+      id: 'activity.test.observe-order',
+      type: 'transfer',
+      conceptIds: ['concept.test.observe'],
+      answerSchema: { kind: 'text', maxLength: 600 },
+      rubricId: 'rubric.test.observe-order',
+    });
+    const rawCriterion = (
+      criterionId: string,
+      description: string,
+      acceptableEvidence: readonly string[],
+      commonMisconceptions: readonly string[],
+    ) => ({
+      ...criterion(criterionId),
+      description,
+      acceptableEvidence,
+      commonMisconceptions,
+    });
+    const rubric = makeRubric({
+      id: 'rubric.test.observe-order',
+      version: '1',
+      conceptIds: ['concept.test.observe'],
+      criteria: [
+        rawCriterion(
+          'criterion.test.sequence',
+          '能按合理顺序描述一次观察活动的过程',
+          [
+            '顺序包含确定目的、明确对象、观察记录、交流结果四个环节（措辞可不同）',
+            '能说明按顺序观察有助于不遗漏、可复核',
+          ],
+          ['观察顺序无所谓，看到什么算什么'],
+        ),
+        rawCriterion(
+          'criterion.test.record',
+          '能说出观察记录的要素，并说明记录要真实、及时',
+          [
+            '列出时间、地点、天气、观察人、生物名称、特征、生活环境中的至少三项',
+            '说明记录应及时、真实客观，不能凭回忆补记',
+          ],
+          ['记录可以事后凭记忆补'],
+        ),
+      ],
+    });
+
+    const grade = (text: string) => {
+      const graded = gradeText({
+        activity,
+        rubric,
+        attempt: attemptFor(activity),
+        answer: { kind: 'text', text },
+      });
+      expect(graded.ok).toBe(true);
+      if (!graded.ok) throw new Error('grade failed');
+      expectValidGrade(graded.value);
+      return graded.value;
+    };
+
+    // 用词和评分要点不完全一样的正常表达：必须判得出，且产出证据。
+    const natural = grade(
+      '先确定观察的目的，再明确要观察的对象，然后按一定的顺序察看并及时记录，最后和同学交流结果。记录表要写清时间、地点、天气、观察人和生物名称，记录必须及时、真实客观，因为事后凭记忆补记容易遗漏。',
+    );
+    expect(natural.criteria.some((criterion) => criterion.met === 'yes')).toBe(true);
+    expect(natural.evidenceCandidates.length).toBeGreaterThan(0);
+    expect(natural.requiresClarification).toBe(false);
+
+    // 误解：命中 commonMisconceptions，必须判 no，不能判对。
+    const misconception = grade(
+      '观察顺序无所谓，看到什么算什么。记录可以事后凭记忆补，只记录符合预期的现象就行。',
+    );
+    expect(misconception.criteria.some((criterion) => criterion.met === 'no')).toBe(true);
+    expect(misconception.criteria.every((criterion) => criterion.met === 'yes')).toBe(false);
+
+    // 离题：仍然 unclear，不产出证据、也不判错。
+    const offTopic = grade('我觉得观察很有趣，可以学到很多东西。');
+    expect(offTopic.criteria.every((criterion) => criterion.met === 'unclear')).toBe(true);
+    expect(offTopic.evidenceCandidates).toHaveLength(0);
+    expect(offTopic.requiresClarification).toBe(true);
+    expect(offTopic.criteria.some((criterion) => criterion.met === 'no')).toBe(false);
+  });
+
   it('rejects answer/schema/rubric mismatches instead of grading them', () => {
     const activity = domainFixtureActivity((entry) => entry.answerSchema.kind === 'diagram_label');
     const rubric = domainFixtureRubric('rubric.cell');

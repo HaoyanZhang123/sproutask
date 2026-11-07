@@ -13793,6 +13793,18 @@ window.__ModuleLoader__.load({
             this.notify();
             return;
           }
+          if (attempt.grade !== null) {
+            this.lastAnswer = this.answer ?? this.lastAnswer;
+            this.feedback = attempt.grade;
+            this.phase = "feedback";
+            this.machine.transition("feedback");
+            this.form?.unmount();
+            this.form = null;
+            this.failureNotice = "";
+            this.notify();
+            this.focusFeedback();
+            return;
+          }
           this.phase = "failed";
           this.machine.transition("failed");
           this.failureNotice = "\u539F\u7B54\u5DF2\u7ECF\u4FDD\u5B58\uFF0C\u53CD\u9988\u6682\u65F6\u6CA1\u6709\u5B8C\u6210\uFF1B\u53EF\u4EE5\u91CD\u8BD5\u6279\u6539\uFF0C\u4E0D\u9700\u8981\u91CD\u65B0\u4F5C\u7B54\u3002";
