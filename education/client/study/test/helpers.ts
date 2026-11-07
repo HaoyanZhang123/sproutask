@@ -157,7 +157,7 @@ export function dispatchKeyOn(target: EventTarget, key: string, options: Keyboar
  * 只扫学生能看到的文字，不在测试里扫描源码。
  */
 export const FORBIDDEN_STUDENT_WORDS =
-  /内容包|activity\.|source\.|step-|三轴|证据候选|基准|回环|受控|返回位置|本地保存|当前概念|掌握百分比|覆盖率|评分版本|答案键|系统证据|不替代|单独保存|criterion/;
+  /内容包|activity\.|source\.|step-|三轴|证据候选|基准|回环|受控|返回位置|本地保存|当前概念|掌握百分比|覆盖率|评分版本|答案键|系统证据|不替代|单独保存|criterion|PDF|页序|1 基|印刷页码/;
 
 export function expectCleanStudentCopy(root: ParentNode): void {
   const value = textOf(root);

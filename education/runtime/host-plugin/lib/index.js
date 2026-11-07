@@ -14365,10 +14365,13 @@ function createTutorService(options) {
     }
   }
   function checkRevision(session, revision) {
-    if (revision !== session.state.revision) {
+    if (!Number.isInteger(revision) || revision < 0) {
+      throw new TutorException("INVALID_INPUT", "turn revision must be a non-negative integer");
+    }
+    if (revision > session.state.revision) {
       throw new TutorException(
         "STALE_REVISION",
-        `turn revision ${revision} does not match session revision ${session.state.revision}`
+        `turn revision ${revision} is ahead of session revision ${session.state.revision}`
       );
     }
   }
@@ -17119,10 +17122,21 @@ var G1Service = class {
           const data = resumed.data;
           const session = data.session;
           if (typeof session?.id === "string" && typeof session.conceptId === "string" && (session.mode === "learn" || session.mode === "review")) {
+            const requestedActivityId = input.activityId ?? data.activityId ?? null;
+            const sameConcept = input.conceptId === session.conceptId && await this.activityBelongsTo(requestedActivityId, session.conceptId);
+            if (!sameConcept) {
+              this.composition.audit?.({
+                kind: "session.rebound_skipped",
+                at: ctx.now,
+                from: input.sessionId,
+                reason: `concept mismatch: session ${session.conceptId} vs requested ${input.conceptId}`
+              });
+              return started;
+            }
             effective = {
               conceptId: session.conceptId,
               mode: session.mode,
-              activityId: input.activityId ?? data.activityId ?? null,
+              activityId: requestedActivityId,
               sessionId: session.id
             };
             this.composition.audit?.({
@@ -17138,6 +17152,19 @@ var G1Service = class {
     }
     if (started.ok) remember(started, effective);
     return started;
+  }
+  /** 这道题是否属于这个概念（换题/恢复前必须确认，否则批改会找不到进度投影）。 */
+  async activityBelongsTo(activityId, conceptId) {
+    if (activityId === null) return true;
+    try {
+      const ctx = this.ctx("g1.activity.scope");
+      const pack = await this.composition.knowledge.getPack(ctx, this.composition.packKey);
+      if (!pack.ok) return false;
+      const activity = pack.data.activities.find((entry) => entry.id === activityId);
+      return activity !== void 0 && activity.conceptIds.includes(conceptId);
+    } catch {
+      return false;
+    }
   }
   async tutorTurn(requestId, input) {
     let real;

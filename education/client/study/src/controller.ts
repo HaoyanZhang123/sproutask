@@ -2850,5 +2850,9 @@ function uniqueSources(sources: readonly StudySource[]): readonly StudySource[] 
 
 function sourceLabel(source: StudySource): string {
   const printed = source.printedPage?.trim() ?? '';
-  return printed.length > 0 ? `课本第 ${printed} 页` : `PDF 第 ${source.pdfPage} 页`;
+  if (printed.length > 0) return `课本第 ${printed} 页`;
+  // 内容包里 98/281 条来源没有课本页码（封面、图注等）。以前这里回退成
+  // "PDF 第 N 页"——那是内部定位术语，学生看不懂也不该看到（红线禁词）。
+  // 没有课本页码就不显示页码，只报出处本身。
+  return '课本原文';
 }

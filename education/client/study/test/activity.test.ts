@@ -245,7 +245,8 @@ describe('题目、草稿与原地反馈', () => {
     // 出处：同页去重、最多 3 个、没有兜底 chip、对不上页的引用不显示
     const chips = [...feedback.querySelectorAll<HTMLButtonElement>('[data-testid="study-feedback-sources"] button')];
     expect(chips.length).toBeLessThanOrEqual(3);
-    expect(chips.map((chip) => chip.textContent)).toEqual(['课本第 12 页', 'PDF 第 26 页']);
+    // 没有课本页码的出处不显示页码，也不回退成内部 PDF 页码（红线禁词）。
+    expect(chips.map((chip) => chip.textContent)).toEqual(['课本第 12 页', '课本原文']);
     expect(text).not.toContain('出处在课本里');
 
     // 答对时只留 下一题 / 再看看材料

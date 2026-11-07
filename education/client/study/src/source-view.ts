@@ -32,31 +32,29 @@ export function openSourcePopover(
       ),
     );
   } else {
+    // 学生界面只报"这页在课本第几页"。"PDF 页序""1 基""印刷页码"是内部定位
+    // 术语（红线禁词），学生看不懂也不该看到。没有课本页码就如实说没有。
     content.append(
       h(
         'div',
         { class: 'edu-study-source-grid' },
         h(
           'div',
-          { class: 'edu-study-source-box', 'data-testid': 'study-source-pdf' },
-          h('p', { class: 'edu-muted' }, 'PDF 页序（1 基）'),
-          h('p', { class: 'edu-study-source-value' }, `PDF 第 ${source.pdfPage} 页`),
-        ),
-        h(
-          'div',
           { class: 'edu-study-source-box', 'data-testid': 'study-source-printed' },
-          h('p', { class: 'edu-muted' }, '印刷页码（课本页脚/页眉标签）'),
+          h('p', { class: 'edu-muted' }, '在课本里的位置'),
           h(
             'p',
             { class: 'edu-study-source-value' },
-            source.printedPage === null ? '未识别（不推算）' : `课本第 ${source.printedPage} 页`,
+            source.printedPage === null
+              ? '这一处没有标注课本页码'
+              : `课本第 ${source.printedPage} 页`,
           ),
         ),
       ),
       h(
         'p',
         { class: 'edu-muted' },
-        'PDF 页序与印刷页码是不同单位，不能互相替代；未识别印刷页时不做偏移猜测。',
+        '页码来自课本页脚；没有标注时不猜、也不换算出别的页码。',
       ),
       h(
         'p',

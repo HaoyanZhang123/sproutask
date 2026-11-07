@@ -351,11 +351,26 @@ export function createTutorService(options: TutorServiceOptions): TutorService {
     }
   }
 
+  /**
+   * 作答提交前的 revision 校验。
+   *
+   * 原来要求严格相等，本意是挡住"迟到响应把旧状态写回去"。但学生页面的 revision
+   * 经常落后于服务端——上一轮反馈还没回来就点了下一题、或者页面重进后拿到的是旧
+   * 快照——严格相等会直接 `STALE_REVISION`，界面显示「内容已经有了更新」，学生
+   * 就再也提交不了同一道题。实测线上就是这样卡住的。
+   *
+   * 真正防止串写的是仓储层的乐观并发（learner/journal 的 revision + requestId
+   * 幂等 + attempt 落库校验），不是这个入参。所以这里只拒绝"超前"的 revision
+   * （那说明客户端状态不可能来自本轮），落后的按正常提交流程继续。
+   */
   function checkRevision(session: InternalSession, revision: number): void {
-    if (revision !== session.state.revision) {
+    if (!Number.isInteger(revision) || revision < 0) {
+      throw new TutorException('INVALID_INPUT', 'turn revision must be a non-negative integer');
+    }
+    if (revision > session.state.revision) {
       throw new TutorException(
         'STALE_REVISION',
-        `turn revision ${revision} does not match session revision ${session.state.revision}`,
+        `turn revision ${revision} is ahead of session revision ${session.state.revision}`,
       );
     }
   }

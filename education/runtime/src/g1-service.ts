@@ -860,10 +860,25 @@ export class G1Service {
             typeof session.conceptId === 'string' &&
             (session.mode === 'learn' || session.mode === 'review')
           ) {
+            // 关键：不能把「旧概念 + 新题目」拼在一起。换到另一节内容时，resume
+            // 出来的会话属于旧概念，硬把新题塞进去会让批改按题目概念去找进度投影
+            // 却找不到（CONTRACT_REJECTED）。概念不一致就放弃复用，按新概念新开会话。
+            const requestedActivityId = input.activityId ?? data.activityId ?? null;
+            const sameConcept =
+              input.conceptId === session.conceptId && await this.activityBelongsTo(requestedActivityId, session.conceptId);
+            if (!sameConcept) {
+              this.composition.audit?.({
+                kind: 'session.rebound_skipped',
+                at: ctx.now,
+                from: input.sessionId,
+                reason: `concept mismatch: session ${session.conceptId} vs requested ${input.conceptId}`,
+              });
+              return started;
+            }
             effective = {
               conceptId: session.conceptId,
               mode: session.mode,
-              activityId: input.activityId ?? data.activityId ?? null,
+              activityId: requestedActivityId,
               sessionId: session.id,
             };
             this.composition.audit?.({
@@ -881,8 +896,21 @@ export class G1Service {
     return started;
   }
 
-  async tutorTurn(requestId: string, input: Record<string, unknown>): Promise<ServiceResult<unknown>> {
-    let real: ServiceResult<unknown>;
+  /** 这道题是否属于这个概念（换题/恢复前必须确认，否则批改会找不到进度投影）。 */
+  private async activityBelongsTo(activityId: string | null, conceptId: string): Promise<boolean> {
+    if (activityId === null) return true;
+    try {
+      const ctx = this.ctx('g1.activity.scope');
+      const pack = await this.composition.knowledge.getPack(ctx, this.composition.packKey);
+      if (!pack.ok) return false;
+      const activity = pack.data.activities.find((entry) => entry.id === activityId);
+      return activity !== undefined && activity.conceptIds.includes(conceptId);
+    } catch {
+      return false;
+    }
+  }
+
+  async tutorTurn(requestId: string, input: Record<string, unknown>): Promise<ServiceResult<unknown>> {    let real: ServiceResult<unknown>;
     try {
       real = await this.composition.tutor.submitTurn(this.ctx(requestId), input as never);
     } catch (error) {

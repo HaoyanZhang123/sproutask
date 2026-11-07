@@ -69,9 +69,10 @@ describe('学习台：摊开的课本 + 练习本', () => {
     (source as HTMLButtonElement).click();
     const popover = container.querySelector<HTMLElement>('[data-testid="study-source-popover"]');
     expect(popover).not.toBeNull();
-    expect(textOf(byTestId(container, 'study-source-pdf'))).toContain('PDF 第 18 页');
+    // 学生界面只报课本页码；"PDF 页序""印刷页码"是内部定位术语（红线禁词）。
     expect(textOf(byTestId(container, 'study-source-printed'))).toContain('课本第 12 页');
-    expect(textOf(popover as HTMLElement)).toContain('不同单位');
+    expect(textOf(popover as HTMLElement)).not.toContain('PDF');
+    expect(textOf(popover as HTMLElement)).not.toContain('页序');
     expectCleanStudentCopy(popover as HTMLElement);
     dispatchKeyOn(container.querySelector('[data-edu-modal="true"] [role="dialog"]') as HTMLElement, 'Escape');
     expect(document.activeElement).toBe(source);

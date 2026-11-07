@@ -12804,25 +12804,19 @@ window.__ModuleLoader__.load({
             { class: "edu-study-source-grid" },
             h(
               "div",
-              { class: "edu-study-source-box", "data-testid": "study-source-pdf" },
-              h("p", { class: "edu-muted" }, "PDF \u9875\u5E8F\uFF081 \u57FA\uFF09"),
-              h("p", { class: "edu-study-source-value" }, `PDF \u7B2C ${source.pdfPage} \u9875`)
-            ),
-            h(
-              "div",
               { class: "edu-study-source-box", "data-testid": "study-source-printed" },
-              h("p", { class: "edu-muted" }, "\u5370\u5237\u9875\u7801\uFF08\u8BFE\u672C\u9875\u811A/\u9875\u7709\u6807\u7B7E\uFF09"),
+              h("p", { class: "edu-muted" }, "\u5728\u8BFE\u672C\u91CC\u7684\u4F4D\u7F6E"),
               h(
                 "p",
                 { class: "edu-study-source-value" },
-                source.printedPage === null ? "\u672A\u8BC6\u522B\uFF08\u4E0D\u63A8\u7B97\uFF09" : `\u8BFE\u672C\u7B2C ${source.printedPage} \u9875`
+                source.printedPage === null ? "\u8FD9\u4E00\u5904\u6CA1\u6709\u6807\u6CE8\u8BFE\u672C\u9875\u7801" : `\u8BFE\u672C\u7B2C ${source.printedPage} \u9875`
               )
             )
           ),
           h(
             "p",
             { class: "edu-muted" },
-            "PDF \u9875\u5E8F\u4E0E\u5370\u5237\u9875\u7801\u662F\u4E0D\u540C\u5355\u4F4D\uFF0C\u4E0D\u80FD\u4E92\u76F8\u66FF\u4EE3\uFF1B\u672A\u8BC6\u522B\u5370\u5237\u9875\u65F6\u4E0D\u505A\u504F\u79FB\u731C\u6D4B\u3002"
+            "\u9875\u7801\u6765\u81EA\u8BFE\u672C\u9875\u811A\uFF1B\u6CA1\u6709\u6807\u6CE8\u65F6\u4E0D\u731C\u3001\u4E5F\u4E0D\u6362\u7B97\u51FA\u522B\u7684\u9875\u7801\u3002"
           ),
           h(
             "p",
@@ -15425,7 +15419,8 @@ window.__ModuleLoader__.load({
     }
     function sourceLabel(source) {
       const printed = source.printedPage?.trim() ?? "";
-      return printed.length > 0 ? `\u8BFE\u672C\u7B2C ${printed} \u9875` : `PDF \u7B2C ${source.pdfPage} \u9875`;
+      if (printed.length > 0) return `\u8BFE\u672C\u7B2C ${printed} \u9875`;
+      return "\u8BFE\u672C\u539F\u6587";
     }
     
     // client/study/src/styles.ts

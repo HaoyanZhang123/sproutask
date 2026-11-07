@@ -820,7 +820,7 @@
     },
     {
       "path": "education/client/study/src/controller.ts",
-      "sha256": "2bd515ed3cd318d253a1c66752099966e7ccc03a8279c7eca2aa336df502db1c"
+      "sha256": "504698013071efb0ba2b7cf64656e63d8cadab712e88eee8c77712aab33a8978"
     },
     {
       "path": "education/client/study/src/fixture.ts",
@@ -848,7 +848,7 @@
     },
     {
       "path": "education/client/study/src/source-view.ts",
-      "sha256": "99d4af2e27264abed79968c0222a1c6734876f2d025559aef64f64f8b53343a8"
+      "sha256": "b89184fc9f6ef82ce70e8111115abbcf1e381e3b7a249050ab2cbeb6745597e0"
     },
     {
       "path": "education/client/study/src/styles.ts",
@@ -864,11 +864,11 @@
     },
     {
       "path": "education/client/study/test/activity.test.ts",
-      "sha256": "8495259537b7388fba2aeed32184adc03a6de96945b642f39b5ce3a50f258962"
+      "sha256": "2af3ee5288db760b51978a3a8e5f9124277a2eb82ad741e74b7eebb8fbb02e01"
     },
     {
       "path": "education/client/study/test/helpers.ts",
-      "sha256": "7166a5d9dac28cae35fc7056d94db6bb5a80172ee5c59a7147dcbd8006714976"
+      "sha256": "9c48caa6cecf952cc96a5d84c3597b6c0255bf4202dbedf721d57defbfb0f485"
     },
     {
       "path": "education/client/study/test/image.test.ts",
@@ -884,7 +884,7 @@
     },
     {
       "path": "education/client/study/test/workspace.test.ts",
-      "sha256": "0560a5103fb53c83f9478e4ab1f77a0557e2a1ef7a7980312f36f06c7b1b5544"
+      "sha256": "0ad54913c492aa88701d101e717b3153d9a202d59de88736966089199fd70b5b"
     },
     {
       "path": "education/client/study/tsconfig.json",
@@ -1776,7 +1776,7 @@
     },
     {
       "path": "education/packages/tutor/src/tutor-service.ts",
-      "sha256": "085320ddbaa7de41dd7701cf200d84ec72782195226e615250af7b025b4d182e"
+      "sha256": "4d788690a06ea986efdaa0a433f349fb0cb46785da28817cf13997e1e5f3cb1d"
     },
     {
       "path": "education/packages/tutor/src/types.ts",
@@ -1820,7 +1820,7 @@
     },
     {
       "path": "education/packages/tutor/test/session-streaming.test.ts",
-      "sha256": "956a1e98d8ce82c7093468a57bd07c3c6e71b4ed6dba9a1ce13202eff19db09d"
+      "sha256": "e77e1e834a35e3e0a78338f626fb1a867d563742c8afcd18ddc3b03480a03a74"
     },
     {
       "path": "education/packages/tutor/test/skill.test.ts",
@@ -2028,7 +2028,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "2ddcdd1da2c9c5f8d5979ee6648305dd1678f09fcd7c5cf26c7d12bf07ed2ed8"
+      "sha256": "c4799f1d5d3b9d9bfd16e7928163618467dccc857029821bbef5b6b615890339"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2048,7 +2048,7 @@
     },
     {
       "path": "education/runtime/host-plugin/lib/index.js",
-      "sha256": "0e922c5f0f739cbaf1b8d38eaba2eb654eeac4a6c5a5ac42d0e02a0987e34236"
+      "sha256": "676d5fc4b2c92750560a9161889da25ba3dbabeab9ba79134e440068ae998b05"
     },
     {
       "path": "education/runtime/host-plugin/package.json",
@@ -2108,7 +2108,7 @@
     },
     {
       "path": "education/runtime/src/g1-service.ts",
-      "sha256": "9ca8dedf1b6a1f399f6af8de77445597be9d325f463a8d28bbdb6e5fcb71fec8"
+      "sha256": "d528d7b249d63959677672cb184ab156ec1cb5bba0f47a49d973cb25e684ae03"
     },
     {
       "path": "education/runtime/src/index.ts",
@@ -2311,5 +2311,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-07T13:19:40Z"
+  "generatedAt": "2026-11-07T15:34:53Z"
 }

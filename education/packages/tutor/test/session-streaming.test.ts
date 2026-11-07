@@ -221,6 +221,35 @@ describe('skip / end / cancel / timeout', () => {
     if (result.ok) return;
     expect(result.error.code).toBe('STALE_REVISION');
   });
+
+  /**
+   * 线上事故回归：学生页面的 revision 常落后于服务端（上一轮反馈还没回来就点了
+   * 下一题、或页面重进拿到旧快照）。原来要求严格相等，落后就 `STALE_REVISION`，
+   * 界面显示「内容已经有了更新」，同一道题再也交不上去。
+   *
+   * 真正防串写的是仓储层的乐观并发与 requestId 幂等，不该由这个入参把学生堵死；
+   * 所以落后的 revision 必须能正常提交，只有"超前"才拒绝（上一条用例）。
+   */
+  it('accepts a lagging turn revision instead of blocking the student', async () => {
+    const harness = await startHarness({ turns: [{ text: 'x', signals: {} }, { text: 'y', signals: {} }] });
+    // 先推一次会话，让服务端 revision 前进
+    const first = await harness.service.submitTurn(harness.ctx('lag-1'), {
+      requestId: 'lag-1',
+      sessionId: harness.session.id,
+      revision: 0,
+      message: '你好',
+    });
+    expect(first.ok).toBe(true);
+
+    // 页面拿到的还是旧 revision（0）：必须能继续提交，而不是「内容已经有了更新」
+    const lagging = await harness.service.submitTurn(harness.ctx('lag-2'), {
+      requestId: 'lag-2',
+      sessionId: harness.session.id,
+      revision: 0,
+      message: '再问一次',
+    });
+    expect(lagging.ok).toBe(true);
+  });
 });
 
 describe('review mode', () => {
