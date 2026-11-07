@@ -9,7 +9,7 @@
 ## 1. 一句话现状
 
 **v0.4.0（2026-11-04）已发布**：运行在真实 DSH 内核上的教育 Agent，带本地优先的七上生物内容包（2 单元 / 7 章 / 22 节 / 43 概念）、本机事件日志与 Windows 学生包。
-当前状态（2026-11-05）：**v0.4.1 已可用**——原生桌面壳 `SproutAsk.exe`（Rust + WebView2）替代 Edge 窗口，会话卡死与安装器问题已修；工作区已清理（8,456MB → 873MB）；干净克隆可构建、CI 有三道守卫；契约锁已重建。本机已覆盖安装 0.4.1 并实测通过；下一步是人工走查。
+当前状态（2026-11-05）：**v0.4.1 已可用**——原生桌面壳 `SproutAsk.exe`（Rust + WebView2）替代 Edge 窗口，会话卡死与安装器问题已修；工作区已清理（8,456MB → 873MB）；干净克隆可构建、CI 有三道守卫；契约锁已重建。本机已覆盖安装 0.4.1 并实测通过。2026-11-07 修复了三个使用问题：作答被静默丢弃（requestId 跨刷新撞号）、导出/删除不可用（客户端是 UNSUPPORTED 桩）、启动无分段计时；安装包已重建（SHA256 `3ea94ab8…`）。下一步是人工走查。
 
 ---
 
@@ -267,6 +267,51 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 
 ---
 
+---
+
+### 2026-11-07：三个使用问题修复（作答丢失 / 导出不可用 / 启动体验）
+
+**用户报告的三个问题**
+
+1. 无法导出学习记录；
+2. 每次启动要卡很久；
+3. 题目「老是出问题」——提交后显示「提交没有完成 / 找不到这项内容」。
+
+**根因（全部落到代码行，不是猜测）**
+
+- **作答被静默丢弃（问题 3 的真正原因）**：客户端 `requestId` 用页内计数器 `request.study.N`（`client/shell/src/shell.ts`、`client/{study,library,map}/src/index.ts`），**刷新页面后从 1 重数**；而学习记录按 `requestId` 去重（`packages/storage/src/journal.ts` 的 `byRequest`）。于是刷新后的新作答撞上历史 id，被当成「重发」直接返回旧回执 → **这次作答压根没落库** → 随后写评分状态时 `NOT_FOUND: no saved attempt`，界面就是「找不到这项内容」。真实数据里能直接看到撞号证据：`request.study.5` 在 11-06 00:42 用于 `attempt.submitted`，11-06 19:46 又被 `session.ended` 复用。
+- **导出/删除不可用**：`runtime/client-plugin/src/live-sources.ts` 的 `exportData` / `deleteData` 是写死的 `UNSUPPORTED` 桩；底层 `packages/storage/src/maintenance.ts` 其实已具备导出与删除能力，只是宿主没有路由、客户端没接。
+- **关系题显示内部 id**：`renderSpec.nodes` 里有写好的中文标签，但学习台 `mountAnswerForm` 没传 `relationNodes`，表单退回用 `pair.fromId` 当文本 → 界面出现 `factor.position` / `effect.part`。
+- **启动慢 / 闪屏误导**：闪屏文案写死「**首次**启动需要初始化本地学习环境」，每次启动都这么显示；宿主也没有任何阶段计时。实测正常冷启动 **2.8–2.9s**（DSH 自身约 1.8s）；14:37 那次 39s 与「上一个实例残留日志锁 + 等 reclaim（37.8s）」在时间上吻合；setup 并未每次重跑（`setup.log` 时间停在 11-06 00:56）。
+
+**修复**
+
+- 新增 `client/shell/src/request-ids.ts`：请求 id = `request.<每次加载唯一前缀>.<计数器>`，study / library / map 与 shell 内部请求统一走它，跨刷新、跨重启都不再撞号。
+- `journal.append` 发现同一 `requestId` 携带**不同命令**时返回 `CONFLICT`，不再静默去重（新增 `isSameCommand`）；真正的重发仍返回 `duplicate: true`。
+- `attempt-pipeline` 收到 `duplicate` 回执即停止（不再继续写评分导致 `NOT_FOUND`），明确告知「这次没保存，请再交一次」。
+- id 计数器按已落库 journal 的高水位起步（`journalIdHighWater`），重启后不再从 `attempt.1` 重新数。
+- 宿主新增 `POST /edu/api/g1/records/export` 与 `DELETE /edu/api/g1/records`，复用 `storage.maintenance`；每次导出用系统文件夹选择框（宿主 PowerShell `FolderBrowserDialog`，与读密钥同一路径，**未新增依赖**）让学生选位置；删除前自动先备份到所选目录，备份失败就不删。客户端改为真实调用，取消时如实说「已取消导出，没有写入任何文件」。
+- 关系题把 `activity.renderSpec.nodes` 的标签作为 `relationNodes` 传入；题目页显示「课本第 N 页」（学生话，不露内容包版本——红线禁词）。
+- 闪屏区分首次 / 非首次文案，超过 15 秒提示「已等 N 秒」；宿主写出 `launch-phases.json`（profile / service 各阶段毫秒）；日志锁被上一个实例占用时给中文提示，不再把 `journal is locked` 抛给学生。
+- 调试台新增 `questions`（88 题渲染走查，不花模型钱）与 `resubmit`（刷新后再次提交，正是本次 bug 的复现路径）两个场景；同步安装目录时也同步 `runtime/scripts`，避免「改了 setup 却测到旧 profile」。
+
+**怎么验证的（实测，非断言）**
+
+- `pnpm typecheck` 全绿；`pnpm test` 全绿（新增：request id 跨刷新唯一、撞 id 拒绝、attempt 未落库兜底、导出/删除文案等用例）；`pnpm check:tracked` OK（747 文件）；`pnpm contract:lock:verify` OK（474 文件）。
+- e2e：`walkthrough`、`study`（提交 → 换题 → 问小芽 → 结束 → 进展）、`questions`（43 概念 **88 道题**全部可渲染）全绿。
+- 真实模型 `resubmit`（刷新后再提交）：两次都落库，`attempt` 2 条 / `session` 2 条 / 重复 requestId **0** 条 / runtime 里 `no saved attempt` 与 `could not record grading` **各 0 条**——旧 bug 已消失；两次 requestId 前缀不同（`request.study.mw65kszahngpcb.6` → `request.study.mw65l2xmqvrnhc.4`）。
+- 导出实测：显式目录导出把 `journal/events.jsonl`（8,590 B）与 `manifest.json` 拷到目标目录；系统文件夹选择框实测弹出「浏览文件夹」。
+- 启动实测：干净重启 `wall=2.8s`，`launch-phases.json` 输出 `{"profile":0,"service":1764}`。
+- 产物：重建 `education/dist/SproutAsk-Setup-0.4.1-x64.exe`（59,831,074 B，SHA256 `3ea94ab8ace621bcb377ea50d5a7e47a0ae29fa6d106efb3fc4d974913d8ce9b`），覆盖安装到 `E:\芽问\current`，并核对 `client.js` / `host-plugin/lib/index.js` 哈希与仓库产物一致。
+- 真实数据只读验收：`journal` 54 事件 / 7 次 `attempt.submitted` / 当前**无**重复 requestId；历史里有 `request.study.N` 撞号痕迹（保留不动，不做事后改写）。
+
+**未做 / 未验证**
+
+- 39 秒启动是单次现象，本次只加了阶段计时与锁冲突提示，**没有复现并修掉那一次**；下次再卡可直接看 `launch-phases.json` 定位到具体阶段。
+- 导出 / 删除只做了 API 与显式目录的实测，**没有在真实学生数据上执行删除**（红线：不写用户真实数据）。
+- DSH 自带 `directoryPicker` 曾尝试启用，但它会连带挂载依赖 `ui-workspace` 的客户端插件，而本产品禁用了 DSH 侧栏 → Web 启动报 `1 entry did not activate`；已回退，改用宿主 `FolderBrowserDialog`。
+
+
 ## 6. 已知限制（诚实清单）
 
 - 安装包**未签名**，Windows 会提示"未知发布者"。
@@ -275,19 +320,20 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 当前界面只有 DOM 级断言，没有真实浏览器视觉走查（三档截图在 `docs/images/ui/`，但不是连续走查）。
 - 学生包里裁掉了 LibreOffice、语音、PTY；`sharp` 随包（`--keep-sharp`，libvips LGPL-3.0）。
 - 原生桌面壳需要 **WebView2 Runtime**（Windows 11 自带；Windows 10 多数已随 Edge 安装）。
-- 强杀桌面壳（任务管理器）可能留下孤儿 node；当前只在关窗时 `taskkill /T /F`，Job Object 兜底未做。
-- 0.4.1 安装后真实对话走查尚未完成（Key 已配置）。
+- 强杀桌面壳（任务管理器）可能留下孤儿 node；关窗已用 `taskkill /T /F` + Job Object 兜底，强杀路径仍未做退出回调。
+- 0.4.1 安装后真实对话走查**已做**（2026-11-07：提交 / 换题 / 问小芽 / 图片 / 导出均走通）；仍未做的是另一台干净机走查。
+- 启动耗时只加了分段计时（`launch-phases.json`），**没有复现并消除** 2026-11-07 14:37 那次 39 秒；日志锁被占时现在会给中文提示而不是长时间等待。
+- DSH 自带 `directoryPicker` 无法启用（它会连带挂载依赖 `ui-workspace` 的客户端插件，与本产品禁用的侧栏冲突）；导出目录改用宿主 `FolderBrowserDialog`。
 
 ---
 
 ## 7. 下一步（按顺序）
 
-1. 用桌面的「SproutAsk」启动 0.4.1，跑一轮真实对话（提交作答 → 反馈 → 下一题）。
-2. 按 `docs/optimize/04-manual-test.md` 做 15 分钟人工走查并收集反馈。
-3. 桌面壳加固：启动自检并重建失效 profile；`status != 200` 时给错误提示而不是白窗；Job Object 清理兜底。
+1. 用桌面的「SproutAsk」启动 0.4.1（2026-11-07 已重装），按 `docs/optimize/04-manual-test.md` 做 15 分钟人工走查。
+2. 观察启动：新装的 `launch-phases.json` 会记录 profile / service 各阶段毫秒；若再出现几十秒卡顿，直接看该文件定位。
+3. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
 4. 视情况补：便携版 zip、0.4.1 Release 发布。
-5. 补 live `activityId` 取下一题、self-report 持久化、进展页页码映射（需 host/契约变更，另行评估）。
-6. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
+5. 补功能前先决定下一轮范围（内容核对 / 界面反馈 / 教学对话）。
 
 ---
 
