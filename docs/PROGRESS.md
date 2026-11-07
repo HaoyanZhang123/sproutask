@@ -302,7 +302,7 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 真实模型 `resubmit`（刷新后再提交）：两次都落库，`attempt` 2 条 / `session` 2 条 / 重复 requestId **0** 条 / runtime 里 `no saved attempt` 与 `could not record grading` **各 0 条**——旧 bug 已消失；两次 requestId 前缀不同（`request.study.mw65kszahngpcb.6` → `request.study.mw65l2xmqvrnhc.4`）。
 - 导出实测：显式目录导出把 `journal/events.jsonl`（8,590 B）与 `manifest.json` 拷到目标目录；系统文件夹选择框实测弹出「浏览文件夹」。
 - 启动实测：干净重启 `wall=2.8s`，`launch-phases.json` 输出 `{"profile":0,"service":1764}`。
-- 产物：重建 `education/dist/SproutAsk-Setup-0.4.1-x64.exe`（59,831,074 B，SHA256 `3ea94ab8ace621bcb377ea50d5a7e47a0ae29fa6d106efb3fc4d974913d8ce9b`），覆盖安装到 `E:\芽问\current`，并核对 `client.js` / `host-plugin/lib/index.js` 哈希与仓库产物一致。
+- 产物：重建 `education/dist/SproutAsk-Setup-0.4.1-x64.exe`（最终版 59,832,422 B，SHA256 `71d4566c7d8ff58c14a2ee5fce84e4ee7566d6af97328f603302dcd1d6c9bd3e`），覆盖安装到 `E:\芽问\current`，并核对 `client.js` / `host-plugin/lib/index.js` 哈希与仓库产物一致。
 - 真实数据只读验收：`journal` 54 事件 / 7 次 `attempt.submitted` / 当前**无**重复 requestId；历史里有 `request.study.N` 撞号痕迹（保留不动，不做事后改写）。
 
 **未做 / 未验证**
@@ -310,6 +310,13 @@ pnpm dev                         # 本机 DSH web + Edge 应用窗口
 - 39 秒启动是单次现象，本次只加了阶段计时与锁冲突提示，**没有复现并修掉那一次**；下次再卡可直接看 `launch-phases.json` 定位到具体阶段。
 - 导出 / 删除只做了 API 与显式目录的实测，**没有在真实学生数据上执行删除**（红线：不写用户真实数据）。
 - DSH 自带 `directoryPicker` 曾尝试启用，但它会连带挂载依赖 `ui-workspace` 的客户端插件，而本产品禁用了 DSH 侧栏 → Web 启动报 `1 entry did not activate`；已回退，改用宿主 `FolderBrowserDialog`。
+
+**同日追加：导出选目录又查出两个真实缺陷（都已修）**
+
+- **一按导出就取消**：宿主脚本设了 `UseDescriptionForTitle`，这个属性只有 PowerShell 7 有；宿主实际用的是 `System32\WindowsPowerShell\v1.0\powershell.exe`（.NET Framework 5.1），赋值抛 `PropertyAssignmentException`、脚本 `status=1` 秒退，`pickExportDirectory` 返回 null，界面显示「已取消导出」——学生永远导不出来。之前那次「实测弹出浏览文件夹」用的是 PS7，所以没暴露。修复：只用两版都有的属性，并逐个 `try/catch`。
+- **选目录时整个应用卡死**：用 `spawnSync` 拉模态对话框会同步阻塞宿主 Node 事件循环，对话框开着时**所有请求都挂起**（实测 `/edu/api/status` 无响应）。修复：改异步 `spawn` + Promise + 5 分钟超时 kill。修复后同一场景下 `/edu/api/status` **5–17ms** 返回。
+- 完整闭环实测：进展页导出 → 系统对话框选桌面 → Enter 确定 → `{ ok: true, count: 1, directory: C:\Users\…\export-… }`，目录里是 `events.jsonl`（8,590 B）与 `manifest.json`（330 B）；核对后已清理该测试产物。
+- 最终安装包重建：59,832,422 B，SHA256 `71d4566c7d8ff58c14a2ee5fce84e4ee7566d6af97328f603302dcd1d6c9bd3e`，已覆盖安装并核对 `client.js` / `host-plugin/lib/index.js` 哈希一致。
 
 
 ## 6. 已知限制（诚实清单）
