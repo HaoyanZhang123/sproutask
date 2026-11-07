@@ -166,7 +166,7 @@ var init_errors = __esm({
 });
 
 // runtime/host-plugin/src/index.ts
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createHash as createHash4, createHmac, timingSafeEqual } from "node:crypto";
 import {
   appendFileSync as appendFileSync2,
@@ -18065,14 +18065,48 @@ async function pickExportDirectory(_ctx) {
     "powershell.exe"
   );
   const powerShell = existsSync8(absolutePowerShell) ? absolutePowerShell : "powershell.exe";
-  const result = spawnSync(powerShell, ["-NoProfile", "-STA", "-Command", script], {
-    encoding: "utf8",
-    windowsHide: true,
-    timeout: 5 * 60 * 1e3
+  const chosen = await new Promise((resolve) => {
+    let settled = false;
+    const finish5 = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    let child;
+    try {
+      child = spawn(powerShell, ["-NoProfile", "-STA", "-Command", script], {
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "ignore"]
+      });
+    } catch {
+      finish5(null);
+      return;
+    }
+    let out = "";
+    child.stdout?.on("data", (chunk) => {
+      out += String(chunk);
+    });
+    const timer = setTimeout(() => {
+      try {
+        child.kill();
+      } catch {
+      }
+      finish5(null);
+    }, 5 * 60 * 1e3);
+    child.on("error", () => {
+      clearTimeout(timer);
+      finish5(null);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code !== 0) {
+        finish5(null);
+        return;
+      }
+      const value = out.trim();
+      finish5(value.length > 0 && path9.isAbsolute(value) ? value : null);
+    });
   });
-  if (result.status !== 0) return null;
-  const chosen = (result.stdout ?? "").trim();
-  if (chosen.length === 0 || !path9.isAbsolute(chosen)) return null;
   return chosen;
 }
 async function readBody(req, maxBytes = 1024 * 1024) {

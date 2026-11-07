@@ -12,7 +12,7 @@
  * the DSH loader never has to resolve workspace TypeScript sources.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import {
   appendFileSync,
@@ -417,12 +417,15 @@ function requestIdOf(req: IncomingMessage, prefix: string): string {
  * 插件，而它依赖 `ui-workspace`——产品的学生界面把 DSH 侧栏/工作区都禁用了，
  * 结果整个 Web 启动会报 "1 entry did not activate"。宿主自己拉起 PowerShell
  * 的 FolderBrowserDialog，和读密钥是同一条已验证路径，不引入新依赖。
+ *
+ * 必须用异步 spawn：`spawnSync` 会把宿主 Node 的事件循环整体卡住，对话框打开
+ * 期间**所有请求都停摆**（实测确认），学生看到的就是"一按导出整个应用没反应"。
+ *
+ * 另外 Windows PowerShell 5.1（.NET Framework）的 FolderBrowserDialog 没有
+ * `UseDescriptionForTitle`，设了会抛 PropertyAssignmentException 导致脚本直接
+ * 退出、永远选不到目录，所以只用两个版本都有的属性并逐个 try/catch。
  */
 async function pickExportDirectory(_ctx: HostContextLike): Promise<string | null> {
-  // Windows PowerShell 5.1（.NET Framework）的 FolderBrowserDialog 没有
-  // UseDescriptionForTitle；设了会抛 PropertyAssignmentException，整个调用直接
-  // 失败，学生看到的就是"一按就取消"。只用两边都有的属性，并逐个 try/catch，
-  // 保证任何设置项失败都不会让对话框本身弹不出来。
   const script = [
     "$ErrorActionPreference='Stop'",
     'Add-Type -AssemblyName System.Windows.Forms',
@@ -440,14 +443,51 @@ async function pickExportDirectory(_ctx: HostContextLike): Promise<string | null
     'powershell.exe',
   );
   const powerShell = existsSync(absolutePowerShell) ? absolutePowerShell : 'powershell.exe';
-  const result = spawnSync(powerShell, ['-NoProfile', '-STA', '-Command', script], {
-    encoding: 'utf8',
-    windowsHide: true,
-    timeout: 5 * 60 * 1000,
+
+  const chosen = await new Promise<string | null>((resolve) => {
+    let settled = false;
+    const finish = (value: string | null): void => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    let child: ReturnType<typeof spawn>;
+    try {
+      child = spawn(powerShell, ['-NoProfile', '-STA', '-Command', script], {
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      });
+    } catch {
+      finish(null);
+      return;
+    }
+    let out = '';
+    child.stdout?.on('data', (chunk: Buffer | string) => {
+      out += String(chunk);
+    });
+    // 学生一直不选也不能把请求挂死：五分钟后当作取消。
+    const timer = setTimeout(() => {
+      try {
+        child.kill();
+      } catch {
+        // 进程可能已经结束
+      }
+      finish(null);
+    }, 5 * 60 * 1000);
+    child.on('error', () => {
+      clearTimeout(timer);
+      finish(null);
+    });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (code !== 0) {
+        finish(null);
+        return;
+      }
+      const value = out.trim();
+      finish(value.length > 0 && path.isAbsolute(value) ? value : null);
+    });
   });
-  if (result.status !== 0) return null;
-  const chosen = (result.stdout ?? '').trim();
-  if (chosen.length === 0 || !path.isAbsolute(chosen)) return null;
   return chosen;
 }
 
