@@ -172,7 +172,7 @@ import {
   appendFileSync as appendFileSync2,
   existsSync as existsSync8,
   mkdirSync as mkdirSync4,
-  readFileSync as readFileSync9,
+  readFileSync as readFileSync10,
   statSync as statSync6,
   unlinkSync as unlinkSync4,
   writeFileSync as writeFileSync6
@@ -5276,7 +5276,7 @@ function createDeepSeekVisionClient(options) {
 }
 
 // runtime/src/runtime-composition.ts
-import { existsSync as existsSync7, readFileSync as readFileSync7 } from "node:fs";
+import { existsSync as existsSync7, readFileSync as readFileSync8 } from "node:fs";
 import path7 from "node:path";
 
 // packages/storage/src/types.ts
@@ -5612,6 +5612,15 @@ import {
   writeSync as writeSync2
 } from "node:fs";
 import path2 from "node:path";
+function isSameCommand(existing, incoming) {
+  if (existing.type !== incoming.type) return false;
+  if (existing.learnerId !== incoming.learnerId) return false;
+  try {
+    return JSON.stringify(existing.payload) === JSON.stringify(incoming.payload);
+  } catch {
+    return false;
+  }
+}
 function recoveryStepsFor(corrupt, tail) {
   const steps = [];
   if (tail) steps.push("isolated the half-written tail line under journal/quarantine; the complete prefix was kept");
@@ -5833,6 +5842,13 @@ var JournalStore = class _JournalStore {
     }
     const existing = this.state.byRequest.get(command.requestId);
     if (existing !== void 0) {
+      if (!isSameCommand(existing, command)) {
+        return errResult(
+          "CONFLICT",
+          `requestId ${command.requestId} was already used for a different command; a unique request id is required`,
+          false
+        );
+      }
       return okResult(
         {
           eventId: existing.eventId,
@@ -13009,6 +13025,27 @@ async function submitAndGradeAttempt(deps, ctx, input) {
       retry: null
     };
   }
+  if (saved.data.duplicate) {
+    deps.onAudit?.({
+      at: deps.clock.now(),
+      kind: "gateway.error",
+      subject: attempt.id,
+      reason: "answer was not saved: the request id was already used by an earlier submission"
+    });
+    return {
+      ok: false,
+      error: tutorError(
+        "CONFLICT",
+        "this submission reused an earlier request id, so the answer was not saved; please submit again",
+        true
+      ),
+      attemptId: null,
+      attemptPersisted: false,
+      duplicate: true,
+      feedbackPending: false,
+      retry: null
+    };
+  }
   if (input.timeoutMs !== void 0 && input.timeoutMs <= 0) {
     await markGradingNotCommitted(deps, ctx, {
       attemptId: attempt.id,
@@ -15951,7 +15988,7 @@ function createSystemClock() {
 }
 
 // runtime/src/adapters/session-ids.ts
-import { readdirSync as readdirSync3 } from "node:fs";
+import { readFileSync as readFileSync7, readdirSync as readdirSync3 } from "node:fs";
 import path6 from "node:path";
 
 // runtime/src/adapters/sequential-ids.ts
@@ -15969,6 +16006,21 @@ function createSequentialIdGenerator(options = {}) {
 }
 
 // runtime/src/adapters/session-ids.ts
+function journalIdHighWater(journalFile) {
+  let text2;
+  try {
+    text2 = readFileSync7(journalFile, "utf8");
+  } catch {
+    return 0;
+  }
+  let highest = 0;
+  const pattern = /\b(?:attempt|event|evidence|assessment|model-run|review|session)\.(\d+)\b/g;
+  for (const match of text2.matchAll(pattern)) {
+    const value = Number(match[1]);
+    if (Number.isFinite(value) && value > highest) highest = value;
+  }
+  return highest;
+}
 var SESSION_ENTRY = /^session[\w.:@-]+$/;
 function listDshSessionIds(sessionsRoot) {
   const found = /* @__PURE__ */ new Set();
@@ -16073,7 +16125,7 @@ var MESSAGES2 = {
   "error.unavailable": "\u5F53\u524D\u529F\u80FD\u4E0D\u53EF\u7528"
 };
 function readJson(file) {
-  return JSON.parse(readFileSync7(file, "utf8"));
+  return JSON.parse(readFileSync8(file, "utf8"));
 }
 function trustModeFromPackStatus(status) {
   return status === "published" ? "published" : "candidate";
@@ -16148,7 +16200,11 @@ async function composeEducationRuntime(options) {
   const clock = createSystemClock();
   const env = options.env ?? process.env;
   const dshHome = resolveDshHome({ explicit: options.dshHome, env, dataRoot: options.dataRoot });
-  const ids = options.ids ?? createDshSessionIdGenerator({ prefix: "edu", dshHome });
+  const ids = options.ids ?? createDshSessionIdGenerator({
+    prefix: "edu",
+    dshHome,
+    startAt: journalIdHighWater(path7.join(path7.resolve(options.dataRoot), "journal", "events.jsonl")) + 1
+  });
   const learnerId = options.learnerId ?? "learner.local.default";
   const workspaceRoot2 = path7.resolve(options.workspaceRoot);
   const contentRoot = path7.join(workspaceRoot2, "content", "biology-7a");
@@ -16378,7 +16434,7 @@ async function composeEducationRuntime(options) {
 
 // runtime/src/g1-service.ts
 import { createHash as createHash3 } from "node:crypto";
-import { readFileSync as readFileSync8 } from "node:fs";
+import { readFileSync as readFileSync9 } from "node:fs";
 import path8 from "node:path";
 function pngDimensions(bytes) {
   if (bytes.length < 24) return null;
@@ -16427,7 +16483,7 @@ function imageServiceError(error) {
   }
 }
 function readJson2(file) {
-  return JSON.parse(readFileSync8(file, "utf8"));
+  return JSON.parse(readFileSync9(file, "utf8"));
 }
 function failFrom2(result) {
   return { ok: false, error: result.error };
@@ -16887,6 +16943,58 @@ var G1Service = class {
       packVersion: this.composition.packKey.packVersion,
       conceptId
     });
+  }
+  /**
+   * 导出学习记录到学生选定的目录。底层 storage 已有分 scope 的导出能力，
+   * 这里只做"学生话"的回执翻译，不重新实现落盘逻辑。
+   */
+  exportRecords(requestId, targetDir) {
+    const exported = this.composition.storage.exportData(
+      "learning_records",
+      targetDir,
+      requestId
+    );
+    if (!exported.ok) return exported;
+    const count = exported.data.manifest.files.length;
+    return okResult(
+      {
+        scope: "learning_records",
+        exportedAt: this.composition.clock.now(),
+        recordCount: count,
+        directory: exported.data.directory,
+        note: `\u5B66\u4E60\u8BB0\u5F55\u5DF2\u5BFC\u51FA\u5230\uFF1A${exported.data.directory}`
+      },
+      count
+    );
+  }
+  /**
+   * 删除学习记录。按产品决定：先自动备份到同一目录，再删除；备份失败就不删。
+   */
+  deleteRecords(requestId, backupDir) {
+    let backupDirectory = null;
+    if (backupDir !== null) {
+      const backup = this.composition.storage.exportData(
+        "learning_records",
+        backupDir,
+        `${requestId}:backup`
+      );
+      if (!backup.ok) return backup;
+      backupDirectory = backup.data.directory;
+    }
+    const plan = this.composition.storage.prepareDelete("learning_records");
+    if (!plan.ok) return plan;
+    const removed = this.composition.storage.deleteData(plan.data, true);
+    if (!removed.ok) return removed;
+    return okResult(
+      {
+        scope: "learning_records",
+        deletedAt: this.composition.clock.now(),
+        removedTargets: removed.data.deleted.length,
+        backupDirectory,
+        note: backupDirectory === null ? "\u5B66\u4E60\u8BB0\u5F55\u5DF2\u5220\u9664\u3002" : `\u5B66\u4E60\u8BB0\u5F55\u5DF2\u5220\u9664\uFF1B\u5220\u9664\u524D\u5907\u4EFD\u5728\uFF1A${backupDirectory}`
+      },
+      removed.data.deleted.length
+    );
   }
   async saveDraft(draft, requestId) {
     const ctx = this.ctx(requestId);
@@ -17899,7 +18007,7 @@ function modelKeyConfigured() {
 }
 function readModelKey() {
   try {
-    const protectedBase64 = readFileSync9(modelKeyFile()).toString("utf8");
+    const protectedBase64 = readFileSync10(modelKeyFile()).toString("utf8");
     const result = runPowerShell(UNPROTECT_SCRIPT, protectedBase64);
     return { key: result.stdout, error: result.error };
   } catch {
@@ -17938,6 +18046,34 @@ function json(res, status, value) {
 function requestIdOf(req, prefix) {
   const value = req.headers["x-edu-request-id"];
   return typeof value === "string" && value.trim().length > 0 ? value : `${prefix}.${String(Date.now())}`;
+}
+async function pickExportDirectory(_ctx) {
+  const script = [
+    "$ErrorActionPreference='Stop'",
+    "Add-Type -AssemblyName System.Windows.Forms",
+    "$d = New-Object System.Windows.Forms.FolderBrowserDialog",
+    "$d.Description = '\u9009\u62E9\u82BD\u95EE\u5B66\u4E60\u8BB0\u5F55\u7684\u4FDD\u5B58\u4F4D\u7F6E'",
+    "$d.UseDescriptionForTitle = $true",
+    "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($d.SelectedPath) }"
+  ].join(";");
+  const systemRoot = process.env["SystemRoot"] ?? process.env["windir"] ?? "C:\\Windows";
+  const absolutePowerShell = path9.join(
+    systemRoot,
+    "System32",
+    "WindowsPowerShell",
+    "v1.0",
+    "powershell.exe"
+  );
+  const powerShell = existsSync8(absolutePowerShell) ? absolutePowerShell : "powershell.exe";
+  const result = spawnSync(powerShell, ["-NoProfile", "-STA", "-Command", script], {
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: 5 * 60 * 1e3
+  });
+  if (result.status !== 0) return null;
+  const chosen = (result.stdout ?? "").trim();
+  if (chosen.length === 0 || !path9.isAbsolute(chosen)) return null;
+  return chosen;
 }
 async function readBody(req, maxBytes = 1024 * 1024) {
   const chunks = [];
@@ -18176,6 +18312,28 @@ function registerRoutes(ctx, composition) {
         json(res, 200, await g1.records());
         return;
       }
+      if (pathname === "/edu/api/g1/records/export" && req.method === "POST") {
+        const body = await readBody(req);
+        const targetDir = typeof body?.["targetDir"] === "string" && path9.isAbsolute(body["targetDir"]) ? body["targetDir"] : await pickExportDirectory(ctx);
+        if (targetDir === null) {
+          json(res, 200, {
+            ok: false,
+            error: { code: "CANCELLED", message: "export cancelled: no folder selected", retryable: true }
+          });
+          return;
+        }
+        const requestId = requestIdOf(req, "g1.records.export");
+        const exported = g1.exportRecords(requestId, targetDir);
+        json(res, 200, exported);
+        return;
+      }
+      if (pathname === "/edu/api/g1/records" && req.method === "DELETE") {
+        const body = await readBody(req);
+        const backupDir = typeof body?.["backupDir"] === "string" && path9.isAbsolute(body["backupDir"]) ? body["backupDir"] : await pickExportDirectory(ctx);
+        const requestId = requestIdOf(req, "g1.records.delete");
+        json(res, 200, g1.deleteRecords(requestId, backupDir));
+        return;
+      }
       if (pathname === "/edu/api/g1/image" && req.method === "POST") {
         const body = await readBody(req, 12 * 1024 * 1024);
         if (body === null || typeof body["base64"] !== "string" || typeof body["mime"] !== "string") {
@@ -18346,7 +18504,7 @@ async function apply(ctx) {
 function readRuntimeLock() {
   try {
     const lock = JSON.parse(
-      readFileSync9(path9.join(workspaceRoot, "..", "docs", "rebuild", "runtime-lock.json"), "utf8")
+      readFileSync10(path9.join(workspaceRoot, "..", "docs", "rebuild", "runtime-lock.json"), "utf8")
     );
     return { version: lock.source?.version, tarballSha256: lock.source?.tarballSha256 };
   } catch {

@@ -8,6 +8,7 @@
 
 import type { RequestContext } from '@edu/domain';
 import type { EducationShell, ShellPanel } from '../../shell/src/index.js';
+import { nextRequestId } from '../../shell/src/request-ids.js';
 import { LibraryController, type LibraryControllerOptions } from './controller.js';
 import { createLibraryPage } from './page.js';
 import type { LibraryDataSource } from './types.js';
@@ -40,11 +41,9 @@ export interface LibraryUi {
 }
 
 function defaultRequestFactory(): () => RequestContext {
-  let counter = 0;
   return () => {
-    counter += 1;
     return {
-      requestId: `request.library.${counter}`,
+      requestId: nextRequestId('request.library'),
       learnerId: 'learner.local.default',
       now: new Date().toISOString(),
     };

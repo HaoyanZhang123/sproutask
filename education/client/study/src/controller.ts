@@ -945,7 +945,9 @@ export class StudyController {
       this.failureNotice =
         result.error.code === 'UNAVAILABLE'
           ? '云端反馈暂不可用；本地材料、原答和草稿仍保留，不会伪造模型回复。'
-          : '';
+          : result.error.code === 'CONFLICT'
+            ? '这次作答没有保存成功；重新点一次「提交作答」就行，内容和草稿都还在。'
+            : '';
       this.machine.transition('failed');
       this.notify();
       return;
@@ -1853,7 +1855,18 @@ export class StudyController {
   }
 
   private stemBlock(): HTMLElement {
-    return h('h3', { class: 'edu-study-stem', 'data-testid': 'study-stem' }, this.activity?.stem ?? '');
+    const blocks: HTMLElement[] = [
+      h('h3', { class: 'edu-study-stem', 'data-testid': 'study-stem' }, this.activity?.stem ?? ''),
+    ];
+    // 题目从哪来：只用学生话给课本页码。"内容包/版本"属于内部术语（红线禁词）。
+    const source = this.workspace?.sources?.[0];
+    const page = source?.printedPage ?? (source?.pdfPage != null ? String(source.pdfPage) : null);
+    if (page !== null) {
+      blocks.push(
+        h('p', { class: 'edu-study-note', 'data-testid': 'study-stem-source' }, `课本第 ${page} 页`),
+      );
+    }
+    return h('div', { class: 'edu-study-stem-block' }, ...blocks);
   }
 
   private questionNumber(): string | null {
@@ -1880,6 +1893,12 @@ export class StudyController {
     } else {
       const form = mountAnswerForm(body, {
         activity: this.activity,
+        // 关系题的节点用内部 id（factor.position…）当选项会直接显示给学生；
+        // renderSpec.nodes 里带着写好的中文标签，必须传下去。
+        relationNodes: this.activity.renderSpec?.nodes.map((node) => ({
+          id: node.id,
+          label: node.label,
+        })),
         // 草稿在交卷后清空；「改文字再试」仍回到上次写的内容，不用从空白开始。
         initial: this.answer ?? this.lastAnswer,
         onSubmit: (value) => void this.submit(value),

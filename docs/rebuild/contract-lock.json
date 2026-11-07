@@ -468,7 +468,7 @@
     },
     {
       "path": "education/client/library/src/index.ts",
-      "sha256": "a09e830e4df3128b105234adae83a630acb9a004e0308e75326ef5d9e7fcc96c"
+      "sha256": "051e726c9a0466a45d3df3445099cd6359efd7b58944e9e63202b895864e8c95"
     },
     {
       "path": "education/client/library/src/job-model.ts",
@@ -544,7 +544,7 @@
     },
     {
       "path": "education/client/map/src/index.ts",
-      "sha256": "22664aef1d8c7e9d35dd761d3196f5442ea2d4a34d6a7aab37fc1c28fda099e9"
+      "sha256": "94e32c4df974fd7273473537d416d7f8d6d17072f79f3c628a0b0a48300cf12d"
     },
     {
       "path": "education/client/map/src/layout.ts",
@@ -684,7 +684,7 @@
     },
     {
       "path": "education/client/shell/src/index.ts",
-      "sha256": "4a214daabe05ba14999c9b1cd8fedb0d065cf464b3151c8af35a25f24cd7219e"
+      "sha256": "8116a2a46d70c458ef7aea7b482103008a98ad68476163344a7b804d4aebefc8"
     },
     {
       "path": "education/client/shell/src/key-port.ts",
@@ -720,7 +720,7 @@
     },
     {
       "path": "education/client/shell/src/pages/records.ts",
-      "sha256": "6c69e3c163e1d238fe5fa09c8c39639e42eec4c4b00ac34dea1332ef2dae788a"
+      "sha256": "db12d3e33c25766e34eea3931975810e7da515922c0d06807c3666210c83d6f5"
     },
     {
       "path": "education/client/shell/src/pages/registry.ts",
@@ -731,12 +731,16 @@
       "sha256": "bd3791c8780753be4675478c1ac2306e1e230d23cb29fa691a4936afb22d89e4"
     },
     {
+      "path": "education/client/shell/src/request-ids.ts",
+      "sha256": "1992a4e4b8de4f80fb10251a39910a3ba8e1c9f2de36a49d45fc84048a72e162"
+    },
+    {
       "path": "education/client/shell/src/shell-state.ts",
       "sha256": "1fdc28382ded29d9cc401d30dcbfa0086ef956463831c525bb8bdedb1c9303ae"
     },
     {
       "path": "education/client/shell/src/shell.ts",
-      "sha256": "f500a52ceaba52769d576ac6445f9b9b204de77ad4333c7846f19b1e560c3d97"
+      "sha256": "ddc76e41bcb7e0ab7b9ad89603d8b595f2697623d755b295c48eff9d21801b47"
     },
     {
       "path": "education/client/shell/src/slots.ts",
@@ -796,7 +800,7 @@
     },
     {
       "path": "education/client/shell/test/records.test.ts",
-      "sha256": "bdd3c0e6581d865a56acfdd4d753a0e0c6c6bcca80347ba49d4e4bdc3fc28f72"
+      "sha256": "311f7b054cc2770177319d101af498ed87623075667d69e9243d6fbcc6d57ace"
     },
     {
       "path": "education/client/shell/tsconfig.json",
@@ -816,7 +820,7 @@
     },
     {
       "path": "education/client/study/src/controller.ts",
-      "sha256": "928b563c58bf0402ddac48dfeb8c27ec438beded6f5739b6e70bcf67598f04b6"
+      "sha256": "59993558f6397ebeca9ecf57b41fd485b52ca6d4bb924a394e3bab5e0cdab207"
     },
     {
       "path": "education/client/study/src/fixture.ts",
@@ -828,7 +832,7 @@
     },
     {
       "path": "education/client/study/src/index.ts",
-      "sha256": "e5e2e988a2d9f15e5e1aa1a9e0282afa6ebf6ec56f86827561e109fafa43506d"
+      "sha256": "49e85b7d1f662debbd7f41b7400e227b4aeb325a250a0ce8327dc74eff8d0876"
     },
     {
       "path": "education/client/study/src/labels.ts",
@@ -1648,7 +1652,7 @@
     },
     {
       "path": "education/packages/storage/src/journal.ts",
-      "sha256": "bdd537ded77808c9e5b3994116c055a44cdcb819527d5290b4cfa94fef5a3cff"
+      "sha256": "5d3373ab034add531ca948104b0dbd8be66ae9204bb2f1c0a78bc9049175a1e6"
     },
     {
       "path": "education/packages/storage/src/lock.ts",
@@ -1688,7 +1692,7 @@
     },
     {
       "path": "education/packages/storage/test/contracts/storage.contract.test.ts",
-      "sha256": "53f7db304e5dea0417a34f95e98a9c0b89157de7faf826557c6ac2fd8890b1e0"
+      "sha256": "ae3310f73806f4035cf2036204aad4cd3552905da2b48352f7be95f1a0fdd2b3"
     },
     {
       "path": "education/packages/storage/test/export-delete.test.ts",
@@ -1700,7 +1704,7 @@
     },
     {
       "path": "education/packages/storage/test/journal.test.ts",
-      "sha256": "81e60cf63c9924d2ed4a32ed7c17bced5b3038c5b1804761ef2ac9b48fb02754"
+      "sha256": "0e2226dc7312ae83bc0fe6e1cbc5536de1346b24f7ffb324e3bdc12c19d0be56"
     },
     {
       "path": "education/packages/storage/test/migration.test.ts",
@@ -1724,7 +1728,7 @@
     },
     {
       "path": "education/packages/tutor/src/attempt-pipeline.ts",
-      "sha256": "efaf7766af94c4f33c9d2f3f4dd59d7e842bc5ea9d89efc64ce69568638518c3"
+      "sha256": "5e3dce922b007a9ed47980d69fe7e8a33efb22a6f5440ce95e436c973d5a9b44"
     },
     {
       "path": "education/packages/tutor/src/context.ts",
@@ -2020,7 +2024,7 @@
     },
     {
       "path": "education/runtime/client-plugin/lib/client.js",
-      "sha256": "d3af7a88a1c61261158bb561ad7537fc7ee341cd8a3b856a6652b8e89eda3813"
+      "sha256": "d85efefe4d925c7b09bbb2082499abb0d91073c234d28dbd54f7f4a94e70f1f4"
     },
     {
       "path": "education/runtime/client-plugin/lib/index.js",
@@ -2036,11 +2040,11 @@
     },
     {
       "path": "education/runtime/client-plugin/src/live-sources.ts",
-      "sha256": "df671ffd3f9834f7224da21dd04a5fbbdfc4b5dc645f9bc065356f0eed43ea1d"
+      "sha256": "a3cc2495b3344e7214bca0f48fde6459d81ab2878b7a17bc39d42a92942627cc"
     },
     {
       "path": "education/runtime/host-plugin/lib/index.js",
-      "sha256": "318f98baba3a3236d7fa828a6eeeb2f924908cce4f93c7f66a429e733a8aa939"
+      "sha256": "b754830325faf57597e9e0310e8eaab961e783a38d58172466a141ef0c175bc3"
     },
     {
       "path": "education/runtime/host-plugin/package.json",
@@ -2048,7 +2052,7 @@
     },
     {
       "path": "education/runtime/host-plugin/src/index.ts",
-      "sha256": "5f333c44a49ddcb70fabd9e66711e982740f70d4c31cd7396085320800c77dfa"
+      "sha256": "0dd7692563c0bd98ff50d1ff1dc9759fbcbc6aa83db72612b8f6fc936c167030"
     },
     {
       "path": "education/runtime/scripts/setup-education-home.mjs",
@@ -2088,7 +2092,7 @@
     },
     {
       "path": "education/runtime/src/adapters/session-ids.ts",
-      "sha256": "e5e18f217f2c00f547412d2492040015ae89d513cb5290412a63f7d5d35f72da"
+      "sha256": "1f1ab4e5c8c01c04eed7af4bb2c9cf9c1a464f98d1e8e0aa5509aadc9e381f29"
     },
     {
       "path": "education/runtime/src/adapters/system-clock.ts",
@@ -2100,7 +2104,7 @@
     },
     {
       "path": "education/runtime/src/g1-service.ts",
-      "sha256": "95e711ef79da638e06ae5b9a281296c33ab468e786281fecf1f5bebecc79a64e"
+      "sha256": "9ca8dedf1b6a1f399f6af8de77445597be9d325f463a8d28bbdb6e5fcb71fec8"
     },
     {
       "path": "education/runtime/src/index.ts",
@@ -2120,7 +2124,7 @@
     },
     {
       "path": "education/runtime/src/runtime-composition.ts",
-      "sha256": "81b957ef09eba1b964e807f787c2684d2f5c1ff4e46d5d9805c9f33b5abd064f"
+      "sha256": "a93f09618c8a7de221c9da4a180c8e509b9594684d8be2ae27a38a90a690caa7"
     },
     {
       "path": "education/runtime/src/shims/visuals-shim.d.ts",
@@ -2192,7 +2196,7 @@
     },
     {
       "path": "education/scripts/debug/cdp.mjs",
-      "sha256": "2b0901efe640bc940207985b5bbe473b55e781500bc5daf33216dfcd5650191f"
+      "sha256": "1e9c6f17d3e98dc434272d8dd1f22803ed270ee724abe35fc3feb6cfcb7563b2"
     },
     {
       "path": "education/scripts/debug/e2e.mjs",
@@ -2200,7 +2204,7 @@
     },
     {
       "path": "education/scripts/debug/scenarios.mjs",
-      "sha256": "4977da4e96367a2a6707e2799b5d8434803808f69739f24e29597825cca07a04"
+      "sha256": "d39b9d1560fec174b7dfff8681fd21640fdeb0e3bede7eceef66dd15ea2e410f"
     },
     {
       "path": "education/scripts/dev-education.mjs",
@@ -2299,5 +2303,5 @@
       "sha256": "3995c7adb8b57a9a6a0a95eb5e1041d09133641fdee361a81fe07565a43ba776"
     }
   ],
-  "generatedAt": "2026-11-06T16:46:03Z"
+  "generatedAt": "2026-11-07T09:03:24Z"
 }

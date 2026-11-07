@@ -8,6 +8,7 @@
 
 import type { RequestContext } from '@edu/domain';
 import type { EducationShell, ShellPanel } from '../../shell/src/index.js';
+import { nextRequestId } from '../../shell/src/request-ids.js';
 import { StudyController, type StudyControllerOptions } from './controller.js';
 import { createStudyPage } from './page.js';
 import { createFixtureStudyDataSource, type FixtureStudyOptions } from './fixture.js';
@@ -41,15 +42,13 @@ export interface StudyUi {
 }
 
 function defaultRequestFactory(): () => RequestContext {
-  let counter = 0;
-  return () => {
-    counter += 1;
-    return {
-      requestId: `request.study.${counter}`,
-      learnerId: 'learner.local.default',
-      now: new Date().toISOString(),
-    };
-  };
+  // 每次刷新页面计数器都从 1 重数，而学习记录按 requestId 去重；复用旧 id 会让
+  // 新作答被当成重发而丢弃（线上事故）。requestId 必须跨刷新唯一。
+  return () => ({
+    requestId: nextRequestId('request.study'),
+    learnerId: 'learner.local.default',
+    now: new Date().toISOString(),
+  });
 }
 
 export function createStudyUi(options: CreateStudyUiOptions = {}): StudyUi {

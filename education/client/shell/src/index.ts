@@ -13,6 +13,7 @@ export * from './errors.js';
 export * from './contracts.js';
 export * from './shell-state.js';
 export * from './shell.js';
+export * from './request-ids.js';
 export * from './slots.js';
 export * from './pages/registry.js';
 export * from './pages/common.js';

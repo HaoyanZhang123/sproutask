@@ -1232,6 +1232,16 @@ window.__ModuleLoader__.load({
       );
     }
     
+    // client/shell/src/request-ids.ts
+    var BOOT_ID = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    var counters = /* @__PURE__ */ new Map();
+    function nextRequestId(prefix) {
+      const key = prefix.trim().length > 0 ? prefix.trim() : "request";
+      const next = (counters.get(key) ?? 0) + 1;
+      counters.set(key, next);
+      return `${key}.${BOOT_ID}.${next}`;
+    }
+    
     // client/shell/src/pages/registry.ts
     var PageRegistryError = class extends Error {
       constructor(message) {
@@ -2979,14 +2989,18 @@ window.__ModuleLoader__.load({
         title: "\u5BFC\u51FA\u5B66\u4E60\u8BB0\u5F55",
         impact: [
           "\u5BFC\u51FA\u5185\u5BB9\uFF1A\u4F60\u7684\u4F5C\u7B54\u3001\u5224\u65AD\u8BB0\u5F55\u3001\u81EA\u8BC4\u548C\u590D\u4E60\u5B89\u6392\u3002",
-          "\u4E0D\u542B\u8BFE\u672C\u539F\u6587\u3002"
+          "\u4E0D\u542B\u8BFE\u672C\u539F\u6587\u3002",
+          "\u70B9\u300C\u9009\u62E9\u4FDD\u5B58\u4F4D\u7F6E\u300D\u540E\u4F1A\u6253\u5F00\u7CFB\u7EDF\u7684\u6587\u4EF6\u5939\u9009\u62E9\u6846\uFF1B\u9009\u597D\u7684\u6587\u4EF6\u5939\u91CC\u4F1A\u51FA\u73B0\u4E00\u4E2A\u65B0\u6587\u4EF6\u5939\u3002"
         ],
-        confirmLabel: "\u786E\u8BA4\u5BFC\u51FA",
+        confirmLabel: "\u9009\u62E9\u4FDD\u5B58\u4F4D\u7F6E",
         onConfirm: () => {
           void (async () => {
             const result = await api2.exportData();
             if (result.ok) {
-              onStatus(`\u5DF2\u5BFC\u51FA ${result.data.recordCount} \u6761\u8BB0\u5F55\u3002${result.data.note}`);
+              const where = typeof result.data.directory === "string" ? `\u4FDD\u5B58\u5728\uFF1A${String(result.data.directory)}` : result.data.note;
+              onStatus(`\u5DF2\u5BFC\u51FA ${result.data.recordCount} \u4E2A\u6587\u4EF6\u3002${where}`);
+            } else if (result.error.code === "CANCELLED") {
+              onStatus("\u5DF2\u53D6\u6D88\u5BFC\u51FA\uFF0C\u6CA1\u6709\u5199\u5165\u4EFB\u4F55\u6587\u4EF6\u3002");
             } else {
               onError(result.error);
             }
@@ -2996,18 +3010,22 @@ window.__ModuleLoader__.load({
       const deleteLearningDialog = new ConfirmDialog({
         title: "\u5220\u9664\u5B66\u4E60\u8BB0\u5F55",
         tone: "danger",
-        acknowledgement: "\u6211\u4E86\u89E3\u5220\u9664\u4E0D\u53EF\u64A4\u9500\uFF0C\u8BFE\u672C\u6587\u4EF6\u4E0D\u4F1A\u88AB\u5220\u9664\u3002",
+        acknowledgement: "\u6211\u4E86\u89E3\u5220\u9664\u4E0D\u53EF\u64A4\u9500\uFF08\u5220\u9664\u524D\u4F1A\u5148\u5907\u4EFD\u4E00\u4EFD\uFF09\uFF0C\u8BFE\u672C\u6587\u4EF6\u4E0D\u4F1A\u88AB\u5220\u9664\u3002",
         impact: [
           "\u4F1A\u5220\u9664\u8FD9\u53F0\u7535\u8111\u4E0A\u7684\u4F5C\u7B54\u3001\u5224\u65AD\u8BB0\u5F55\u3001\u81EA\u8BC4\u548C\u590D\u4E60\u5B89\u6392\u3002",
+          "\u5220\u9664\u524D\u4F1A\u5148\u6253\u5F00\u6587\u4EF6\u5939\u9009\u62E9\u6846\uFF0C\u628A\u4E00\u4EFD\u5907\u4EFD\u4FDD\u5B58\u5230\u4F60\u9009\u7684\u4F4D\u7F6E\u3002",
           "\u8BFE\u672C\u6587\u4EF6\u548C\u8BFE\u672C\u539F\u56FE\u4E0D\u4F1A\u88AB\u5220\u9664\u3002"
         ],
-        confirmLabel: "\u786E\u8BA4\u5220\u9664\u5B66\u4E60\u8BB0\u5F55",
+        confirmLabel: "\u9009\u62E9\u5907\u4EFD\u4F4D\u7F6E\u5E76\u5220\u9664",
         onConfirm: () => {
           void (async () => {
             const result = await api2.deleteData("learning_records");
             if (result.ok) {
-              onStatus(result.data.note);
+              const backup = typeof result.data.backupDirectory === "string" ? `\u5907\u4EFD\u5728\uFF1A${String(result.data.backupDirectory)}` : "";
+              onStatus(backup.length > 0 ? `\u5B66\u4E60\u8BB0\u5F55\u5DF2\u5220\u9664\u3002${backup}` : result.data.note);
               onDeleted();
+            } else if (result.error.code === "CANCELLED") {
+              onStatus("\u5DF2\u53D6\u6D88\u5220\u9664\uFF0C\u5B66\u4E60\u8BB0\u5F55\u6CA1\u6709\u53D8\u5316\u3002");
             } else {
               onError(result.error);
             }
@@ -3257,7 +3275,6 @@ window.__ModuleLoader__.load({
       homePromise = null;
       recordsPromise = null;
       renderToken = 0;
-      requestCounter = 0;
       disposed = false;
       lastRangeInput = null;
       constructor(options) {
@@ -3266,10 +3283,8 @@ window.__ModuleLoader__.load({
         this.keyPort = options.keyPort ?? (options.data.kind === "live" ? createHttpAuthKeyPort() : createUnsupportedAuthKeyPort());
         this.clock = options.clock ?? { now: () => (/* @__PURE__ */ new Date()).toISOString() };
         this.ids = options.ids ?? {
-          next: (prefix) => {
-            this.requestCounter += 1;
-            return `${prefix}.${this.requestCounter}`;
-          }
+          // 页面重载后计数器归零会让 requestId 撞上历史记录而被当成重发。
+          next: (prefix) => nextRequestId(prefix)
         };
         const initialPath = options.initialPath ?? readInitialPath();
         this.state = {
@@ -3784,7 +3799,6 @@ window.__ModuleLoader__.load({
         this.renderContext();
       }
       newRequest() {
-        this.requestCounter += 1;
         return {
           requestId: this.ids.next("request"),
           learnerId: this.state.snapshot?.learner.id ?? "learner.local.pending",
@@ -9190,11 +9204,9 @@ window.__ModuleLoader__.load({
     
     // client/library/src/index.ts
     function defaultRequestFactory() {
-      let counter = 0;
       return () => {
-        counter += 1;
         return {
-          requestId: `request.library.${counter}`,
+          requestId: nextRequestId("request.library"),
           learnerId: "learner.local.default",
           now: (/* @__PURE__ */ new Date()).toISOString()
         };
@@ -12502,11 +12514,9 @@ window.__ModuleLoader__.load({
     
     // client/map/src/index.ts
     function defaultRequestFactory2() {
-      let counter = 0;
       return () => {
-        counter += 1;
         return {
-          requestId: `request.map.${counter}`,
+          requestId: nextRequestId("request.map"),
           learnerId: "learner.local.default",
           now: (/* @__PURE__ */ new Date()).toISOString()
         };
@@ -13712,7 +13722,7 @@ window.__ModuleLoader__.load({
         if (!result.ok) {
           this.phase = "failed";
           this.failedError = result.error;
-          this.failureNotice = result.error.code === "UNAVAILABLE" ? "\u4E91\u7AEF\u53CD\u9988\u6682\u4E0D\u53EF\u7528\uFF1B\u672C\u5730\u6750\u6599\u3001\u539F\u7B54\u548C\u8349\u7A3F\u4ECD\u4FDD\u7559\uFF0C\u4E0D\u4F1A\u4F2A\u9020\u6A21\u578B\u56DE\u590D\u3002" : "";
+          this.failureNotice = result.error.code === "UNAVAILABLE" ? "\u4E91\u7AEF\u53CD\u9988\u6682\u4E0D\u53EF\u7528\uFF1B\u672C\u5730\u6750\u6599\u3001\u539F\u7B54\u548C\u8349\u7A3F\u4ECD\u4FDD\u7559\uFF0C\u4E0D\u4F1A\u4F2A\u9020\u6A21\u578B\u56DE\u590D\u3002" : result.error.code === "CONFLICT" ? "\u8FD9\u6B21\u4F5C\u7B54\u6CA1\u6709\u4FDD\u5B58\u6210\u529F\uFF1B\u91CD\u65B0\u70B9\u4E00\u6B21\u300C\u63D0\u4EA4\u4F5C\u7B54\u300D\u5C31\u884C\uFF0C\u5185\u5BB9\u548C\u8349\u7A3F\u90FD\u8FD8\u5728\u3002" : "";
           this.machine.transition("failed");
           this.notify();
           return;
@@ -14535,7 +14545,17 @@ window.__ModuleLoader__.load({
         return h("p", { class: "edu-study-q-head" }, ...parts);
       }
       stemBlock() {
-        return h("h3", { class: "edu-study-stem", "data-testid": "study-stem" }, this.activity?.stem ?? "");
+        const blocks = [
+          h("h3", { class: "edu-study-stem", "data-testid": "study-stem" }, this.activity?.stem ?? "")
+        ];
+        const source = this.workspace?.sources?.[0];
+        const page = source?.printedPage ?? (source?.pdfPage != null ? String(source.pdfPage) : null);
+        if (page !== null) {
+          blocks.push(
+            h("p", { class: "edu-study-note", "data-testid": "study-stem-source" }, `\u8BFE\u672C\u7B2C ${page} \u9875`)
+          );
+        }
+        return h("div", { class: "edu-study-stem-block" }, ...blocks);
       }
       questionNumber() {
         const workspace = this.workspace;
@@ -14560,6 +14580,12 @@ window.__ModuleLoader__.load({
         } else {
           const form = mountAnswerForm(body, {
             activity: this.activity,
+            // 关系题的节点用内部 id（factor.position…）当选项会直接显示给学生；
+            // renderSpec.nodes 里带着写好的中文标签，必须传下去。
+            relationNodes: this.activity.renderSpec?.nodes.map((node) => ({
+              id: node.id,
+              label: node.label
+            })),
             // 草稿在交卷后清空；「改文字再试」仍回到上次写的内容，不用从空白开始。
             initial: this.answer ?? this.lastAnswer,
             onSubmit: (value) => void this.submit(value)
@@ -16894,15 +16920,11 @@ window.__ModuleLoader__.load({
     
     // client/study/src/index.ts
     function defaultRequestFactory3() {
-      let counter = 0;
-      return () => {
-        counter += 1;
-        return {
-          requestId: `request.study.${counter}`,
-          learnerId: "learner.local.default",
-          now: (/* @__PURE__ */ new Date()).toISOString()
-        };
-      };
+      return () => ({
+        requestId: nextRequestId("request.study"),
+        learnerId: "learner.local.default",
+        now: (/* @__PURE__ */ new Date()).toISOString()
+      });
     }
     function createStudyUi(options = {}) {
       const dataSource = options.dataSource ?? createFixtureStudyDataSource({ scenario: options.fixtureScenario });
@@ -16988,10 +17010,24 @@ window.__ModuleLoader__.load({
           return { ok: false, error: { code: "UNSUPPORTED", message: "range claim is not wired in this build" } };
         },
         async exportData() {
-          return { ok: false, error: { code: "UNSUPPORTED", message: "export is not wired in this build" } };
+          return api("/edu/api/g1/records/export", {
+            method: "POST",
+            body: JSON.stringify({}),
+            headers: { "x-edu-request-id": requestId("g1.records.export") }
+          });
         },
-        async deleteData() {
-          return { ok: false, error: { code: "UNSUPPORTED", message: "delete is not wired in this build" } };
+        async deleteData(scope) {
+          if (scope !== "learning_records") {
+            return {
+              ok: false,
+              error: { code: "UNSUPPORTED", message: `delete scope ${scope} is not supported yet` }
+            };
+          }
+          return api("/edu/api/g1/records", {
+            method: "DELETE",
+            body: JSON.stringify({}),
+            headers: { "x-edu-request-id": requestId("g1.records.delete") }
+          });
         }
       };
     }

@@ -664,6 +664,69 @@ export class G1Service {
     });
   }
 
+  /**
+   * 导出学习记录到学生选定的目录。底层 storage 已有分 scope 的导出能力，
+   * 这里只做"学生话"的回执翻译，不重新实现落盘逻辑。
+   */
+  exportRecords(
+    requestId: string,
+    targetDir: string,
+  ): ServiceResult<Record<string, unknown>> {
+    const exported = this.composition.storage.exportData(
+      'learning_records',
+      targetDir,
+      requestId,
+    );
+    if (!exported.ok) return exported;
+    const count = exported.data.manifest.files.length;
+    return okResult(
+      {
+        scope: 'learning_records',
+        exportedAt: this.composition.clock.now(),
+        recordCount: count,
+        directory: exported.data.directory,
+        note: `学习记录已导出到：${exported.data.directory}`,
+      },
+      count,
+    );
+  }
+
+  /**
+   * 删除学习记录。按产品决定：先自动备份到同一目录，再删除；备份失败就不删。
+   */
+  deleteRecords(
+    requestId: string,
+    backupDir: string | null,
+  ): ServiceResult<Record<string, unknown>> {
+    let backupDirectory: string | null = null;
+    if (backupDir !== null) {
+      const backup = this.composition.storage.exportData(
+        'learning_records',
+        backupDir,
+        `${requestId}:backup`,
+      );
+      if (!backup.ok) return backup;
+      backupDirectory = backup.data.directory;
+    }
+    const plan = this.composition.storage.prepareDelete('learning_records');
+    if (!plan.ok) return plan;
+    const removed = this.composition.storage.deleteData(plan.data, true);
+    if (!removed.ok) return removed;
+    return okResult(
+      {
+        scope: 'learning_records',
+        deletedAt: this.composition.clock.now(),
+        removedTargets: removed.data.deleted.length,
+        backupDirectory,
+        note:
+          backupDirectory === null
+            ? '学习记录已删除。'
+            : `学习记录已删除；删除前备份在：${backupDirectory}`,
+      },
+      removed.data.deleted.length,
+    );
+  }
+
   async saveDraft(draft: G1Draft, requestId: string): Promise<ServiceResult<{ savedAt: string }>> {
     const ctx = this.ctx(requestId);
     const receipt = await this.composition.storage.append(ctx, {

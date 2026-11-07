@@ -68,9 +68,10 @@ describe('single writer JSONL journal', () => {
     const storage = await openStorage(root);
     try {
       const first = await storage.append(requestContext('req.duplicate'), journalCommand('req.duplicate'));
+      // 真正的重发：同一条命令（同 type/payload），只有 eventId 与时间可能不同。
       const retry = await storage.append(
         requestContext('req.duplicate'),
-        journalCommand('req.duplicate', { eventId: 'event.other', payload: { note: 'changed' } }),
+        journalCommand('req.duplicate', { eventId: 'event.other' }),
       );
       expect(first.ok).toBe(true);
       expect(retry.ok).toBe(true);
@@ -94,6 +95,25 @@ describe('single writer JSONL journal', () => {
       } finally {
         reopened.close();
       }
+    } finally {
+      storage.close();
+    }
+  });
+
+  it('rejects a reused requestId that carries a different command instead of dropping it', async () => {
+    const storage = await openStorage(root);
+    try {
+      const first = await storage.append(requestContext('req.reused'), journalCommand('req.reused'));
+      expect(first.ok).toBe(true);
+
+      // 不同命令撞了同一个 requestId：不能静默当成重发（那会丢新数据）。
+      const reused = await storage.append(
+        requestContext('req.reused'),
+        journalCommand('req.reused', { payload: { note: 'different command' } }),
+      );
+      expect(reused.ok).toBe(false);
+      if (!reused.ok) expect(reused.error.code).toBe('CONFLICT');
+      expect(journalLines()).toHaveLength(1);
     } finally {
       storage.close();
     }

@@ -60,7 +60,7 @@ import {
 } from './adapters/dsh-tutor.js';
 import { createNotBoundTutorGateway } from './adapters/dsh-not-bound.js';
 import { createSystemClock } from './adapters/system-clock.js';
-import { createDshSessionIdGenerator } from './adapters/session-ids.js';
+import { createDshSessionIdGenerator, journalIdHighWater } from './adapters/session-ids.js';
 import { PageRegistry } from './pages.js';
 
 export interface I18nService {
@@ -272,7 +272,16 @@ export async function composeEducationRuntime(
   // (`<DSH_HOME>/sessions/**/session.N`), otherwise the first start after a
   // restart hits the broken restore path (0 model calls, TypeError).
   const dshHome = resolveDshHome({ explicit: options.dshHome, env, dataRoot: options.dataRoot });
-  const ids = options.ids ?? createDshSessionIdGenerator({ prefix: 'edu', dshHome });
+  // Id counters live in memory, so a restart re-mints `attempt.1`, `event.1`, …
+  // and the journal (which dedupes by requestId and rejects id reuse) then drops
+  // or rejects the new record. Seed the counter above everything already saved.
+  const ids =
+    options.ids ??
+    createDshSessionIdGenerator({
+      prefix: 'edu',
+      dshHome,
+      startAt: journalIdHighWater(path.join(path.resolve(options.dataRoot), 'journal', 'events.jsonl')) + 1,
+    });
   const learnerId = options.learnerId ?? 'learner.local.default';
   const workspaceRoot = path.resolve(options.workspaceRoot);
   const contentRoot = path.join(workspaceRoot, 'content', 'biology-7a');

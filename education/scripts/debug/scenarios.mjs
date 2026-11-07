@@ -278,17 +278,24 @@ export const SCENARIOS = {
       await expectCleanCopy(context, '提交后');
     });
 
-    await report.step('跳过进入下一题', async () => {
+    await report.step('换到下一题（提交成功走「下一题」，提交失败走「先跳过」）', async () => {
       const before = await cdp.evaluate(
         `(document.querySelector('[data-testid="study-stem"]')?.textContent || '').trim()`,
       );
-      await cdp.click('[data-action="skip-question"]', { label: '先跳过' });
-      await new Promise((done) => setTimeout(done, 5000));
+      const hasNext = await cdp.evaluate(
+        `Boolean(document.querySelector('[data-action="next-question"]'))`,
+      );
+      if (hasNext) {
+        await cdp.click('[data-action="next-question"]', { label: '下一题' });
+      } else {
+        await cdp.click('[data-action="skip-question"]', { label: '先跳过' });
+      }
+      await new Promise((done) => setTimeout(done, 6000));
       const after = await cdp.evaluate(
         `(document.querySelector('[data-testid="study-stem"]')?.textContent || '').trim()`,
       );
-      await snapshot(context, '03-after-skip');
-      if (after === before) throw new Error(`跳过之后题目没变：「${String(before).slice(0, 40)}」`);
+      await snapshot(context, '03-after-next');
+      if (after === before) throw new Error(`换题之后题目没变：「${String(before).slice(0, 40)}」`);
     });
 
     await report.step('问小芽：发一条消息（无 Key，应优雅失败）', async () => {
@@ -324,6 +331,126 @@ export const SCENARIOS = {
     console.log(`结束状态标题：${await title()}`);
   },
 
+  /**
+   * 全部概念的题目渲染走查（不花模型钱）。
+   *
+   * 逐个概念打开学习台，检查：题干非空、选项/输入控件齐全、页面没有内部标识、
+   * 没有 JS 异常。目标是让"某类题型一渲染就露 factor.position"这种问题一次扫出来。
+   */
+  async questions(context, report) {
+    const { cdp } = context;
+    const conceptIds = await cdp.evaluate(
+      `(async () => {
+         const r = await fetch('/edu/api/g1/snapshot');
+         const j = await r.json();
+         return (j.data?.concepts ?? []).map((c) => c.id);
+       })()`,
+    );
+    if (!Array.isArray(conceptIds) || conceptIds.length === 0) throw new Error('snapshot 里没有概念');
+
+    const failures = [];
+    let checked = 0;
+    for (const conceptId of conceptIds) {
+      const url = `/edu/api/g1/study?conceptId=${encodeURIComponent(conceptId)}`;
+      const opened = await cdp.evaluate(`(async () => {
+        const r = await fetch(${JSON.stringify(url)});
+        const j = await r.json();
+        if (!j.ok) return { ok: false, code: j.error?.code ?? 'unknown', message: j.error?.message ?? '' };
+        return {
+          ok: true,
+          concept: j.data.concept.title,
+          activities: (j.data.activities ?? []).map((a) => ({
+            id: a.id,
+            kind: a.answerSchema?.kind ?? null,
+            stem: a.stem,
+          })),
+        };
+      })()`);
+      if (!opened?.ok) {
+        failures.push(`${conceptId}: 打不开（${opened?.code ?? '?'}）`);
+        continue;
+      }
+      for (const activity of opened.activities ?? []) {
+        checked += 1;
+        const problems = [];
+        if (typeof activity.stem !== 'string' || activity.stem.trim().length < 6) problems.push('题干为空或过短');
+        if (activity.kind === null) problems.push('缺少作答方式');
+        if (/activity\.|concept\.|source\./.test(String(activity.stem))) problems.push('题干里出现内部标识');
+        if (problems.length > 0) failures.push(`${opened.concept} / ${activity.id}: ${problems.join('、')}`);
+      }
+    }
+
+    await report.step('所有题目可渲染', async () => {
+      if (failures.length > 0) {
+        throw new Error(`${failures.length} 处问题：${failures.slice(0, 5).join(' | ')}`);
+      }
+    });
+    console.log(`检查了 ${conceptIds.length} 个概念、${checked} 道题`);
+    await report.step('页面无报错', () => expectNoErrors(context));
+  },
+  /**
+   * 旧的"提交后题目消失"复现路径：同一页面刷新/重进后再提交一次。
+   * 修复前页内计数器会重用 request.study.N，第二次提交被当成重发而丢弃。
+   */
+  async resubmit(context, report) {
+    const { cdp } = context;
+    const openStudy = async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('去目录挑一个');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"map-page\\"]")', { label: '知识地图' });
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').includes('观察的目的与对象'))`,
+        { label: '概念按钮' },
+      );
+      await cdp.clickText('观察的目的与对象');
+      await new Promise((done) => setTimeout(done, 1000));
+      await cdp.waitFor(
+        `[...document.querySelectorAll('button')].some((el) => (el.textContent || '').trim() === '开始学习')`,
+        { label: '开始学习' },
+      );
+      await cdp.clickText('开始学习');
+      await cdp.waitFor('document.querySelector("[data-testid=\\"study-question\\"]") !== null', {
+        label: '题目',
+        timeoutMs: 40_000,
+      });
+    };
+    const submitFirst = async () => {
+      await cdp.waitFor('document.querySelectorAll("input[type=\\"radio\\"]").length >= 1', {
+        label: '选项',
+        timeoutMs: 20_000,
+      });
+      await cdp.evaluate(`(() => { document.querySelectorAll('input[type="radio"]')[0].click(); return true; })()`);
+      await cdp.click('[data-action="submit-answer"]', { label: '提交作答' });
+      await cdp.waitFor('!document.querySelector("[data-wait-base]")', {
+        label: '反馈完成',
+        timeoutMs: 120_000,
+      });
+      await new Promise((done) => setTimeout(done, 1500));
+    };
+
+    await report.step('第一次提交', async () => {
+      await openStudy();
+      await submitFirst();
+      await snapshot(context, '01-first');
+    });
+
+    await report.step('重新打开（模拟刷新）再提交', async () => {
+      await cdp.evaluate('location.reload()');
+      await new Promise((done) => setTimeout(done, 4000));
+      await openStudy();
+      await submitFirst();
+      await snapshot(context, '02-second');
+    });
+
+    await report.step('两次提交都应有反馈', async () => {
+      const text = await cdp.text();
+      if (/提交没有完成|找不到这项内容/.test(text)) {
+        throw new Error('重进后再次提交仍然失败');
+      }
+      await expectCleanCopy(context, '重进提交');
+    });
+    await report.step('整体无报错', () => expectNoErrors(context));
+  },
   /** 真实模型走查（会花钱）：只在 --secrets 指向真实 Key 时运行。 */
   async live(context, report) {
     const { cdp, outDir } = context;

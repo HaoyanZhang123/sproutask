@@ -199,7 +199,8 @@ describe('progress page', () => {
     await tick(10);
     const status = container.querySelector<HTMLElement>('[data-testid="records-action-status"]');
     expect(textOf(status as HTMLElement)).toContain('已导出');
-    expect(textOf(status as HTMLElement)).toContain('条记录');
+    // 导出会先让学生选目录；回执给的是落盘位置或记录数，两者都算成功。
+    expect(textOf(status as HTMLElement)).toMatch(/个文件|条记录/);
     expect(shell.getState().currentPath).toBe('/records');
   });
 

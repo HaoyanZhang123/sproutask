@@ -54,10 +54,25 @@ export function createLiveShellDataSource(): any {
       return { ok: false, error: { code: 'UNSUPPORTED', message: 'range claim is not wired in this build' } };
     },
     async exportData() {
-      return { ok: false, error: { code: 'UNSUPPORTED', message: 'export is not wired in this build' } };
+      // 学生自己选目录；选择动作在宿主用原生目录选择器完成。
+      return api('/edu/api/g1/records/export', {
+        method: 'POST',
+        body: JSON.stringify({}),
+        headers: { 'x-edu-request-id': requestId('g1.records.export') },
+      });
     },
-    async deleteData() {
-      return { ok: false, error: { code: 'UNSUPPORTED', message: 'delete is not wired in this build' } };
+    async deleteData(scope: string) {
+      if (scope !== 'learning_records') {
+        return {
+          ok: false,
+          error: { code: 'UNSUPPORTED', message: `delete scope ${scope} is not supported yet` },
+        };
+      }
+      return api('/edu/api/g1/records', {
+        method: 'DELETE',
+        body: JSON.stringify({}),
+        headers: { 'x-edu-request-id': requestId('g1.records.delete') },
+      });
     },
   };
 }

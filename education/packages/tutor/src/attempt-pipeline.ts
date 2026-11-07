@@ -417,6 +417,31 @@ export async function submitAndGradeAttempt(
     };
   }
 
+  // `duplicate` 只可能是"同一个 requestId 的旧回执"。若这次是学生新写的一版答案，
+  // 继续往下走会拿旧 attempt 去写评分状态，最后抛 NOT_FOUND，界面上就是
+  // "提交没有完成 / 找不到这项内容"。这里直接让学生重试，不掩盖问题。
+  if (saved.data.duplicate) {
+    deps.onAudit?.({
+      at: deps.clock.now(),
+      kind: 'gateway.error',
+      subject: attempt.id,
+      reason: 'answer was not saved: the request id was already used by an earlier submission',
+    });
+    return {
+      ok: false,
+      error: tutorError(
+        'CONFLICT',
+        'this submission reused an earlier request id, so the answer was not saved; please submit again',
+        true,
+      ),
+      attemptId: null,
+      attemptPersisted: false,
+      duplicate: true,
+      feedbackPending: false,
+      retry: null,
+    };
+  }
+
   if (input.timeoutMs !== undefined && input.timeoutMs <= 0) {
     await markGradingNotCommitted(deps, ctx, {
       attemptId: attempt.id,

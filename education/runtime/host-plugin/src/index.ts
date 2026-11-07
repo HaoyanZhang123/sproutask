@@ -410,6 +410,43 @@ function requestIdOf(req: IncomingMessage, prefix: string): string {
   return typeof value === 'string' && value.trim().length > 0 ? value : `${prefix}.${String(Date.now())}`;
 }
 
+/**
+ * 让学生用系统自带的文件夹选择框选一个导出目录。
+ *
+ * 这里刻意不用 DSH 的 `ctx.directoryPicker`：那个插件会连带挂载一个客户端侧
+ * 插件，而它依赖 `ui-workspace`——产品的学生界面把 DSH 侧栏/工作区都禁用了，
+ * 结果整个 Web 启动会报 "1 entry did not activate"。宿主自己拉起 PowerShell
+ * 的 FolderBrowserDialog，和读密钥是同一条已验证路径，不引入新依赖。
+ */
+async function pickExportDirectory(_ctx: HostContextLike): Promise<string | null> {
+  const script = [
+    "$ErrorActionPreference='Stop'",
+    'Add-Type -AssemblyName System.Windows.Forms',
+    '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
+    "$d.Description = '选择芽问学习记录的保存位置'",
+    "$d.UseDescriptionForTitle = $true",
+    'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($d.SelectedPath) }',
+  ].join(';');
+  const systemRoot = process.env['SystemRoot'] ?? process.env['windir'] ?? 'C:\\Windows';
+  const absolutePowerShell = path.join(
+    systemRoot,
+    'System32',
+    'WindowsPowerShell',
+    'v1.0',
+    'powershell.exe',
+  );
+  const powerShell = existsSync(absolutePowerShell) ? absolutePowerShell : 'powershell.exe';
+  const result = spawnSync(powerShell, ['-NoProfile', '-STA', '-Command', script], {
+    encoding: 'utf8',
+    windowsHide: true,
+    timeout: 5 * 60 * 1000,
+  });
+  if (result.status !== 0) return null;
+  const chosen = (result.stdout ?? '').trim();
+  if (chosen.length === 0 || !path.isAbsolute(chosen)) return null;
+  return chosen;
+}
+
 async function readBody(
   req: IncomingMessage,
   maxBytes = 1024 * 1024,
@@ -657,6 +694,36 @@ function registerRoutes(ctx: HostContextLike, composition: EducationRuntimeCompo
       }
       if (pathname === '/edu/api/g1/records' && req.method === 'GET') {
         json(res, 200, await g1.records());
+        return;
+      }
+      if (pathname === '/edu/api/g1/records/export' && req.method === 'POST') {
+        // 导出学习记录：先让学生（或系统）选定目标目录，再落盘。
+        const body = await readBody(req);
+        const targetDir =
+          typeof body?.['targetDir'] === 'string' && path.isAbsolute(body['targetDir'])
+            ? body['targetDir']
+            : await pickExportDirectory(ctx);
+        if (targetDir === null) {
+          json(res, 200, {
+            ok: false,
+            error: { code: 'CANCELLED', message: 'export cancelled: no folder selected', retryable: true },
+          });
+          return;
+        }
+        const requestId = requestIdOf(req, 'g1.records.export');
+        const exported = g1.exportRecords(requestId, targetDir);
+        json(res, 200, exported);
+        return;
+      }
+      if (pathname === '/edu/api/g1/records' && req.method === 'DELETE') {
+        // 删除学习记录：先按学生要求导出备份，再删除。
+        const body = await readBody(req);
+        const backupDir =
+          typeof body?.['backupDir'] === 'string' && path.isAbsolute(body['backupDir'])
+            ? body['backupDir']
+            : await pickExportDirectory(ctx);
+        const requestId = requestIdOf(req, 'g1.records.delete');
+        json(res, 200, g1.deleteRecords(requestId, backupDir));
         return;
       }
       if (pathname === '/edu/api/g1/image' && req.method === 'POST') {

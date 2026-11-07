@@ -282,6 +282,13 @@ export async function launchApp(options) {
       const to = join(dirname(app), 'app', 'runtime', name, 'lib');
       if (existsSync(from) && existsSync(to)) cpSync(from, to, { recursive: true });
     }
+    // 初始化脚本也同步：它决定 profile 里哪些插件被禁用（例如目录选择器），
+    // 只同步 bundle 会让人误以为改过 setup 没生效。
+    const scriptsFrom = join(syncBundles, 'scripts');
+    const scriptsTo = join(dirname(app), 'app', 'runtime', 'scripts');
+    if (existsSync(scriptsFrom) && existsSync(scriptsTo)) {
+      cpSync(scriptsFrom, scriptsTo, { recursive: true });
+    }
   }
 
   const child = spawn(app, [], {

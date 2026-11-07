@@ -47,6 +47,7 @@ import type {
 } from './data/types.js';
 import { h, clear } from './dom.js';
 import { renderErrorBanner } from './errors.js';
+import { nextRequestId } from './request-ids.js';
 import { evaluateLayout, FONT_SCALE_STEPS } from './layout.js';
 import { EducationPageRegistry } from './pages/registry.js';
 import { createAccountPage } from './pages/account.js';
@@ -118,7 +119,6 @@ export class EducationShell {
   private homePromise: Promise<boolean> | null = null;
   private recordsPromise: Promise<boolean> | null = null;
   private renderToken = 0;
-  private requestCounter = 0;
   private disposed = false;
   private lastRangeInput: RangeSaveInput | null = null;
 
@@ -132,10 +132,8 @@ export class EducationShell {
     this.ids =
       options.ids ??
       {
-        next: (prefix: string) => {
-          this.requestCounter += 1;
-          return `${prefix}.${this.requestCounter}`;
-        },
+        // 页面重载后计数器归零会让 requestId 撞上历史记录而被当成重发。
+        next: (prefix: string) => nextRequestId(prefix),
       };
 
     const initialPath = options.initialPath ?? readInitialPath();
@@ -700,7 +698,6 @@ export class EducationShell {
   }
 
   private newRequest(): ShellRequest {
-    this.requestCounter += 1;
     return {
       requestId: this.ids.next('request'),
       learnerId: this.state.snapshot?.learner.id ?? 'learner.local.pending',

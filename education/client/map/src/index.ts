@@ -12,6 +12,7 @@
 
 import type { RequestContext } from '@edu/domain';
 import type { EducationShell, ShellPanel } from '../../shell/src/index.js';
+import { nextRequestId } from '../../shell/src/request-ids.js';
 import { MapController, type MapControllerOptions, type MapTimings } from './controller.js';
 import { createMapPage } from './page.js';
 import { createFixtureMapDataSource, type MapScenario } from './fixture.js';
@@ -49,11 +50,9 @@ export interface MapUi {
 }
 
 function defaultRequestFactory(): () => MapRequest {
-  let counter = 0;
   return () => {
-    counter += 1;
     return {
-      requestId: `request.map.${counter}`,
+      requestId: nextRequestId('request.map'),
       learnerId: 'learner.local.default',
       now: new Date().toISOString(),
     };

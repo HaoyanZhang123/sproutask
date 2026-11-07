@@ -69,6 +69,25 @@ interface JournalInternals {
   duplicateRequestCommits: number;
 }
 
+/**
+ * Whether a stored commit is the *same* command as an incoming one (a real
+ * retry), rather than a different command that reused a request id. Only the
+ * caller-controlled fields are compared: seq/eventId/occurredAt differ per
+ * attempt by design.
+ */
+function isSameCommand(
+  existing: JournalCommand,
+  incoming: { readonly type: string; readonly learnerId: string; readonly payload: unknown },
+): boolean {
+  if (existing.type !== incoming.type) return false;
+  if (existing.learnerId !== incoming.learnerId) return false;
+  try {
+    return JSON.stringify(existing.payload) === JSON.stringify(incoming.payload);
+  } catch {
+    return false;
+  }
+}
+
 function recoveryStepsFor(corrupt: boolean, tail: boolean): string[] {
   const steps: string[] = [];
   if (tail) steps.push('isolated the half-written tail line under journal/quarantine; the complete prefix was kept');
@@ -327,6 +346,16 @@ export class JournalStore {
 
     const existing = this.state.byRequest.get(command.requestId);
     if (existing !== undefined) {
+      // 幂等只对"同一条命令重发"成立。不同命令撞了同一个 requestId，说明调用方
+      // 生成了会重复的 id（例如页内计数器每次刷新从 1 重数）；此时若照样返回旧回执，
+      // 新数据会被静默丢弃——线上表现为"提交没有完成 + 找不到这项内容"。
+      if (!isSameCommand(existing, command)) {
+        return errResult(
+          'CONFLICT',
+          `requestId ${command.requestId} was already used for a different command; a unique request id is required`,
+          false,
+        );
+      }
       return okResult(
         {
           eventId: existing.eventId,

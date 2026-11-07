@@ -769,13 +769,20 @@ function renderDataManagement(
     impact: [
       '导出内容：你的作答、判断记录、自评和复习安排。',
       '不含课本原文。',
+      '点「选择保存位置」后会打开系统的文件夹选择框；选好的文件夹里会出现一个新文件夹。',
     ],
-    confirmLabel: '确认导出',
+    confirmLabel: '选择保存位置',
     onConfirm: () => {
       void (async () => {
         const result = await api.exportData();
         if (result.ok) {
-          onStatus(`已导出 ${result.data.recordCount} 条记录。${result.data.note}`);
+          const where =
+            typeof (result.data as { directory?: unknown }).directory === 'string'
+              ? `保存在：${String((result.data as { directory?: string }).directory)}`
+              : result.data.note;
+          onStatus(`已导出 ${result.data.recordCount} 个文件。${where}`);
+        } else if (result.error.code === 'CANCELLED') {
+          onStatus('已取消导出，没有写入任何文件。');
         } else {
           onError(result.error);
         }
@@ -786,18 +793,25 @@ function renderDataManagement(
   const deleteLearningDialog = new ConfirmDialog({
     title: '删除学习记录',
     tone: 'danger',
-    acknowledgement: '我了解删除不可撤销，课本文件不会被删除。',
+    acknowledgement: '我了解删除不可撤销（删除前会先备份一份），课本文件不会被删除。',
     impact: [
       '会删除这台电脑上的作答、判断记录、自评和复习安排。',
+      '删除前会先打开文件夹选择框，把一份备份保存到你选的位置。',
       '课本文件和课本原图不会被删除。',
     ],
-    confirmLabel: '确认删除学习记录',
+    confirmLabel: '选择备份位置并删除',
     onConfirm: () => {
       void (async () => {
         const result = await api.deleteData('learning_records');
         if (result.ok) {
-          onStatus(result.data.note);
+          const backup =
+            typeof (result.data as { backupDirectory?: unknown }).backupDirectory === 'string'
+              ? `备份在：${String((result.data as { backupDirectory?: string }).backupDirectory)}`
+              : '';
+          onStatus(backup.length > 0 ? `学习记录已删除。${backup}` : result.data.note);
           onDeleted();
+        } else if (result.error.code === 'CANCELLED') {
+          onStatus('已取消删除，学习记录没有变化。');
         } else {
           onError(result.error);
         }

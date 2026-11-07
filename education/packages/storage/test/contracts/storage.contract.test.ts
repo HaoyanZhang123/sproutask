@@ -116,15 +116,37 @@ describe('T01 journal fixtures', () => {
     try {
       expect(storage.status.lastSeq).toBe(3);
       expect(storage.status.duplicateRequestCommits).toBe(1);
+      // 重发的是 seq 1 那条命令本身（attempt.submitted / attempt.journal.1），
+      // 幂等只对"同一条命令"成立；撞 id 的不同命令会被判为 CONFLICT。
       const retry = await storage.append(
         requestContext('request.duplicate'),
-        journalCommand('request.duplicate'),
+        {
+          ...journalCommand('request.duplicate'),
+          type: 'attempt.submitted',
+          payload: { attemptId: 'attempt.journal.1' },
+        },
       );
       expect(retry.ok).toBe(true);
       if (retry.ok) {
         expect(retry.data.duplicate).toBe(true);
         expect(retry.data.seq).toBe(1);
       }
+    } finally {
+      storage.close();
+    }
+  });
+
+  it('rejects a reused requestId that carries a different command', async () => {
+    writeJournal(fixtureText('journal/duplicate-request-id.jsonl'));
+    const storage = await openStorage(root);
+    try {
+      const reused = await storage.append(
+        requestContext('request.duplicate'),
+        journalCommand('request.duplicate'),
+      );
+      expect(reused.ok).toBe(false);
+      if (!reused.ok) expect(reused.error.code).toBe('CONFLICT');
+      expect(storage.status.lastSeq).toBe(3);
     } finally {
       storage.close();
     }

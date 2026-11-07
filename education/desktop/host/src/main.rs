@@ -99,16 +99,53 @@ const LOADING_HTML: &str = r#"<!doctype html>
   .sprout::before { content: ""; position: absolute; left: 24px; top: 13px; width: 6px; height: 27px; border-radius: 3px; background: #f6f8f2; }
   .sprout::after { content: ""; position: absolute; left: 13px; top: 17px; width: 13px; height: 17px; border-radius: 10px 3px 10px 3px; background: #d8ead9; transform: rotate(-26deg); }
   h1 { font-size: 20px; font-weight: 600; letter-spacing: 2px; margin: 0; }
-  p { font-size: 13px; color: #6b7f70; margin: 0; }
+  p { font-size: 13px; color: #6b7f70; margin: 0; text-align: center; line-height: 1.7; }
+  .slow { font-size: 12px; color: #8a9a90; opacity: 0; transition: opacity .3s ease; }
+  .slow.on { opacity: 1; }
   @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.88); opacity: .82; } }
 </style>
 </head>
 <body>
   <div class="box">
     <div class="sprout"></div>
-    <h1>正在启动芽问</h1>
-    <p>首次启动需要初始化本地学习环境，请稍候</p>
+    <h1 id="title">正在启动芽问</h1>
+    <p id="hint">正在准备本地学习环境，请稍候</p>
+    <p class="slow" id="slow"></p>
   </div>
+  <script>
+    (function () {
+      var started = Date.now();
+      var slow = document.getElementById('slow');
+      var hint = document.getElementById('hint');
+      var title = document.getElementById('title');
+      // 首次启动确实要初始化；之后只是在等本地服务，文案不该再骗人说"首次"。
+      var firstRun = (function () {
+        try {
+          return window.localStorage.getItem('sproutask.firstRunDone') !== '1';
+        } catch (_) {
+          return false;
+        }
+      })();
+      if (!firstRun) {
+        title.textContent = '正在启动芽问';
+        hint.textContent = '本地服务正在加载，通常会很快';
+      } else {
+        title.textContent = '正在启动芽问';
+        hint.textContent = '首次启动需要初始化本地学习环境，请稍候';
+      }
+      setInterval(function () {
+        var seconds = Math.round((Date.now() - started) / 1000);
+        if (seconds >= 15) {
+          slow.classList.add('on');
+          slow.textContent = '已等 ' + seconds + ' 秒，还在启动。可以关掉重开，或稍等一会。';
+        }
+      }, 1000);
+      function markDone() {
+        try { window.localStorage.setItem('sproutask.firstRunDone', '1'); } catch (_) {}
+      }
+      window.__sproutaskMarkStarted = markDone;
+    })();
+  </script>
 </body>
 </html>
 "#;
@@ -522,7 +559,11 @@ fn run_service(
     pid_slot: &AtomicU32,
     closing: &AtomicBool,
 ) -> Result<String, String> {
+    let started = Instant::now();
+    let mut phases: Vec<(&str, u64)> = Vec::new();
+
     ensure_profile(config, pid_slot, closing)?;
+    phases.push(("profile", started.elapsed().as_millis() as u64));
     if closing.load(Ordering::SeqCst) {
         return Err("启动已取消。".to_string());
     }
@@ -575,6 +616,8 @@ fn run_service(
 
         if let Some(url) = read_web_url(&stdout_log) {
             // 成功后保留 pid：关窗时按它清理整棵进程树。
+            phases.push(("service", started.elapsed().as_millis() as u64));
+            write_launch_phases(&config.logs, &phases);
             return Ok(url);
         }
 
@@ -591,6 +634,14 @@ fn run_service(
                 .code()
                 .map(|code| code.to_string())
                 .unwrap_or_else(|| "未知".to_string());
+            // 上一个芽问还没退干净时，日志锁会挡住新实例；说人话，别让学生看
+            // "journal is locked by pid …"。
+            if detail.contains("journal is locked") {
+                return Err(
+                    "上一次芽问还在退出中，本地记录暂时被它占用。\n\n请等几秒再重新打开芽问；这次的记录不会丢。"
+                        .to_string(),
+                );
+            }
             return Err(format!(
                 "本地服务提前退出（退出码 {code}）。{}{}",
                 if detail.is_empty() { "" } else { "\n\n" },
@@ -754,6 +805,20 @@ fn configure_child_env(command: &mut Command, config: &Config) {
 fn create_log_file(path: &Path) -> Result<fs::File, String> {
     fs::File::create(path)
         .map_err(|error| format!("无法写入日志文件：{}\n{error}", path.display()))
+}
+
+/// 启动阶段耗时（毫秒），写进 `launch-phases.json`。
+///
+/// 闪屏只在服务就绪后才消失；没有分段计时就只能看到"总共慢"，不知道慢在
+/// profile 初始化、node 启动还是 DSH 自身。这个文件让下一��卡顿可直接定位。
+fn write_launch_phases(logs: &Path, phases: &[(&str, u64)]) {
+    let mut text = String::from("{\n");
+    for (index, (name, millis)) in phases.iter().enumerate() {
+        let comma = if index + 1 == phases.len() { "" } else { "," };
+        text.push_str(&format!("  \"{name}\": {millis}{comma}\n"));
+    }
+    text.push_str("}\n");
+    let _ = fs::write(logs.join("launch-phases.json"), text);
 }
 
 fn read_web_url(path: &Path) -> Option<String> {

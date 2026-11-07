@@ -15,7 +15,7 @@
  * fallback is safe.
  */
 
-import { readdirSync, type Dirent } from 'node:fs';
+import { readFileSync, readdirSync, type Dirent } from 'node:fs';
 import path from 'node:path';
 import type { Id, IdGenerator } from '@edu/domain';
 import { createSequentialIdGenerator, type SequentialIdOptions } from './sequential-ids.js';
@@ -27,6 +27,31 @@ export interface DshSessionIdOptions extends SequentialIdOptions {
   readonly sessionsRoot?: string | null;
   /** Upper bound on skipped ids before using the unique fallback. */
   readonly maxSkips?: number;
+}
+
+/**
+ * Highest numeric suffix already present in the learning journal.
+ *
+ * Id counters live in memory (`attempt.1, attempt.2, …`), so a process restart
+ * starts minting the same numbers again. Anything that reuses an id of an
+ * already-saved record is rejected (`CONFLICT`) or silently deduped, and the
+ * answer is lost. Seeding the counter above the journal's high-water mark keeps
+ * ids unique across restarts without changing their opaque shape.
+ */
+export function journalIdHighWater(journalFile: string): number {
+  let text: string;
+  try {
+    text = readFileSync(journalFile, 'utf8');
+  } catch {
+    return 0;
+  }
+  let highest = 0;
+  const pattern = /\b(?:attempt|event|evidence|assessment|model-run|review|session)\.(\d+)\b/g;
+  for (const match of text.matchAll(pattern)) {
+    const value = Number(match[1]);
+    if (Number.isFinite(value) && value > highest) highest = value;
+  }
+  return highest;
 }
 
 /** DSH stores one directory per session: `session.2`, `session.budget.probe.<ts>`, ... */
@@ -73,7 +98,6 @@ export function createDshSessionIdGenerator(options: DshSessionIdOptions = {}): 
       : null);
   const maxSkips = options.maxSkips ?? 10_000;
   const reserved = new Set<string>();
-
   return {
     next(scope: string): Id {
       const normalized = scope.trim();
