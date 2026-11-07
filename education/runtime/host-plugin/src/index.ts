@@ -419,12 +419,16 @@ function requestIdOf(req: IncomingMessage, prefix: string): string {
  * 的 FolderBrowserDialog，和读密钥是同一条已验证路径，不引入新依赖。
  */
 async function pickExportDirectory(_ctx: HostContextLike): Promise<string | null> {
+  // Windows PowerShell 5.1（.NET Framework）的 FolderBrowserDialog 没有
+  // UseDescriptionForTitle；设了会抛 PropertyAssignmentException，整个调用直接
+  // 失败，学生看到的就是"一按就取消"。只用两边都有的属性，并逐个 try/catch，
+  // 保证任何设置项失败都不会让对话框本身弹不出来。
   const script = [
     "$ErrorActionPreference='Stop'",
     'Add-Type -AssemblyName System.Windows.Forms',
     '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
-    "$d.Description = '选择芽问学习记录的保存位置'",
-    "$d.UseDescriptionForTitle = $true",
+    "try { $d.Description = '选择芽问学习记录的保存位置' } catch { }",
+    'try { $d.ShowNewFolderButton = $true } catch { }',
     'if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($d.SelectedPath) }',
   ].join(';');
   const systemRoot = process.env['SystemRoot'] ?? process.env['windir'] ?? 'C:\\Windows';

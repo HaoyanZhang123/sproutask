@@ -18052,8 +18052,8 @@ async function pickExportDirectory(_ctx) {
     "$ErrorActionPreference='Stop'",
     "Add-Type -AssemblyName System.Windows.Forms",
     "$d = New-Object System.Windows.Forms.FolderBrowserDialog",
-    "$d.Description = '\u9009\u62E9\u82BD\u95EE\u5B66\u4E60\u8BB0\u5F55\u7684\u4FDD\u5B58\u4F4D\u7F6E'",
-    "$d.UseDescriptionForTitle = $true",
+    "try { $d.Description = '\u9009\u62E9\u82BD\u95EE\u5B66\u4E60\u8BB0\u5F55\u7684\u4FDD\u5B58\u4F4D\u7F6E' } catch { }",
+    "try { $d.ShowNewFolderButton = $true } catch { }",
     "if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { [Console]::Out.Write($d.SelectedPath) }"
   ].join(";");
   const systemRoot = process.env["SystemRoot"] ?? process.env["windir"] ?? "C:\\Windows";

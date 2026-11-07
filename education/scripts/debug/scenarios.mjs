@@ -451,6 +451,46 @@ export const SCENARIOS = {
     });
     await report.step('整体无报错', () => expectNoErrors(context));
   },
+  /**
+   * 导出学习记录的完整 UI 路径：进展页 → 导出 → 选择保存位置。
+   * 系统文件夹选择框会阻塞请求，所以本场景由外部（UIA）点「取消」，
+   * 用来验证"取消后如实告诉学生没有写入任何文件"。
+   */
+  async 'export-ui'(context, report) {
+    const { cdp } = context;
+    await report.step('打开进展页', async () => {
+      await cdp.waitFor('document.querySelector("[data-testid=\\"edu-nav\\"]")', { label: '主导航' });
+      await cdp.clickText('进展');
+      await cdp.waitFor('document.querySelector("[data-action=\\"export-records\\"]")', {
+        label: '导出按钮',
+        timeoutMs: 20_000,
+      });
+    });
+    await report.step('点导出并确认（会弹出系统文件夹选择框）', async () => {
+      await cdp.click('[data-action="export-records"]', { label: '导出学习记录' });
+      await cdp.waitFor('document.querySelector("[data-edu-dialog=\\"default\\"]")', { label: '导出确认框' });
+      await cdp.click('[data-action="confirm"]', { label: '选择保存位置' });
+      await snapshot(context, '01-picker-open');
+    });
+    await report.step('选择框返回后如实提示结果', async () => {
+      // 外部会点「确定」或关掉选择框；两种结果都必须给出真实反馈。
+      const deadline = Date.now() + 120_000;
+      let status = '';
+      while (Date.now() < deadline) {
+        status = await cdp.evaluate(
+          `(document.querySelector('[data-testid="records-action-status"]')?.textContent || '').trim()`,
+        );
+        if (status.length > 0) break;
+        await new Promise((done) => setTimeout(done, 1000));
+      }
+      await snapshot(context, '02-after-picker');
+      if (!/已取消导出|已导出/.test(status)) {
+        throw new Error(`选择框返回后提示不对：「${status}」`);
+      }
+      console.log(`导出结果提示：${status}`);
+    });
+    await report.step('整体无报错', () => expectNoErrors(context));
+  },
   /** 真实模型走查（会花钱）：只在 --secrets 指向真实 Key 时运行。 */
   async live(context, report) {
     const { cdp, outDir } = context;
